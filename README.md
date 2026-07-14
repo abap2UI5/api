@@ -48,8 +48,9 @@ Rules:
   sample's XML 1:1 (open = descend into a container, leaf = childless
   control/stay, shut = ascend, attr = one attribute). factory( ) returns an
   empty root - open the <mvc:View> and declare its xmlns namespaces yourself.
-  No blank line between same-named calls; one blank line before a shut( ), none
-  after. Booleans: literal `true`/`false`, or
+  Blank line between calls whose method name differs (open<->leaf, before shut);
+  none between same-named calls and none right after a shut. Booleans: literal
+  `true`/`false`, or
   z2ui5_cl_api_xml=>as_bool( ) when fed from an ABAP boolean variable.
 - Structure z2ui5_if_app~main as a dispatcher:
     me->client = client.

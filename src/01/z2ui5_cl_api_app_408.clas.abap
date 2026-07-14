@@ -37,6 +37,7 @@ CLASS z2ui5_cl_api_app_408 IMPLEMENTATION.
                              ( n = `xmlns:mvc` v = `sap.ui.core.mvc` ) )
        )->open( n = `VBox`
                 a = VALUE #( ( n = `class` v = `sapUiSmallMargin` ) )
+
           )->leaf( n = `Text`
                    a = VALUE #( ( n = `text`
                                   v = `Lorem ipsum dolor st amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. ` &&
