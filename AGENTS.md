@@ -276,6 +276,11 @@ client->view_display( view->stringify( ) ).
   `CASE client->get( )-event.` … `WHEN \`NAME\`.` … `ENDCASE` — even for a single
   event (never an `IF check_on_event( )`). After changing bound data in an event,
   call `client->view_model_update( )` to push it back (no full redraw).
+- Read event parameters (declared via `_event( … t_arg = … )`) with
+  `client->get_event_arg( n )`. A **boolean** parameter (e.g. a CheckBox
+  `selected`, `${$parameters>/selected}`) arrives as `abap_bool` (`X` / space),
+  **not** the string `` `true` `` — read it with
+  `CONV abap_bool( client->get_event_arg( 1 ) )`, never `… = \`true\``.
 
 #### Booleans
 

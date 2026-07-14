@@ -78,7 +78,8 @@ CLASS z2ui5_cl_api_app_421 IMPLEMENTATION.
     CASE client->get( )-event.
 
       WHEN `PARENT_CLICKED`.
-        DATA(selected) = xsdbool( client->get_event_arg( 1 ) = `true` ).
+        " a boolean event parameter arrives as abap_bool (X / space), not `true`
+        DATA(selected) = CONV abap_bool( client->get_event_arg( 1 ) ).
         child1 = selected.
         child2 = selected.
         child3 = selected.
