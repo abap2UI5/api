@@ -13,9 +13,13 @@ _Last generated: <!-- last-run -->2026-07-14 09:00 UTC<!-- /last-run -->_
 
 ## What this repo does
 
-This is an **automated repository**. Its mission: clone *every* official UI5
-demo kit sample and independently rebuild it as an abap2UI5 sample — so gaps
-between what UI5 offers and what abap2UI5 covers are revealed and can be closed.
+> **This repository is AI-generated.** From *every* official UI5 demo kit sample
+> it automatically builds an abap2UI5 app — so **functional gaps** between what
+> UI5 offers and what abap2UI5 can already express are revealed and can be closed.
+>
+> See the result in **[api.md](api.md)**. To try it live, **pull this repo into
+> your ABAP system and start the app `z2ui5_cl_api_app_overview`** — it lists
+> every generated sample and launches it right in your system.
 
 A coding agent runs the pipeline:
 
@@ -144,10 +148,10 @@ Overall **132 / 720** demo kit samples ported (18.3 %).
 
 Detailed, **control-level** view — one table per module, one row per sample:
 
-* [**api.md**](api.md) — columns Name (control, with ↗ to the OpenUI5 API) ·
-  Javascript (sample source in the [OpenUI5 repo](https://github.com/SAP/openui5),
-  with ↗ to the OpenUI5 demo) · ABAP (the generated class). All source links
-  point at OpenUI5.
+* [**api.md**](api.md) — one flat table mirroring the overview app: Module ·
+  Control (→ OpenUI5 API) · Sample · JavaScript (→ OpenUI5 repo source) · UI5 App
+  (→ live OpenUI5 fullscreen sample) · ABAP (→ generated class). All source links
+  point at OpenUI5; only the "start the app" column is dropped (static page).
 * **Overview app** (`z2ui5_cl_api_app_overview`) — an abap2UI5 app in `src/`
   that lists every ported app as a table (Module · Control · Sample ·
   JavaScript · UI5 App · ABAP · abap2UI5 App), each link opening in a new tab

@@ -344,11 +344,11 @@ scripts.**
 
 - **`README.md`** (between the `<!-- coverage:start/end -->` markers) — the
   per-module coverage summary.
-- **`api.md`** — one table per module (library), one row per UI5 demo kit
-  sample, sorted by control (entity). Columns:
-  **Name** (control, with a ↗ link to its UI5 API reference next to it) ·
-  **Javascript** (link to the `ui5/` template, with a ↗ link to the live demo
-  kit sample app next to it) · **ABAP** (link to the generated class,
+- **`api.md`** — one flat table, the same layout as the overview app (minus its
+  "start the app" link, since api.md is static). One row per UI5 demo kit sample,
+  sorted module → control → sample. Columns: **Module** · **Control** (→ OpenUI5
+  API) · **Sample** · **JavaScript** (↗ → OpenUI5 repo source) · **UI5 App**
+  (↗ → live OpenUI5 fullscreen sample) · **ABAP** (↗ → generated class,
   `—` = not ported).
 - **`src/z2ui5_cl_api_app_overview.clas.*`** — the in-system overview **app**:
   an abap2UI5 app that lists every ported app as one row of a `sap.m.Table`,
@@ -377,11 +377,12 @@ node scripts/generate-overview.mjs                          # the overview app (
   Rebuild URL (`.../entity/<entity>/sample/...`) as fallback.
 - **api.md links are external** (absolute URLs, overridable via env) and point
   at **OpenUI5** — only the ABAP column links back to this repo:
-  Name → a ↗ to the control's OpenUI5 API reference
+  Control → the control's OpenUI5 API reference
   (`DEMOKIT`=`https://sdk.openui5.org`/api/`<entity>`),
-  Javascript → the sample's source folder in the OpenUI5 repository
-  (`OPENUI5`=`https://github.com/SAP/openui5`/tree/`OPENUI5_REF`/src/…/demokit/sample/`<Name>`)
-  plus a ↗ to the live OpenUI5 demo kit sample app (`DEMOKIT`),
+  JavaScript → the sample's source folder in the OpenUI5 repository
+  (`OPENUI5`=`https://github.com/SAP/openui5`/tree/`OPENUI5_REF`/src/…/demokit/sample/`<Name>`),
+  UI5 App → the live OpenUI5 fullscreen sample runner
+  (`DEMOKIT`/resources/…/index.html?sap-ui-xx-sample-id=…&sap-ui-xx-sample-lib=…),
   ABAP → the generated `.clas.abap` (`REPO`/`REF`).
 
 The `generate_coverage` workflow (`workflow_dispatch` + weekly) shallow-clones

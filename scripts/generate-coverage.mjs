@@ -40,10 +40,13 @@ const GH = `https://github.com/${REPO}`;
 const DEMOKIT = process.env.DEMOKIT || 'https://sdk.openui5.org';   // OpenUI5 demo kit
 const OPENUI5 = process.env.OPENUI5 || 'https://github.com/SAP/openui5';   // OpenUI5 repo
 const OPENUI5_REF = process.env.OPENUI5_REF || 'master';
-// live OpenUI5 demo kit sample app (needs the entity the sample belongs to)
-const demokitUrl = (entity, sampleId) => `${DEMOKIT}/entity/${entity}/sample/${sampleId}`;
+// live OpenUI5 demo kit sample app, opened fullscreen (the sample runner)
+const fullscreenUrl = (lib, name) =>
+  `${DEMOKIT}/resources/sap/ui/documentation/sdk/index.html?sap-ui-xx-sample-id=${lib}.sample.${name}&sap-ui-xx-sample-lib=${lib}`;
 // OpenUI5 API reference for a control (entity)
 const apiUrl = (entity) => `${DEMOKIT}/api/${entity}`;
+// bare control name without its namespace (sap.f.GridList -> GridList)
+const bareControl = (entity) => entity.slice(entity.lastIndexOf('.') + 1);
 // the sample's source folder in the OpenUI5 repository
 const sampleSrcUrl = (lib, name) =>
   `${OPENUI5}/tree/${OPENUI5_REF}/src/${lib}/test/${lib.replace(/\./g, '/')}/demokit/sample/${name}`;
@@ -149,41 +152,39 @@ function summaryLines() {
   return l;
 }
 
-// api.md — one table per module (library); Control is a column.
+// api.md — one flat table, mirroring the in-system overview app (same columns,
+// minus the "start the app" link). One row per UI5 demo kit sample.
 function controlLines() {
   const l = [];
-  l.push('One table per module, one row per UI5 demo kit sample. **Name** is the demo');
-  l.push('kit control with a ↗ to its OpenUI5 API reference; **Javascript** links to');
-  l.push('the sample source in the [OpenUI5 repository](https://github.com/SAP/openui5)');
-  l.push('with a ↗ to the live OpenUI5 demo kit app next to it; **ABAP** to the');
-  l.push('generated class (`—` = not ported yet). See the');
-  l.push('[README](README.md#coverage) for the per-module summary.');
+  l.push('One row per UI5 demo kit sample, same layout as the in-system overview');
+  l.push('app (`z2ui5_cl_api_app_overview`) — only the "start the app" link is');
+  l.push('dropped, since this is a static page. **Control** links to the OpenUI5');
+  l.push('API, **JavaScript** to the sample source in the');
+  l.push('[OpenUI5 repository](https://github.com/SAP/openui5), **UI5 App** to the');
+  l.push('live OpenUI5 fullscreen sample, **ABAP** to the generated class');
+  l.push('(`—` = not ported yet). See the [README](README.md#coverage) for the');
+  l.push('per-module coverage summary.');
   l.push('');
+  l.push('| Module | Control | Sample | JavaScript | UI5 App | ABAP |');
+  l.push('|--------|---------|--------|:----------:|:-------:|:----:|');
 
-  for (const { lib } of summary) {
-    const entry = libs.find((e) => e.lib === lib);
-    const lp = entry.samples.filter((s) => s.port).length;
-    l.push(`## ${lib} — ${lp}/${entry.samples.length} (${pct(lp, entry.samples.length)})`);
-    l.push('');
-    l.push('| Name | Javascript | ABAP |');
-    l.push('|------|-----------|------|');
+  // flatten all samples, sort by module -> control (entity) -> sample name;
+  // samples without a known control sort last within their module
+  const rows = libs.flatMap((e) => e.samples.map((s) => ({ ...s, lib: e.lib })));
+  rows.sort((a, b) =>
+    a.lib.toLowerCase().localeCompare(b.lib.toLowerCase()) ||
+    (a.entity ? 0 : 1) - (b.entity ? 0 : 1) ||
+    (a.entity || '').toLowerCase().localeCompare((b.entity || '').toLowerCase()) ||
+    a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
 
-    // sort by control (entity), then sample name; entity-less rows last
-    const rows = [...entry.samples].sort((a, b) =>
-      (a.entity ? 0 : 1) - (b.entity ? 0 : 1) ||
-      (a.entity || '').toLowerCase().localeCompare((b.entity || '').toLowerCase()) ||
-      a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
-    for (const s of rows) {
-      const api = s.entity ? ` [↗](${apiUrl(s.entity)})` : '';
-      const name = s.entity ? `${s.entity}${api}` : '—';
-      const sample = `[${s.name}](${sampleSrcUrl(lib, s.name)})`;   // OpenUI5 repo source
-      const demo = s.entity ? ` [↗](${demokitUrl(s.entity, `${lib}.sample.${s.name}`)})` : '';
-      const js = `${sample}${demo}`;
-      const abap = s.port ? `[${s.port.cls}](${abapUrl(s.port.file)})` : '—';
-      l.push(`| ${name} | ${js} | ${abap} |`);
-    }
-    l.push('');
+  for (const s of rows) {
+    const control = s.entity ? `[${bareControl(s.entity)}](${apiUrl(s.entity)})` : '—';
+    const js = `[↗](${sampleSrcUrl(s.lib, s.name)})`;
+    const ui5 = `[↗](${fullscreenUrl(s.lib, s.name)})`;
+    const abap = s.port ? `[↗](${abapUrl(s.port.file)})` : '—';
+    l.push(`| ${s.lib} | ${control} | ${s.name} | ${js} | ${ui5} | ${abap} |`);
   }
+  l.push('');
   return l;
 }
 
