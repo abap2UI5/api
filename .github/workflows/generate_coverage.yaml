@@ -41,10 +41,17 @@ jobs:
     - name: Drop OpenUI5 checkout
       run: rm -rf openui5
 
+    - name: Stamp last generated date into README
+      run: |
+        STAMP=$(date -u '+%Y-%m-%d %H:%M UTC')
+        sed -i "s|<!-- last-run -->.*<!-- /last-run -->|<!-- last-run -->$STAMP<!-- /last-run -->|" README.md
+
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v8
       with:
-        add-paths: COVERAGE.md
+        add-paths: |
+          COVERAGE.md
+          README.md
         commit-message: Regenerate sample coverage
         author: 'github-actions[bot] <github-actions[bot]@users.noreply.github.com>'
         committer: 'github-actions[bot] <github-actions[bot]@users.noreply.github.com>'

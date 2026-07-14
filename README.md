@@ -9,6 +9,60 @@
 
 # abap2UI5-api
 
+_Last generated: <!-- last-run -->2026-07-14 09:00 UTC<!-- /last-run -->_
+
+## What this repo does
+
+This is an **automated repository**. Its mission: clone *every* official UI5
+demo kit sample and independently rebuild it as an abap2UI5 sample — so gaps
+between what UI5 offers and what abap2UI5 covers are revealed and can be closed.
+
+A coding agent runs the pipeline:
+
+1. **Read** — clone [OpenUI5](https://github.com/SAP/openui5) and scan every
+   demo kit sample (`src/<library>/test/<library>/demokit/sample/<Name>/`).
+2. **Generate** — rebuild each sample 1:1 as an abap2UI5 app (`z2ui5_if_app`),
+   filed by library under `src/01`…`src/05`.
+3. **Store templates** — keep the original UI5 JS/XML templates on the
+   [`ui5`](https://github.com/abap2UI5/api/tree/ui5) branch, one folder per port.
+4. **Report** — regenerate [COVERAGE.md](COVERAGE.md): every sample marked
+   ✅ ported / ❌ missing, with a coverage figure per module. The ❌ rows are
+   the backlog.
+
+Reviewed, curated samples graduate to the hand-maintained
+[abap2UI5/samples](https://github.com/abap2UI5/samples) repository.
+
+<details>
+<summary><b>Generation prompt</b> (UI5 sample → abap2UI5 app)</summary>
+
+```
+You are porting one official UI5 demo kit sample to abap2UI5.
+
+Input:  the sample's original files (Component.js, *.view.xml, controller,
+        manifest.json) from the OpenUI5 checkout.
+Output: one ABAP class z2ui5_cl_demo_app_<n> implementing z2ui5_if_app, that
+        rebuilds the sample's UI and behaviour 1:1.
+
+Rules:
+- Translate the XML view control-for-control; use z2ui5_cl_xml_view for
+  standard controls and z2ui5_cl_util_xml for anything not wrapped.
+- Move the sample's JSON model data into ABAP (VALUE #( ... )) and bind it
+  with client->_bind / _bind_edit.
+- Map controller event handlers to check_on_event( ) branches.
+- Use ONLY controls and properties available since UI5 1.71; never use a
+  deprecated control/property. If the sample needs anything newer or
+  deprecated, stop and report the gap instead of porting.
+- Must pass abaplint for ABAP_STANDARD, ABAP_CLOUD and ABAP_702 (downport).
+- Add ABAP Doc above the class:
+    "! Generated port of a UI5 demo kit sample - not yet manually reviewed
+    "! Rebuild of the UI5 demo kit sample: <demo kit url>
+    "! <full sample description>
+- Set the abapGit <DESCRIPT> to `<entity> - <demo kit description>`.
+- Follow all ABAP conventions in AGENTS.md.
+```
+
+</details>
+
 Generated abap2UI5 ports of the official UI5 demo kit samples, split by library:
 
 | Folder    | Library    |
