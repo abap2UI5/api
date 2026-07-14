@@ -192,15 +192,17 @@ the `)->` arrows line up:
 | `open( n ns a )` | open a container tag `<X>` | add child **and descend** into it | the new child |
 | `leaf( n ns a )` | a self-closing tag `<X/>` | add child, **stay** on current node | the same node |
 | `shut( )` | the closing `</X>` | **ascend** to the parent | the parent |
-| `attr( n v )` | one `name="value"` | add an attribute to current node | the same node |
+| `attr( n v )` | one `name="value"` | add an attribute to the control just opened/leaf'd | the same node |
 
 Arguments: `n` = tag name, `ns` = namespace **prefix** (literal `f`, `l`, `core`,
-`mvc` — omitted for the default `sap.m` namespace), `a` = a `VALUE #( )` table of
-**`( `key=value` )`** attribute strings. Each row is split on its **first** `=`,
-so the value may itself contain `=`, `&`, braces or spaces. Build a value from a
-variable with `&&` or a string template — e.g.
-`( `items=` && client->_bind( t_items ) )`. `attr( n v )` is the single-attribute
-shortcut for dynamic cases; usually pass everything through `a`.
+`mvc` — omitted for the default `sap.m` namespace).
+
+**Attributes go through `attr( n = `key` v = `value` )`**, chained right after the
+control's `open`/`leaf`. `attr` always targets that control (the last-added child,
+or the node itself if none yet), so it works after both `open` and `leaf`. `v` is
+any string expression — a literal, a `client->_bind( … )` / `_event( … )` result,
+or a `|…|` template. (An `open`/`leaf` also accepts an up-front `a = VALUE #( ( `key=value` ) … )`
+string table, split on the first `=` — handy for attributes built in a loop.)
 
 Both named XML aggregations (`<headerToolbar>`, `<layoutData>`) and controls are
 just `open`/`leaf` calls — an aggregation is a nameless-namespace `open` with no
@@ -215,19 +217,20 @@ other control:
 DATA(view) = z2ui5_cl_api_xml=>factory( ).
 
 view->open( n = `View` ns = `mvc`
-            a = VALUE #( ( `xmlns=sap.m` )
-                         ( `xmlns:mvc=sap.ui.core.mvc` )
-                         ( `xmlns:f=sap.f` ) )
-    )->leaf( n = `Slider`
-             a = VALUE #( ( `value=`      && client->_bind_edit( slider_value ) )
-                          ( `liveChange=` && client->_event( `SLIDER_MOVED` ) ) )
+    )->attr( n = `xmlns`     v = `sap.m`
+    )->attr( n = `xmlns:mvc` v = `sap.ui.core.mvc`
+    )->attr( n = `xmlns:f`   v = `sap.f`
 
-    )->open( n = `Panel`
-             a = VALUE #( ( `width=` && client->_bind( panel_width ) ) )
+    )->leaf( `Slider`
+        )->attr( n = `value`      v = client->_bind_edit( slider_value )
+        )->attr( n = `liveChange` v = client->_event( `SLIDER_MOVED` )
+
+    )->open( `Panel`
+        )->attr( n = `width` v = client->_bind( panel_width )
         )->open( `headerToolbar`
-            )->open( n = `Toolbar`
-                )->leaf( n = `Title`
-                         a = VALUE #( ( `text=Header` ) )
+            )->open( `Toolbar`
+                )->leaf( `Title`
+                    )->attr( n = `text` v = `Header`
 
             )->shut(
         )->shut( ).
@@ -242,27 +245,27 @@ client->view_display( view->stringify( ) ).
 
 - **The closing paren rides with the arrow.** Never leave a `)` alone at a line
   end; carry it to the **start of the next segment** so it always reads `)->`.
-  The final call of the chain ends in `) ).`.
+  With the `attr()` chain there is no nested `VALUE`, so the whole view ends in a
+  single `` ).`` (not `) ).`).
 - **Indent after every `open`.** Each `open( )` shifts its children's `)->` one
   level (4 spaces) to the right; `shut( )` shifts back left. The `)->` of a
   `shut` sits at the same column as the `open` it closes.
-- **`leaf` sits one level left of the `open`'s children** so its arrow aligns
-  with the `open` on the line above (the arrows form one column).
-- **Blank lines follow the method name, not the nesting:** a blank line between
-  two calls whose verb **differs** (`open`↔`leaf`, and before every `shut`);
-  **no** blank line between calls of the **same** verb (`open`/`open`,
-  `leaf`/`leaf`, consecutive `shut`s) and **none directly after** a `shut`.
-- **One attribute per `( … )` row**, one per line; align the `=` (or the values)
-  under each other so the row reads as a column of `key=value` pairs.
-- Long text literals split with `&&` at ~255 chars max per line (§6).
+- **A control's `attr()` lines sit one level (4 spaces) in from the control's
+  own `)->` line**; align the `v =` column across them.
+- **Blank lines follow the structural verb, attrs don't count:** a blank line
+  between two controls whose verb **differs** (`open`↔`leaf`, and before every
+  `shut`); **no** blank between same-verb controls (`open`/`open`, `leaf`/`leaf`,
+  consecutive `shut`s), **none directly after** a `shut`, and **none** between a
+  control and its `attr()`s.
+- Long text/binding values split with `&&` at ~255 chars max per line (§6).
 
 #### Data binding & events
 
 - `client->_bind( var )` — one-way bind (display); `client->_bind_edit( var )` —
   two-way bind (the value flows back into `var` on the next round-trip). Bind the
-  ABAP `DATA` member, e.g. `( `items=` && client->_bind( t_items ) )`.
+  ABAP `DATA` member, e.g. `)->attr( n = `items` v = client->_bind( t_items )`.
 - Inside a bound aggregation, child properties use UI5 binding braces on the
-  upper-cased field name: `( `text={TITLE}` )`.
+  upper-cased field name: `)->attr( n = `text` v = `{TITLE}``.
 - `client->_event( \`NAME\` )` — wire a control event (press, liveChange…) to an
   event named `NAME`; handle it in `on_event( )` with
   `IF client->check_on_event( \`NAME\` ).`. After changing bound data in an
@@ -270,9 +273,9 @@ client->view_display( view->stringify( ) ).
 
 #### Booleans
 
-A literal boolean is just `( `editable=true` )` / `( `editable=false` )`. **Only**
-when the value comes from an ABAP boolean variable, build the row with
-`as_bool( )`: `( `editable=` && z2ui5_cl_api_xml=>as_bool( flag ) )` — a raw
+A literal boolean is just `)->attr( n = `editable` v = `true``. **Only** when the
+value comes from an ABAP boolean variable, wrap it with `as_bool( )`:
+`)->attr( n = `editable` v = z2ui5_cl_api_xml=>as_bool( flag )` — a raw
 `abap_false` would otherwise serialise to an empty string. Never feed
 `abap_true`/`abap_false` straight into an attribute value.
 

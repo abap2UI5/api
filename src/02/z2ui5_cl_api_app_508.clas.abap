@@ -38,75 +38,86 @@ CLASS z2ui5_cl_api_app_508 IMPLEMENTATION.
     DATA(view) = z2ui5_cl_api_xml=>factory( ).
 
     view->open( n = `View` ns = `mvc`
-                a = VALUE #( ( `xmlns=sap.m` )
-                             ( `xmlns:mvc=sap.ui.core.mvc` )
-                             ( `xmlns:form=sap.ui.layout.form` ) )
+        )->attr( n = `xmlns`      v = `sap.m`
+        )->attr( n = `xmlns:mvc`  v = `sap.ui.core.mvc`
+        )->attr( n = `xmlns:form` v = `sap.ui.layout.form`
+
         )->open( n = `SimpleForm` ns = `form`
-                 a = VALUE #( ( `width=auto` )
-                              ( `class=sapUiResponsiveMargin` )
-                              ( `layout=ResponsiveGridLayout` )
-                              ( `editable=true` )
-                              ( `labelSpanL=3` )
-                              ( `labelSpanM=3` )
-                              ( `emptySpanL=4` )
-                              ( `emptySpanM=4` )
-                              ( `columnsL=1` )
-                              ( `columnsM=1` )
-                              ( `title=Number Input` ) )
+            )->attr( n = `width`      v = `auto`
+            )->attr( n = `class`      v = `sapUiResponsiveMargin`
+            )->attr( n = `layout`     v = `ResponsiveGridLayout`
+            )->attr( n = `editable`   v = `true`
+            )->attr( n = `labelSpanL` v = `3`
+            )->attr( n = `labelSpanM` v = `3`
+            )->attr( n = `emptySpanL` v = `4`
+            )->attr( n = `emptySpanM` v = `4`
+            )->attr( n = `columnsL`   v = `1`
+            )->attr( n = `columnsM`   v = `1`
+            )->attr( n = `title`      v = `Number Input`
+
             )->open( n = `content` ns = `form`
 
-                )->leaf( n = `Label`
-                         a = VALUE #( ( `text=Number` ) )
-                )->leaf( n = `Input`
-                         a = VALUE #( ( `value={ path: '` && path && `', type: 'sap.ui.model.type.Integer' }` ) )
+                )->leaf( `Label`
+                    )->attr( n = `text` v = `Number`
+
+                )->leaf( `Input`
+                    )->attr( n = `value` v = `{ path: '` && path && `', type: 'sap.ui.model.type.Integer' }`
 
             )->shut(
         )->shut(
         )->open( n = `SimpleForm` ns = `form`
-                 a = VALUE #( ( `width=auto` )
-                              ( `class=sapUiResponsiveMargin` )
-                              ( `layout=ResponsiveGridLayout` )
-                              ( `labelSpanL=3` )
-                              ( `labelSpanM=3` )
-                              ( `emptySpanL=4` )
-                              ( `emptySpanM=4` )
-                              ( `columnsL=1` )
-                              ( `columnsM=1` )
-                              ( `title=Min Integer Digits (minimal number of non-fraction digits)` ) )
+            )->attr( n = `width`      v = `auto`
+            )->attr( n = `class`      v = `sapUiResponsiveMargin`
+            )->attr( n = `layout`     v = `ResponsiveGridLayout`
+            )->attr( n = `labelSpanL` v = `3`
+            )->attr( n = `labelSpanM` v = `3`
+            )->attr( n = `emptySpanL` v = `4`
+            )->attr( n = `emptySpanM` v = `4`
+            )->attr( n = `columnsL`   v = `1`
+            )->attr( n = `columnsM`   v = `1`
+            )->attr( n = `title`      v = `Min Integer Digits (minimal number of non-fraction digits)`
+
             )->open( n = `content` ns = `form`
 
-                )->leaf( n = `Label`
-                         a = VALUE #( ( `text=3 digits` ) )
-                )->leaf( n = `Text`
-                         a = VALUE #( ( `text={ path: '` && path && `', type: 'sap.ui.model.type.Integer', formatOptions: { minIntegerDigits: 3 } }` ) )
-                )->leaf( n = `Label`
-                         a = VALUE #( ( `text=5 digits` ) )
-                )->leaf( n = `Text`
-                         a = VALUE #( ( `text={ path: '` && path && `', type: 'sap.ui.model.type.Integer', formatOptions: { minIntegerDigits: 5 } }` ) )
+                )->leaf( `Label`
+                    )->attr( n = `text` v = `3 digits`
+
+                )->leaf( `Text`
+                    )->attr( n = `text` v = `{ path: '` && path && `', type: 'sap.ui.model.type.Integer', formatOptions: { minIntegerDigits: 3 } }`
+
+                )->leaf( `Label`
+                    )->attr( n = `text` v = `5 digits`
+
+                )->leaf( `Text`
+                    )->attr( n = `text` v = `{ path: '` && path && `', type: 'sap.ui.model.type.Integer', formatOptions: { minIntegerDigits: 5 } }`
 
             )->shut(
         )->shut(
         )->open( n = `SimpleForm` ns = `form`
-                 a = VALUE #( ( `width=auto` )
-                              ( `class=sapUiResponsiveMargin` )
-                              ( `layout=ResponsiveGridLayout` )
-                              ( `labelSpanL=3` )
-                              ( `labelSpanM=3` )
-                              ( `emptySpanL=4` )
-                              ( `emptySpanM=4` )
-                              ( `columnsL=1` )
-                              ( `columnsM=1` )
-                              ( `title=Max Integer Digits (maximal number of non-fraction digits)` ) )
+            )->attr( n = `width`      v = `auto`
+            )->attr( n = `class`      v = `sapUiResponsiveMargin`
+            )->attr( n = `layout`     v = `ResponsiveGridLayout`
+            )->attr( n = `labelSpanL` v = `3`
+            )->attr( n = `labelSpanM` v = `3`
+            )->attr( n = `emptySpanL` v = `4`
+            )->attr( n = `emptySpanM` v = `4`
+            )->attr( n = `columnsL`   v = `1`
+            )->attr( n = `columnsM`   v = `1`
+            )->attr( n = `title`      v = `Max Integer Digits (maximal number of non-fraction digits)`
+
             )->open( n = `content` ns = `form`
 
-                )->leaf( n = `Label`
-                         a = VALUE #( ( `text=2 digits` ) )
-                )->leaf( n = `Text`
-                         a = VALUE #( ( `text={ path: '` && path && `', type: 'sap.ui.model.type.Integer', formatOptions: { maxIntegerDigits: 2 } }` ) )
-                )->leaf( n = `Label`
-                         a = VALUE #( ( `text=5 digits` ) )
-                )->leaf( n = `Text`
-                         a = VALUE #( ( `text={ path: '` && path && `', type: 'sap.ui.model.type.Integer', formatOptions: { maxIntegerDigits: 5 } }` ) ) ).
+                )->leaf( `Label`
+                    )->attr( n = `text` v = `2 digits`
+
+                )->leaf( `Text`
+                    )->attr( n = `text` v = `{ path: '` && path && `', type: 'sap.ui.model.type.Integer', formatOptions: { maxIntegerDigits: 2 } }`
+
+                )->leaf( `Label`
+                    )->attr( n = `text` v = `5 digits`
+
+                )->leaf( `Text`
+                    )->attr( n = `text` v = `{ path: '` && path && `', type: 'sap.ui.model.type.Integer', formatOptions: { maxIntegerDigits: 5 } }` ).
 
     client->view_display( view->stringify( ) ).
 

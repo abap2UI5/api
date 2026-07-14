@@ -81,47 +81,47 @@ CLASS z2ui5_cl_api_app_416 IMPLEMENTATION.
     DATA(view) = z2ui5_cl_api_xml=>factory( ).
 
     view->open( n = `View` ns = `mvc`
-                a = VALUE #( ( `xmlns=sap.m` )
-                             ( `xmlns:mvc=sap.ui.core.mvc` )
-                             ( `xmlns:f=sap.f` ) )
+        )->attr( n = `xmlns`     v = `sap.m`
+        )->attr( n = `xmlns:mvc` v = `sap.ui.core.mvc`
+        )->attr( n = `xmlns:f`   v = `sap.f`
 
-        )->leaf( n = `Slider`
-                 a = VALUE #( ( `value=`      && client->_bind_edit( slider_value ) )
-                              ( `liveChange=` && client->_event( `SLIDER_MOVED` ) ) )
+        )->leaf( `Slider`
+            )->attr( n = `value`      v = client->_bind_edit( slider_value )
+            )->attr( n = `liveChange` v = client->_event( `SLIDER_MOVED` )
 
-        )->open( n = `Panel`
-                 a = VALUE #( ( `id=panelForGridList` )
-                              ( `backgroundDesign=Transparent` )
-                              ( `width=` && client->_bind( panel_width ) ) )
+        )->open( `Panel`
+            )->attr( n = `id`               v = `panelForGridList`
+            )->attr( n = `backgroundDesign` v = `Transparent`
+            )->attr( n = `width`            v = client->_bind( panel_width )
             )->open( `headerToolbar`
-                )->open( n = `Toolbar`
-                         a = VALUE #( ( `height=3rem` ) )
+                )->open( `Toolbar`
+                    )->attr( n = `height` v = `3rem`
 
-                    )->leaf( n = `Title`
-                             a = VALUE #( ( `text=GridList with default grid layout` ) )
+                    )->leaf( `Title`
+                        )->attr( n = `text` v = `GridList with default grid layout`
 
                 )->shut(
             )->shut(
             )->open( n = `GridList` ns = `f`
-                     a = VALUE #( ( `id=gridList` )
-                                  ( `headerText=GridList header` )
-                                  ( `items=` && client->_bind( t_items ) ) )
+                )->attr( n = `id`         v = `gridList`
+                )->attr( n = `headerText` v = `GridList header`
+                )->attr( n = `items`      v = client->_bind( t_items )
                 )->open( n = `GridListItem` ns = `f`
-                    )->open( n = `VBox`
-                             a = VALUE #( ( `class=sapUiSmallMargin` ) )
+                    )->open( `VBox`
+                        )->attr( n = `class` v = `sapUiSmallMargin`
                         )->open( `layoutData`
 
-                            )->leaf( n = `FlexItemData`
-                                     a = VALUE #( ( `growFactor=1` )
-                                                  ( `shrinkFactor=0` ) )
+                            )->leaf( `FlexItemData`
+                                )->attr( n = `growFactor`   v = `1`
+                                )->attr( n = `shrinkFactor` v = `0`
 
                         )->shut(
-                        )->leaf( n = `Title`
-                                 a = VALUE #( ( `text={TITLE}` )
-                                              ( `wrapping=true` ) )
-                        )->leaf( n = `Label`
-                                 a = VALUE #( ( `text={SUBTITLE}` )
-                                              ( `wrapping=true` ) ) ).
+                        )->leaf( `Title`
+                            )->attr( n = `text`     v = `{TITLE}`
+                            )->attr( n = `wrapping` v = `true`
+                        )->leaf( `Label`
+                            )->attr( n = `text`     v = `{SUBTITLE}`
+                            )->attr( n = `wrapping` v = `true` ).
 
     client->view_display( view->stringify( ) ).
 

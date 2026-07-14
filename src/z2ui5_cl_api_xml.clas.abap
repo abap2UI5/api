@@ -3,13 +3,15 @@
 "!   open  - add a child control/aggregation and DESCEND into it (returns child)
 "!   leaf  - add a childless control but STAY on the current node (returns same)
 "!   shut  - ASCEND to the parent (returns parent)
-"!   attr  - set one attribute (returns the same node)
-"! Element = n (name), namespace prefix = ns (e.g. `f`, `core`, `l`). Attributes
-"! = a, a flat table of `key=value` strings (split on the FIRST `=`, so values
-"! may contain `=`, `&`, spaces): a = VALUE #( ( `width=100%` ) ( `class=x` ) ).
-"! The root <mvc:View> and its xmlns declarations are written by hand: pass them
-"! to the first open( ) as attributes, exactly like a real UI5 view.
-"! For a boolean property fed from an ABAP variable, wrap it with as_bool( ).
+"!   attr  - add one attribute to the control just opened/leaf'd (returns same)
+"! Element = n (name), namespace prefix = ns (e.g. `f`, `core`, `l`).
+"! Attributes are added with attr( n = `key` v = `value` ) chained right after
+"! the control's open/leaf - attr always targets that control (the last child,
+"! or the node itself). `v` may be any string expression (literal, a client
+"! bind/event, || template). Alternatively pass attributes up front to open/leaf
+"! via a = a flat table of `key=value` strings (split on the first `=`).
+"! The root <mvc:View> and its xmlns declarations are written by hand, exactly
+"! like a real UI5 view. For a boolean from an ABAP variable, use as_bool( ).
 CLASS z2ui5_cl_api_xml DEFINITION PUBLIC CREATE PRIVATE.
 
   PUBLIC SECTION.
@@ -30,7 +32,8 @@ CLASS z2ui5_cl_api_xml DEFINITION PUBLIC CREATE PRIVATE.
     "! namespaces yourself, exactly like any other control:
     "!   DATA(view) = z2ui5_cl_api_xml=>factory( ).
     "!   view->open( n = `View` ns = `mvc`
-    "!               a = VALUE #( ( `xmlns=sap.m` ) ( `xmlns:mvc=sap.ui.core.mvc` ) ) ) ...
+    "!       )->attr( n = `xmlns`     v = `sap.m`
+    "!       )->attr( n = `xmlns:mvc` v = `sap.ui.core.mvc` ) ...
     CLASS-METHODS factory
       RETURNING
         VALUE(result) TYPE REF TO z2ui5_cl_api_xml.
@@ -177,7 +180,15 @@ CLASS z2ui5_cl_api_xml IMPLEMENTATION.
 
   METHOD attr.
 
-    APPEND VALUE #( n = n v = v ) TO t_pair.
+    " set the attribute on the element the chain is currently pointing at:
+    " the just-added child (after open/leaf) or - if none yet - this node
+    " itself (so attributes can be attached right after open/leaf/shut).
+    IF t_child IS INITIAL.
+      APPEND VALUE #( n = n v = v ) TO t_pair.
+    ELSE.
+      DATA(target) = t_child[ lines( t_child ) ].
+      APPEND VALUE #( n = n v = v ) TO target->t_pair.
+    ENDIF.
     result = me.
 
   ENDMETHOD.

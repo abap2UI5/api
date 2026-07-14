@@ -46,15 +46,16 @@ Output: one ABAP class z2ui5_cl_api_app_<n> implementing z2ui5_if_app, that
 Rules:
 - Build the view with the generic builder z2ui5_cl_api_xml, translating the
   sample's XML 1:1 (open = descend into a container, leaf = childless
-  control/stay, shut = ascend, attr = one attribute). Attributes are passed as
-  a = VALUE #( ( `key=value` ) ... ), one `key=value` string per row, split on
-  the first `=` (values may contain =, &, braces, spaces); build a value from a
-  variable with && or a string template. factory( ) returns an empty root -
-  open the <mvc:View> and declare its xmlns namespaces yourself. Blank line
-  between calls whose method name differs (open<->leaf, before shut); none
-  between same-named calls and none right after a shut. Booleans: literal
-  ( `x=true` )/( `x=false` ), or ( `x=` && z2ui5_cl_api_xml=>as_bool( flag ) )
-  when fed from an ABAP boolean variable.
+  control/stay, shut = ascend). Attributes are added with
+  attr( n = `key` v = `value` ) chained right after the control's open/leaf;
+  attr targets that control, and v is any string expression (literal, a
+  client->_bind/_event result, a || template). factory( ) returns an empty root
+  - open the <mvc:View> and declare its xmlns namespaces yourself. Blank line
+  between controls whose verb differs (open<->leaf, before shut); none between
+  same-verb controls, none right after a shut, none between a control and its
+  attrs; the whole view ends in a single ). Booleans: literal
+  v = `true`/`false`, or v = z2ui5_cl_api_xml=>as_bool( flag ) when fed from an
+  ABAP boolean variable.
 - Structure z2ui5_if_app~main as a dispatcher:
     me->client = client.
     IF client->check_on_init( ).
