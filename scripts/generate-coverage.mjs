@@ -147,9 +147,9 @@ function summaryLines() {
 function controlLines() {
   const l = [];
   l.push('One table per module, one row per UI5 demo kit sample. **Name** is the demo');
-  l.push('kit control; **Javascript** links to the collected UI5 template (`ui5/`),');
-  l.push('**API** to the control\'s UI5 API reference, **Demo** to the live demo kit');
-  l.push('app, **ABAP** to the generated class (`—` = not ported yet). See the');
+  l.push('kit control with a ↗ to its UI5 API reference; **Javascript** links to the');
+  l.push('collected UI5 template (`ui5/`) with a ↗ to the live demo kit app next to');
+  l.push('it; **ABAP** to the generated class (`—` = not ported yet). See the');
   l.push('[README](README.md#coverage) for the per-module summary.');
   l.push('');
 
@@ -158,8 +158,8 @@ function controlLines() {
     const lp = entry.samples.filter((s) => s.port).length;
     l.push(`## ${lib} — ${lp}/${entry.samples.length} (${pct(lp, entry.samples.length)})`);
     l.push('');
-    l.push('| Name | Javascript | API | Demo | ABAP |');
-    l.push('|------|-----------|-----|------|------|');
+    l.push('| Name | Javascript | ABAP |');
+    l.push('|------|-----------|------|');
 
     // sort by control (entity), then sample name; entity-less rows last
     const rows = [...entry.samples].sort((a, b) =>
@@ -167,12 +167,13 @@ function controlLines() {
       (a.entity || '').toLowerCase().localeCompare((b.entity || '').toLowerCase()) ||
       a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
     for (const s of rows) {
-      const name = s.entity || '—';
-      const js = s.port ? `[${s.name}](${templateUrl(lib, s.port.cls)})` : s.name;
-      const api = s.entity ? `[↗](${apiUrl(s.entity)})` : '—';
-      const demo = s.entity ? `[↗](${demokitUrl(s.entity, `${lib}.sample.${s.name}`)})` : '—';
+      const api = s.entity ? ` [↗](${apiUrl(s.entity)})` : '';
+      const name = s.entity ? `${s.entity}${api}` : '—';
+      const sample = s.port ? `[${s.name}](${templateUrl(lib, s.port.cls)})` : s.name;
+      const demo = s.entity ? ` [↗](${demokitUrl(s.entity, `${lib}.sample.${s.name}`)})` : '';
+      const js = `${sample}${demo}`;
       const abap = s.port ? `[${s.port.cls}](${abapUrl(s.port.file)})` : '—';
-      l.push(`| ${name} | ${js} | ${api} | ${demo} | ${abap} |`);
+      l.push(`| ${name} | ${js} | ${abap} |`);
     }
     l.push('');
   }

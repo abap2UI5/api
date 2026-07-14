@@ -192,10 +192,10 @@ scripts.**
   per-module coverage summary.
 - **`api.md`** — one table per module (library), one row per UI5 demo kit
   sample, sorted by control (entity). Columns:
-  **Name** (control) · **Javascript** (link to the `ui5/` template) ·
-  **API** (arrow link to the control's UI5 API reference) · **Demo**
-  (arrow link to the live demo kit sample app) · **ABAP** (link to the
-  generated class, `—` = not ported).
+  **Name** (control, with a ↗ link to its UI5 API reference next to it) ·
+  **Javascript** (link to the `ui5/` template, with a ↗ link to the live demo
+  kit sample app next to it) · **ABAP** (link to the generated class,
+  `—` = not ported).
 - **`src/z2ui5_cl_api_app_overview.clas.*`** — the in-system overview **app**:
   an abap2UI5 app that lists every ported app grouped by control, opens it in a
   **new browser tab** (`_event_client( cs_event-open_new_tab )`) and links its
@@ -215,9 +215,9 @@ node scripts/generate-overview.mjs                          # the overview app (
   `demokit/docuindex.json` (`explored.entities[].samples[]`), with the port's
   Rebuild URL (`.../entity/<entity>/sample/...`) as fallback.
 - **api.md links are external** (absolute URLs, overridable via env):
-  Javascript → `ui5/` template folder (`REPO`/`REF`), API → the control's UI5
-  API reference (`DEMOKIT`/api/`<entity>`), Demo → the live demo kit sample app
-  (`DEMOKIT`), ABAP → the `.clas.abap` (`REPO`/`REF`).
+  Name → a ↗ to the control's UI5 API reference (`DEMOKIT`/api/`<entity>`),
+  Javascript → `ui5/` template folder (`REPO`/`REF`) plus a ↗ to the live demo
+  kit sample app (`DEMOKIT`), ABAP → the `.clas.abap` (`REPO`/`REF`).
 
 The `generate_coverage` workflow (`workflow_dispatch` + weekly) shallow-clones
 OpenUI5, runs both scripts, stamps the `<!-- last-run -->` timestamp into
