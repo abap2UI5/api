@@ -30,6 +30,11 @@ const README = path.join(ROOT, 'README.md');
 const START = '<!-- coverage:start -->';
 const END = '<!-- coverage:end -->';
 
+// free-text notes, keyed by "<lib>.sample.<Name>" — persisted here because
+// api.md is generated (edit comments.json, not the table)
+let comments = {};
+try { comments = JSON.parse(fs.readFileSync(path.join(ROOT, 'comments.json'), 'utf8')); } catch { /* none */ }
+
 // link targets (overridable via env) — all links are external/absolute
 const REPO = process.env.REPO || 'abap2UI5/api';   // owner/name
 const REF = process.env.REF || 'main';             // branch the links resolve on
@@ -37,6 +42,8 @@ const GH = `https://github.com/${REPO}`;
 const DEMOKIT = process.env.DEMOKIT || 'https://sapui5.hana.ondemand.com/sdk/#';
 // live demo kit sample app (needs the entity the sample belongs to)
 const demokitUrl = (entity, sampleId) => `${DEMOKIT}/entity/${entity}/sample/${sampleId}`;
+// UI5 API reference for a control (entity)
+const apiUrl = (entity) => `${DEMOKIT}/api/${entity}`;
 // collected JS template folder under ui5/
 const templateUrl = (lib, cls) => `${GH}/tree/${REF}/ui5/${lib}/${cls}`;
 // generated abap2UI5 class file under src/
@@ -144,11 +151,12 @@ function summaryLines() {
 // api.md — one table per module (library); Control is a column.
 function controlLines() {
   const l = [];
-  l.push('One table per module, one row per UI5 demo kit sample. **Control** is the');
-  l.push('demo kit entity (plain), **Javascript** links to the collected UI5 template');
-  l.push('(`ui5/`), **ABAP** to the generated class (`—` = not ported yet), **Demo** to');
-  l.push('the live demo kit sample app. See the [README](README.md#coverage) for the');
-  l.push('per-module summary.');
+  l.push('One table per module, one row per UI5 demo kit sample. **Name** is the demo');
+  l.push('kit control (plain); **Javascript** links to the collected UI5 template');
+  l.push('(`ui5/`), **API** to the control\'s UI5 API reference, **Demo** to the live');
+  l.push('demo kit app, **ABAP** to the generated class (`—` = not ported yet).');
+  l.push('**Comment** is free text from `comments.json`. See the');
+  l.push('[README](README.md#coverage) for the per-module summary.');
   l.push('');
 
   for (const { lib } of summary) {
@@ -156,8 +164,8 @@ function controlLines() {
     const lp = entry.samples.filter((s) => s.port).length;
     l.push(`## \`${lib}\` — ${lp}/${entry.samples.length} (${pct(lp, entry.samples.length)})`);
     l.push('');
-    l.push('| Control | Javascript | ABAP | Demo |');
-    l.push('|---------|-----------|------|------|');
+    l.push('| Name | Javascript | API | Demo | ABAP | Comment |');
+    l.push('|------|-----------|-----|------|------|---------|');
 
     // sort by control (entity), then sample name; entity-less rows last
     const rows = [...entry.samples].sort((a, b) =>
@@ -165,11 +173,13 @@ function controlLines() {
       (a.entity || '').toLowerCase().localeCompare((b.entity || '').toLowerCase()) ||
       a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
     for (const s of rows) {
-      const control = s.entity ? `\`${s.entity}\`` : '—';
+      const name = s.entity ? `\`${s.entity}\`` : '—';
       const js = s.port ? `[\`${s.name}\`](${templateUrl(lib, s.port.cls)})` : `\`${s.name}\``;
+      const api = s.entity ? `[api ↗](${apiUrl(s.entity)})` : '—';
+      const demo = s.entity ? `[demo ↗](${demokitUrl(s.entity, `${lib}.sample.${s.name}`)})` : '—';
       const abap = s.port ? `[\`${s.port.cls}\`](${abapUrl(s.port.file)})` : '—';
-      const demo = s.entity ? `[demo kit ↗](${demokitUrl(s.entity, `${lib}.sample.${s.name}`)})` : '—';
-      l.push(`| ${control} | ${js} | ${abap} | ${demo} |`);
+      const comment = (comments[`${lib}.sample.${s.name}`] || '').replace(/\|/g, '\\|').replace(/\n/g, ' ');
+      l.push(`| ${name} | ${js} | ${api} | ${demo} | ${abap} | ${comment} |`);
     }
     l.push('');
   }

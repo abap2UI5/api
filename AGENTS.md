@@ -190,11 +190,25 @@ scripts.**
 
 - **`README.md`** (between the `<!-- coverage:start/end -->` markers) — the
   per-module coverage summary.
-- **`api.md`** — control-level detail: one section per UI5 control (demo kit
-  entity), each listing its samples (Javascript / ABAP / Link columns).
+- **`api.md`** — one table per module (library), one row per UI5 demo kit
+  sample, sorted by control (entity). Columns:
+  **Name** (control, plain text) · **Javascript** (link to the `ui5/`
+  template) · **API** (link to the control's UI5 API reference) · **Demo**
+  (link to the live demo kit sample app) · **ABAP** (link to the generated
+  class, `—` = not ported) · **Comment** (free text).
 - **`src/z2ui5_cl_api_app_overview.clas.*`** — the in-system overview **app**:
-  an abap2UI5 app that lists every ported app grouped by control and starts it
-  via `nav_app_call` (`_event(app)` → `on_event`). Mirrors `api.md`'s layout.
+  an abap2UI5 app that lists every ported app grouped by control, opens it in a
+  **new browser tab** (`_event_client( cs_event-open_new_tab )`) and links its
+  demo kit page. Mirrors `api.md`'s layout.
+
+**Free-text comments** live in **`comments.json`** (not in `api.md`, which is
+generated). It maps `"<lib>.sample.<Name>"` → a note; the generator injects it
+into that sample's **Comment** cell. Use it to record why a port is blocked or
+imperfect. Example:
+
+```json
+{ "sap.m.sample.GenericTagObjectNumber": "port blocked: needs a custom control" }
+```
 
 ```bash
 OPENUI5_DIR=../openui5 node scripts/generate-coverage.mjs   # README + api.md
@@ -210,8 +224,10 @@ node scripts/generate-overview.mjs                          # the overview app (
   `demokit/docuindex.json` (`explored.entities[].samples[]`), with the port's
   Rebuild URL (`.../entity/<entity>/sample/...`) as fallback.
 - **api.md links are external** (absolute URLs, overridable via env):
-  Javascript → `ui5/` template folder (`REPO`/`REF`), ABAP → the `.clas.abap`,
-  Link → the live demo kit sample app (`DEMOKIT`).
+  Javascript → `ui5/` template folder (`REPO`/`REF`), API → the control's UI5
+  API reference (`DEMOKIT`/api/`<entity>`), Demo → the live demo kit sample app
+  (`DEMOKIT`), ABAP → the `.clas.abap` (`REPO`/`REF`). Free-text comments come
+  from `comments.json`.
 
 The `generate_coverage` workflow (`workflow_dispatch` + weekly) shallow-clones
 OpenUI5, runs both scripts, stamps the `<!-- last-run -->` timestamp into
