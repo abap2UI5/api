@@ -108,6 +108,30 @@ Each generated port carries ABAP Doc directly above `CLASS ... DEFINITION`:
   port it** — leave it as an ❌ gap in the coverage report.
 - Every port must pass all three CI checks (§6).
 
+### App skeleton
+
+Build the view with the generic builder **`z2ui5_cl_api_xml`** (`open` = descend
+into a container, `add` = leaf/stay, `close` = ascend, `attr` = one attribute),
+translating the sample's XML 1:1 — every control / property / namespace maps
+directly, nothing is approximated. Structure `z2ui5_if_app~main` as a dispatcher:
+
+```abap
+METHOD z2ui5_if_app~main.
+
+  me->client = client.
+  IF client->check_on_init( ).
+    data_init( ).
+    view_display( ).
+  ELSEIF client->check_on_event( ).
+    on_event( ).
+  ENDIF.
+
+ENDMETHOD.
+```
+
+Add `data_init( )` / `on_event( )` only when the app actually has data / events
+(never a pass-through method with a single statement).
+
 ### Generation prompt
 
 The prompt used to port one sample is kept in `README.md` (the "Generation

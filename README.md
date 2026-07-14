@@ -44,8 +44,19 @@ Output: one ABAP class z2ui5_cl_api_app_<n> implementing z2ui5_if_app, that
         rebuilds the sample's UI and behaviour 1:1.
 
 Rules:
-- Translate the XML view control-for-control; use z2ui5_cl_xml_view for
-  standard controls and z2ui5_cl_util_xml for anything not wrapped.
+- Build the view with the generic builder z2ui5_cl_api_xml, translating the
+  sample's XML 1:1 (open = descend into a container, add = leaf/stay,
+  close = ascend, attr = one attribute). Every control/property/namespace maps
+  directly, so nothing is approximated or dropped.
+- Structure z2ui5_if_app~main as a dispatcher:
+    me->client = client.
+    IF client->check_on_init( ).
+      data_init( ).
+      view_display( ).
+    ELSEIF client->check_on_event( ).
+      on_event( ).
+    ENDIF.
+  Add data_init / on_event only when the app actually has data / events.
 - Move the sample's JSON model data into ABAP (VALUE #( ... )) and bind it
   with client->_bind / _bind_edit.
 - Map controller event handlers to check_on_event( ) branches.
