@@ -14,9 +14,10 @@ CLASS z2ui5_cl_api_app_454 DEFINITION PUBLIC.
     DATA t_products TYPE STANDARD TABLE OF ty_s_product WITH EMPTY KEY.
 
   PROTECTED SECTION.
-    METHODS view_display
-      IMPORTING
-        client TYPE REF TO z2ui5_if_client.
+    DATA client TYPE REF TO z2ui5_if_client.
+
+    METHODS data_init.
+    METHODS view_display.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -24,92 +25,84 @@ ENDCLASS.
 
 CLASS z2ui5_cl_api_app_454 IMPLEMENTATION.
 
-  METHOD view_display.
+  METHOD z2ui5_if_app~main.
 
-    DATA(page) = z2ui5_cl_xml_view=>factory( ).
-
-    DATA(layout) = page->vertical_layout( class = `sapUiContentPadding`
-                                          width = `100%` ).
-    layout->label( text     = `Enter a search term, e.g. “Notebook”, and add matching products as tokens`
-                   width    = `100%`
-                   labelfor = `multiInput` ).
-
-    " showClearIcon was only introduced with UI5 1.94 and is omitted here
-    layout->multi_input(
-        id              = `multiInput`
-        width           = `70%`
-        suggestionitems = client->_bind( t_products )
-        placeholder     = `Products...`
-        showvaluehelp   = abap_false
-        )->suggestion_items(
-            )->item( key  = `{PRODUCT_ID}`
-                     text = `{NAME}` ).
-
-    layout->label( text     = `MultiInput with pre-selected tokens`
-                   labelfor = `multiInput1` ).
-
-    " the original also adds a JS validator that turns typed text into tokens - not portable to abap2UI5
-    layout->multi_input(
-        id             = `multiInput1`
-        showsuggestion = abap_false
-        width          = `70%`
-        showvaluehelp  = abap_false
-        )->tokens(
-            )->token( key  = `0001`
-                      text = `Token 1`
-            )->token( key  = `0002`
-                      text = `Token 2`
-            )->token( key  = `0003`
-                      text = `Token 3`
-            )->token( key  = `0004`
-                      text = `Token 4`
-            )->token( key  = `0005`
-                      text = `Token 5`
-            )->token( key  = `0006`
-                      text = `Token 6` ).
-
-    layout->label( text     = `MultiInput with single long token`
-                   labelfor = `multiInput2` ).
-    layout->multi_input(
-        id             = `multiInput2`
-        showsuggestion = abap_false
-        width          = `300px`
-        showvaluehelp  = abap_false
-        )->tokens(
-            )->token( key  = `longText`
-                      text = `Very long long long long long long long text` ).
-
-    client->view_display( page->stringify( ) ).
+    me->client = client.
+    IF client->check_on_init( ).
+      data_init( ).
+      view_display( ).
+    ENDIF.
 
   ENDMETHOD.
 
 
-  METHOD z2ui5_if_app~main.
+  METHOD data_init.
 
-    IF client->check_on_init( ).
+    t_products = VALUE #(
+      ( product_id = `HT-1000` name = `Notebook Basic 15` )
+      ( product_id = `HT-1001` name = `Notebook Basic 17` )
+      ( product_id = `HT-1002` name = `Notebook Basic 18` )
+      ( product_id = `HT-1003` name = `Notebook Basic 19` )
+      ( product_id = `HT-1007` name = `ITelO Vault` )
+      ( product_id = `HT-1010` name = `Notebook Professional 15` )
+      ( product_id = `HT-1011` name = `Notebook Professional 17` )
+      ( product_id = `HT-1020` name = `ITelO Vault Net` )
+      ( product_id = `HT-1021` name = `ITelO Vault SAT` )
+      ( product_id = `HT-1022` name = `Comfort Easy` )
+      ( product_id = `HT-1023` name = `Comfort Senior` )
+      ( product_id = `HT-1030` name = `Ergo Screen E-I` )
+      ( product_id = `HT-1031` name = `Ergo Screen E-II` )
+      ( product_id = `HT-1032` name = `Ergo Screen E-III` )
+      ( product_id = `HT-1035` name = `Flat Basic` )
+      ( product_id = `HT-1036` name = `Flat Future` ) ).
+    SORT t_products BY name.
 
-      t_products = VALUE #(
-        ( product_id = `HT-1000` name = `Notebook Basic 15` )
-        ( product_id = `HT-1001` name = `Notebook Basic 17` )
-        ( product_id = `HT-1002` name = `Notebook Basic 18` )
-        ( product_id = `HT-1003` name = `Notebook Basic 19` )
-        ( product_id = `HT-1007` name = `ITelO Vault` )
-        ( product_id = `HT-1010` name = `Notebook Professional 15` )
-        ( product_id = `HT-1011` name = `Notebook Professional 17` )
-        ( product_id = `HT-1020` name = `ITelO Vault Net` )
-        ( product_id = `HT-1021` name = `ITelO Vault SAT` )
-        ( product_id = `HT-1022` name = `Comfort Easy` )
-        ( product_id = `HT-1023` name = `Comfort Senior` )
-        ( product_id = `HT-1030` name = `Ergo Screen E-I` )
-        ( product_id = `HT-1031` name = `Ergo Screen E-II` )
-        ( product_id = `HT-1032` name = `Ergo Screen E-III` )
-        ( product_id = `HT-1035` name = `Flat Basic` )
-        ( product_id = `HT-1036` name = `Flat Future` ) ).
-      SORT t_products BY name.
+  ENDMETHOD.
 
-      view_display( client ).
 
-    ENDIF.
+  METHOD view_display.
+
+    DATA(view) = z2ui5_cl_api_xml=>factory( VALUE #( ( n = `xmlns` v = `sap.m` )
+                                                     ( n = `xmlns:mvc` v = `sap.ui.core.mvc` )
+                                                     ( n = `xmlns:l` v = `sap.ui.layout` )
+                                                     ( n = `xmlns:core` v = `sap.ui.core` ) ) ).
+
+    " showClearIcon (UI5 1.94) is omitted to stay compatible with UI5 1.71
+    view->open( n = `VerticalLayout` ns = `l`
+                a = VALUE #( ( n = `class` v = `sapUiContentPadding` )
+                             ( n = `width` v = `100%` ) )
+        )->add( n = `Label`
+                a = VALUE #( ( n = `text`     v = `Enter a search term, e.g. “Notebook”, and add matching products as tokens` )
+                             ( n = `width`    v = `100%` )
+                             ( n = `labelFor` v = `multiInput` ) )
+        )->open( n = `MultiInput`
+                 a = VALUE #( ( n = `width`           v = `70%` )
+                              ( n = `id`              v = `multiInput` )
+                              ( n = `suggestionItems` v = client->_bind( t_products ) )
+                              ( n = `placeholder`     v = `Products...` )
+                              ( n = `showValueHelp`   v = `false` ) )
+            )->add( n = `Item` ns = `core`
+                    a = VALUE #( ( n = `key`  v = `{PRODUCT_ID}` )
+                                 ( n = `text` v = `{NAME}` ) )
+        )->close(
+        )->add( n = `Label`
+                a = VALUE #( ( n = `text`     v = `MultiInput with pre-selected tokens` )
+                             ( n = `labelFor` v = `multiInput1` ) )
+        )->add( n = `MultiInput`
+                a = VALUE #( ( n = `id`             v = `multiInput1` )
+                             ( n = `showSuggestion` v = `false` )
+                             ( n = `width`          v = `70%` )
+                             ( n = `showValueHelp`  v = `false` ) )
+        )->add( n = `Label`
+                a = VALUE #( ( n = `text`     v = `MultiInput with single long token` )
+                             ( n = `labelFor` v = `multiInput2` ) )
+        )->add( n = `MultiInput`
+                a = VALUE #( ( n = `id`             v = `multiInput2` )
+                             ( n = `showSuggestion` v = `false` )
+                             ( n = `width`          v = `300px` )
+                             ( n = `showValueHelp`  v = `false` ) ) ).
+
+    client->view_display( view->stringify( ) ).
 
   ENDMETHOD.
 

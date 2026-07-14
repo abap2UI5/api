@@ -4,8 +4,9 @@
 "!   add   - add a child but STAY on the current node (returns the same node)
 "!   close - ASCEND to the parent (returns parent)
 "!   attr  - set one attribute (returns the same node)
-"! Element = n (name), namespace = ns (e.g. `sap.f`), attributes = a (table of
-"! n/v). Namespaces are collected and declared once on the root <mvc:View>.
+"! Element = n (name), namespace prefix = ns (e.g. `f`, `core`, `l`), attributes
+"! = a (table of n/v). The root <mvc:View> and its xmlns declarations are written
+"! by hand: pass them to factory( ) as attributes, exactly like a real UI5 view.
 CLASS z2ui5_cl_api_xml DEFINITION PUBLIC CREATE PRIVATE.
 
   PUBLIC SECTION.
@@ -17,9 +18,12 @@ CLASS z2ui5_cl_api_xml DEFINITION PUBLIC CREATE PRIVATE.
       END OF ty_s_attr.
     TYPES ty_t_attr TYPE STANDARD TABLE OF ty_s_attr WITH DEFAULT KEY.
 
+    "! root <mvc:View>; pass its attributes incl. the xmlns declarations, e.g.
+    "! factory( VALUE #( ( n = `xmlns` v = `sap.m` )
+    "!                   ( n = `xmlns:mvc` v = `sap.ui.core.mvc` ) ) )
     CLASS-METHODS factory
       IMPORTING
-        default_ns    TYPE string DEFAULT `sap.m`
+        a             TYPE ty_t_attr OPTIONAL
       RETURNING
         VALUE(result) TYPE REF TO z2ui5_cl_api_xml.
 
@@ -63,7 +67,6 @@ CLASS z2ui5_cl_api_xml DEFINITION PUBLIC CREATE PRIVATE.
     DATA t_child TYPE ty_t_node.
     DATA parent TYPE REF TO z2ui5_cl_api_xml.
     DATA root   TYPE REF TO z2ui5_cl_api_xml.
-    DATA t_ns   TYPE ty_t_attr.
 
     METHODS elem
       IMPORTING
@@ -72,12 +75,6 @@ CLASS z2ui5_cl_api_xml DEFINITION PUBLIC CREATE PRIVATE.
         a             TYPE ty_t_attr
       RETURNING
         VALUE(result) TYPE REF TO z2ui5_cl_api_xml.
-
-    METHODS reg_ns
-      IMPORTING
-        lib           TYPE string
-      RETURNING
-        VALUE(result) TYPE string.
 
     METHODS render
       RETURNING
@@ -101,8 +98,7 @@ CLASS z2ui5_cl_api_xml IMPLEMENTATION.
     result->root = result.
     result->name = `View`.
     result->prefix = `mvc`.
-    result->t_ns = VALUE #( ( n = `` v = default_ns )
-                           ( n = `mvc` v = `sap.ui.core.mvc` ) ).
+    result->t_attr = a.
 
   ENDMETHOD.
 
@@ -113,10 +109,8 @@ CLASS z2ui5_cl_api_xml IMPLEMENTATION.
     result->root = root.
     result->parent = me.
     result->name = n.
+    result->prefix = ns.
     result->t_attr = a.
-    IF ns IS NOT INITIAL.
-      result->prefix = reg_ns( ns ).
-    ENDIF.
     APPEND result TO t_child.
 
   ENDMETHOD.
@@ -156,42 +150,11 @@ CLASS z2ui5_cl_api_xml IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD reg_ns.
-
-    DATA(map) = VALUE ty_t_attr(
-        ( n = `sap.f`           v = `f` )
-        ( n = `sap.uxap`        v = `uxap` )
-        ( n = `sap.tnt`         v = `tnt` )
-        ( n = `sap.ui.layout`   v = `l` )
-        ( n = `sap.ui.core`     v = `core` )
-        ( n = `sap.ui.table`    v = `table` )
-        ( n = `sap.ui.unified`  v = `u` )
-        ( n = `sap.ui.core.mvc` v = `mvc` ) ).
-
-    result = VALUE #( map[ n = lib ]-v OPTIONAL ).
-    IF result IS INITIAL.
-      SPLIT lib AT `.` INTO TABLE DATA(t_seg).
-      result = t_seg[ lines( t_seg ) ].
-    ENDIF.
-
-    IF NOT line_exists( root->t_ns[ n = result ] ).
-      APPEND VALUE #( n = result v = lib ) TO root->t_ns.
-    ENDIF.
-
-  ENDMETHOD.
-
-
   METHOD render.
 
     DATA(qname) = COND string( WHEN prefix IS INITIAL THEN name ELSE |{ prefix }:{ name }| ).
 
     DATA(attrs) = ``.
-    IF me = root.
-      LOOP AT t_ns INTO DATA(ns).
-        attrs = COND string( WHEN ns-n IS INITIAL THEN |{ attrs } xmlns="{ ns-v }"|
-                             ELSE |{ attrs } xmlns:{ ns-n }="{ ns-v }"| ).
-      ENDLOOP.
-    ENDIF.
     LOOP AT t_attr INTO DATA(at).
       attrs = |{ attrs } { at-n }="{ xml_escape( at-v ) }"|.
     ENDLOOP.

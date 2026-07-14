@@ -10,6 +10,8 @@ CLASS z2ui5_cl_api_app_408 DEFINITION PUBLIC.
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
 
+    METHODS view_display.
+
   PRIVATE SECTION.
 ENDCLASS.
 
@@ -19,23 +21,28 @@ CLASS z2ui5_cl_api_app_408 IMPLEMENTATION.
   METHOD z2ui5_if_app~main.
 
     me->client = client.
-
     IF client->check_on_init( ).
-
-      DATA(view) = z2ui5_cl_xml_view=>factory( ).
-      view->vbox( `sapUiSmallMargin`
-          )->text( `Lorem ipsum dolor st amet, consetetur sadipscing elitr, ` &&
-                   `sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. ` &&
-                   `At vero eos et accusam et justo duo dolores et ea rebum. ` &&
-                   `Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. ` &&
-                   `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, ` &&
-                   `sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. ` &&
-                   `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, ` &&
-                   `sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat` ).
-
-      client->view_display( view->stringify( ) ).
-
+      view_display( ).
     ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD view_display.
+
+    DATA(view) = z2ui5_cl_api_xml=>factory( VALUE #( ( n = `xmlns` v = `sap.m` )
+                                                     ( n = `xmlns:mvc` v = `sap.ui.core.mvc` ) ) ).
+
+    view->open( n = `VBox`
+                a = VALUE #( ( n = `class` v = `sapUiSmallMargin` ) )
+        )->add( n = `Text`
+                a = VALUE #( ( n = `text`
+                               v = `Lorem ipsum dolor st amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. ` &&
+                                   `At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. ` &&
+                                   `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. ` &&
+                                   `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat` ) ) ).
+
+    client->view_display( view->stringify( ) ).
 
   ENDMETHOD.
 
