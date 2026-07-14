@@ -3,9 +3,10 @@
  * Generates the in-system overview app src/z2ui5_cl_api_app_overview.clas.*
  * — an abap2UI5 app that lists every ported sample as one row of a table with
  * columns: Module, Control (-> OpenUI5 API), Sample (-> live OpenUI5 fullscreen
- * sample), JavaScript (-> OpenUI5 repo source), ABAP (-> generated class on
- * GitHub) and abap2UI5 App (class name -> starts the app). Every link opens in a
- * NEW browser tab (target="_blank"; the abap2UI5 App uses the ?app_start= URL).
+ * sample, plus a space-separated ↗ to the OpenUI5 repo source) and abap2UI5 App
+ * (class name -> starts the app, plus a space-separated ↗ to the generated class
+ * on GitHub). Every link opens in a NEW browser tab (target="_blank"; the
+ * abap2UI5 App uses the ?app_start= URL).
  * Depends only on src/ (no OpenUI5 checkout needed).
  *
  * Run:  node scripts/generate-overview.mjs
@@ -68,10 +69,11 @@ const rows = apps.map((a) =>
   ` path = \`${a.file}\`${' '.repeat(wf - a.file.length)} )`);
 
 const abap = `"! Generated overview app - lists every abap2UI5 api sample app in a table.
-"! Each row links the OpenUI5 control API, the live OpenUI5 fullscreen sample
-"! (Sample column), the OpenUI5 sample source, the generated ABAP class and -
-"! via the abap2UI5 app class name - a start link, all opening in a new browser
-"! tab. Do not edit by hand - regenerate with scripts/generate-overview.mjs
+"! The Sample column links the live OpenUI5 fullscreen sample (plus a ↗ to the
+"! OpenUI5 source), the abap2UI5 App column starts the app by its class name
+"! (plus a ↗ to the generated ABAP class) and Control links the OpenUI5 API -
+"! all opening in a new browser tab. Do not edit by hand - regenerate with
+"! scripts/generate-overview.mjs
 CLASS ${CLASS} DEFINITION PUBLIC.
 
   PUBLIC SECTION.
@@ -163,8 +165,6 @@ CLASS ${CLASS} IMPLEMENTATION.
         )->column( )->text( \`Module\` )->get_parent(
         )->column( )->text( \`Control\` )->get_parent(
         )->column( )->text( \`Sample\` )->get_parent(
-        )->column( )->text( \`JavaScript\` )->get_parent(
-        )->column( )->text( \`ABAP\` )->get_parent(
         )->column( )->text( \`abap2UI5 App\` ).
 
     tab->items(
@@ -174,18 +174,23 @@ CLASS ${CLASS} IMPLEMENTATION.
                 )->link( text   = \`{CTRL_NAME}\`
                          href   = \`{API_URL}\`
                          target = \`_blank\`
-                )->link( text   = \`{NAME}\`
-                         href   = \`{UI5_URL}\`
-                         target = \`_blank\`
-                )->link( text   = \`↗\`
-                         href   = \`{JS_URL}\`
-                         target = \`_blank\`
-                )->link( text   = \`↗\`
-                         href   = \`{ABAP_URL}\`
-                         target = \`_blank\`
-                )->link( text   = \`{CLASS}\`
-                         href   = \`{START_URL}\`
-                         target = \`_blank\` ).
+                )->hbox(
+                    )->link( text   = \`{NAME}\`
+                             href   = \`{UI5_URL}\`
+                             target = \`_blank\`
+                    )->text( \` \`
+                    )->link( text   = \`↗\`
+                             href   = \`{JS_URL}\`
+                             target = \`_blank\`
+                    )->get_parent(
+                )->hbox(
+                    )->link( text   = \`{CLASS}\`
+                             href   = \`{START_URL}\`
+                             target = \`_blank\`
+                    )->text( \` \`
+                    )->link( text   = \`↗\`
+                             href   = \`{ABAP_URL}\`
+                             target = \`_blank\` ).
 
     client->view_display( view->stringify( ) ).
 
