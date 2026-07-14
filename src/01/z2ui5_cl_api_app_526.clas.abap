@@ -1,6 +1,10 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.Button - Button
 "! https://sdk.openui5.org/entity/sap.m.Button/sample/sap.m.sample.Button
+"! NOTES (generation):
+"! - IMPROVISED: the original press handler toasts oEvent.getSource().getId()
+"!   - a client-side control id that does not exist server-side. All presses
+"!   collapse to one event that shows a static text instead.
 CLASS z2ui5_cl_api_app_526 DEFINITION PUBLIC.
 
   PUBLIC SECTION.
@@ -17,11 +21,6 @@ ENDCLASS.
 
 
 CLASS z2ui5_cl_api_app_526 IMPLEMENTATION.
-
-  " NOTES (generation):
-  " - IMPROVISED: the original press handler toasts oEvent.getSource().getId()
-  "   - a client-side control id that does not exist server-side. All presses
-  "   collapse to one event that shows a static text instead.
 
   METHOD z2ui5_if_app~main.
 

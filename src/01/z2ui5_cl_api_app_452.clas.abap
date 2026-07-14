@@ -1,6 +1,12 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.MultiComboBox - MultiComboBoxGrouping
 "! https://sdk.openui5.org/entity/sap.m.MultiComboBox/sample/sap.m.sample.MultiComboBoxGrouping
+"! NOTES (generation):
+"! - IMPROVISED: the original binds items with a model sorter (group: true) and a
+"!   groupHeaderFactory, neither of which is expressible in abap2UI5 - so the
+"!   grouped items are rendered statically as core:SeparatorItem headers +
+"!   core:Item entries, built in a LOOP over the ABAP data instead of a bound
+"!   aggregation.
 CLASS z2ui5_cl_api_app_452 DEFINITION PUBLIC.
 
   PUBLIC SECTION.
@@ -27,13 +33,6 @@ ENDCLASS.
 
 
 CLASS z2ui5_cl_api_app_452 IMPLEMENTATION.
-
-  " NOTES (generation):
-  " - IMPROVISED: the original binds items with a model sorter (group: true) and a
-  "   groupHeaderFactory, neither of which is expressible in abap2UI5 - so the
-  "   grouped items are rendered statically as core:SeparatorItem headers +
-  "   core:Item entries, built in a LOOP over the ABAP data instead of a bound
-  "   aggregation.
 
   METHOD z2ui5_if_app~main.
 

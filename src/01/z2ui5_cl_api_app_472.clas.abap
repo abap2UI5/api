@@ -1,6 +1,11 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.RangeSlider - RangeSlider
 "! https://sdk.openui5.org/entity/sap.m.RangeSlider/sample/sap.m.sample.RangeSlider
+"! NOTES (generation):
+"! - IMPROVISED: the sample binds the composite RangeSlider "range" property
+"!   (an array [low, high] - range="{/RS1}" / range="0,100"). abap2UI5 binds
+"!   scalar ABAP fields, so each range is expressed as the equivalent value /
+"!   value2 properties the control keeps in sync - identical rendering.
 CLASS z2ui5_cl_api_app_472 DEFINITION PUBLIC.
 
   PUBLIC SECTION.
@@ -28,12 +33,6 @@ ENDCLASS.
 
 
 CLASS z2ui5_cl_api_app_472 IMPLEMENTATION.
-
-  " NOTES (generation):
-  " - IMPROVISED: the sample binds the composite RangeSlider "range" property
-  "   (an array [low, high] - range="{/RS1}" / range="0,100"). abap2UI5 binds
-  "   scalar ABAP fields, so each range is expressed as the equivalent value /
-  "   value2 properties the control keeps in sync - identical rendering.
 
   METHOD data_init.
 

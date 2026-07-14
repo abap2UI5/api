@@ -1,6 +1,10 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.Input - InputValueState
 "! https://sdk.openui5.org/entity/sap.m.Input/sample/sap.m.sample.InputValueState
+"! NOTES (generation):
+"! - 1.71: Input property showClearIcon (since UI5 1.94) dropped from three inputs.
+"! - 1.71: the two formattedValueStateText aggregations (a FormattedText carrying
+"!   Links, since UI5 1.78) omitted; valueState/valueStateText still render the state.
 CLASS z2ui5_cl_api_app_439 DEFINITION PUBLIC.
 
   PUBLIC SECTION.
@@ -16,11 +20,6 @@ ENDCLASS.
 
 
 CLASS z2ui5_cl_api_app_439 IMPLEMENTATION.
-
-  " NOTES (generation):
-  " - 1.71: Input property showClearIcon (since UI5 1.94) dropped from three inputs.
-  " - 1.71: the two formattedValueStateText aggregations (a FormattedText carrying
-  "   Links, since UI5 1.78) omitted; valueState/valueStateText still render the state.
 
   METHOD view_display.
 

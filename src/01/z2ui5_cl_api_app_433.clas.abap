@@ -1,6 +1,10 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.IconTabBar - IconTabBarStretchContent
 "! https://sdk.openui5.org/entity/sap.m.IconTabBar/sample/sap.m.sample.IconTabBarStretchContent
+"! NOTES (generation):
+"! - IMPROVISED: the IconTabBar property expanded="{device>/isNoPhone}" is
+"!   dropped - abap2UI5 has no device model, so the phone/non-phone binding
+"!   cannot be expressed. The tab bar stays expanded.
 CLASS z2ui5_cl_api_app_433 DEFINITION PUBLIC.
 
   PUBLIC SECTION.
@@ -24,11 +28,6 @@ ENDCLASS.
 
 
 CLASS z2ui5_cl_api_app_433 IMPLEMENTATION.
-
-  " NOTES (generation):
-  " - IMPROVISED: the IconTabBar property expanded="{device>/isNoPhone}" is
-  "   dropped - abap2UI5 has no device model, so the phone/non-phone binding
-  "   cannot be expressed. The tab bar stays expanded.
 
   METHOD data_init.
 

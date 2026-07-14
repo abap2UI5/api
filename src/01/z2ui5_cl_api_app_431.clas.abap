@@ -1,6 +1,15 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.GenericTile - GenericTileAsKPITile
 "! https://sdk.openui5.org/entity/sap.m.GenericTile/sample/sap.m.sample.GenericTileAsKPITile
+"! NOTES (generation):
+"! - 1.71: frameType OneByHalf / TwoByHalf dropped on several tiles - both enum
+"!   values were added in UI5 1.83; OneByOne / TwoByOne (1.71) are kept.
+"! - 1.71: systemInfo and appShortcut dropped - both added in UI5 1.92.
+"! - 1.71: url dropped on the link tiles - added in UI5 1.76.
+"! - IMPROVISED: the custom CSS class tileLayout is dropped from the class
+"!   attribute - the sample's style.css (float: left) cannot be injected here.
+"! - IMPROVISED: the relative test-resources image and backgroundImage paths are
+"!   resolved to absolute sdk.openui5.org URLs so the tile images load standalone.
 CLASS z2ui5_cl_api_app_431 DEFINITION PUBLIC.
 
   PUBLIC SECTION.
@@ -17,16 +26,6 @@ ENDCLASS.
 
 
 CLASS z2ui5_cl_api_app_431 IMPLEMENTATION.
-
-  " NOTES (generation):
-  " - 1.71: frameType OneByHalf / TwoByHalf dropped on several tiles - both enum
-  "   values were added in UI5 1.83; OneByOne / TwoByOne (1.71) are kept.
-  " - 1.71: systemInfo and appShortcut dropped - both added in UI5 1.92.
-  " - 1.71: url dropped on the link tiles - added in UI5 1.76.
-  " - IMPROVISED: the custom CSS class tileLayout is dropped from the class
-  "   attribute - the sample's style.css (float: left) cannot be injected here.
-  " - IMPROVISED: the relative test-resources image and backgroundImage paths are
-  "   resolved to absolute sdk.openui5.org URLs so the tile images load standalone.
 
   METHOD z2ui5_if_app~main.
 

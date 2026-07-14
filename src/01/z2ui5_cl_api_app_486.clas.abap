@@ -1,6 +1,11 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.Toolbar - ToolbarShrinkable
 "! https://sdk.openui5.org/entity/sap.m.Toolbar/sample/sap.m.sample.ToolbarShrinkable
+"! NOTES (generation):
+"! - IMPROVISED: the sample's controller onSliderLiveChange resizes the toolbars
+"!   in JS; there is no width in the source XML. Rebuilt as a bound width on each
+"!   Toolbar fed by the SLIDER_CHANGE liveChange event - this width binding is an
+"!   addition not present in Toolbar.view.xml.
 CLASS z2ui5_cl_api_app_486 DEFINITION PUBLIC.
 
   PUBLIC SECTION.
@@ -20,12 +25,6 @@ ENDCLASS.
 
 
 CLASS z2ui5_cl_api_app_486 IMPLEMENTATION.
-
-  " NOTES (generation):
-  " - IMPROVISED: the sample's controller onSliderLiveChange resizes the toolbars
-  "   in JS; there is no width in the source XML. Rebuilt as a bound width on each
-  "   Toolbar fed by the SLIDER_CHANGE liveChange event - this width binding is an
-  "   addition not present in Toolbar.view.xml.
 
   METHOD z2ui5_if_app~main.
 

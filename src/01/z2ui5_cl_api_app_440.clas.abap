@@ -1,6 +1,11 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.Link - LinkEmphasized
 "! https://sdk.openui5.org/entity/sap.m.Link/sample/sap.m.sample.LinkEmphasized
+"! NOTES (generation):
+"! - IMPROVISED: the last column's original number binding is a
+"!   sap.ui.model.type.Currency formatter (parts Price/CurrencyCode,
+"!   formatOptions showMeasure:false); it is replaced by a plain ObjectNumber
+"!   with a preformatted price text (number={PRICE} unit={CURRENCY_CODE}).
 CLASS z2ui5_cl_api_app_440 DEFINITION PUBLIC.
 
   PUBLIC SECTION.
@@ -34,12 +39,6 @@ ENDCLASS.
 
 
 CLASS z2ui5_cl_api_app_440 IMPLEMENTATION.
-
-  " NOTES (generation):
-  " - IMPROVISED: the last column's original number binding is a
-  "   sap.ui.model.type.Currency formatter (parts Price/CurrencyCode,
-  "   formatOptions showMeasure:false); it is replaced by a plain ObjectNumber
-  "   with a preformatted price text (number={PRICE} unit={CURRENCY_CODE}).
 
   METHOD data_init.
 

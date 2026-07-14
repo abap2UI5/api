@@ -1,6 +1,12 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.FlexBox - FlexBoxNested
 "! https://sdk.openui5.org/entity/sap.m.FlexBox/sample/sap.m.sample.FlexBoxNested
+"! NOTES (generation):
+"! - IMPROVISED: the original sample colours .item1..item6 and the h2 headings
+"!   via a separate style.css; the previous port injected it through an
+"!   html:style block. z2ui5_cl_api_xml has no raw-text/CDATA node, so that CSS
+"!   cannot be emitted - the styleClass attributes are ported 1:1 but the flex
+"!   items render without their background colours. Dropped.
 CLASS z2ui5_cl_api_app_404 DEFINITION PUBLIC.
 
   PUBLIC SECTION.
@@ -16,13 +22,6 @@ ENDCLASS.
 
 
 CLASS z2ui5_cl_api_app_404 IMPLEMENTATION.
-
-  " NOTES (generation):
-  " - IMPROVISED: the original sample colours .item1..item6 and the h2 headings
-  "   via a separate style.css; the previous port injected it through an
-  "   html:style block. z2ui5_cl_api_xml has no raw-text/CDATA node, so that CSS
-  "   cannot be emitted - the styleClass attributes are ported 1:1 but the flex
-  "   items render without their background colours. Dropped.
 
   METHOD z2ui5_if_app~main.
 

@@ -1,6 +1,12 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.Panel - PanelExpanded
 "! https://sdk.openui5.org/entity/sap.m.Panel/sample/sap.m.sample.PanelExpanded
+"! NOTES (generation):
+"! - IMPROVISED: the original controller toggles the third panel imperatively
+"!   (onOverflowToolbarPress -> oPanel.setExpanded(!oPanel.getExpanded())). It is
+"!   reproduced with a two-way bound `expanded` property plus a TOOLBAR_PRESSED
+"!   event that flips it - the view therefore carries an `expanded` binding and a
+"!   `press` the original view.xml does not have.
 CLASS z2ui5_cl_api_app_471 DEFINITION PUBLIC.
 
   PUBLIC SECTION.
@@ -19,13 +25,6 @@ ENDCLASS.
 
 
 CLASS z2ui5_cl_api_app_471 IMPLEMENTATION.
-
-  " NOTES (generation):
-  " - IMPROVISED: the original controller toggles the third panel imperatively
-  "   (onOverflowToolbarPress -> oPanel.setExpanded(!oPanel.getExpanded())). It is
-  "   reproduced with a two-way bound `expanded` property plus a TOOLBAR_PRESSED
-  "   event that flips it - the view therefore carries an `expanded` binding and a
-  "   `press` the original view.xml does not have.
 
   METHOD view_display.
 

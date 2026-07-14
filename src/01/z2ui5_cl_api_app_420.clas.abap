@@ -1,6 +1,10 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.Carousel - CarouselWithControls
 "! https://sdk.openui5.org/entity/sap.m.Carousel/sample/sap.m.sample.CarouselWithControls
+"! NOTES (generation):
+"! - IMPROVISED: the three carousel images bind to a separate named model in the
+"!   original (img>/products/pic1..3 from sap/ui/demo/mock/img.json); resolved
+"!   here to static image URLs, as abap2UI5 serves a single default model.
 CLASS z2ui5_cl_api_app_420 DEFINITION PUBLIC.
 
   PUBLIC SECTION.
@@ -27,11 +31,6 @@ ENDCLASS.
 
 
 CLASS z2ui5_cl_api_app_420 IMPLEMENTATION.
-
-  " NOTES (generation):
-  " - IMPROVISED: the three carousel images bind to a separate named model in the
-  "   original (img>/products/pic1..3 from sap/ui/demo/mock/img.json); resolved
-  "   here to static image URLs, as abap2UI5 serves a single default model.
 
   METHOD data_init.
 

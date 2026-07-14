@@ -306,10 +306,22 @@ leave it as an ❌ gap. Never silently substitute a different control.
 
 When the port is **not** a clean 1:1 — you improvised, dropped/downgraded
 something for 1.71, replaced a controller-only behaviour, or relied on a
-binding/event form you could not verify — record it as a `" NOTES (generation):`
-comment block at the **top of the class `IMPLEMENTATION`** (right after
-`CLASS … IMPLEMENTATION.`, before the first method), one bullet per caveat,
-tagged so a reviewer can scan them:
+binding/event form you could not verify — record it in the **header ABAP Doc**,
+as extra `"! ` lines appended **right after the three fixed header lines** (the
+`GENERATED …` / `<entity> - <SampleName>` / url lines) and before
+`CLASS … DEFINITION`:
+
+```abap
+"! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
+"! <entity> - <SampleName>
+"! <demo kit url>
+"! NOTES (generation):
+"! - IMPROVISED: …
+"! - 1.71: …
+CLASS z2ui5_cl_api_app_<n> DEFINITION PUBLIC.
+```
+
+One bullet per caveat, tagged so a reviewer can scan them:
 
 - `LIVE-TEST:` needs checking in a running system — an unverified binding/event
   path, or uncertain rendering (e.g. app 530's `${$source>/text}` event arg).
