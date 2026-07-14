@@ -22,6 +22,18 @@ const SRC = path.join(ROOT, 'src');
 const OPENUI5_DIR = process.env.OPENUI5_DIR || path.join(ROOT, 'openui5');
 const OUT = path.join(ROOT, 'COVERAGE.md');
 
+// link targets (overridable via env)
+const REPO = process.env.REPO || 'abap2UI5/api';           // this repo, owner/name
+const UI5_BRANCH = process.env.UI5_BRANCH || 'ui5';        // branch holding the JS templates
+const OPENUI5_REPO = process.env.OPENUI5_REPO || 'SAP/openui5';
+const OPENUI5_BRANCH = process.env.OPENUI5_BRANCH || 'master';
+// upstream demo kit source folder for a (lib, name)
+const ui5SourceUrl = (lib, name) =>
+  `https://github.com/${OPENUI5_REPO}/tree/${OPENUI5_BRANCH}/src/${lib}/test/${lib.replace(/\./g, '/')}/demokit/sample/${name}`;
+// collected JS template folder on the ui5 branch (only exists for ported samples)
+const templateUrl = (lib, cls) =>
+  `https://github.com/${REPO}/tree/${UI5_BRANCH}/src/${lib}/${cls}`;
+
 function walk(dir, out = []) {
   for (const name of fs.readdirSync(dir)) {
     const full = path.join(dir, name);
@@ -31,8 +43,8 @@ function walk(dir, out = []) {
   return out;
 }
 
-// --- 1. ported set: (lib, name) -> abap2UI5 class -------------------------
-const ported = new Map(); // key `${lib}\t${name}` -> class
+// --- 1. ported set: (lib, name) -> { cls, file } --------------------------
+const ported = new Map(); // key `${lib}\t${name}` -> { cls, file }
 for (const f of walk(SRC)) {
   if (!f.endsWith('.clas.abap')) continue;
   const cls = path.basename(f, '.clas.abap');
@@ -44,7 +56,7 @@ for (const f of walk(SRC)) {
   if (i === -1) continue;
   const lib = id.slice(0, i);
   const name = id.slice(i + '.sample.'.length);
-  ported.set(`${lib}\t${name}`, cls);
+  ported.set(`${lib}\t${name}`, { cls, file: path.relative(ROOT, f) });
 }
 
 // --- 2. universe: all demo kit samples in the OpenUI5 checkout -------------
@@ -60,7 +72,7 @@ for (const lib of fs.readdirSync(path.join(OPENUI5_DIR, 'src')).sort()) {
   const samples = fs.readdirSync(sampleDir)
     .filter((n) => fs.statSync(path.join(sampleDir, n)).isDirectory())
     .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
-    .map((name) => ({ name, cls: ported.get(`${lib}\t${name}`) || null }));
+    .map((name) => ({ name, port: ported.get(`${lib}\t${name}`) || null }));
   if (samples.length) libs.push({ lib, samples });
 }
 
@@ -87,7 +99,7 @@ out.push('');
 // summary — sort by coverage desc, then library name
 const summary = libs
   .map((l) => {
-    const p = l.samples.filter((s) => s.cls).length;
+    const p = l.samples.filter((s) => s.port).length;
     return { lib: l.lib, total: l.samples.length, ported: p };
   })
   .sort((a, b) => (b.ported / b.total) - (a.ported / a.total) || a.lib.localeCompare(b.lib));
@@ -107,15 +119,24 @@ out.push('');
 // detail per library — libraries in the same coverage-desc order
 out.push('## Samples per module');
 out.push('');
+out.push('The **Sample** name links to the collected UI5 template folder (`ui5`');
+out.push('branch), **UI5 source** to the original demo kit sample in OpenUI5, and');
+out.push('**abap2UI5 class** to the generated ABAP class.');
+out.push('');
 for (const { lib } of summary) {
   const entry = libs.find((l) => l.lib === lib);
-  const p = entry.samples.filter((s) => s.cls).length;
+  const p = entry.samples.filter((s) => s.port).length;
   out.push(`### \`${lib}\` — ${p}/${entry.samples.length} (${pct(p, entry.samples.length)})`);
   out.push('');
-  out.push('| | Sample | abap2UI5 class |');
-  out.push('|---|--------|----------------|');
+  out.push('| | Sample | UI5 source | abap2UI5 class |');
+  out.push('|---|--------|------------|----------------|');
   for (const s of entry.samples) {
-    out.push(`| ${s.cls ? '✅' : '❌'} | \`${s.name}\` | ${s.cls ? `\`${s.cls}\`` : '—'} |`);
+    const sample = s.port
+      ? `[\`${s.name}\`](${templateUrl(lib, s.port.cls)})`
+      : `\`${s.name}\``;
+    const source = `[source](${ui5SourceUrl(lib, s.name)})`;
+    const cls = s.port ? `[\`${s.port.cls}\`](${s.port.file})` : '—';
+    out.push(`| ${s.port ? '✅' : '❌'} | ${sample} | ${source} | ${cls} |`);
   }
   out.push('');
 }
