@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.ui.core.ContainerPadding/sample/sap.m.sample.ContainerPaddingAndMargin
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.ui.core.ContainerPadding/sample/sap.m.sample.ContainerPaddingAndMargin
 "! By combining the margin and padding concepts you can flexibly design your application layout
 "! without having to write any custom CSS. This example shows a HorizontalLayout that is layouted
 "! with the standard margin and padding classes provided by UI5.
@@ -27,7 +27,7 @@ CLASS z2ui5_cl_api_app_489 IMPLEMENTATION.
       `with the standard margin and padding classes provided by UI5.`.
 
     " the original binds the images against the demo kit mock model - here the mock image URL is used directly
-    DATA(image_url) = `https://sapui5.hana.ondemand.com/test-resources/sap/ui/documentation/sdk/images/HT-7777-large.jpg`.
+    DATA(image_url) = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-7777-large.jpg`.
 
     DATA(page) = z2ui5_cl_xml_view=>factory( ).
 

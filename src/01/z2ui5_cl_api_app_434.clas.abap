@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.Image/sample/sap.m.sample.ImageModeBackground
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.Image/sample/sap.m.sample.ImageModeBackground
 "! Visualizes the state of the control when the mode property is set to ImageMode.Background.
 CLASS z2ui5_cl_api_app_434 DEFINITION PUBLIC.
 
@@ -19,8 +19,8 @@ CLASS z2ui5_cl_api_app_434 IMPLEMENTATION.
 
   METHOD view_display.
 
-    DATA(pic1) = `https://sapui5.hana.ondemand.com/test-resources/sap/ui/documentation/sdk/images/HT-7777-large.jpg`.
-    DATA(pic3) = `https://sapui5.hana.ondemand.com/test-resources/sap/ui/documentation/sdk/images/HT-6100-large.jpg`.
+    DATA(pic1) = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-7777-large.jpg`.
+    DATA(pic3) = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-6100-large.jpg`.
 
     DATA(page) = z2ui5_cl_xml_view=>factory( ).
 

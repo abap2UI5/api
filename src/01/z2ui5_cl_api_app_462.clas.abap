@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.ObjectHeader/sample/sap.m.sample.ObjectHeaderImage
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.ObjectHeader/sample/sap.m.sample.ObjectHeaderImage
 "! An Object Header will also make space for an image if one is specified, via a URL for the 'icon'
 "! property. Note: This example shows the image inside ObjectHeader with the responsive property set
 "! to false. On phone in portrait mode, the image remains visible.
@@ -23,7 +23,7 @@ CLASS z2ui5_cl_api_app_462 IMPLEMENTATION.
 
     DATA(view) = z2ui5_cl_xml_view=>factory( ).
     DATA(header) = view->object_header(
-        icon             = `https://sapui5.hana.ondemand.com/test-resources/sap/ui/documentation/sdk/images/HT-1010.jpg`
+        icon             = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1010.jpg`
         icondensityaware = abap_false
         iconalt          = `Notebook Professional 15`
         title            = `Notebook Professional 15`

@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.ObjectHeader/sample/sap.m.sample.ObjectHeaderMarkers
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.ObjectHeader/sample/sap.m.sample.ObjectHeaderMarkers
 "! This sample shows the different states of an Object Header, which can be set using the markers.
 CLASS z2ui5_cl_api_app_463 DEFINITION PUBLIC.
 

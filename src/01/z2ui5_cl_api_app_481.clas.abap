@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.StepInput/sample/sap.m.sample.StepInput
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.StepInput/sample/sap.m.sample.StepInput
 "! The StepInput allows the user to change stepwise a value by a predefined step and also to set
 "! additional description, such as units of measurement and currencies after the input field.
 CLASS z2ui5_cl_api_app_481 DEFINITION PUBLIC.

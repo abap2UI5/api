@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.ObjectAttribute/sample/sap.m.sample.ObjectHeaderResponsiveI
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.ObjectAttribute/sample/sap.m.sample.ObjectHeaderResponsiveI
 "! This is a responsive Object Header with a Title, 2 Statuses/Attributes rendered next to the title
 "! in a fullScreenOptimized mode (fullScreenOptimized = true).
 CLASS z2ui5_cl_api_app_459 DEFINITION PUBLIC.
@@ -66,7 +66,7 @@ CLASS z2ui5_cl_api_app_459 IMPLEMENTATION.
         )->vertical_layout(
             class = `sapUiContentPadding`
             width = `100%`
-            )->image( src = `https://sapui5.hana.ondemand.com/test-resources/sap/ui/documentation/sdk/images/HT-1000.jpg`
+            )->image( src = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1000.jpg`
             )->text( `30 x 18 x 3 cm` ).
 
     items->icon_tab_filter(

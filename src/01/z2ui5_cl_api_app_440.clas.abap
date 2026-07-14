@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.Link/sample/sap.m.sample.LinkEmphasized
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.Link/sample/sap.m.sample.LinkEmphasized
 "! Usually you use an Object Identifier in the first column of a table. But if you need an active
 "! identifier you should use an 'emphasized' link instead.
 CLASS z2ui5_cl_api_app_440 DEFINITION PUBLIC.
@@ -100,7 +100,7 @@ CLASS z2ui5_cl_api_app_440 IMPLEMENTATION.
             weight_unit    = `KG`
             price          = `956.00`
             currency_code  = `EUR`
-            pic_url        = `https://sapui5.hana.ondemand.com/test-resources/sap/ui/documentation/sdk/images/HT-1000.jpg` )
+            pic_url        = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1000.jpg` )
           ( product_id     = `HT-1001`
             name           = `Notebook Basic 17`
             supplier_name  = `Very Best Screens`
@@ -112,7 +112,7 @@ CLASS z2ui5_cl_api_app_440 IMPLEMENTATION.
             weight_unit    = `KG`
             price          = `1249.00`
             currency_code  = `EUR`
-            pic_url        = `https://sapui5.hana.ondemand.com/test-resources/sap/ui/documentation/sdk/images/HT-1001.jpg` )
+            pic_url        = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1001.jpg` )
           ( product_id     = `HT-1003`
             name           = `Notebook Basic 19`
             supplier_name  = `Smartcards`
@@ -124,7 +124,7 @@ CLASS z2ui5_cl_api_app_440 IMPLEMENTATION.
             weight_unit    = `KG`
             price          = `1650.00`
             currency_code  = `EUR`
-            pic_url        = `https://sapui5.hana.ondemand.com/test-resources/sap/ui/documentation/sdk/images/HT-1003.jpg` )
+            pic_url        = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1003.jpg` )
           ( product_id     = `HT-1007`
             name           = `ITelO Vault`
             supplier_name  = `Technocom`
@@ -136,7 +136,7 @@ CLASS z2ui5_cl_api_app_440 IMPLEMENTATION.
             weight_unit    = `KG`
             price          = `299.00`
             currency_code  = `EUR`
-            pic_url        = `https://sapui5.hana.ondemand.com/test-resources/sap/ui/documentation/sdk/images/HT-1007.jpg` )
+            pic_url        = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1007.jpg` )
           ( product_id     = `HT-1010`
             name           = `Notebook Professional 15`
             supplier_name  = `Very Best Screens`
@@ -148,7 +148,7 @@ CLASS z2ui5_cl_api_app_440 IMPLEMENTATION.
             weight_unit    = `KG`
             price          = `1999.00`
             currency_code  = `EUR`
-            pic_url        = `https://sapui5.hana.ondemand.com/test-resources/sap/ui/documentation/sdk/images/HT-1010.jpg` )
+            pic_url        = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1010.jpg` )
           ( product_id     = `HT-1020`
             name           = `ITelO Vault Net`
             supplier_name  = `Technocom`
@@ -160,7 +160,7 @@ CLASS z2ui5_cl_api_app_440 IMPLEMENTATION.
             weight_unit    = `KG`
             price          = `459.00`
             currency_code  = `EUR`
-            pic_url        = `https://sapui5.hana.ondemand.com/test-resources/sap/ui/documentation/sdk/images/HT-1020.jpg` ) ).
+            pic_url        = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1020.jpg` ) ).
 
       " the original view sorts the table items by name via a binding sorter
       SORT t_products BY name ASCENDING.

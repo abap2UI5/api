@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.ComboBox/sample/sap.m.sample.ComboBox
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.ComboBox/sample/sap.m.sample.ComboBox
 "! The combo box control provides a list box with items and a text field allowing the user to either
 "! type a value directly into the control or choose from the list of existing items.
 CLASS z2ui5_cl_api_app_423 DEFINITION PUBLIC.

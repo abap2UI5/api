@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.ui.unified.Currency/sample/sap.ui.unified.sample.Currency
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.ui.unified.Currency/sample/sap.ui.unified.sample.Currency
 "! Display Currencies with proper Alignment
 CLASS z2ui5_cl_api_app_526 DEFINITION PUBLIC.
 

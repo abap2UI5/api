@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.ui.core.StandardMargins/sample/sap.m.sample.StandardMarginsEnforceWidthAuto
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.ui.core.StandardMargins/sample/sap.m.sample.StandardMarginsEnforceWidthAuto
 "! Some controls (for example the IconTabBar) do not have a 'width' property but still have a default
 "! width of 100%. We provide css class 'sapUiForceWidthAuto' to overwrite the control's width in such
 "! a case.

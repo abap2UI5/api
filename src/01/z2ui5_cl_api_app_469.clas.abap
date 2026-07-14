@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.PDFViewer/sample/sap.m.sample.PDFViewerPopup
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.PDFViewer/sample/sap.m.sample.PDFViewerPopup
 "! A PDF viewer opening as a popup dialog.
 CLASS z2ui5_cl_api_app_469 DEFINITION PUBLIC.
 
@@ -28,7 +28,7 @@ CLASS z2ui5_cl_api_app_469 IMPLEMENTATION.
   METHOD view_display.
 
     " images and PDF files of the original sample sap/m/demokit/sample/PDFViewerPopup
-    DATA(base_url) = `https://sapui5.hana.ondemand.com/test-resources/sap/m/demokit/sample/PDFViewerPopup/`.
+    DATA(base_url) = `https://sdk.openui5.org/test-resources/sap/m/demokit/sample/PDFViewerPopup/`.
 
     DATA(view) = z2ui5_cl_xml_view=>factory( ).
     view->carousel(
@@ -54,7 +54,7 @@ CLASS z2ui5_cl_api_app_469 IMPLEMENTATION.
 
     IF client->check_on_event( `SHOW_PDF` ).
 
-      pdf_source = `https://sapui5.hana.ondemand.com/test-resources/sap/m/demokit/sample/PDFViewerPopup/` && client->get_event_arg( 1 ).
+      pdf_source = `https://sdk.openui5.org/test-resources/sap/m/demokit/sample/PDFViewerPopup/` && client->get_event_arg( 1 ).
 
       popup_display( ).
 

@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.ObjectHeader/sample/sap.m.sample.ObjectHeaderResponsiveV
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.ObjectHeader/sample/sap.m.sample.ObjectHeaderResponsiveV
 "! This is a responsive Object Header without a number and with a Title, 3 Statuses/Attributes.
 CLASS z2ui5_cl_api_app_465 DEFINITION PUBLIC.
 
@@ -23,7 +23,7 @@ CLASS z2ui5_cl_api_app_465 IMPLEMENTATION.
     " data of /ProductCollection/0 of the mock model sap/ui/demo/mock/products.json used by the original sample
     DATA(header) = view->object_header(
         responsive       = abap_true
-        icon             = `https://sapui5.hana.ondemand.com/test-resources/sap/ui/documentation/sdk/images/HT-6100.jpg`
+        icon             = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-6100.jpg`
         iconalt          = `Power Projector 4713`
         intro            = `A very powerful projector with special features for Internet usability, USB`
         title            = `Power Projector 4713`

@@ -65,7 +65,7 @@ CLASS z2ui5_cl_api_app_overview IMPLEMENTATION.
                                ELSE `sapUiTinyMarginBegin` ).
       prev_control = app-control.
 
-      DATA(url) = |https://sapui5.hana.ondemand.com/sdk/#/entity/{ app-control }/sample/{ app-lib }.sample.{ app-name }|.
+      DATA(url) = |https://sdk.openui5.org/entity/{ app-control }/sample/{ app-lib }.sample.{ app-name }|.
       page->hbox( alignitems = `Center`
                   class      = css
           )->text(

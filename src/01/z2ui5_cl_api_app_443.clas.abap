@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.List/sample/sap.m.sample.ListGrowing
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.List/sample/sap.m.sample.ListGrowing
 "! The Growing feature helps if your content is too big to be loaded/shown at once. It paginates the
 "! content into smaller chunks - aka pages - which are loaded/shown one after another. Random access
 "! to pages (e.g jumping to the end) is not possible. Depending on the model the content is loaded
@@ -55,7 +55,7 @@ CLASS z2ui5_cl_api_app_443 IMPLEMENTATION.
 
     IF client->check_on_init( ).
 
-      DATA(pic_url) = `https://sapui5.hana.ondemand.com/test-resources/sap/ui/documentation/sdk/images/`.
+      DATA(pic_url) = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/`.
       t_products = VALUE #(
         ( name = `Notebook Basic 15`        product_id = `HT-1000` pic = pic_url && `HT-1000.jpg` )
         ( name = `Notebook Basic 17`        product_id = `HT-1001` pic = pic_url && `HT-1001.jpg` )

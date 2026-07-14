@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.CustomTreeItem/sample/sap.m.sample.CustomTreeItem
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.CustomTreeItem/sample/sap.m.sample.CustomTreeItem
 "! With the Custom Tree Item you can add any kind of content to Tree.
 CLASS z2ui5_cl_api_app_429 DEFINITION PUBLIC.
 

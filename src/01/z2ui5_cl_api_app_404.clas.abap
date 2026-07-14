@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.FlexBox/sample/sap.m.sample.FlexBoxNested
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.FlexBox/sample/sap.m.sample.FlexBoxNested
 "! Flex Boxes can be nested. Remember also that HBox and VBox are 'convenience' controls based on the
 "! Flex Box control.
 CLASS z2ui5_cl_api_app_404 DEFINITION PUBLIC.

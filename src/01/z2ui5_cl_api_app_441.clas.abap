@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.List/sample/sap.m.sample.ListCounter
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.List/sample/sap.m.sample.ListCounter
 "! The counter of an item quickly shows how many detail entries are related, without having to
 "! navigate to the detail page.
 CLASS z2ui5_cl_api_app_441 DEFINITION PUBLIC.

@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.StandardListItem/sample/sap.m.sample.StandardListItemDescription
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.StandardListItem/sample/sap.m.sample.StandardListItemDescription
 "! This list item offers a standardized user interface for list content with title and description.
 CLASS z2ui5_cl_api_app_478 DEFINITION PUBLIC.
 

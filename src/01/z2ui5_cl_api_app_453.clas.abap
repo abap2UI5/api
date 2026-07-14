@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.MultiComboBox/sample/sap.m.sample.MultiComboBoxTwoColumnsLayout
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.MultiComboBox/sample/sap.m.sample.MultiComboBoxTwoColumnsLayout
 "! Use the dropdown list with two columns layout if you need to display additional information to
 "! your options, like e.g. currencies to countries or abbreviations to systems.
 CLASS z2ui5_cl_api_app_453 DEFINITION PUBLIC.

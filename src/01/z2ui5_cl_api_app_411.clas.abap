@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.GenericTag/sample/sap.uxap.sample.ObjectPageHeaderActionButtons
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.GenericTag/sample/sap.uxap.sample.ObjectPageHeaderActionButtons
 "! This example demonstrates ObjectPage with ObjectPageHeaderActionButtons and a GenericTag in the
 "! header.
 CLASS z2ui5_cl_api_app_411 DEFINITION PUBLIC.

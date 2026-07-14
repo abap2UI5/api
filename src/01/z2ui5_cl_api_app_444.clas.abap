@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.List/sample/sap.m.sample.ListNavType
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.List/sample/sap.m.sample.ListNavType
 "! If only a subset of the list items are navigable you should indicate those by setting their 'type'
 "! to 'Navigation'. This displays an navigation arrow. Do not show arrows if all items are navigable.
 "! This achieved by setting the 'type' to 'Active'.
@@ -21,7 +21,7 @@ CLASS z2ui5_cl_api_app_444 IMPLEMENTATION.
 
   METHOD view_display.
 
-    DATA(pic_url) = `https://sapui5.hana.ondemand.com/test-resources/sap/ui/documentation/sdk/images/`.
+    DATA(pic_url) = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/`.
 
     DATA(page) = z2ui5_cl_xml_view=>factory( ).
 

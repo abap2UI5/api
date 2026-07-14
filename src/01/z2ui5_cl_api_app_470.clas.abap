@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.Page/sample/sap.m.sample.PageStandardClasses
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.Page/sample/sap.m.sample.PageStandardClasses
 "! This page implements the same sample as in 'Fiori Sample Page - sapUiFioriObjectPage' using
 "! standard margin classes. In contrast to using 'sapUiFioriObjectPage', the margins used for form,
 "! list, table and panel are responsive: they adapt to the available screen width. For more

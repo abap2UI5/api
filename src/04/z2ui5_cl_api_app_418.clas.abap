@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.f.GridList/sample/sap.f.sample.GridListBoxContainerGrouping
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.f.GridList/sample/sap.f.sample.GridListBoxContainerGrouping
 "! This sample illustrates subgroups with headers, custom header and lazy loading of GridList items.
 CLASS z2ui5_cl_api_app_418 DEFINITION PUBLIC.
 

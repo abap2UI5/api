@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.GenericTile/sample/sap.m.sample.GenericTileAsKPITile
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.GenericTile/sample/sap.m.sample.GenericTileAsKPITile
 "! Shows KPI Tile samples that can contain header, subheader, key value, trend, scale, unit, and a
 "! footer.
 CLASS z2ui5_cl_api_app_431 DEFINITION PUBLIC.
@@ -82,7 +82,7 @@ CLASS z2ui5_cl_api_app_431 IMPLEMENTATION.
         subheader = `Subtitle`
         press     = client->_event( `PRESS` )
         )->tile_content(
-            )->image_content( src = `https://sapui5.hana.ondemand.com/test-resources/sap/m/demokit/sample/GenericTileAsLaunchTile/images/SAPLogoLargeTile_28px_height.png` ).
+            )->image_content( src = `https://sdk.openui5.org/test-resources/sap/m/demokit/sample/GenericTileAsLaunchTile/images/SAPLogoLargeTile_28px_height.png` ).
 
     page->generic_tile(
         class     = `sapUiTinyMarginBegin sapUiTinyMarginTop`
@@ -100,11 +100,11 @@ CLASS z2ui5_cl_api_app_431 IMPLEMENTATION.
         subheader = `Department`
         press     = client->_event( `PRESS` )
         )->tile_content(
-            )->image_content( src = `https://sapui5.hana.ondemand.com/test-resources/sap/m/demokit/sample/GenericTileAsLaunchTile/images/ProfileImage_LargeGenTile.png` ).
+            )->image_content( src = `https://sdk.openui5.org/test-resources/sap/m/demokit/sample/GenericTileAsLaunchTile/images/ProfileImage_LargeGenTile.png` ).
 
     page->generic_tile(
         class           = `sapUiTinyMarginBegin sapUiTinyMarginTop`
-        backgroundimage = `https://sapui5.hana.ondemand.com/test-resources/sap/m/images/NewsImage1.png`
+        backgroundimage = `https://sdk.openui5.org/test-resources/sap/m/images/NewsImage1.png`
         frametype       = `OneByOne`
         press           = client->_event( `PRESS` )
         )->tile_content(
@@ -116,7 +116,7 @@ CLASS z2ui5_cl_api_app_431 IMPLEMENTATION.
 
     page->generic_tile(
         class           = `sapUiTinyMarginBegin sapUiTinyMarginTop`
-        backgroundimage = `https://sapui5.hana.ondemand.com/test-resources/sap/m/demokit/sample/SlideTile/images/NewsImage1.png`
+        backgroundimage = `https://sdk.openui5.org/test-resources/sap/m/demokit/sample/SlideTile/images/NewsImage1.png`
         frametype       = `TwoByOne`
         press           = client->_event( `PRESS` )
         )->tile_content( footer = `August 21, 2016`
@@ -144,7 +144,7 @@ CLASS z2ui5_cl_api_app_431 IMPLEMENTATION.
                            transitiontime = `250`
                            displaytime    = `2500` ).
     slide_tile->generic_tile(
-        backgroundimage = `https://sapui5.hana.ondemand.com/test-resources/sap/m/demokit/sample/SlideTile/images/NewsImage1.png`
+        backgroundimage = `https://sdk.openui5.org/test-resources/sap/m/demokit/sample/SlideTile/images/NewsImage1.png`
         frametype       = `TwoByOne`
         press           = client->_event( `PRESS` )
         )->tile_content( footer = `August 21, 2016`
@@ -152,7 +152,7 @@ CLASS z2ui5_cl_api_app_431 IMPLEMENTATION.
                 contenttext = `Wind Map: Monitoring Real-Time and Forecasted Wind Conditions across the Globe`
                 subheader   = `Today, SAP News` ).
     slide_tile->generic_tile(
-        backgroundimage = `https://sapui5.hana.ondemand.com/test-resources/sap/m/demokit/sample/SlideTile/images/NewsImage2.png`
+        backgroundimage = `https://sdk.openui5.org/test-resources/sap/m/demokit/sample/SlideTile/images/NewsImage2.png`
         frametype       = `TwoByOne`
         state           = `Failed`
         )->tile_content( footer = `August 21, 2016`
@@ -204,7 +204,7 @@ CLASS z2ui5_cl_api_app_431 IMPLEMENTATION.
         subheader = `Link tile`
         press     = client->_event( `PRESS` )
         )->tile_content(
-            )->image_content( src = `https://sapui5.hana.ondemand.com/test-resources/sap/m/demokit/sample/GenericTileAsLaunchTile/images/SAPLogoLargeTile_28px_height.png` ).
+            )->image_content( src = `https://sdk.openui5.org/test-resources/sap/m/demokit/sample/GenericTileAsLaunchTile/images/SAPLogoLargeTile_28px_height.png` ).
 
     page->generic_tile(
         class  = `sapUiTinyMarginBegin sapUiTinyMarginTop`
@@ -248,7 +248,7 @@ CLASS z2ui5_cl_api_app_431 IMPLEMENTATION.
         press     = client->_event( `PRESS` )
         frametype = `TwoByOne`
         )->tile_content(
-            )->image_content( src = `https://sapui5.hana.ondemand.com/test-resources/sap/m/demokit/sample/GenericTileAsLaunchTile/images/SAPLogoLargeTile_28px_height.png` ).
+            )->image_content( src = `https://sdk.openui5.org/test-resources/sap/m/demokit/sample/GenericTileAsLaunchTile/images/SAPLogoLargeTile_28px_height.png` ).
 
     client->view_display( page->stringify( ) ).
 

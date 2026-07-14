@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.Text/sample/sap.m.sample.Text
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.Text/sample/sap.m.sample.Text
 "! The text control can be used for embedding longer paragraphs of text into your application, that
 "! need text wrapping.
 CLASS z2ui5_cl_api_app_408 DEFINITION PUBLIC.

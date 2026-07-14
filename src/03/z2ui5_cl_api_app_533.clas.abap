@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.uxap.ObjectPageLayout/sample/sap.uxap.sample.ObjectPageHeaderExpanded
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.uxap.ObjectPageLayout/sample/sap.uxap.sample.ObjectPageHeaderExpanded
 "! This is an example of an ObjectPage with property alwaysShowContentHeader set to true. In this case
 "! the HeaderContent won't snap on a desktop.
 CLASS z2ui5_cl_api_app_533 DEFINITION PUBLIC.

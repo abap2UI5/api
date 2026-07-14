@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.uxap.ObjectPageLayout/sample/sap.uxap.sample.AnchorBarWithNumbers
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.uxap.ObjectPageLayout/sample/sap.uxap.sample.AnchorBarWithNumbers
 "! This example shows how to visualize numbers in parenthesis after the corresponding section titles
 "! in the AnchorBar
 CLASS z2ui5_cl_api_app_532 DEFINITION PUBLIC.
@@ -85,8 +85,8 @@ CLASS z2ui5_cl_api_app_532 IMPLEMENTATION.
         )->link( text = `+33 6 4512 5158`
         )->link( text = `DeniseSmith@sap.com`
         )->horizontal_layout(
-            )->image( src = `https://sapui5.hana.ondemand.com/test-resources/sap/uxap/images/linkedin.png`
-            )->image( src   = `https://sapui5.hana.ondemand.com/test-resources/sap/uxap/images/Twitter.png`
+            )->image( src = `https://sdk.openui5.org/test-resources/sap/uxap/images/linkedin.png`
+            )->image( src   = `https://sdk.openui5.org/test-resources/sap/uxap/images/Twitter.png`
                       class = `sapUiSmallMarginBegin` ).
 
     flex_box->vertical_layout( class = `sapUiSmallMarginBeginEnd`

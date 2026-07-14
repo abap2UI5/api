@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.ui.core.theming/sample/sap.ui.core.sample.BasicThemeParameters
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.ui.core.theming/sample/sap.ui.core.sample.BasicThemeParameters
 "! Sample provides a link to the Theme Parameter Toolbox. There you can easily search, preview, and
 "! filter semantic theme parameters.
 CLASS z2ui5_cl_api_app_502 DEFINITION PUBLIC.
@@ -32,7 +32,7 @@ CLASS z2ui5_cl_api_app_502 IMPLEMENTATION.
               )->link(
                   text   = `Click here to open the Theme Parameter Toolbox`
                   target = `_blank`
-                  href   = `https://sapui5.hana.ondemand.com/test-resources/sap/m/demokit/theming/webapp/index.html` ).
+                  href   = `https://sdk.openui5.org/test-resources/sap/m/demokit/theming/webapp/index.html` ).
 
       client->view_display( page->stringify( ) ).
 

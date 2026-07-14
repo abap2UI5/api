@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.TextArea/sample/sap.m.sample.TextAreaValueUpdate
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.TextArea/sample/sap.m.sample.TextAreaValueUpdate
 "! Since 1.30 the value property of sap.m.TextArea is not updated on every keystroke, but first when
 "! the user presses Enter or leaves the input. The change was necessary to fully support the standard
 "! UI5 data binding with formatters and types. If you still need immediate update you have 2 options:

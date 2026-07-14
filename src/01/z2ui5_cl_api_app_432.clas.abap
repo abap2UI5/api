@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.IconTabBar/sample/sap.m.sample.IconTabBarOverflowSelectList
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.IconTabBar/sample/sap.m.sample.IconTabBarOverflowSelectList
 "! In this example when there is not enough space for all tab items to fit on the screen, the rest
 "! are displayed in an overflow select list for easier selection.
 CLASS z2ui5_cl_api_app_432 DEFINITION PUBLIC.

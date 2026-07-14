@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.uxap.ObjectPageLayout/sample/sap.uxap.sample.ObjectPageTabNavigationMode
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.uxap.ObjectPageLayout/sample/sap.uxap.sample.ObjectPageTabNavigationMode
 "! Object Page sample showing a layout where the navigation is Tab based (one Tab per section) rather
 "! than having all of the sections visible at the same time.
 CLASS z2ui5_cl_api_app_537 DEFINITION PUBLIC.
@@ -36,12 +36,12 @@ CLASS z2ui5_cl_api_app_537 IMPLEMENTATION.
     IF client->check_on_init( ).
 
       t_employees = VALUE #(
-        ( name = `Michael Adams`   picture = `https://sapui5.hana.ondemand.com/test-resources/sap/uxap/images/person.png` job = `Scrum Master` )
-        ( name = `John Miller`     picture = `https://sapui5.hana.ondemand.com/test-resources/sap/uxap/images/person.png` job = `Product Owner` )
-        ( name = `Richard Wilson`  picture = `https://sapui5.hana.ondemand.com/test-resources/sap/uxap/images/person.png` job = `Ux Designer` )
-        ( name = `Julie Armstrong` picture = `https://sapui5.hana.ondemand.com/test-resources/sap/uxap/images/person.png` job = `Quality Engineer` )
-        ( name = `Denise Smith`    picture = `https://sapui5.hana.ondemand.com/test-resources/sap/uxap/images/person.png` job = `Team Member` )
-        ( name = `Richard Adams`   picture = `https://sapui5.hana.ondemand.com/test-resources/sap/uxap/images/person.png` job = `Team Member` ) ).
+        ( name = `Michael Adams`   picture = `https://sdk.openui5.org/test-resources/sap/uxap/images/person.png` job = `Scrum Master` )
+        ( name = `John Miller`     picture = `https://sdk.openui5.org/test-resources/sap/uxap/images/person.png` job = `Product Owner` )
+        ( name = `Richard Wilson`  picture = `https://sdk.openui5.org/test-resources/sap/uxap/images/person.png` job = `Ux Designer` )
+        ( name = `Julie Armstrong` picture = `https://sdk.openui5.org/test-resources/sap/uxap/images/person.png` job = `Quality Engineer` )
+        ( name = `Denise Smith`    picture = `https://sdk.openui5.org/test-resources/sap/uxap/images/person.png` job = `Team Member` )
+        ( name = `Richard Adams`   picture = `https://sdk.openui5.org/test-resources/sap/uxap/images/person.png` job = `Team Member` ) ).
 
       view_display( ).
 
@@ -105,9 +105,9 @@ CLASS z2ui5_cl_api_app_537 IMPLEMENTATION.
                 )->link( text = `DeniseSmith@sap.com`
             )->get_parent(
             )->horizontal_layout( class = `sapUiSmallMarginBeginEnd`
-                )->image( src = `https://sapui5.hana.ondemand.com/test-resources/sap/uxap/images/linkedin.png`
+                )->image( src = `https://sdk.openui5.org/test-resources/sap/uxap/images/linkedin.png`
                 )->image(
-                    src   = `https://sapui5.hana.ondemand.com/test-resources/sap/uxap/images/Twitter.png`
+                    src   = `https://sdk.openui5.org/test-resources/sap/uxap/images/Twitter.png`
                     class = `sapUiSmallMarginBegin`
             )->get_parent(
             )->vertical_layout( class = `sapUiSmallMarginBeginEnd`

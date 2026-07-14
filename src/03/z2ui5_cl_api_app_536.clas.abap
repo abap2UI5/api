@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.uxap.ObjectPageLayout/sample/sap.uxap.sample.ObjectPageSelectedSection
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.uxap.ObjectPageLayout/sample/sap.uxap.sample.ObjectPageSelectedSection
 "! Object Page sample showing a layout where the selected section is defined by the user.
 CLASS z2ui5_cl_api_app_536 DEFINITION PUBLIC.
 
@@ -67,7 +67,7 @@ CLASS z2ui5_cl_api_app_536 IMPLEMENTATION.
     header_title->snapped_heading(
         )->flex_box( fitcontainer = abap_true
                      alignitems   = `Center`
-            )->image( src   = `https://sapui5.hana.ondemand.com/test-resources/sap/uxap/images/imageID_275314.png`
+            )->image( src   = `https://sdk.openui5.org/test-resources/sap/uxap/images/imageID_275314.png`
                       width = `2rem`
                       class = `sapUiTinyMarginEnd`
             )->title( text     = `Denise Smith`
@@ -99,7 +99,7 @@ CLASS z2ui5_cl_api_app_536 IMPLEMENTATION.
                      fitcontainer = abap_true ).
 
     " sap.m.Avatar is only available since UI5 1.73 - a plain image is used instead
-    flex_box->image( src   = `https://sapui5.hana.ondemand.com/test-resources/sap/uxap/images/imageID_275314.png`
+    flex_box->image( src   = `https://sdk.openui5.org/test-resources/sap/uxap/images/imageID_275314.png`
                      width = `5rem`
                      class = `sapUiSmallMarginEnd` ).
 
@@ -108,8 +108,8 @@ CLASS z2ui5_cl_api_app_536 IMPLEMENTATION.
         )->link( text = `DeniseSmith@sap.com` ).
 
     flex_box->horizontal_layout( class = `sapUiSmallMarginBeginEnd`
-        )->image( src = `https://sapui5.hana.ondemand.com/test-resources/sap/uxap/images/linkedin.png`
-        )->image( src   = `https://sapui5.hana.ondemand.com/test-resources/sap/uxap/images/Twitter.png`
+        )->image( src = `https://sdk.openui5.org/test-resources/sap/uxap/images/linkedin.png`
+        )->image( src   = `https://sdk.openui5.org/test-resources/sap/uxap/images/Twitter.png`
                   class = `sapUiSmallMarginBegin` ).
 
     flex_box->vertical_layout( class = `sapUiSmallMarginBeginEnd`
@@ -383,7 +383,7 @@ CLASS z2ui5_cl_api_app_536 IMPLEMENTATION.
     LOOP AT t_employees INTO DATA(s_employee).
       connections_blocks->panel(
           )->vbox(
-              )->image( src = `https://sapui5.hana.ondemand.com/test-resources/sap/uxap/images/person.png`
+              )->image( src = `https://sdk.openui5.org/test-resources/sap/uxap/images/person.png`
               )->label( s_employee-name
               )->label( s_employee-job ).
     ENDLOOP.

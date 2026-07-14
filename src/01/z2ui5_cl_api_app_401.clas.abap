@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.FacetFilter/sample/sap.m.sample.FacetFilterLight
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.FacetFilter/sample/sap.m.sample.FacetFilterLight
 "! This is a 'Light' version of the Facet Filter. It is for small displays where only a selectable
 "! summary bar is shown, and a dialog is shown for setting the facet values.
 CLASS z2ui5_cl_api_app_401 DEFINITION PUBLIC.

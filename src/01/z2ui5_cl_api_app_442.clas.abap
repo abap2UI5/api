@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.List/sample/sap.m.sample.ListFooter
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.List/sample/sap.m.sample.ListFooter
 "! With the 'footerText' property you can set a message that is shown at the very end of the list.
 CLASS z2ui5_cl_api_app_442 DEFINITION PUBLIC.
 
@@ -29,7 +29,7 @@ CLASS z2ui5_cl_api_app_442 IMPLEMENTATION.
                )->standard_list_item(
                    title       = `Notebook Basic 15`
                    description = `HT-1000`
-                   icon        = `https://sapui5.hana.ondemand.com/test-resources/sap/ui/documentation/sdk/images/HT-1000.jpg`
+                   icon        = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1000.jpg`
                    iconinset   = abap_false ).
 
     client->view_display( page->stringify( ) ).

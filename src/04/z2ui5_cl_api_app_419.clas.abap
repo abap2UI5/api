@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.f.ShellBar/sample/sap.f.sample.ShellBar
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.f.ShellBar/sample/sap.f.sample.ShellBar
 "! Shell Bar example showing the control title as part of a mega menu, configurable by the app
 "! developer.
 CLASS z2ui5_cl_api_app_419 DEFINITION PUBLIC.
@@ -28,7 +28,7 @@ CLASS z2ui5_cl_api_app_419 IMPLEMENTATION.
     page->shell_bar(
         title               = `Application Title`
         secondtitle         = `Short description`
-        homeicon            = `https://sapui5.hana.ondemand.com/sdk/resources/sap/ui/documentation/sdk/images/logo_sap.png`
+        homeicon            = `https://sdk.openui5.orgresources/sap/ui/documentation/sdk/images/logo_sap.png`
         showcopilot         = abap_true
         showsearch          = abap_true
         shownotifications   = abap_true

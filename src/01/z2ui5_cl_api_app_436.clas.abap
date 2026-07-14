@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.Input/sample/sap.m.sample.InputAssistedTwoValues
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.Input/sample/sap.m.sample.InputAssistedTwoValues
 "! This example shows how to easily implement an assisted input with two-value suggestions.
 CLASS z2ui5_cl_api_app_436 DEFINITION PUBLIC.
 

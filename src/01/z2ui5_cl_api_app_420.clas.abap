@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.Carousel/sample/sap.m.sample.CarouselWithControls
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.Carousel/sample/sap.m.sample.CarouselWithControls
 "! With the Carousel a user can browse through multi-page content by swiping left or right.
 CLASS z2ui5_cl_api_app_420 DEFINITION PUBLIC.
 
@@ -30,7 +30,7 @@ CLASS z2ui5_cl_api_app_420 IMPLEMENTATION.
   METHOD view_display.
 
     " Image URLs of the mock models sap/ui/demo/mock/img.json and products.json used by the original sample
-    DATA(base_url) = `https://sapui5.hana.ondemand.com/test-resources/sap/ui/documentation/sdk/images/`.
+    DATA(base_url) = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/`.
 
     " Subset of the mock model sap/ui/demo/mock/products.json used by the original sample
     t_products = VALUE #(

@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.Input/sample/sap.m.sample.InputAssistedTabularSuggestions
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.Input/sample/sap.m.sample.InputAssistedTabularSuggestions
 "! In this example assisted input is provided with table-like suggestions where several columns can
 "! display more details.
 CLASS z2ui5_cl_api_app_435 DEFINITION PUBLIC.

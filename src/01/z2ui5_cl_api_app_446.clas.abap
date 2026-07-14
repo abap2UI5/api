@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.List/sample/sap.m.sample.ListSelection
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.List/sample/sap.m.sample.ListSelection
 "! 'Single selection' forces the user to choose exactly one out of many items. With the 'multi'
 "! selection the user can pick multiple items at the same time. This is helpful for e.g. batch
 "! processing. With 'includeItem' the selection is also changed when pressing the item.
@@ -81,7 +81,7 @@ CLASS z2ui5_cl_api_app_446 IMPLEMENTATION.
     IF client->check_on_init( ).
 
       mode = `MultiSelect`.
-      DATA(pic_url) = `https://sapui5.hana.ondemand.com/test-resources/sap/ui/documentation/sdk/images/`.
+      DATA(pic_url) = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/`.
       t_products = VALUE #(
         ( name = `Notebook Basic 15`        product_id = `HT-1000` pic = pic_url && `HT-1000.jpg` )
         ( name = `Notebook Basic 17`        product_id = `HT-1001` pic = pic_url && `HT-1001.jpg` )

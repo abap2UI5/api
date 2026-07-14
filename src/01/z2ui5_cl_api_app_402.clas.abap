@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.FlexBox/sample/sap.m.sample.FlexBoxCols
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.FlexBox/sample/sap.m.sample.FlexBoxCols
 "! You can create balanced areas with Flex Box, such as these columns with equal height regardless of
 "! content.
 CLASS z2ui5_cl_api_app_402 DEFINITION PUBLIC.

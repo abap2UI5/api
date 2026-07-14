@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.ScrollContainer/sample/sap.m.sample.ScrollContainer
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.ScrollContainer/sample/sap.m.sample.ScrollContainer
 "! The Scroll Container is a control that can display arbitrary content within a limited screen area
 "! and provides touch scrolling to make all content accessible.
 CLASS z2ui5_cl_api_app_473 DEFINITION PUBLIC.
@@ -30,7 +30,7 @@ CLASS z2ui5_cl_api_app_473 IMPLEMENTATION.
           vertical  = abap_true
           focusable = abap_true
           )->image(
-              src   = `https://sapui5.hana.ondemand.com/test-resources/sap/ui/documentation/sdk/images/HT-7777-large.jpg`
+              src   = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-7777-large.jpg`
               width = client->_bind( width ) ).
 
       client->view_display( view->stringify( ) ).

@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.ui.layout.FixFlex/sample/sap.ui.layout.sample.FixFlexHorizontal
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.ui.layout.FixFlex/sample/sap.ui.layout.sample.FixFlexHorizontal
 "! Shows a FixFlex control with a horizontal layout.
 CLASS z2ui5_cl_api_app_514 DEFINITION PUBLIC.
 
@@ -31,7 +31,7 @@ CLASS z2ui5_cl_api_app_514 IMPLEMENTATION.
     " the original binds the image against the demo kit mock model - here the mock image URL is used directly
     layout->fix_content( `layout`
         )->image(
-            src          = `https://sapui5.hana.ondemand.com/test-resources/sap/ui/documentation/sdk/images/HT-7777-large.jpg`
+            src          = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-7777-large.jpg`
             densityaware = abap_true )->get_parent(
     )->flex_content( `layout`
         )->text(

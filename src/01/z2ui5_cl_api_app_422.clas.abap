@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.ColorPalette/sample/sap.m.sample.ColorPalette
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.ColorPalette/sample/sap.m.sample.ColorPalette
 "! The standalone ColorPalette in a container (sap.ui.layout.SimpleForm).
 CLASS z2ui5_cl_api_app_422 DEFINITION PUBLIC.
 

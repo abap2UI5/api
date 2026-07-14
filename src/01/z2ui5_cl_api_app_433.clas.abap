@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.IconTabBar/sample/sap.m.sample.IconTabBarStretchContent
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.IconTabBar/sample/sap.m.sample.IconTabBarStretchContent
 "! In this example, the IconTabBar height is stretched to the maximum height of the page content.
 "! Note: The height of the parent container must be defined as a fixed value. Also, applyContentPadding
 "! property is set to false and backgroundDesign property is set to Transparent.

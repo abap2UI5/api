@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.f.GridList/sample/sap.f.sample.GridListBoxContainer
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.f.GridList/sample/sap.f.sample.GridListBoxContainer
 "! This layout allows to display same height grid items with configurable width.
 CLASS z2ui5_cl_api_app_417 DEFINITION PUBLIC.
 

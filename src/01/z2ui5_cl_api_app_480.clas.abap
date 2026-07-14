@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.StandardListItem/sample/sap.m.sample.StandardListItemTitle
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.StandardListItem/sample/sap.m.sample.StandardListItemTitle
 "! By default the title size adapts to the available space and gets bigger if the description is
 "! empty. List items with and without descriptions results in titles with different sizes. In this
 "! cases it is better to switch the size adaption off.
@@ -31,7 +31,7 @@ CLASS z2ui5_cl_api_app_480 IMPLEMENTATION.
 
   METHOD view_display.
 
-    DATA(base_url) = `https://sapui5.hana.ondemand.com/test-resources/sap/ui/documentation/sdk/images/`.
+    DATA(base_url) = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/`.
 
     DATA(view) = z2ui5_cl_xml_view=>factory( ).
     DATA(list) = view->list( headertext = `Products` ).

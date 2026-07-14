@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.ui.layout.Grid/sample/sap.ui.layout.sample.GridInfo
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.ui.layout.Grid/sample/sap.ui.layout.sample.GridInfo
 "! You can use the Grid control to make responsive table-free layouts; here we are using a default
 "! indent and span, and specifying the Small settings such that the image and text will stack on a
 "! small display.

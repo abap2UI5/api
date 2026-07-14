@@ -84,7 +84,9 @@ ui5/<library>/<z2ui5_cl_api_app_n>/   ← original Component.js, *.view.xml,
 
 The folder name (class) is the join key between a port (`src/`) and its template
 (`ui5/`). Templates are held verbatim — never edited to fit ABAP; that is the
-generator's job. The `api.md` tables link the two together (§7).
+generator's job. `ui5/` is the generator's local input store; the `api.md`
+**Javascript** column links to the sample's source in the upstream
+[OpenUI5 repository](https://github.com/SAP/openui5), not to this copy (§7).
 
 ---
 
@@ -98,8 +100,11 @@ Each generated port carries ABAP Doc directly above `CLASS ... DEFINITION`:
 "! <full, untruncated sample description>
 ```
 
-- The `<demo kit url>` ends in `/sample/<lib>.sample.<Name>` — this is what the
-  coverage generator parses to match a port to its source sample (§7). **Never
+- The `<demo kit url>` is the **OpenUI5** demo kit link
+  (`https://sdk.openui5.org/entity/<entity>/sample/<lib>.sample.<Name>`) — its
+  `.../entity/<entity>/sample/<lib>.sample.<Name>` tail is what the coverage
+  generator parses to match a port to its source sample (§7). Always use the
+  OpenUI5 host (`sdk.openui5.org`), never the commercial SAPUI5 one. **Never
   remove or reword this line.**
 - The abapGit `<DESCRIPT>` follows `<entity> - <demo kit description>`
   (e.g. `sap.m.Switch - Some say it is only a switch...`), truncated to 60 chars.
@@ -357,10 +362,14 @@ node scripts/generate-overview.mjs                          # the overview app (
 - **Control (entity) for grouping / the demo kit link** — from each library's
   `demokit/docuindex.json` (`explored.entities[].samples[]`), with the port's
   Rebuild URL (`.../entity/<entity>/sample/...`) as fallback.
-- **api.md links are external** (absolute URLs, overridable via env):
-  Name → a ↗ to the control's UI5 API reference (`DEMOKIT`/api/`<entity>`),
-  Javascript → `ui5/` template folder (`REPO`/`REF`) plus a ↗ to the live demo
-  kit sample app (`DEMOKIT`), ABAP → the `.clas.abap` (`REPO`/`REF`).
+- **api.md links are external** (absolute URLs, overridable via env) and point
+  at **OpenUI5** — only the ABAP column links back to this repo:
+  Name → a ↗ to the control's OpenUI5 API reference
+  (`DEMOKIT`=`https://sdk.openui5.org`/api/`<entity>`),
+  Javascript → the sample's source folder in the OpenUI5 repository
+  (`OPENUI5`=`https://github.com/SAP/openui5`/tree/`OPENUI5_REF`/src/…/demokit/sample/`<Name>`)
+  plus a ↗ to the live OpenUI5 demo kit sample app (`DEMOKIT`),
+  ABAP → the generated `.clas.abap` (`REPO`/`REF`).
 
 The `generate_coverage` workflow (`workflow_dispatch` + weekly) shallow-clones
 OpenUI5, runs both scripts, stamps the `<!-- last-run -->` timestamp into

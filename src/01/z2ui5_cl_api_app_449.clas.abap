@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.MessageView/sample/sap.m.sample.MessageViewMessageManager
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.MessageView/sample/sap.m.sample.MessageViewMessageManager
 "! A sample showing how you can connect the MessageView with MessageManager.
 CLASS z2ui5_cl_api_app_449 DEFINITION PUBLIC.
 

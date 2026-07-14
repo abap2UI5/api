@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.StandardListItem/sample/sap.m.sample.StandardListItemIcon
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.StandardListItem/sample/sap.m.sample.StandardListItemIcon
 "! This list item offers a standardized user interface for list content with title, description and
 "! icon.
 CLASS z2ui5_cl_api_app_479 DEFINITION PUBLIC.
@@ -39,7 +39,7 @@ CLASS z2ui5_cl_api_app_479 IMPLEMENTATION.
 
   METHOD on_init.
 
-    DATA(base_url) = `https://sapui5.hana.ondemand.com/test-resources/sap/ui/documentation/sdk/images/`.
+    DATA(base_url) = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/`.
     t_products = VALUE #(
       ( product_id      = `HT-1000`
         name            = `Notebook Basic 15`

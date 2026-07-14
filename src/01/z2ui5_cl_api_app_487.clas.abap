@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.Tree/sample/sap.m.sample.Tree
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.Tree/sample/sap.m.sample.Tree
 "! Tree displays data in hierarchical structure.
 CLASS z2ui5_cl_api_app_487 DEFINITION PUBLIC.
 

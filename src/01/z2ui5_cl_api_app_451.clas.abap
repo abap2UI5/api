@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.MultiComboBox/sample/sap.m.sample.MultiComboBoxDefaultFiltering
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.MultiComboBox/sample/sap.m.sample.MultiComboBoxDefaultFiltering
 "! The default filtering is 'starts with per term', which filters by the beginning of every word in
 "! every column.
 CLASS z2ui5_cl_api_app_451 DEFINITION PUBLIC.

@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.uxap.ObjectPageHeader/sample/sap.uxap.sample.ProfileObjectPageHeader
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.uxap.ObjectPageHeader/sample/sap.uxap.sample.ProfileObjectPageHeader
 "! This is an example of ObjectPageHeader using the showPlaceholder property.
 CLASS z2ui5_cl_api_app_530 DEFINITION PUBLIC.
 
@@ -71,13 +71,13 @@ CLASS z2ui5_cl_api_app_530 IMPLEMENTATION.
     header_content->horizontal_layout(
         )->image( width  = `21px`
                   height = `21px`
-                  src    = `https://sapui5.hana.ondemand.com/test-resources/sap/uxap/images/linkedInIcon.png`
+                  src    = `https://sdk.openui5.org/test-resources/sap/uxap/images/linkedInIcon.png`
         )->image( width  = `20px`
                   height = `20px`
-                  src    = `https://sapui5.hana.ondemand.com/test-resources/sap/uxap/images/facebookIcon.png`
+                  src    = `https://sdk.openui5.org/test-resources/sap/uxap/images/facebookIcon.png`
         )->image( width  = `21px`
                   height = `21px`
-                  src    = `https://sapui5.hana.ondemand.com/test-resources/sap/uxap/images/twitterIcon.png` ).
+                  src    = `https://sdk.openui5.org/test-resources/sap/uxap/images/twitterIcon.png` ).
 
     header_content->object_status( state = `Success`
                                    icon  = `sap-icon://employee-approvals`

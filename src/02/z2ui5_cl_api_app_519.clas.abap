@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.ui.layout.HorizontalLayout/sample/sap.ui.layout.sample.HorizontalLayout
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.ui.layout.HorizontalLayout/sample/sap.ui.layout.sample.HorizontalLayout
 "! The Horizontal Layout control is a simple way to align multiple controls horizontally. By default
 "! the contained controls are not wrapped. If you want more sophisticated layout options, consider
 "! Grid or Flex Box based layouts.
@@ -22,7 +22,7 @@ CLASS z2ui5_cl_api_app_519 IMPLEMENTATION.
   METHOD view_display.
 
     " the original binds the images against the demo kit mock model - here the mock image URL is used directly
-    DATA(image_url) = `https://sapui5.hana.ondemand.com/test-resources/sap/ui/documentation/sdk/images/HT-7777-large.jpg`.
+    DATA(image_url) = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-7777-large.jpg`.
 
     DATA(page) = z2ui5_cl_xml_view=>factory( ).
 

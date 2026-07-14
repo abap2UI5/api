@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.ui.layout.Grid/sample/sap.ui.layout.sample.GridXL
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.ui.layout.Grid/sample/sap.ui.layout.sample.GridXL
 "! The major layout features of the Grid control are shown in this example. Features like indentation,
 "! making content visible/invisible based on the screen size, moving content forward and backwards are
 "! demonstrated.
@@ -52,7 +52,7 @@ CLASS z2ui5_cl_api_app_518 IMPLEMENTATION.
 
     " the wrapper grid_data method does not support the visible/linebreak/move properties - generic element used
     grid1->image(
-        src          = `https://sapui5.hana.ondemand.com/resources/sap/ui/documentation/sdk/images/demoAppsTeaser.png`
+        src          = `https://sdk.openui5.org/resources/sap/ui/documentation/sdk/images/demoAppsTeaser.png`
         densityaware = abap_false
         width        = `100%` )->get(
         )->layout_data(
@@ -81,7 +81,7 @@ CLASS z2ui5_cl_api_app_518 IMPLEMENTATION.
                                   ( n = `indent` v = `XL0 L0 M0` ) ) ).
 
     grid2->image(
-        src          = `https://sapui5.hana.ondemand.com/test-resources/sap/ui/documentation/sdk/images/HT-1010.jpg`
+        src          = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1010.jpg`
         densityaware = abap_false
         width        = `100%` )->get(
         )->layout_data(
@@ -91,7 +91,7 @@ CLASS z2ui5_cl_api_app_518 IMPLEMENTATION.
                 t_prop = VALUE #( ( n = `moveForward` v = `M6` ) ) ).
 
     grid2->image(
-        src          = `https://sapui5.hana.ondemand.com/test-resources/sap/ui/documentation/sdk/images/HT-6100.jpg`
+        src          = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-6100.jpg`
         densityaware = abap_false
         width        = `100%` )->get(
         )->layout_data(
@@ -106,7 +106,7 @@ CLASS z2ui5_cl_api_app_518 IMPLEMENTATION.
         class        = `sapUiSmallMargin` ).
 
     grid3->image(
-        src          = `https://sapui5.hana.ondemand.com/test-resources/sap/ui/documentation/sdk/images/HT-1071.jpg`
+        src          = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1071.jpg`
         densityaware = abap_false
         width        = `100%` )->get(
         )->layout_data(
@@ -122,7 +122,7 @@ CLASS z2ui5_cl_api_app_518 IMPLEMENTATION.
         )->text( client->_bind( description2 ) ).
 
     grid3->image(
-        src          = `https://sapui5.hana.ondemand.com/test-resources/sap/ui/documentation/sdk/images/HT-1032.jpg`
+        src          = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1032.jpg`
         densityaware = abap_false
         width        = `100%` )->get(
         )->layout_data(

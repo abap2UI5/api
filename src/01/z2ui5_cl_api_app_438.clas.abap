@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.Input/sample/sap.m.sample.InputSuggestionsCustomFilter
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.Input/sample/sap.m.sample.InputSuggestionsCustomFilter
 "! The default filtering for the suggestionItems aggregation uses a 'begins with' style operator. You
 "! can override this with your own custom filter function using the Input control's setFilterFunction
 "! method.

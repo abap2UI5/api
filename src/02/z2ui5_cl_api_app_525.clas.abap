@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.ui.table.Table/sample/sap.ui.table.sample.MultiHeader
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.ui.table.Table/sample/sap.ui.table.sample.MultiHeader
 "! Example for multi-header of table
 CLASS z2ui5_cl_api_app_525 DEFINITION PUBLIC.
 

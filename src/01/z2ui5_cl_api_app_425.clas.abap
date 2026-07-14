@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.ComboBox/sample/sap.m.sample.ComboBoxDefaultFiltering
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.ComboBox/sample/sap.m.sample.ComboBoxDefaultFiltering
 "! The default filtering is 'starts with per term', which filters by the beginning of every word in
 "! every column. Autocomplete (type-ahead) works only for the first column, the leading value.
 CLASS z2ui5_cl_api_app_425 DEFINITION PUBLIC.

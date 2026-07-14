@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.CheckBox/sample/sap.m.sample.CheckBoxTriState
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.m.CheckBox/sample/sap.m.sample.CheckBoxTriState
 "! In this sample, the CheckBox reflects the selection states of its dependent input fields -
 "! selected, not selected, and partially selected.
 CLASS z2ui5_cl_api_app_421 DEFINITION PUBLIC.

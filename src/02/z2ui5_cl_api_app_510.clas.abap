@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.ui.integration.widgets.Card/sample/sap.ui.integration.sample.CardExplorer
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.ui.integration.widgets.Card/sample/sap.ui.integration.sample.CardExplorer
 "! Card Explorer is the application where you can learn more about integration cards.
 CLASS z2ui5_cl_api_app_510 DEFINITION PUBLIC.
 
@@ -29,7 +29,7 @@ CLASS z2ui5_cl_api_app_510 IMPLEMENTATION.
   METHOD view_display.
 
     " the original opens the relative Card Explorer url of the demo kit - here the absolute url is used
-    DATA(card_explorer_url) = `https://sapui5.hana.ondemand.com/test-resources/sap/ui/integration/demokit/cardExplorer/index.html`.
+    DATA(card_explorer_url) = `https://sdk.openui5.org/test-resources/sap/ui/integration/demokit/cardExplorer/index.html`.
 
     DATA(page) = z2ui5_cl_xml_view=>factory( ).
 
@@ -42,7 +42,7 @@ CLASS z2ui5_cl_api_app_510 IMPLEMENTATION.
             class      = `sapUiSmallMargin`
             target     = `_blank`
         )->image(
-            src   = `https://sapui5.hana.ondemand.com/resources/sap/ui/documentation/sdk/images/tools/CardExplorer.png`
+            src   = `https://sdk.openui5.org/resources/sap/ui/documentation/sdk/images/tools/CardExplorer.png`
             alt   = `Card Explorer`
             class = `sapUiSmallMargin`
             press = client->_event_client( val   = client->cs_event-open_new_tab

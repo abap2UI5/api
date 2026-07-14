@@ -14,7 +14,9 @@
  * Ported samples      : this repo's src/**\/*.clas.abap, each carrying
  *                       "! Rebuild of the UI5 demo kit sample: <url>.../sample/<lib>.sample.<Name>
  *
- * All table links are external (absolute). Env: OPENUI5_DIR, REPO, REF, DEMOKIT.
+ * All table links are external (absolute) and point at OpenUI5 — the demo kit
+ * (sdk.openui5.org) and the source repo (github.com/SAP/openui5); only the ABAP
+ * column links back to this repo. Env: OPENUI5_DIR, REPO, REF, DEMOKIT, OPENUI5.
  *
  * Run:  OPENUI5_DIR=../openui5 node scripts/generate-coverage.mjs
  */
@@ -30,18 +32,22 @@ const README = path.join(ROOT, 'README.md');
 const START = '<!-- coverage:start -->';
 const END = '<!-- coverage:end -->';
 
-// link targets (overridable via env) — all links are external/absolute
-const REPO = process.env.REPO || 'abap2UI5/api';   // owner/name
-const REF = process.env.REF || 'main';             // branch the links resolve on
+// link targets (overridable via env) — all links are external/absolute and
+// point at OpenUI5: the demo kit (sdk.openui5.org) and the source repo (SAP/openui5)
+const REPO = process.env.REPO || 'abap2UI5/api';   // owner/name (this repo)
+const REF = process.env.REF || 'main';             // branch the ABAP links resolve on
 const GH = `https://github.com/${REPO}`;
-const DEMOKIT = process.env.DEMOKIT || 'https://sapui5.hana.ondemand.com/sdk/#';
-// live demo kit sample app (needs the entity the sample belongs to)
+const DEMOKIT = process.env.DEMOKIT || 'https://sdk.openui5.org';   // OpenUI5 demo kit
+const OPENUI5 = process.env.OPENUI5 || 'https://github.com/SAP/openui5';   // OpenUI5 repo
+const OPENUI5_REF = process.env.OPENUI5_REF || 'master';
+// live OpenUI5 demo kit sample app (needs the entity the sample belongs to)
 const demokitUrl = (entity, sampleId) => `${DEMOKIT}/entity/${entity}/sample/${sampleId}`;
-// UI5 API reference for a control (entity)
+// OpenUI5 API reference for a control (entity)
 const apiUrl = (entity) => `${DEMOKIT}/api/${entity}`;
-// collected JS template folder under ui5/
-const templateUrl = (lib, cls) => `${GH}/tree/${REF}/ui5/${lib}/${cls}`;
-// generated abap2UI5 class file under src/
+// the sample's source folder in the OpenUI5 repository
+const sampleSrcUrl = (lib, name) =>
+  `${OPENUI5}/tree/${OPENUI5_REF}/src/${lib}/test/${lib.replace(/\./g, '/')}/demokit/sample/${name}`;
+// generated abap2UI5 class file under src/ (this repo)
 const abapUrl = (file) => `${GH}/blob/${REF}/${file.split(path.sep).join('/')}`;
 
 function walk(dir, out = []) {
@@ -147,9 +153,10 @@ function summaryLines() {
 function controlLines() {
   const l = [];
   l.push('One table per module, one row per UI5 demo kit sample. **Name** is the demo');
-  l.push('kit control with a ↗ to its UI5 API reference; **Javascript** links to the');
-  l.push('collected UI5 template (`ui5/`) with a ↗ to the live demo kit app next to');
-  l.push('it; **ABAP** to the generated class (`—` = not ported yet). See the');
+  l.push('kit control with a ↗ to its OpenUI5 API reference; **Javascript** links to');
+  l.push('the sample source in the [OpenUI5 repository](https://github.com/SAP/openui5)');
+  l.push('with a ↗ to the live OpenUI5 demo kit app next to it; **ABAP** to the');
+  l.push('generated class (`—` = not ported yet). See the');
   l.push('[README](README.md#coverage) for the per-module summary.');
   l.push('');
 
@@ -169,7 +176,7 @@ function controlLines() {
     for (const s of rows) {
       const api = s.entity ? ` [↗](${apiUrl(s.entity)})` : '';
       const name = s.entity ? `${s.entity}${api}` : '—';
-      const sample = s.port ? `[${s.name}](${templateUrl(lib, s.port.cls)})` : s.name;
+      const sample = `[${s.name}](${sampleSrcUrl(lib, s.name)})`;   // OpenUI5 repo source
       const demo = s.entity ? ` [↗](${demokitUrl(s.entity, `${lib}.sample.${s.name}`)})` : '';
       const js = `${sample}${demo}`;
       const abap = s.port ? `[${s.port.cls}](${abapUrl(s.port.file)})` : '—';

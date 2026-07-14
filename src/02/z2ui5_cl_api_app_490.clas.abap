@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.ui.core.ContainerPadding/sample/sap.m.sample.ContainerResponsivePadding
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.ui.core.ContainerPadding/sample/sap.m.sample.ContainerResponsivePadding
 "! Apply the CSS class 'sapUiResponsiveContentPadding' on a UI5 container control to add a responsive
 "! padding based on the screen size around the container content area.
 CLASS z2ui5_cl_api_app_490 DEFINITION PUBLIC.
@@ -56,7 +56,7 @@ CLASS z2ui5_cl_api_app_490 IMPLEMENTATION.
             )->image(
                 width        = `10em`
                 densityaware = abap_false
-                src          = `https://sapui5.hana.ondemand.com/test-resources/sap/ui/documentation/sdk/images/HT-7777-large.jpg` )->get_parent(
+                src          = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-7777-large.jpg` )->get_parent(
         )->text( lorem ).
 
     client->view_display( page->stringify( ) ).

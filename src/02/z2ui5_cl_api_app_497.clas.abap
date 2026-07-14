@@ -1,5 +1,5 @@
 "! Generated port of a UI5 demo kit sample - not yet manually reviewed
-"! Rebuild of the UI5 demo kit sample: https://sapui5.hana.ondemand.com/sdk/#/entity/sap.ui.core.StandardMargins/sample/sap.m.sample.StandardNoMargins
+"! Rebuild of the UI5 demo kit sample: https://sdk.openui5.org/entity/sap.ui.core.StandardMargins/sample/sap.m.sample.StandardNoMargins
 "! Use our standard 'No-Margins' classes to remove existing margins from your control. You can either
 "! remove all margins at once or remove the margin on one or more sides.
 CLASS z2ui5_cl_api_app_497 DEFINITION PUBLIC.
