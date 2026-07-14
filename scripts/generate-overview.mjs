@@ -104,12 +104,9 @@ const abap = `"! Generated overview app - lists every abap2UI5 api sample app in
 "! In the Sample column the name links the OpenUI5 source and the ↗ starts the
 "! live OpenUI5 sample; in the abap2UI5 column the class name links the generated
 "! ABAP class and the ↗ starts the app; Control links the OpenUI5 API - all
-"! opening in a new browser tab. The Note column shows a popover with the port's
-"! generation caveats when present. Do not edit by hand - regenerate with
-"! scripts/generate-overview.mjs
-"! NOTES (generation):
-"! - LIVE-TEST: the Note popover anchors to the pressed control via the event arg
-"!   \$event.oSource.sId; confirm it resolves the anchor in a running system.
+"! opening in a new browser tab. The Note column shows a hint button whose
+"! tooltip carries the port's generation caveats when present. Do not edit by
+"! hand - regenerate with scripts/generate-overview.mjs
 CLASS ${CLASS} DEFINITION PUBLIC.
 
   PUBLIC SECTION.
@@ -139,7 +136,6 @@ CLASS ${CLASS} DEFINITION PUBLIC.
     DATA client TYPE REF TO z2ui5_if_client.
 
     METHODS view_display.
-    METHODS on_event.
     METHODS get_catalog
       RETURNING
         VALUE(result) TYPE ty_t_app.
@@ -157,39 +153,7 @@ CLASS ${CLASS} IMPLEMENTATION.
       view_display( ).
     ELSEIF client->check_on_navigated( ).
       view_display( ).
-    ELSEIF client->check_on_event( ).
-      on_event( ).
     ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD on_event.
-
-    CASE client->get( )-event.
-
-      WHEN \`SHOW_NOTES\`.
-        " arg1 = the row's NOTES text, arg2 = the pressed control id (popover anchor)
-        SPLIT client->get_event_arg( 1 ) AT \` // \` INTO TABLE DATA(lt_line).
-
-        DATA(popover) = z2ui5_cl_api_xml=>factory( ).
-        DATA(box) = popover->open( \`Popover\`
-            )->attr( n = \`title\`        v = \`Generation notes\`
-            )->attr( n = \`placement\`    v = \`Auto\`
-            )->attr( n = \`contentWidth\` v = \`32rem\`
-
-            )->open( \`VBox\`
-                )->attr( n = \`class\` v = \`sapUiContentPadding\` ).
-
-        LOOP AT lt_line INTO DATA(lv_line).
-          box->leaf( \`Text\`
-              )->attr( n = \`text\` v = lv_line ).
-        ENDLOOP.
-
-        client->popover_display( xml   = popover->stringify( )
-                                 by_id = client->get_event_arg( 2 ) ).
-
-    ENDCASE.
 
   ENDMETHOD.
 
@@ -306,10 +270,8 @@ CLASS ${CLASS} IMPLEMENTATION.
                                 )->leaf( \`Button\`
                                     )->attr( n = \`icon\`    v = \`sap-icon://hint\`
                                     )->attr( n = \`type\`    v = \`Transparent\`
-                                    )->attr( n = \`tooltip\` v = \`Generation notes\`
-                                    )->attr( n = \`visible\` v = \`{HAS_NOTES}\`
-                                    )->attr( n = \`press\`   v = client->_event( val   = \`SHOW_NOTES\`
-                                                                               t_arg = VALUE #( ( \`{NOTES}\` ) ( \`$event.oSource.sId\` ) ) ) ).
+                                    )->attr( n = \`tooltip\` v = \`{NOTES}\`
+                                    )->attr( n = \`visible\` v = \`{HAS_NOTES}\` ).
 
     client->view_display( view->stringify( ) ).
 
