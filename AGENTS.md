@@ -114,7 +114,10 @@ Build the view with the generic builder **`z2ui5_cl_api_xml`** (`open` = descend
 into a container, `leaf` = childless control/stay, `shut` = ascend, `attr` = one
 attribute — all verbs 4 chars so chains align),
 translating the sample's XML 1:1 — every control / property / namespace maps
-directly, nothing is approximated. Structure `z2ui5_if_app~main` as a dispatcher:
+directly, nothing is approximated. Pass boolean properties as ABAP booleans
+(`v = abap_true` / `v = abap_false`); the builder renders them as `true` / `false`
+(it keeps a hashed set of boolean UI5 property names — extend `class_constructor`
+if a boolean property is missing). Structure `z2ui5_if_app~main` as a dispatcher:
 
 ```abap
 METHOD z2ui5_if_app~main.

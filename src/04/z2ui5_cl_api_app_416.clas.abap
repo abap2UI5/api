@@ -110,10 +110,10 @@ CLASS z2ui5_cl_api_app_416 IMPLEMENTATION.
                         )->shut(
                         )->leaf( n = `Title`
                                  a = VALUE #( ( n = `text`     v = `{TITLE}` )
-                                              ( n = `wrapping` v = `true` ) )
+                                              ( n = `wrapping` v = abap_true  ) )
                         )->leaf( n = `Label`
                                  a = VALUE #( ( n = `text`     v = `{SUBTITLE}` )
-                                              ( n = `wrapping` v = `true` ) ) ).
+                                              ( n = `wrapping` v = abap_true  ) ) ).
 
     client->view_display( view->stringify( ) ).
 
