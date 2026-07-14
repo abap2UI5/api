@@ -22,8 +22,9 @@ The pipeline (run by a coding agent):
    implementing `z2ui5_if_app`), filed by library under `src/`.
 3. **Store templates** — keep the untouched original UI5 JS/XML templates in the
    `ui5/` folder.
-4. **Report** — regenerate `api.md` (coverage) and `OVERVIEW.md`: every sample
-   marked ✅ ported / ❌ missing, with a coverage figure per module.
+4. **Report** — regenerate the coverage (`README.md` summary + `api.md`) and the
+   in-system overview app: every sample marked ✅ ported / ❌ missing, with a
+   coverage figure per module.
 
 Curated, hand-reviewed samples ultimately graduate to the
 [abap2UI5/samples](https://github.com/abap2UI5/samples) repo. Everything here is
@@ -83,7 +84,7 @@ ui5/<library>/<z2ui5_cl_api_app_n>/   ← original Component.js, *.view.xml,
 
 The folder name (class) is the join key between a port (`src/`) and its template
 (`ui5/`). Templates are held verbatim — never edited to fit ABAP; that is the
-generator's job. The `api.md` / `OVERVIEW.md` tables link the two together (§7).
+generator's job. The `api.md` tables link the two together (§7).
 
 ---
 
@@ -143,17 +144,22 @@ npx abaplint ./abaplint.jsonc          # expect 0 issues
 
 ---
 
-## 7. Coverage report — always (re)generated
+## 7. Coverage & overview — always (re)generated
 
-Two generated, never hand-edited docs list every demo kit sample of every
-library and mark ✅/❌ with per-module coverage:
+Three generated, never hand-edited artefacts. **Never hand-edit them — edit the
+scripts.**
 
-- **`api.md`** — coverage report (Javascript / ABAP / Link columns).
-- **`OVERVIEW.md`** — the same tables plus a rightmost **System** column that
-  launches each ported app in the abap2UI5 system.
+- **`README.md`** (between the `<!-- coverage:start/end -->` markers) — the
+  per-module coverage summary.
+- **`api.md`** — control-level detail: one section per UI5 control (demo kit
+  entity), each listing its samples (Javascript / ABAP / Link columns).
+- **`src/z2ui5_cl_api_app_overview.clas.*`** — the in-system overview **app**:
+  an abap2UI5 app that lists every ported app grouped by control and starts it
+  via `nav_app_call` (`_event(app)` → `on_event`). Mirrors `api.md`'s layout.
 
 ```bash
-OPENUI5_DIR=../openui5 node scripts/generate-coverage.mjs   # writes both docs
+OPENUI5_DIR=../openui5 node scripts/generate-coverage.mjs   # README + api.md
+node scripts/generate-overview.mjs                          # the overview app (src only)
 ```
 
 - **Universe of samples** — every `demokit/sample/<Name>` directory in the
@@ -161,18 +167,17 @@ OPENUI5_DIR=../openui5 node scripts/generate-coverage.mjs   # writes both docs
 - **Ported set** — parsed from each `src/**/*.clas.abap` port's
   `Rebuild of the UI5 demo kit sample: .../sample/<lib>.sample.<Name>` line.
 - A port matches a sample on `(library, Name)`.
-- **Entity for the demo kit link** — from each library's
+- **Control (entity) for grouping / the demo kit link** — from each library's
   `demokit/docuindex.json` (`explored.entities[].samples[]`), with the port's
-  Rebuild URL as fallback.
-- **All table links are external** (absolute URLs, overridable via env):
+  Rebuild URL (`.../entity/<entity>/sample/...`) as fallback.
+- **api.md links are external** (absolute URLs, overridable via env):
   Javascript → `ui5/` template folder (`REPO`/`REF`), ABAP → the `.clas.abap`,
-  Link → the live demo kit sample app (`DEMOKIT`), System → the app in the
-  abap2UI5 system (`SYSTEM`, `?app_start=<CLASS>`).
+  Link → the live demo kit sample app (`DEMOKIT`).
 
 The `generate_coverage` workflow (`workflow_dispatch` + weekly) shallow-clones
-OpenUI5, runs the script, stamps the `<!-- last-run -->` timestamp into
-`README.md`, and opens a pull request. Edit the **script**, never the generated
-docs.
+OpenUI5, runs both scripts, stamps the `<!-- last-run -->` timestamp into
+`README.md`, and opens a pull request. The overview app must stay abaplint-clean
+(§6) — it lives in `src/` and is part of every CI build.
 
 ---
 
