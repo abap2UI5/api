@@ -108,27 +108,43 @@ Each generated port carries ABAP Doc directly above `CLASS ... DEFINITION`:
   port it** — leave it as an ❌ gap in the coverage report.
 - Every port must pass all three CI checks (§6).
 
-### App skeleton
+### App skeleton — how a port is built
 
-Build the view with the generic builder **`z2ui5_cl_api_xml`** (`open` = descend
-into a container, `leaf` = childless control/stay, `shut` = ascend, `attr` = one
-attribute — all verbs 4 chars so chains align), translating the sample's XML 1:1
-— every control / property / namespace maps directly, nothing is approximated.
+This is the complete recipe for turning one UI5 demo kit sample into a port.
+Follow it exactly so every port looks the same and stays maintainable.
 
-- **`factory( )` returns an empty root** — open the `<mvc:View>` and declare its
-  `xmlns` namespaces yourself, exactly like any other control. `ns` is the literal
-  prefix (`f`, `l`, `core`, `mvc`).
-- **Formatting**: every `open( )` **indents its content** one level deeper (its
-  children's `)->` shift right); `shut` de-indents. Blank lines separate calls
-  whose method name **differs** (`open`↔`leaf`, before a `shut`); **no** blank
-  between calls of the same name (`open`/`open`, `leaf`/`leaf`, consecutive
-  `shut`s) and **none directly after a `shut`**.
-- **Booleans**: a literal is just `` `true` `` / `` `false` ``; only when the
-  value comes from an ABAP boolean variable, wrap it with
-  `z2ui5_cl_api_xml=>as_bool( flag )` (a raw `abap_false` would otherwise
-  serialise to an empty string).
+**Inputs** — the sample's original files from the OpenUI5 checkout: the
+`*.view.xml` (the UI), the controller (`*.controller.js` — event handlers),
+`Component.js` / `manifest.json` (which model data is loaded), plus any local
+`*.json` mock data. All of these are also copied verbatim into the port's
+`ui5/<library>/<class>/` folder (§4).
 
-Structure `z2ui5_if_app~main` as a dispatcher:
+**Output** — one class `z2ui5_cl_api_app_<n>` implementing `z2ui5_if_app`, whose
+view is a **1:1** rebuild of the sample's XML.
+
+#### Class layout
+
+```abap
+CLASS z2ui5_cl_api_app_<n> DEFINITION PUBLIC.       " lowercase, not FINAL
+
+  PUBLIC SECTION.
+    INTERFACES z2ui5_if_app.
+    " local types for the model data (ty_s_ / ty_t_) + the DATA that back the
+    " bindings live here, so the framework can serialise them across round-trips
+    TYPES: BEGIN OF ty_s_item, ... END OF ty_s_item.
+    DATA t_items TYPE STANDARD TABLE OF ty_s_item WITH EMPTY KEY.
+
+  PROTECTED SECTION.
+    DATA client TYPE REF TO z2ui5_if_client.
+    METHODS data_init.       " only if the app has model data
+    METHODS on_event.        " only if the app reacts to events
+    METHODS view_display.
+
+  PRIVATE SECTION.           " always present, kept empty
+ENDCLASS.
+```
+
+#### `z2ui5_if_app~main` — the dispatcher
 
 ```abap
 METHOD z2ui5_if_app~main.
@@ -144,13 +160,138 @@ METHOD z2ui5_if_app~main.
 ENDMETHOD.
 ```
 
-Add `data_init( )` / `on_event( )` only when the app actually has data / events
-(never a pass-through method with a single statement).
+- `check_on_init( )` fires once when the app starts — seed the data, draw the view.
+- `check_on_event( )` fires on every user interaction — dispatch in `on_event( )`.
+- Add `data_init( )` / `on_event( )` **only when the app actually has data /
+  events** — never a pass-through method with a single statement. A static app
+  (like app 408) has just `view_display( )` under `check_on_init( )`.
+- If the sample re-displays on navigation, add an
+  `ELSEIF client->check_on_navigated( ). view_display( ).` branch.
+
+#### `data_init` — the model
+
+The sample's JSON model becomes ABAP: one `ty_s_`/`ty_t_` type per JSON array,
+filled with `VALUE #( ( … ) ( … ) )`. Field names are the JSON keys, upper-cased
+by ABAP; bindings reference them in braces (`{TITLE}`, `{PRODUCT_ID}`). Keep the
+data verbatim from the sample (same rows, same text). See app 416 / 454.
+
+#### `view_display` — the view via `z2ui5_cl_api_xml`
+
+Build the view with the generic builder **`z2ui5_cl_api_xml`**. It translates a
+UI5 XML view 1:1 by method chaining — every control, property and namespace maps
+directly, nothing is approximated. The four navigation verbs are all 4 chars so
+the `)->` arrows line up:
+
+| Verb | XML meaning | Tree action | Returns |
+|------|-------------|-------------|---------|
+| `open( n ns a )` | open a container tag `<X>` | add child **and descend** into it | the new child |
+| `leaf( n ns a )` | a self-closing tag `<X/>` | add child, **stay** on current node | the same node |
+| `shut( )` | the closing `</X>` | **ascend** to the parent | the parent |
+| `attr( n v )` | one `name="value"` | add an attribute to current node | the same node |
+
+Arguments: `n` = tag name, `ns` = namespace **prefix** (literal `f`, `l`, `core`,
+`mvc` — omitted for the default `sap.m` namespace), `a` = a `VALUE #( )` table of
+`( n = <attr> v = <value> )` rows. `attr( )` is the single-attribute shortcut;
+usually pass everything through `a`.
+
+Both named XML aggregations (`<headerToolbar>`, `<layoutData>`) and controls are
+just `open`/`leaf` calls — an aggregation is a nameless-namespace `open` with no
+attributes, e.g. `)->open( \`headerToolbar\` )` (positional — a single named `n =`
+would trip abaplint's `omit_parameter_name`).
+
+`factory( )` returns an **empty root**. There is no implicit `<View>` — you open
+the `<mvc:View>` and declare its `xmlns` namespaces yourself, exactly like any
+other control:
+
+```abap
+DATA(view) = z2ui5_cl_api_xml=>factory( ).
+
+view->open( n = `View` ns = `mvc`
+            a = VALUE #( ( n = `xmlns`     v = `sap.m` )
+                         ( n = `xmlns:mvc` v = `sap.ui.core.mvc` )
+                         ( n = `xmlns:f`   v = `sap.f` ) )
+    )->leaf( n = `Slider`
+             a = VALUE #( ( n = `value`      v = client->_bind_edit( slider_value ) )
+                          ( n = `liveChange` v = client->_event( `SLIDER_MOVED` ) ) )
+
+    )->open( n = `Panel`
+             a = VALUE #( ( n = `width` v = client->_bind( panel_width ) ) )
+        )->open( `headerToolbar`
+            )->open( n = `Toolbar`
+                )->leaf( n = `Title`
+                         a = VALUE #( ( n = `text` v = `Header` ) )
+
+            )->shut(
+        )->shut( ).
+
+client->view_display( view->stringify( ) ).
+```
+
+`stringify( )` renders the whole tree to the XML string handed to
+`client->view_display( )` as the standalone final statement.
+
+#### Formatting rules (strict — reviewers check these)
+
+- **The closing paren rides with the arrow.** Never leave a `)` alone at a line
+  end; carry it to the **start of the next segment** so it always reads `)->`.
+  The final call of the chain ends in `) ).`.
+- **Indent after every `open`.** Each `open( )` shifts its children's `)->` one
+  level (4 spaces) to the right; `shut( )` shifts back left. The `)->` of a
+  `shut` sits at the same column as the `open` it closes.
+- **`leaf` sits one level left of the `open`'s children** so its arrow aligns
+  with the `open` on the line above (the arrows form one column).
+- **Blank lines follow the method name, not the nesting:** a blank line between
+  two calls whose verb **differs** (`open`↔`leaf`, and before every `shut`);
+  **no** blank line between calls of the **same** verb (`open`/`open`,
+  `leaf`/`leaf`, consecutive `shut`s) and **none directly after** a `shut`.
+- **Inside `a = VALUE #( )`, the `v =` columns align** under each other (pad the
+  `n =` names) so attribute values form a straight column.
+- Long text literals split with `&&` at ~255 chars max per line (§6).
+
+#### Data binding & events
+
+- `client->_bind( var )` — one-way bind (display); `client->_bind_edit( var )` —
+  two-way bind (the value flows back into `var` on the next round-trip). Bind the
+  ABAP `DATA` member, e.g. `v = client->_bind( t_items )`.
+- Inside a bound aggregation, child properties use UI5 binding braces on the
+  upper-cased field name: `v = \`{TITLE}\``.
+- `client->_event( \`NAME\` )` — wire a control event (press, liveChange…) to an
+  event named `NAME`; handle it in `on_event( )` with
+  `IF client->check_on_event( \`NAME\` ).`. After changing bound data in an
+  event, call `client->view_model_update( )` to push it back (no full redraw).
+
+#### Booleans
+
+A literal boolean is just `` `true` `` / `` `false` `` written directly. **Only**
+when the value comes from an ABAP boolean variable, wrap it with
+`z2ui5_cl_api_xml=>as_bool( flag )` — a raw `abap_false` would otherwise
+serialise to an empty string. Never feed `abap_true`/`abap_false` straight into
+an attribute value.
+
+#### The 1.71 rule in practice
+
+Use **only** controls/properties available since UI5 1.71; never a deprecated
+one. When a sample uses something newer, either omit that one optional property
+with a one-line comment (see app 454: `showClearIcon` dropped, `" … omitted to
+stay compatible with UI5 1.71`) if the sample still works without it, or — if the
+sample's whole point needs the newer/deprecated control — **do not port it** and
+leave it as an ❌ gap. Never silently substitute a different control.
+
+#### Worked references
+
+Three PoC ports show the full range — read them before writing a new one:
+
+| App | Sample | Shows |
+|-----|--------|-------|
+| `src/01/z2ui5_cl_api_app_408` | `sap.m.Text` | static view, no data/events, `&&`-split text |
+| `src/04/z2ui5_cl_api_app_416` | `sap.f.GridList` | data + two-way bind + `liveChange` event + `view_model_update` |
+| `src/01/z2ui5_cl_api_app_454` | `sap.m.MultiInput` | data, bound aggregation, `core:Item`, 1.71 omission comment |
 
 ### Generation prompt
 
-The prompt used to port one sample is kept in `README.md` (the "Generation
-prompt" section). Keep the two in sync.
+A condensed version of the recipe above, phrased as a porting task, is kept in
+`README.md` (the "Generation prompt" section). **Keep the two in sync** — this
+§5 is the authoritative long form.
 
 ---
 
