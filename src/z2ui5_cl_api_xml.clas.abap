@@ -1,9 +1,9 @@
 "! Generic UI5 XML view builder - translate a UI5 XML view 1:1 by method
-"! chaining. Each node is one instance; navigate the tree with:
-"!   tag  - add a child control/aggregation and DESCEND into it (returns child)
-"!   leaf - add a child but STAY on the current node (returns the same node)
-"!   up   - ASCEND to the parent (returns parent)
-"!   attr - set one attribute (returns the same node)
+"! chaining. Navigate the tree with:
+"!   open  - add a child control/aggregation and DESCEND into it (returns child)
+"!   add   - add a child but STAY on the current node (returns the same node)
+"!   close - ASCEND to the parent (returns parent)
+"!   attr  - set one attribute (returns the same node)
 "! Element = n (name), namespace = ns (e.g. `sap.f`), attributes = a (table of
 "! n/v). Namespaces are collected and declared once on the root <mvc:View>.
 CLASS z2ui5_cl_api_xml DEFINITION PUBLIC CREATE PRIVATE.
@@ -23,7 +23,7 @@ CLASS z2ui5_cl_api_xml DEFINITION PUBLIC CREATE PRIVATE.
       RETURNING
         VALUE(result) TYPE REF TO z2ui5_cl_api_xml.
 
-    METHODS tag
+    METHODS open
       IMPORTING
         n             TYPE string
         ns            TYPE string OPTIONAL
@@ -31,7 +31,7 @@ CLASS z2ui5_cl_api_xml DEFINITION PUBLIC CREATE PRIVATE.
       RETURNING
         VALUE(result) TYPE REF TO z2ui5_cl_api_xml.
 
-    METHODS leaf
+    METHODS add
       IMPORTING
         n             TYPE string
         ns            TYPE string OPTIONAL
@@ -46,7 +46,7 @@ CLASS z2ui5_cl_api_xml DEFINITION PUBLIC CREATE PRIVATE.
       RETURNING
         VALUE(result) TYPE REF TO z2ui5_cl_api_xml.
 
-    METHODS up
+    METHODS close
       RETURNING
         VALUE(result) TYPE REF TO z2ui5_cl_api_xml.
 
@@ -65,7 +65,7 @@ CLASS z2ui5_cl_api_xml DEFINITION PUBLIC CREATE PRIVATE.
     DATA root   TYPE REF TO z2ui5_cl_api_xml.
     DATA t_ns   TYPE ty_t_attr.
 
-    METHODS add
+    METHODS elem
       IMPORTING
         n             TYPE string
         ns            TYPE string
@@ -107,7 +107,7 @@ CLASS z2ui5_cl_api_xml IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD add.
+  METHOD elem.
 
     result = NEW #( ).
     result->root = root.
@@ -122,20 +122,20 @@ CLASS z2ui5_cl_api_xml IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD tag.
+  METHOD open.
 
-    result = add( n  = n
-                  ns = ns
-                  a  = a ).
+    result = elem( n  = n
+                   ns = ns
+                   a  = a ).
 
   ENDMETHOD.
 
 
-  METHOD leaf.
+  METHOD add.
 
-    add( n  = n
-         ns = ns
-         a  = a ).
+    elem( n  = n
+          ns = ns
+          a  = a ).
     result = me.
 
   ENDMETHOD.
@@ -149,7 +149,7 @@ CLASS z2ui5_cl_api_xml IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD up.
+  METHOD close.
 
     result = parent.
 
@@ -183,7 +183,7 @@ CLASS z2ui5_cl_api_xml IMPLEMENTATION.
 
   METHOD render.
 
-    DATA(tag_name) = COND string( WHEN prefix IS INITIAL THEN name ELSE |{ prefix }:{ name }| ).
+    DATA(qname) = COND string( WHEN prefix IS INITIAL THEN name ELSE |{ prefix }:{ name }| ).
 
     DATA(attrs) = ``.
     IF me = root.
@@ -197,7 +197,7 @@ CLASS z2ui5_cl_api_xml IMPLEMENTATION.
     ENDLOOP.
 
     IF t_child IS INITIAL.
-      result = |<{ tag_name }{ attrs }/>|.
+      result = |<{ qname }{ attrs }/>|.
       RETURN.
     ENDIF.
 
@@ -205,7 +205,7 @@ CLASS z2ui5_cl_api_xml IMPLEMENTATION.
     LOOP AT t_child INTO DATA(child).
       inner = |{ inner }{ child->render( ) }|.
     ENDLOOP.
-    result = |<{ tag_name }{ attrs }>{ inner }</{ tag_name }>|.
+    result = |<{ qname }{ attrs }>{ inner }</{ qname }>|.
 
   ENDMETHOD.
 
