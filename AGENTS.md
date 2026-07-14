@@ -343,11 +343,16 @@ scripts.**
   kit sample app next to it) · **ABAP** (link to the generated class,
   `—` = not ported).
 - **`src/z2ui5_cl_api_app_overview.clas.*`** — the in-system overview **app**:
-  an abap2UI5 app that lists every ported app, one row per sample. Each row
-  starts with its **control**, then the sample name (opens the app in a **new
-  browser tab** via `_event_client( cs_event-open_new_tab )`), then a `->` link
-  to its demo kit page. Rows of the same control form a block, separated from
-  the next control by a blank line (a top margin on the first row of each block).
+  an abap2UI5 app that lists every ported app as one row of a `sap.m.Table`,
+  sorted by module → control → sample. Columns:
+  **Module** (text) · **Control** (link → OpenUI5 API) · **Sample** (text) ·
+  **JavaScript** (↗ → OpenUI5 repo source) · **UI5 App** (↗ → live OpenUI5
+  **fullscreen** sample runner) · **ABAP** (↗ → generated class on GitHub) ·
+  **abap2UI5 App** (↗ → starts the app). **Every link opens in a new browser
+  tab** (`target="_blank"`; the abap2UI5 App link is the `?app_start=<CLASS>`
+  URL). All source links point at OpenUI5; only ABAP + the start link are local.
+  The per-row URLs are built in `view_display` (the start URL needs the runtime
+  system origin), the static facts come from `get_catalog`.
 
 ```bash
 OPENUI5_DIR=../openui5 node scripts/generate-coverage.mjs   # README + api.md

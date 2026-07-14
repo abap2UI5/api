@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 /*
  * Generates the in-system overview app src/z2ui5_cl_api_app_overview.clas.*
- * — an abap2UI5 app that lists every ported sample app grouped by UI5 control
- * (demo kit entity) and starts it in the system (nav_app_call), mirroring the
- * layout of api.md. Depends only on src/ (no OpenUI5 checkout needed).
+ * — an abap2UI5 app that lists every ported sample as one row of a table with
+ * columns: Module, Control (-> OpenUI5 API), Sample, JavaScript (-> OpenUI5
+ * repo source), UI5 App (-> live OpenUI5 fullscreen sample), ABAP (-> generated
+ * class on GitHub) and abap2UI5 App (-> starts the app). Every link opens in a
+ * NEW browser tab (target="_blank"; the abap2UI5 App uses the ?app_start= URL).
+ * Depends only on src/ (no OpenUI5 checkout needed).
  *
  * Run:  node scripts/generate-overview.mjs
  */
@@ -26,7 +29,8 @@ function walk(dir, out = []) {
   return out;
 }
 
-// collect ported apps: control (entity), library, sample name, class
+// collect ported apps: control (entity), module (library), sample name, class,
+// and the repo-relative path of the generated class (for the ABAP GitHub link)
 const apps = [];
 for (const f of walk(SRC)) {
   if (!f.endsWith('.clas.abap')) continue;
@@ -38,25 +42,36 @@ for (const f of walk(SRC)) {
   const id = m[2];
   const i = id.indexOf('.sample.');
   if (i === -1) continue;
-  apps.push({ control: entity, lib: id.slice(0, i), name: id.slice(i + '.sample.'.length), app: cls });
+  apps.push({
+    module: id.slice(0, i),
+    control: entity,
+    name: id.slice(i + '.sample.'.length),
+    cls,
+    file: path.relative(ROOT, f).split(path.sep).join('/'),
+  });
 }
-// group by control, then by name (case-insensitive)
+// order by module, then control, then sample name (case-insensitive)
 apps.sort((a, b) =>
+  a.module.toLowerCase().localeCompare(b.module.toLowerCase()) ||
   a.control.toLowerCase().localeCompare(b.control.toLowerCase()) ||
   a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
 
-// aligned VALUE #( ) rows
+// aligned VALUE #( ) rows — only the generation-time facts; the URLs are built
+// at runtime in view_display (the abap2UI5 start URL needs the system origin)
 const w = (k) => Math.max(...apps.map((a) => a[k].length));
-const wc = w('control'), wl = w('lib'), wn = w('name'), wa = w('app');
+const wm = w('module'), wc = w('control'), wn = w('name'), wl = w('cls'), wf = w('file');
 const rows = apps.map((a) =>
-  `      ( control = \`${a.control}\`${' '.repeat(wc - a.control.length)}` +
-  ` lib = \`${a.lib}\`${' '.repeat(wl - a.lib.length)}` +
+  `      ( module = \`${a.module}\`${' '.repeat(wm - a.module.length)}` +
+  ` control = \`${a.control}\`${' '.repeat(wc - a.control.length)}` +
   ` name = \`${a.name}\`${' '.repeat(wn - a.name.length)}` +
-  ` app = \`${a.app}\`${' '.repeat(wa - a.app.length)} )`);
+  ` class = \`${a.cls}\`${' '.repeat(wl - a.cls.length)}` +
+  ` path = \`${a.file}\`${' '.repeat(wf - a.file.length)} )`);
 
-const abap = `"! Generated overview app - lists every abap2UI5 api sample app grouped by UI5
-"! control and starts it in the system. Do not edit by hand - regenerate with
-"! scripts/generate-overview.mjs
+const abap = `"! Generated overview app - lists every abap2UI5 api sample app in a table.
+"! Each row links the OpenUI5 control API, the OpenUI5 sample source, the live
+"! OpenUI5 fullscreen sample, the generated ABAP class and a start link for the
+"! abap2UI5 app - all opening in a new browser tab. Do not edit by hand -
+"! regenerate with scripts/generate-overview.mjs
 CLASS ${CLASS} DEFINITION PUBLIC.
 
   PUBLIC SECTION.
@@ -64,12 +79,20 @@ CLASS ${CLASS} DEFINITION PUBLIC.
 
     TYPES:
       BEGIN OF ty_s_app,
-        control TYPE string,
-        lib     TYPE string,
-        name    TYPE string,
-        app     TYPE string,
+        module    TYPE string,
+        control   TYPE string,
+        name      TYPE string,
+        class     TYPE string,
+        path      TYPE string,
+        api_url   TYPE string,
+        js_url    TYPE string,
+        ui5_url   TYPE string,
+        abap_url  TYPE string,
+        start_url TYPE string,
       END OF ty_s_app.
     TYPES ty_t_app TYPE STANDARD TABLE OF ty_s_app WITH DEFAULT KEY.
+
+    DATA t_app TYPE ty_t_app.
 
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
@@ -99,45 +122,69 @@ CLASS ${CLASS} IMPLEMENTATION.
 
   METHOD view_display.
 
-    DATA(t_catalog) = get_catalog( ).
-
-    " base url to launch an app in a new browser tab
+    " base url to launch an abap2UI5 app in a new browser tab
     DATA(start) = |{ client->get( )-s_config-origin }{ client->get( )-s_config-pathname }?app_start=|.
 
+    t_app = get_catalog( ).
+    LOOP AT t_app ASSIGNING FIELD-SYMBOL(<app>).
+
+      DATA(libpath) = replace( val = <app>-module
+                               sub = \`.\`
+                               with = \`/\`
+                               occ = 0 ).
+
+      <app>-api_url   = |https://sdk.openui5.org/api/{ <app>-control }|.
+      <app>-js_url    = |https://github.com/SAP/openui5/tree/master/src/{ <app>-module }| &&
+                        |/test/{ libpath }/demokit/sample/{ <app>-name }|.
+      <app>-ui5_url   = |https://sdk.openui5.org/resources/sap/ui/documentation/sdk/index.html| &&
+                        |?sap-ui-xx-sample-id={ <app>-module }.sample.{ <app>-name }| &&
+                        |&sap-ui-xx-sample-lib={ <app>-module }&sap-ui-xx-sample-origin=.| &&
+                        |&sap-ui-xx-dk-origin=https%3A%2F%2Fsdk.openui5.org| &&
+                        |&sap-ui-theme=sap_horizon&sap-ui-rtl=false&sap-ui-density=sapUiSizeCompact|.
+      <app>-abap_url  = |https://github.com/abap2UI5/api/blob/main/{ <app>-path }|.
+      <app>-start_url = |{ start }{ to_upper( <app>-class ) }|.
+
+    ENDLOOP.
+
     DATA(view) = z2ui5_cl_xml_view=>factory( ).
-    DATA(page) = view->shell(
+    DATA(tab) = view->shell(
         )->page(
             title          = \`abap2UI5 - api\`
             navbuttonpress = client->_event_nav_app_leave( )
-            shownavbutton  = client->check_app_prev_stack( ) ).
+            shownavbutton  = client->check_app_prev_stack( )
+        )->table(
+            sticky = \`ColumnHeaders\`
+            items  = client->_bind( t_app ) ).
 
-    DATA(prev_control) = \`\`.
-    LOOP AT t_catalog INTO DATA(app).
+    tab->columns(
+        )->column( )->text( \`Module\` )->get_parent(
+        )->column( )->text( \`Control\` )->get_parent(
+        )->column( )->text( \`Sample\` )->get_parent(
+        )->column( )->text( \`JavaScript\` )->get_parent(
+        )->column( )->text( \`UI5 App\` )->get_parent(
+        )->column( )->text( \`ABAP\` )->get_parent(
+        )->column( )->text( \`abap2UI5 App\` ).
 
-      " every row starts with its control; a new control opens a new block,
-      " set off from the previous one by a blank line (top margin)
-      DATA(css) = COND string( WHEN prev_control IS NOT INITIAL AND app-control <> prev_control
-                               THEN \`sapUiTinyMarginBegin sapUiMediumMarginTop\`
-                               ELSE \`sapUiTinyMarginBegin\` ).
-      prev_control = app-control.
-
-      DATA(url) = |https://sdk.openui5.org/entity/{ app-control }/sample/{ app-lib }.sample.{ app-name }|.
-      page->hbox( alignitems = \`Center\`
-                  class      = css
-          )->text(
-              text  = app-control
-              class = \`sapUiTinyMarginEnd\`
-          )->link(
-              text  = app-name
-              press = client->_event_client( val   = client->cs_event-open_new_tab
-                                             t_arg = VALUE #( ( |{ start }{ to_upper( app-app ) }| ) ) )
-          )->link(
-              text   = \`->\`
-              href   = url
-              target = \`_blank\`
-              class  = \`sapUiSmallMarginBegin\` ).
-
-    ENDLOOP.
+    tab->items(
+        )->column_list_item(
+            )->cells(
+                )->text( \`{MODULE}\`
+                )->link( text   = \`{CONTROL}\`
+                         href   = \`{API_URL}\`
+                         target = \`_blank\`
+                )->text( \`{NAME}\`
+                )->link( text   = \`↗\`
+                         href   = \`{JS_URL}\`
+                         target = \`_blank\`
+                )->link( text   = \`↗\`
+                         href   = \`{UI5_URL}\`
+                         target = \`_blank\`
+                )->link( text   = \`↗\`
+                         href   = \`{ABAP_URL}\`
+                         target = \`_blank\`
+                )->link( text   = \`↗\`
+                         href   = \`{START_URL}\`
+                         target = \`_blank\` ).
 
     client->view_display( view->stringify( ) ).
 
