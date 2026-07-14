@@ -278,9 +278,9 @@ client->view_display( view->stringify( ) ).
   call `client->view_model_update( )` to push it back (no full redraw).
 - Read event parameters (declared via `_event( … t_arg = … )`) with
   `client->get_event_arg( n )`. A **boolean** parameter (e.g. a CheckBox
-  `selected`, `${$parameters>/selected}`) arrives as `abap_bool` (`X` / space),
-  **not** the string `` `true` `` — read it with
-  `CONV abap_bool( client->get_event_arg( 1 ) )`, never `… = \`true\``.
+  `selected`, `${$parameters>/selected}`) already arrives as `abap_bool`
+  (`X` / space), **not** the string `` `true` `` — assign it straight into an
+  `abap_bool` field (`flag = client->get_event_arg( 1 ).`); never test `… = \`true\``.
 
 #### Booleans
 

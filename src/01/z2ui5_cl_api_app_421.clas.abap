@@ -78,11 +78,9 @@ CLASS z2ui5_cl_api_app_421 IMPLEMENTATION.
     CASE client->get( )-event.
 
       WHEN `PARENT_CLICKED`.
-        " a boolean event parameter arrives as abap_bool (X / space), not `true`
-        DATA(selected) = CONV abap_bool( client->get_event_arg( 1 ) ).
-        child1 = selected.
-        child2 = selected.
-        child3 = selected.
+        child1 = client->get_event_arg( 1 ).
+        child2 = client->get_event_arg( 1 ).
+        child3 = client->get_event_arg( 1 ).
         client->view_model_update( ).
 
     ENDCASE.
