@@ -70,11 +70,9 @@ CLASS z2ui5_cl_api_app_454 IMPLEMENTATION.
                              ( n = `xmlns:mvc`  v = `sap.ui.core.mvc` )
                              ( n = `xmlns:l`    v = `sap.ui.layout` )
                              ( n = `xmlns:core` v = `sap.ui.core` ) )
-
        )->open( n = `VerticalLayout` ns = `l`
                 a = VALUE #( ( n = `class` v = `sapUiContentPadding` )
                              ( n = `width` v = `100%` ) )
-
           )->leaf( n = `Label`
                    a = VALUE #( ( n = `text`     v = `Enter a search term, e.g. “Notebook”, and add matching products as tokens` )
                                 ( n = `width`    v = `100%` )
@@ -85,10 +83,10 @@ CLASS z2ui5_cl_api_app_454 IMPLEMENTATION.
                                 ( n = `suggestionItems` v = client->_bind( t_products ) )
                                 ( n = `placeholder`     v = `Products...` )
                                 ( n = `showValueHelp`   v = `false` ) )
-
              )->leaf( n = `Item` ns = `core`
                       a = VALUE #( ( n = `key`  v = `{PRODUCT_ID}` )
                                    ( n = `text` v = `{NAME}` ) )
+
           )->shut(
           )->leaf( n = `Label`
                    a = VALUE #( ( n = `text`     v = `MultiInput with pre-selected tokens` )

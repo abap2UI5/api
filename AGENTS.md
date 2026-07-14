@@ -118,8 +118,10 @@ attribute — all verbs 4 chars so chains align), translating the sample's XML 1
 - **`factory( )` returns an empty root** — open the `<mvc:View>` and declare its
   `xmlns` namespaces yourself, exactly like any other control. `ns` is the literal
   prefix (`f`, `l`, `core`, `mvc`).
-- **Formatting**: `)->` continuations align the arrow under the head's `->`;
-  leave one **blank line after every `open( )`** before the block's content.
+- **Formatting**: `)->` continuations align the arrow under the head's `->`.
+  Blank lines: none between calls of the **same** name (`open`/`open`,
+  `leaf`/`leaf`); exactly one **before a `shut`** (before the first of a run),
+  none after it.
 - **Booleans**: a literal is just `` `true` `` / `` `false` ``; only when the
   value comes from an ABAP boolean variable, wrap it with
   `z2ui5_cl_api_xml=>as_bool( flag )` (a raw `abap_false` would otherwise
