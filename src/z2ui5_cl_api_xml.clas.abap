@@ -1,8 +1,8 @@
 "! Generic UI5 XML view builder - translate a UI5 XML view 1:1 by method
-"! chaining. Navigate the tree with:
+"! chaining. Navigate the tree with (all verbs 4 chars, so chains align):
 "!   open  - add a child control/aggregation and DESCEND into it (returns child)
-"!   add   - add a child but STAY on the current node (returns the same node)
-"!   close - ASCEND to the parent (returns parent)
+"!   leaf  - add a childless control but STAY on the current node (returns same)
+"!   shut  - ASCEND to the parent (returns parent)
 "!   attr  - set one attribute (returns the same node)
 "! Element = n (name), namespace prefix = ns (e.g. `f`, `core`, `l`), attributes
 "! = a (table of n/v). The root <mvc:View> and its xmlns declarations are written
@@ -35,7 +35,7 @@ CLASS z2ui5_cl_api_xml DEFINITION PUBLIC CREATE PRIVATE.
       RETURNING
         VALUE(result) TYPE REF TO z2ui5_cl_api_xml.
 
-    METHODS add
+    METHODS leaf
       IMPORTING
         n             TYPE string
         ns            TYPE string OPTIONAL
@@ -50,7 +50,7 @@ CLASS z2ui5_cl_api_xml DEFINITION PUBLIC CREATE PRIVATE.
       RETURNING
         VALUE(result) TYPE REF TO z2ui5_cl_api_xml.
 
-    METHODS close
+    METHODS shut
       RETURNING
         VALUE(result) TYPE REF TO z2ui5_cl_api_xml.
 
@@ -125,7 +125,7 @@ CLASS z2ui5_cl_api_xml IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD add.
+  METHOD leaf.
 
     elem( n  = n
           ns = ns
@@ -143,7 +143,7 @@ CLASS z2ui5_cl_api_xml IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD close.
+  METHOD shut.
 
     result = parent.
 

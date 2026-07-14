@@ -82,9 +82,9 @@ CLASS z2ui5_cl_api_app_416 IMPLEMENTATION.
                                                      ( n = `xmlns:mvc` v = `sap.ui.core.mvc` )
                                                      ( n = `xmlns:f` v = `sap.f` ) ) ).
 
-    view->add( n = `Slider`
-               a = VALUE #( ( n = `value`      v = client->_bind_edit( slider_value ) )
-                            ( n = `liveChange` v = client->_event( `SLIDER_MOVED` ) ) )
+    view->leaf( n = `Slider`
+                a = VALUE #( ( n = `value`      v = client->_bind_edit( slider_value ) )
+                             ( n = `liveChange` v = client->_event( `SLIDER_MOVED` ) ) )
         )->open( n = `Panel`
                  a = VALUE #( ( n = `id`               v = `panelForGridList` )
                               ( n = `backgroundDesign` v = `Transparent` )
@@ -92,10 +92,10 @@ CLASS z2ui5_cl_api_app_416 IMPLEMENTATION.
             )->open( `headerToolbar`
                 )->open( n = `Toolbar`
                          a = VALUE #( ( n = `height` v = `3rem` ) )
-                    )->add( n = `Title`
-                            a = VALUE #( ( n = `text` v = `GridList with default grid layout` ) )
-                )->close(
-            )->close(
+                    )->leaf( n = `Title`
+                             a = VALUE #( ( n = `text` v = `GridList with default grid layout` ) )
+                )->shut(
+            )->shut(
             )->open( n = `GridList` ns = `f`
                      a = VALUE #( ( n = `id`         v = `gridList` )
                                   ( n = `headerText` v = `GridList header` )
@@ -104,16 +104,16 @@ CLASS z2ui5_cl_api_app_416 IMPLEMENTATION.
                     )->open( n = `VBox`
                              a = VALUE #( ( n = `class` v = `sapUiSmallMargin` ) )
                         )->open( `layoutData`
-                            )->add( n = `FlexItemData`
-                                    a = VALUE #( ( n = `growFactor`   v = `1` )
-                                                 ( n = `shrinkFactor` v = `0` ) )
-                        )->close(
-                        )->add( n = `Title`
-                                a = VALUE #( ( n = `text`     v = `{TITLE}` )
-                                             ( n = `wrapping` v = `true` ) )
-                        )->add( n = `Label`
-                                a = VALUE #( ( n = `text`     v = `{SUBTITLE}` )
-                                             ( n = `wrapping` v = `true` ) ) ).
+                            )->leaf( n = `FlexItemData`
+                                     a = VALUE #( ( n = `growFactor`   v = `1` )
+                                                  ( n = `shrinkFactor` v = `0` ) )
+                        )->shut(
+                        )->leaf( n = `Title`
+                                 a = VALUE #( ( n = `text`     v = `{TITLE}` )
+                                              ( n = `wrapping` v = `true` ) )
+                        )->leaf( n = `Label`
+                                 a = VALUE #( ( n = `text`     v = `{SUBTITLE}` )
+                                              ( n = `wrapping` v = `true` ) ) ).
 
     client->view_display( view->stringify( ) ).
 

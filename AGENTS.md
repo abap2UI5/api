@@ -111,7 +111,8 @@ Each generated port carries ABAP Doc directly above `CLASS ... DEFINITION`:
 ### App skeleton
 
 Build the view with the generic builder **`z2ui5_cl_api_xml`** (`open` = descend
-into a container, `add` = leaf/stay, `close` = ascend, `attr` = one attribute),
+into a container, `leaf` = childless control/stay, `shut` = ascend, `attr` = one
+attribute — all verbs 4 chars so chains align),
 translating the sample's XML 1:1 — every control / property / namespace maps
 directly, nothing is approximated. Structure `z2ui5_if_app~main` as a dispatcher:
 
