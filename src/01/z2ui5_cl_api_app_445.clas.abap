@@ -7,9 +7,9 @@ CLASS z2ui5_cl_api_app_445 DEFINITION PUBLIC.
     INTERFACES z2ui5_if_app.
 
   PROTECTED SECTION.
-    METHODS view_display
-      IMPORTING
-        client TYPE REF TO z2ui5_if_client.
+    DATA client TYPE REF TO z2ui5_if_client.
+
+    METHODS view_display.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -17,24 +17,30 @@ ENDCLASS.
 
 CLASS z2ui5_cl_api_app_445 IMPLEMENTATION.
 
-  METHOD view_display.
+  METHOD z2ui5_if_app~main.
 
-    DATA(page) = z2ui5_cl_xml_view=>factory( ).
-
-    page->list(
-           headertext = `Products`
-           nodatatext = |No products found!\nPlease change your filter settings.| ).
-
-    client->view_display( page->stringify( ) ).
+    me->client = client.
+    IF client->check_on_init( ).
+      view_display( ).
+    ENDIF.
 
   ENDMETHOD.
 
 
-  METHOD z2ui5_if_app~main.
+  METHOD view_display.
 
-    IF client->check_on_init( ).
-      view_display( client ).
-    ENDIF.
+    DATA(view) = z2ui5_cl_api_xml=>factory( ).
+
+    view->open( n = `View` ns = `mvc`
+                a = VALUE #( ( n = `xmlns:l`   v = `sap.ui.layout` )
+                             ( n = `xmlns:mvc` v = `sap.ui.core.mvc` )
+                             ( n = `xmlns`     v = `sap.m` ) )
+
+        )->leaf( n = `List`
+                 a = VALUE #( ( n = `headerText` v = `Products` )
+                              ( n = `noDataText` v = |No products found!\nPlease change your filter settings.| ) ) ).
+
+    client->view_display( view->stringify( ) ).
 
   ENDMETHOD.
 

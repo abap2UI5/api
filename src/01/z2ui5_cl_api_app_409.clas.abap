@@ -8,6 +8,10 @@ CLASS z2ui5_cl_api_app_409 DEFINITION PUBLIC.
     INTERFACES z2ui5_if_app.
 
   PROTECTED SECTION.
+    DATA client TYPE REF TO z2ui5_if_client.
+
+    METHODS view_display.
+
   PRIVATE SECTION.
 ENDCLASS.
 
@@ -16,16 +20,35 @@ CLASS z2ui5_cl_api_app_409 IMPLEMENTATION.
 
   METHOD z2ui5_if_app~main.
 
-    DATA(view) = z2ui5_cl_xml_view=>factory( ).
-    view->vertical_layout( class = `sapUiContentPadding`
-                           width = `100%`
-        )->text_area(
-            value = `Lorem ipsum dolor st amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, `  &&
-                    `sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est `    &&
-                    `Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore ` &&
-                    `et dolore magna aliquyam erat, sed diam voluptua. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod `     &&
-                    `tempor invidunt ut labore et dolore magna aliquyam erat`
-            rows  = `8` ).
+    me->client = client.
+    IF client->check_on_init( ).
+      view_display( ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD view_display.
+
+    DATA(view) = z2ui5_cl_api_xml=>factory( ).
+
+    view->open( n = `View` ns = `mvc`
+                a = VALUE #( ( n = `xmlns:l`   v = `sap.ui.layout` )
+                             ( n = `xmlns:mvc` v = `sap.ui.core.mvc` )
+                             ( n = `xmlns`     v = `sap.m` ) )
+        )->open( n = `VerticalLayout` ns = `l`
+                 a = VALUE #( ( n = `class` v = `sapUiContentPadding` )
+                              ( n = `width` v = `100%` ) )
+            )->open( n = `content` ns = `l`
+
+                )->leaf( n = `TextArea`
+                         a = VALUE #( ( n = `value`
+                                        v = `Lorem ipsum dolor st amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, ` &&
+                                            `sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est ` &&
+                                            `Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore ` &&
+                                            `et dolore magna aliquyam erat, sed diam voluptua. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod ` &&
+                                            `tempor invidunt ut labore et dolore magna aliquyam erat` )
+                                      ( n = `rows` v = `8` ) ) ).
 
     client->view_display( view->stringify( ) ).
 
