@@ -141,7 +141,7 @@ CLASS z2ui5_cl_api_app_401 IMPLEMENTATION.
                         )->attr( n = `key`     v = `{TEXT}`
                         )->attr( n = `counter` v = `{COUNT}`
 
-            )->shut(
+                )->shut(
             )->shut(
 
             )->open( `Table`
@@ -199,7 +199,7 @@ CLASS z2ui5_cl_api_app_401 IMPLEMENTATION.
                         )->leaf( `Text`
                             )->attr( n = `text` v = `Price`
 
-                )->shut(
+                    )->shut(
                 )->shut(
 
                 )->open( `items`
