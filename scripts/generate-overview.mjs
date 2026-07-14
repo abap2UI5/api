@@ -81,6 +81,7 @@ CLASS ${CLASS} DEFINITION PUBLIC.
       BEGIN OF ty_s_app,
         module    TYPE string,
         control   TYPE string,
+        ctrl_name TYPE string,
         name      TYPE string,
         class     TYPE string,
         path      TYPE string,
@@ -133,6 +134,10 @@ CLASS ${CLASS} IMPLEMENTATION.
                                with = \`/\`
                                occ = 0 ).
 
+      " display only the bare control, without its namespace (sap.f.GridList -> GridList)
+      DATA(dot) = find( val = <app>-control sub = \`.\` occ = -1 ).
+      <app>-ctrl_name = COND #( WHEN dot >= 0 THEN substring( val = <app>-control off = dot + 1 ) ELSE <app>-control ).
+
       <app>-api_url   = |https://sdk.openui5.org/api/{ <app>-control }|.
       <app>-js_url    = |https://github.com/SAP/openui5/tree/master/src/{ <app>-module }| &&
                         |/test/{ libpath }/demokit/sample/{ <app>-name }|.
@@ -169,7 +174,7 @@ CLASS ${CLASS} IMPLEMENTATION.
         )->column_list_item(
             )->cells(
                 )->text( \`{MODULE}\`
-                )->link( text   = \`{CONTROL}\`
+                )->link( text   = \`{CTRL_NAME}\`
                          href   = \`{API_URL}\`
                          target = \`_blank\`
                 )->text( \`{NAME}\`
