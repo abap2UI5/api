@@ -101,8 +101,13 @@ function entityMap(demokitDir) {
   return map;
 }
 
+// Focus: only these UI5 libraries are in scope right now; the others are brought
+// back in later. Set to null to cover every OpenUI5 library again.
+const FOCUS_LIBS = ['sap.m'];
+
 const libs = []; // { lib, samples: [{ name, port, entity }] }
 for (const lib of fs.readdirSync(path.join(OPENUI5_DIR, 'src')).sort()) {
+  if (FOCUS_LIBS && !FOCUS_LIBS.includes(lib)) continue;
   const demokitDir = path.join(OPENUI5_DIR, 'src', lib, 'test', lib.replace(/\./g, '/'), 'demokit');
   const sampleDir = path.join(demokitDir, 'sample');
   if (!fs.existsSync(sampleDir)) continue;

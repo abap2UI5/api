@@ -10,10 +10,10 @@
 
 _Last generated: <!-- last-run -->2026-07-14 09:00 UTC<!-- /last-run -->_
 
-> **This repository is AI-generated.** From *every* official UI5 demo kit sample
-> it automatically builds an abap2UI5 app, exposing the **functional gaps**
-> between what UI5 offers and what abap2UI5 can already express — so they can be
-> closed.
+> **This repository is AI-generated.** From *every* official **`sap.m`** UI5 demo
+> kit sample it automatically builds an abap2UI5 app, exposing the **functional
+> gaps** between what UI5 offers and what abap2UI5 can already express — so they
+> can be closed. Other UI5 libraries follow later.
 >
 > See the result in **[api.md](api.md)**, or try it live: pull this repo into
 > your ABAP system and start **`z2ui5_cl_api_app_overview`**, which lists every
@@ -24,9 +24,9 @@ _Last generated: <!-- last-run -->2026-07-14 09:00 UTC<!-- /last-run -->_
 A coding agent runs the pipeline:
 
 1. **Read** — clone [OpenUI5](https://github.com/SAP/openui5) and scan every
-   demo kit sample (`src/<library>/test/<library>/demokit/sample/<Name>/`).
+   `sap.m` demo kit sample (`src/sap.m/test/sap/m/demokit/sample/<Name>/`).
 2. **Generate** — rebuild each sample 1:1 as an abap2UI5 app (`z2ui5_if_app`),
-   filed by library under `src/01`…`src/05`.
+   filed under `src/01`.
 3. **Store templates** — keep the original UI5 JS/XML templates in
    [`ui5/`](ui5), one folder per port (named after the port class).
 4. **Report** — regenerate the [coverage](#coverage) tables and the in-system
@@ -90,15 +90,8 @@ Rules:
 
 </details>
 
-Ports are split by library:
-
-| Folder    | Library    |
-|-----------|------------|
-| `src/01`  | `sap.m`    |
-| `src/02`  | `sap.ui`   |
-| `src/03`  | `sap.uxap` |
-| `src/04`  | `sap.f`    |
-| `src/05`  | `sap.tnt`  |
+The focus is currently on **`sap.m`** — all ports live under `src/01`. Other UI5
+libraries are brought back in later.
 
 ## Compatibility
 
@@ -124,22 +117,12 @@ have an abap2UI5 port.
 
 <!-- coverage:start -->
 
-Overall **36 / 720** demo kit samples ported (5.0 %).
+Overall **34 / 446** demo kit samples ported (7.6 %).
 
 | Module | Samples | Ported | Coverage | |
 |--------|--------:|-------:|---------:|---|
 | `sap.m` | 446 | 34 | 7.6 % | █░░░░░░░░░ |
-| `sap.f` | 42 | 1 | 2.4 % | ░░░░░░░░░░ |
-| `sap.ui.core` | 48 | 1 | 2.1 % | ░░░░░░░░░░ |
-| `sap.tnt` | 17 | 0 | 0.0 % | ░░░░░░░░░░ |
-| `sap.ui.codeeditor` | 2 | 0 | 0.0 % | ░░░░░░░░░░ |
-| `sap.ui.integration` | 4 | 0 | 0.0 % | ░░░░░░░░░░ |
-| `sap.ui.layout` | 62 | 0 | 0.0 % | ░░░░░░░░░░ |
-| `sap.ui.mdc` | 13 | 0 | 0.0 % | ░░░░░░░░░░ |
-| `sap.ui.table` | 18 | 0 | 0.0 % | ░░░░░░░░░░ |
-| `sap.ui.unified` | 21 | 0 | 0.0 % | ░░░░░░░░░░ |
-| `sap.uxap` | 47 | 0 | 0.0 % | ░░░░░░░░░░ |
-| **Total** | **720** | **36** | **5.0 %** | █░░░░░░░░░ |
+| **Total** | **446** | **34** | **7.6 %** | █░░░░░░░░░ |
 
 <!-- coverage:end -->
 
