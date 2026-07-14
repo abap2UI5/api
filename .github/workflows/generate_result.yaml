@@ -1,4 +1,4 @@
-name: generate_coverage
+name: generate_result
 
 # Regenerates the coverage tables in README.md: every UI5 demo kit sample per
 # library, marked with whether an abap2UI5 port exists. The sample universe
@@ -14,11 +14,11 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: generate_coverage
+  group: generate_result
   cancel-in-progress: false
 
 jobs:
-  generate_coverage:
+  generate_result:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -61,7 +61,7 @@ jobs:
         commit-message: Regenerate sample coverage
         author: 'github-actions[bot] <github-actions[bot]@users.noreply.github.com>'
         committer: 'github-actions[bot] <github-actions[bot]@users.noreply.github.com>'
-        branch: generate_coverage/regenerate
+        branch: generate_result/regenerate
         delete-branch: true
         title: Regenerate sample coverage
         body: Automated coverage regeneration from the latest OpenUI5 demo kit samples.

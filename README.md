@@ -4,19 +4,22 @@
 <br>
 [![auto_downport](https://github.com/abap2UI5/api/actions/workflows/auto_downport.yaml/badge.svg)](https://github.com/abap2UI5/api/actions/workflows/auto_downport.yaml)
 <br>
-[![generate_coverage](https://github.com/abap2UI5/api/actions/workflows/generate_coverage.yaml/badge.svg)](https://github.com/abap2UI5/api/actions/workflows/generate_coverage.yaml)
+[![generate_result](https://github.com/abap2UI5/api/actions/workflows/generate_result.yaml/badge.svg)](https://github.com/abap2UI5/api/actions/workflows/generate_result.yaml)
 
 # abap2UI5-api
 
 _Last generated: <!-- last-run -->2026-07-14 09:00 UTC<!-- /last-run -->_
 
 > **This repository is AI-generated.** From *every* official UI5 demo kit sample
-> it automatically builds an abap2UI5 app — so **functional gaps** between what
-> UI5 offers and what abap2UI5 can already express are revealed and can be closed.
+> it automatically builds an abap2UI5 app, exposing the **functional gaps**
+> between what UI5 offers and what abap2UI5 can already express — so they can be
+> closed.
 >
-> See the result in **[api.md](api.md)**. To try it live, **pull this repo into
-> your ABAP system and start the app `z2ui5_cl_api_app_overview`** — it lists
-> every generated sample and launches it right in your system.
+> See the result in **[api.md](api.md)**, or try it live: pull this repo into
+> your ABAP system and start **`z2ui5_cl_api_app_overview`**, which lists every
+> generated sample and launches it right in your system.
+
+## Pipeline
 
 A coding agent runs the pipeline:
 
@@ -24,11 +27,11 @@ A coding agent runs the pipeline:
    demo kit sample (`src/<library>/test/<library>/demokit/sample/<Name>/`).
 2. **Generate** — rebuild each sample 1:1 as an abap2UI5 app (`z2ui5_if_app`),
    filed by library under `src/01`…`src/05`.
-3. **Store templates** — keep the original UI5 JS/XML templates in the
-   [`ui5/`](ui5) folder, one folder per port (named after the port class).
-4. **Report** — regenerate the [coverage](#coverage) (README + [api.md](api.md))
-   and the in-system overview app: every sample marked ✅ ported / ❌ missing,
-   with a coverage figure per module. The ❌ rows are the backlog.
+3. **Store templates** — keep the original UI5 JS/XML templates in
+   [`ui5/`](ui5), one folder per port (named after the port class).
+4. **Report** — regenerate the [coverage](#coverage) tables and the in-system
+   overview app, marking every sample ✅ ported or ❌ missing. The ❌ rows are
+   the backlog.
 
 Reviewed, curated samples graduate to the hand-maintained
 [abap2UI5/samples](https://github.com/abap2UI5/samples) repository.
@@ -86,7 +89,7 @@ Rules:
 
 </details>
 
-Generated abap2UI5 ports of the official UI5 demo kit samples, split by library:
+Ports are split by library:
 
 | Folder    | Library    |
 |-----------|------------|
@@ -96,20 +99,16 @@ Generated abap2UI5 ports of the official UI5 demo kit samples, split by library:
 | `src/04`  | `sap.f`    |
 | `src/05`  | `sap.tnt`  |
 
-Every app is ABAP Cloud ready and downportable to 7.02 — validated by the three
-CI checks below.
+## Compatibility
 
-#### Compatibility
+Every app is ABAP Cloud ready and downportable to 7.02. In detail, every app:
 
-* Every control and property used is available since **UI5 1.71** (16 Jan 2020),
-  so the samples run on old UI5 versions too.
-* No sample uses an obsolete (deprecated) control or property.
-* All samples run on both **SAPUI5** and **OpenUI5**.
-* All samples can be booted with the UI5 **legacy-free** runtime.
-* All samples run on both **ABAP Cloud** and **ABAP Standard**.
-* All samples can be **downported** with abaplint (down to 7.02).
+* uses only controls and properties available since **UI5 1.71** (16 Jan 2020),
+  none of them deprecated — so it runs on old UI5 versions too;
+* runs on **SAPUI5** and **OpenUI5**, including the **legacy-free** runtime;
+* runs on **ABAP Cloud** and **ABAP Standard**, and downports to **7.02**.
 
-#### Checks
+CI enforces this on every change:
 
 | Build            | What it does                                                    |
 |------------------|----------------------------------------------------------------|
@@ -143,20 +142,14 @@ Overall **132 / 720** demo kit samples ported (18.3 %).
 
 <!-- coverage:end -->
 
-Detailed, **control-level** view — one table per module, one row per sample:
+For the full **control-level** view — one row per sample (Module · Control ·
+Sample · JavaScript · UI5 App · ABAP), every link pointing at OpenUI5 — see
+**[api.md](api.md)**, or the in-system overview app `z2ui5_cl_api_app_overview`,
+which mirrors it and additionally starts each app.
 
-* [**api.md**](api.md) — one flat table mirroring the overview app: Module ·
-  Control (→ OpenUI5 API) · Sample · JavaScript (→ OpenUI5 repo source) · UI5 App
-  (→ live OpenUI5 fullscreen sample) · ABAP (→ generated class). All source links
-  point at OpenUI5; only the "start the app" column is dropped (static page).
-* **Overview app** (`z2ui5_cl_api_app_overview`) — an abap2UI5 app in `src/`
-  that lists every ported app as a table (Module · Control · Sample ·
-  JavaScript · UI5 App · ABAP · abap2UI5 App), each link opening in a new tab
-  and the last one **starting the app in the system**
-  (generated by `scripts/generate-overview.mjs`).
-
-The coverage summary and `api.md` are regenerated by the `generate_coverage`
-workflow (`scripts/generate-coverage.mjs`) from the latest OpenUI5 demo kit
+The coverage summary and `api.md` are generated by the `generate_result`
+workflow (`scripts/generate-coverage.mjs`), and the overview app by
+`scripts/generate-overview.mjs`, both from the latest OpenUI5 demo kit
 samples — do not edit them by hand.
 
 #### Dependencies

@@ -385,7 +385,7 @@ node scripts/generate-overview.mjs                          # the overview app (
   (`DEMOKIT`/resources/…/index.html?sap-ui-xx-sample-id=…&sap-ui-xx-sample-lib=…),
   ABAP → the generated `.clas.abap` (`REPO`/`REF`).
 
-The `generate_coverage` workflow (`workflow_dispatch` + weekly) shallow-clones
+The `generate_result` workflow (`workflow_dispatch` + weekly) shallow-clones
 OpenUI5, runs both scripts, stamps the `<!-- last-run -->` timestamp into
 `README.md`, and opens a pull request. The overview app must stay abaplint-clean
 (§6) — it lives in `src/` and is part of every CI build.
