@@ -228,18 +228,21 @@ CLASS z2ui5_cl_api_app_401 IMPLEMENTATION.
 
   METHOD on_event.
 
-    IF client->check_on_event( `RESET` ).
+    CASE client->get( )-event.
 
-      t_range_category = VALUE #( ).
-      t_range_supplier = VALUE #( ).
-      t_products = t_products_all.
-      client->view_model_update( ).
+      WHEN `RESET`.
+        t_range_category = VALUE #( ).
+        t_range_supplier = VALUE #( ).
+        t_products = t_products_all.
+        client->view_model_update( ).
 
-    ELSEIF client->check_on_event( `LIST_CLOSE_CATEGORY` ).
-      on_event_list_close( `CATEGORY` ).
-    ELSEIF client->check_on_event( `LIST_CLOSE_SUPPLIER` ).
-      on_event_list_close( `SUPPLIER` ).
-    ENDIF.
+      WHEN `LIST_CLOSE_CATEGORY`.
+        on_event_list_close( `CATEGORY` ).
+
+      WHEN `LIST_CLOSE_SUPPLIER`.
+        on_event_list_close( `SUPPLIER` ).
+
+    ENDCASE.
 
   ENDMETHOD.
 

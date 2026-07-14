@@ -269,9 +269,11 @@ client->view_display( view->stringify( ) ).
 - Inside a bound aggregation, child properties use UI5 binding braces on the
   upper-cased field name: `)->attr( n = `text` v = `{TITLE}``.
 - `client->_event( \`NAME\` )` — wire a control event (press, liveChange…) to an
-  event named `NAME`; handle it in `on_event( )` with
-  `IF client->check_on_event( \`NAME\` ).`. After changing bound data in an
-  event, call `client->view_model_update( )` to push it back (no full redraw).
+  event named `NAME`. Dispatch in `on_event( )`: for a **single** event an
+  `IF client->check_on_event( \`NAME\` ).` is enough; with **more than one**
+  event always use a `CASE client->get( )-event.` … `WHEN \`NAME\`.` … `ENDCASE`.
+  After changing bound data in an event, call `client->view_model_update( )` to
+  push it back (no full redraw).
 
 #### Booleans
 
