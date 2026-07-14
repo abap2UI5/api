@@ -22,8 +22,8 @@ The pipeline (run by a coding agent):
    implementing `z2ui5_if_app`), filed by library under `src/`.
 3. **Store templates** — keep the untouched original UI5 JS/XML templates in the
    `ui5/` folder.
-4. **Report** — regenerate `COVERAGE.md`: every sample marked ✅ ported /
-   ❌ missing, with a coverage figure per module.
+4. **Report** — regenerate the coverage tables in `README.md`: every sample
+   marked ✅ ported / ❌ missing, with a coverage figure per module.
 
 Curated, hand-reviewed samples ultimately graduate to the
 [abap2UI5/samples](https://github.com/abap2UI5/samples) repo. Everything here is
@@ -83,7 +83,7 @@ ui5/<library>/<z2ui5_cl_demo_app_n>/   ← original Component.js, *.view.xml,
 
 The folder name (class) is the join key between a port (`src/`) and its template
 (`ui5/`). Templates are held verbatim — never edited to fit ABAP; that is the
-generator's job. `COVERAGE.md` links the two together (§7).
+generator's job. The coverage tables in `README.md` link the two together (§7).
 
 ---
 
@@ -145,11 +145,13 @@ npx abaplint ./abaplint.jsonc          # expect 0 issues
 
 ## 7. Coverage report — always (re)generated
 
-`COVERAGE.md` is generated, never hand-edited. It lists every demo kit sample of
-every library and marks ✅/❌, with per-module coverage.
+The coverage tables live **inside `README.md`**, between the
+`<!-- coverage:start -->` / `<!-- coverage:end -->` markers, and are generated,
+never hand-edited. They list every demo kit sample of every library and mark
+✅/❌, with per-module coverage.
 
 ```bash
-OPENUI5_DIR=../openui5 node scripts/generate-coverage.mjs
+OPENUI5_DIR=../openui5 node scripts/generate-coverage.mjs   # rewrites the block
 ```
 
 - **Universe of samples** — every `demokit/sample/<Name>` directory in the
@@ -157,11 +159,17 @@ OPENUI5_DIR=../openui5 node scripts/generate-coverage.mjs
 - **Ported set** — parsed from each `src/**/*.clas.abap` port's
   `Rebuild of the UI5 demo kit sample: .../sample/<lib>.sample.<Name>` line.
 - A port matches a sample on `(library, Name)`.
+- **Entity for the demo kit link** — from each library's
+  `demokit/docuindex.json` (`explored.entities[].samples[]`), with the port's
+  Rebuild URL as fallback.
+- **All table links are external** (absolute GitHub URLs, ref `main`, override
+  via `REF`/`REPO`): Javascript → `ui5/` template folder, ABAP → the
+  `.clas.abap`, Link → the live demo kit sample app.
 
 The `generate_coverage` workflow (`workflow_dispatch` + weekly) shallow-clones
 OpenUI5, runs the script, stamps the `<!-- last-run -->` timestamp into
 `README.md`, and opens a pull request. Edit the **script**, never the generated
-`COVERAGE.md`.
+block.
 
 ---
 

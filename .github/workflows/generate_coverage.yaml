@@ -1,8 +1,8 @@
 name: generate_coverage
 
-# Regenerates COVERAGE.md: every UI5 demo kit sample per library, marked with
-# whether an abap2UI5 port exists. The sample universe comes from a shallow
-# OpenUI5 checkout; the ported set is read from this repo's *.clas.abap.
+# Regenerates the coverage tables in README.md: every UI5 demo kit sample per
+# library, marked with whether an abap2UI5 port exists. The sample universe
+# comes from a shallow OpenUI5 checkout; the ported set is read from *.clas.abap.
 
 on:
   workflow_dispatch:
@@ -33,9 +33,10 @@ jobs:
     - name: Shallow clone OpenUI5 (sample universe)
       run: git clone --depth 1 https://github.com/SAP/openui5.git openui5
 
-    - name: Generate COVERAGE.md
+    - name: Regenerate coverage tables in README
       env:
         OPENUI5_DIR: ./openui5
+        REF: main
       run: node scripts/generate-coverage.mjs
 
     - name: Drop OpenUI5 checkout
@@ -49,13 +50,11 @@ jobs:
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v8
       with:
-        add-paths: |
-          COVERAGE.md
-          README.md
+        add-paths: README.md
         commit-message: Regenerate sample coverage
         author: 'github-actions[bot] <github-actions[bot]@users.noreply.github.com>'
         committer: 'github-actions[bot] <github-actions[bot]@users.noreply.github.com>'
         branch: generate_coverage/regenerate
         delete-branch: true
         title: Regenerate sample coverage
-        body: Automated COVERAGE.md regeneration from the latest OpenUI5 demo kit samples.
+        body: Automated coverage regeneration from the latest OpenUI5 demo kit samples.
