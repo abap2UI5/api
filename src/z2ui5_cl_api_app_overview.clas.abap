@@ -1,8 +1,8 @@
 "! Generated overview app - lists every abap2UI5 api sample app in a table.
-"! Each row links the OpenUI5 control API, the OpenUI5 sample source, the live
-"! OpenUI5 fullscreen sample, the generated ABAP class and a start link for the
-"! abap2UI5 app - all opening in a new browser tab. Do not edit by hand -
-"! regenerate with scripts/generate-overview.mjs
+"! Each row links the OpenUI5 control API, the live OpenUI5 fullscreen sample
+"! (Sample column), the OpenUI5 sample source, the generated ABAP class and -
+"! via the abap2UI5 app class name - a start link, all opening in a new browser
+"! tab. Do not edit by hand - regenerate with scripts/generate-overview.mjs
 CLASS z2ui5_cl_api_app_overview DEFINITION PUBLIC.
 
   PUBLIC SECTION.
@@ -95,7 +95,6 @@ CLASS z2ui5_cl_api_app_overview IMPLEMENTATION.
         )->column( )->text( `Control` )->get_parent(
         )->column( )->text( `Sample` )->get_parent(
         )->column( )->text( `JavaScript` )->get_parent(
-        )->column( )->text( `UI5 App` )->get_parent(
         )->column( )->text( `ABAP` )->get_parent(
         )->column( )->text( `abap2UI5 App` ).
 
@@ -106,17 +105,16 @@ CLASS z2ui5_cl_api_app_overview IMPLEMENTATION.
                 )->link( text   = `{CTRL_NAME}`
                          href   = `{API_URL}`
                          target = `_blank`
-                )->text( `{NAME}`
+                )->link( text   = `{NAME}`
+                         href   = `{UI5_URL}`
+                         target = `_blank`
                 )->link( text   = `↗`
                          href   = `{JS_URL}`
                          target = `_blank`
                 )->link( text   = `↗`
-                         href   = `{UI5_URL}`
-                         target = `_blank`
-                )->link( text   = `↗`
                          href   = `{ABAP_URL}`
                          target = `_blank`
-                )->link( text   = `↗`
+                )->link( text   = `{CLASS}`
                          href   = `{START_URL}`
                          target = `_blank` ).
 
