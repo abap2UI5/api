@@ -105,67 +105,131 @@ CLASS z2ui5_cl_api_app_401 IMPLEMENTATION.
 
   METHOD view_display.
 
-    DATA(view) = z2ui5_cl_xml_view=>factory( ).
-    DATA(vbox) = view->vbox( id = `idVBox` ).
+    " The bound lists collection of the original is unrolled into two static facet filter lists;
+    " the original controller appends the demo table of sap.m.sample.Table with an adjusted first column.
+    DATA(view) = z2ui5_cl_api_xml=>factory( ).
 
-    " The bound lists collection of the original is unrolled into two static facet filter lists
-    vbox->facet_filter( id                  = `idFacetFilter`
-                        type                = `Light`
-                        showpersonalization = abap_true
-                        showreset           = abap_true
-                        reset               = client->_event( `RESET` )
-        )->facet_filter_list( title     = `Category`
-                              key       = `Category`
-                              mode      = `MultiSelect`
-                              listclose = client->_event( val   = `LIST_CLOSE_CATEGORY`
-                                                          t_arg = VALUE #( ( `$event.mParameters.selectedItems` ) ) )
-                              items     = client->_bind( t_categories )
-            )->facet_filter_item( text    = `{TEXT}`
-                                  key     = `{TEXT}`
-                                  counter = `{COUNT}` )->get_parent( )->get_parent(
-        )->facet_filter_list( title     = `SupplierName`
-                              key       = `SupplierName`
-                              mode      = `MultiSelect`
-                              listclose = client->_event( val   = `LIST_CLOSE_SUPPLIER`
-                                                          t_arg = VALUE #( ( `$event.mParameters.selectedItems` ) ) )
-                              items     = client->_bind( t_suppliers )
-            )->facet_filter_item( text    = `{TEXT}`
-                                  key     = `{TEXT}`
-                                  counter = `{COUNT}` ).
+    view->open( n = `View` ns = `mvc`
+        )->attr( n = `xmlns`     v = `sap.m`
+        )->attr( n = `xmlns:mvc` v = `sap.ui.core.mvc`
 
-    " The original controller appends the demo table of sap.m.sample.Table with an adjusted first column
-    DATA(tab) = vbox->table( id    = `idProductsTable`
-                             inset = abap_false
-                             items = client->_bind( t_products ) ).
+        )->open( `VBox`
+            )->attr( n = `id` v = `idVBox`
 
-    tab->header_toolbar(
-       )->overflow_toolbar(
-           )->title( text  = `Products`
-                     level = `H2`
-           )->toolbar_spacer( ).
+            )->open( `FacetFilter`
+                )->attr( n = `id`                  v = `idFacetFilter`
+                )->attr( n = `type`                v = `Light`
+                )->attr( n = `showPersonalization` v = `true`
+                )->attr( n = `showReset`           v = `true`
+                )->attr( n = `reset`               v = client->_event( `RESET` )
 
-    DATA(columns) = tab->columns( ).
-    columns->column( `12em` )->text( `Product` ).
-    columns->column( minscreenwidth = `Tablet`
-                     demandpopin    = abap_true )->text( `Supplier` ).
-    columns->column( minscreenwidth = `Desktop`
-                     demandpopin    = abap_true
-                     halign         = `End` )->text( `Dimensions` ).
-    columns->column( minscreenwidth = `Desktop`
-                     demandpopin    = abap_true
-                     halign         = `Center` )->text( `Weight` ).
-    columns->column( halign = `End` )->text( `Price` ).
+                )->open( `FacetFilterList`
+                    )->attr( n = `title`     v = `Category`
+                    )->attr( n = `key`       v = `Category`
+                    )->attr( n = `mode`      v = `MultiSelect`
+                    )->attr( n = `listClose` v = client->_event( val   = `LIST_CLOSE_CATEGORY`
+                                                                 t_arg = VALUE #( ( `$event.mParameters.selectedItems` ) ) )
+                    )->attr( n = `items`     v = client->_bind( t_categories )
 
-    DATA(cells) = tab->items( )->column_list_item( valign = `Middle` )->cells( ).
-    cells->object_identifier( title = `{NAME}`
-                              text  = `{CATEGORY}` )->get_parent( ).
-    cells->text( `{SUPPLIER_NAME}` ).
-    cells->text( `{DIMENSIONS}` ).
-    cells->object_number( number = `{WEIGHT_MEASURE}`
-                          unit   = `{WEIGHT_UNIT}`
-                          state  = `{WEIGHT_STATE}` ).
-    cells->object_number( number = `{PRICE}`
-                          unit   = `{CURRENCY_CODE}` ).
+                    )->leaf( `FacetFilterItem`
+                        )->attr( n = `text`    v = `{TEXT}`
+                        )->attr( n = `key`     v = `{TEXT}`
+                        )->attr( n = `counter` v = `{COUNT}`
+
+                )->shut(
+                )->open( `FacetFilterList`
+                    )->attr( n = `title`     v = `SupplierName`
+                    )->attr( n = `key`       v = `SupplierName`
+                    )->attr( n = `mode`      v = `MultiSelect`
+                    )->attr( n = `listClose` v = client->_event( val   = `LIST_CLOSE_SUPPLIER`
+                                                                 t_arg = VALUE #( ( `$event.mParameters.selectedItems` ) ) )
+                    )->attr( n = `items`     v = client->_bind( t_suppliers )
+
+                    )->leaf( `FacetFilterItem`
+                        )->attr( n = `text`    v = `{TEXT}`
+                        )->attr( n = `key`     v = `{TEXT}`
+                        )->attr( n = `counter` v = `{COUNT}`
+
+            )->shut(
+            )->shut(
+
+            )->open( `Table`
+                )->attr( n = `id`    v = `idProductsTable`
+                )->attr( n = `inset` v = `false`
+                )->attr( n = `items` v = client->_bind( t_products )
+
+                )->open( `headerToolbar`
+                    )->open( `OverflowToolbar`
+                        )->leaf( `Title`
+                            )->attr( n = `text`  v = `Products`
+                            )->attr( n = `level` v = `H2`
+                        )->leaf( `ToolbarSpacer`
+
+                    )->shut(
+                )->shut(
+
+                )->open( `columns`
+                    )->open( `Column`
+                        )->attr( n = `width` v = `12em`
+
+                        )->leaf( `Text`
+                            )->attr( n = `text` v = `Product`
+
+                    )->shut(
+                    )->open( `Column`
+                        )->attr( n = `minScreenWidth` v = `Tablet`
+                        )->attr( n = `demandPopin`    v = `true`
+
+                        )->leaf( `Text`
+                            )->attr( n = `text` v = `Supplier`
+
+                    )->shut(
+                    )->open( `Column`
+                        )->attr( n = `minScreenWidth` v = `Desktop`
+                        )->attr( n = `demandPopin`    v = `true`
+                        )->attr( n = `hAlign`         v = `End`
+
+                        )->leaf( `Text`
+                            )->attr( n = `text` v = `Dimensions`
+
+                    )->shut(
+                    )->open( `Column`
+                        )->attr( n = `minScreenWidth` v = `Desktop`
+                        )->attr( n = `demandPopin`    v = `true`
+                        )->attr( n = `hAlign`         v = `Center`
+
+                        )->leaf( `Text`
+                            )->attr( n = `text` v = `Weight`
+
+                    )->shut(
+                    )->open( `Column`
+                        )->attr( n = `hAlign` v = `End`
+
+                        )->leaf( `Text`
+                            )->attr( n = `text` v = `Price`
+
+                )->shut(
+                )->shut(
+
+                )->open( `items`
+                    )->open( `ColumnListItem`
+                        )->attr( n = `vAlign` v = `Middle`
+
+                        )->open( `cells`
+                            )->leaf( `ObjectIdentifier`
+                                )->attr( n = `title` v = `{NAME}`
+                                )->attr( n = `text`  v = `{CATEGORY}`
+                            )->leaf( `Text`
+                                )->attr( n = `text` v = `{SUPPLIER_NAME}`
+                            )->leaf( `Text`
+                                )->attr( n = `text` v = `{DIMENSIONS}`
+                            )->leaf( `ObjectNumber`
+                                )->attr( n = `number` v = `{WEIGHT_MEASURE}`
+                                )->attr( n = `unit`   v = `{WEIGHT_UNIT}`
+                                )->attr( n = `state`  v = `{WEIGHT_STATE}`
+                            )->leaf( `ObjectNumber`
+                                )->attr( n = `number` v = `{PRICE}`
+                                )->attr( n = `unit`   v = `{CURRENCY_CODE}` ).
 
     client->view_display( view->stringify( ) ).
 
