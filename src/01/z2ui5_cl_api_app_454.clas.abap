@@ -80,7 +80,7 @@ CLASS z2ui5_cl_api_app_454 IMPLEMENTATION.
                               ( n = `id`              v = `multiInput` )
                               ( n = `suggestionItems` v = client->_bind( t_products ) )
                               ( n = `placeholder`     v = `Products...` )
-                              ( n = `showValueHelp`   v = abap_false ) )
+                              ( n = `showValueHelp`   v = z2ui5_cl_api_xml=>as_bool( abap_false ) ) )
             )->leaf( n = `Item` ns = `core`
                      a = VALUE #( ( n = `key`  v = `{PRODUCT_ID}` )
                                   ( n = `text` v = `{NAME}` ) )
@@ -90,17 +90,17 @@ CLASS z2ui5_cl_api_app_454 IMPLEMENTATION.
                               ( n = `labelFor` v = `multiInput1` ) )
         )->leaf( n = `MultiInput`
                  a = VALUE #( ( n = `id`             v = `multiInput1` )
-                              ( n = `showSuggestion` v = abap_false )
+                              ( n = `showSuggestion` v = z2ui5_cl_api_xml=>as_bool( abap_false ) )
                               ( n = `width`          v = `70%` )
-                              ( n = `showValueHelp`  v = abap_false ) )
+                              ( n = `showValueHelp`  v = z2ui5_cl_api_xml=>as_bool( abap_false ) ) )
         )->leaf( n = `Label`
                  a = VALUE #( ( n = `text`     v = `MultiInput with single long token` )
                               ( n = `labelFor` v = `multiInput2` ) )
         )->leaf( n = `MultiInput`
                  a = VALUE #( ( n = `id`             v = `multiInput2` )
-                              ( n = `showSuggestion` v = abap_false )
+                              ( n = `showSuggestion` v = z2ui5_cl_api_xml=>as_bool( abap_false ) )
                               ( n = `width`          v = `300px` )
-                              ( n = `showValueHelp`  v = abap_false ) ) ).
+                              ( n = `showValueHelp`  v = z2ui5_cl_api_xml=>as_bool( abap_false ) ) ) ).
 
     client->view_display( view->stringify( ) ).
 

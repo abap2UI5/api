@@ -7,6 +7,7 @@
 "! Element = n (name), namespace prefix = ns (e.g. `f`, `core`, `l`), attributes
 "! = a (table of n/v). The root <mvc:View> and its xmlns declarations are written
 "! by hand: pass them to factory( ) as attributes, exactly like a real UI5 view.
+"! For a boolean property fed from an ABAP variable, wrap it with as_bool( ).
 CLASS z2ui5_cl_api_xml DEFINITION PUBLIC CREATE PRIVATE.
 
   PUBLIC SECTION.
@@ -17,6 +18,14 @@ CLASS z2ui5_cl_api_xml DEFINITION PUBLIC CREATE PRIVATE.
         v TYPE string,
       END OF ty_s_attr.
     TYPES ty_t_attr TYPE STANDARD TABLE OF ty_s_attr WITH DEFAULT KEY.
+
+    "! render an ABAP boolean as the UI5 attribute value `true` / `false`,
+    "! e.g. a = VALUE #( ( n = `visible` v = z2ui5_cl_api_xml=>as_bool( flag ) ) )
+    CLASS-METHODS as_bool
+      IMPORTING
+        val           TYPE abap_bool
+      RETURNING
+        VALUE(result) TYPE string.
 
     "! root <mvc:View>; pass its attributes incl. the xmlns declarations, e.g.
     "! factory( VALUE #( ( n = `xmlns` v = `sap.m` )
@@ -61,18 +70,12 @@ CLASS z2ui5_cl_api_xml DEFINITION PUBLIC CREATE PRIVATE.
   PROTECTED SECTION.
     TYPES ty_t_node TYPE STANDARD TABLE OF REF TO z2ui5_cl_api_xml WITH DEFAULT KEY.
 
-    " boolean UI5 properties (lowercase) - if an attribute names one of these and
-    " carries an ABAP boolean (`X` -> true, empty -> false) it is converted
-    CLASS-DATA st_bool TYPE HASHED TABLE OF string WITH UNIQUE KEY table_line.
-
     DATA name   TYPE string.
     DATA prefix TYPE string.
     DATA t_attr TYPE ty_t_attr.
     DATA t_child TYPE ty_t_node.
     DATA parent TYPE REF TO z2ui5_cl_api_xml.
     DATA root   TYPE REF TO z2ui5_cl_api_xml.
-
-    CLASS-METHODS class_constructor.
 
     METHODS elem
       IMPORTING
@@ -83,15 +86,6 @@ CLASS z2ui5_cl_api_xml DEFINITION PUBLIC CREATE PRIVATE.
         VALUE(result) TYPE REF TO z2ui5_cl_api_xml.
 
     METHODS render
-      RETURNING
-        VALUE(result) TYPE string.
-
-    "! render one attribute value: convert ABAP booleans on boolean properties
-    "! (`X` -> `true`, empty -> `false`), then XML-escape
-    METHODS attr_val
-      IMPORTING
-        n             TYPE string
-        v             TYPE string
       RETURNING
         VALUE(result) TYPE string.
 
@@ -107,18 +101,9 @@ ENDCLASS.
 
 CLASS z2ui5_cl_api_xml IMPLEMENTATION.
 
-  METHOD class_constructor.
+  METHOD as_bool.
 
-    st_bool = VALUE #(
-      ( `active` ) ( `adjustheight` ) ( `applycontentpadding` ) ( `autoadjustwidth` )
-      ( `blocked` ) ( `busy` ) ( `checked` ) ( `collapsed` ) ( `draggable` )
-      ( `droppable` ) ( `editable` ) ( `enabled` ) ( `enableformattedtext` )
-      ( `enablescrolling` ) ( `expandable` ) ( `expanded` ) ( `floatingfooter` )
-      ( `growing` ) ( `growingscrolltoload` ) ( `interactive` ) ( `modal` )
-      ( `movable` ) ( `readonly` ) ( `required` ) ( `resizable` ) ( `selected` )
-      ( `showarrow` ) ( `showclearicon` ) ( `showfooter` ) ( `showheader` )
-      ( `showicon` ) ( `shownavbutton` ) ( `showsuggestion` ) ( `showvaluehelp` )
-      ( `stretch` ) ( `useanimation` ) ( `visible` ) ( `wrap` ) ( `wrapping` ) ).
+    result = COND #( WHEN val = abap_true THEN `true` ELSE `false` ).
 
   ENDMETHOD.
 
@@ -187,8 +172,7 @@ CLASS z2ui5_cl_api_xml IMPLEMENTATION.
 
     DATA(attrs) = ``.
     LOOP AT t_attr INTO DATA(at).
-      attrs = |{ attrs } { at-n }="{ attr_val( n = at-n
-                                               v = at-v ) }"|.
+      attrs = |{ attrs } { at-n }="{ xml_escape( at-v ) }"|.
     ENDLOOP.
 
     IF t_child IS INITIAL.
@@ -201,21 +185,6 @@ CLASS z2ui5_cl_api_xml IMPLEMENTATION.
       inner = |{ inner }{ child->render( ) }|.
     ENDLOOP.
     result = |<{ qname }{ attrs }>{ inner }</{ qname }>|.
-
-  ENDMETHOD.
-
-
-  METHOD attr_val.
-
-    result = v.
-    IF line_exists( st_bool[ table_line = to_lower( n ) ] ).
-      IF v = abap_true.
-        result = `true`.
-      ELSEIF v IS INITIAL.
-        result = `false`.
-      ENDIF.
-    ENDIF.
-    result = xml_escape( result ).
 
   ENDMETHOD.
 
