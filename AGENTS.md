@@ -196,8 +196,11 @@ the `)->` arrows line up:
 
 Arguments: `n` = tag name, `ns` = namespace **prefix** (literal `f`, `l`, `core`,
 `mvc` — omitted for the default `sap.m` namespace), `a` = a `VALUE #( )` table of
-`( n = <attr> v = <value> )` rows. `attr( )` is the single-attribute shortcut;
-usually pass everything through `a`.
+**`( `key=value` )`** attribute strings. Each row is split on its **first** `=`,
+so the value may itself contain `=`, `&`, braces or spaces. Build a value from a
+variable with `&&` or a string template — e.g.
+`( `items=` && client->_bind( t_items ) )`. `attr( n v )` is the single-attribute
+shortcut for dynamic cases; usually pass everything through `a`.
 
 Both named XML aggregations (`<headerToolbar>`, `<layoutData>`) and controls are
 just `open`/`leaf` calls — an aggregation is a nameless-namespace `open` with no
@@ -212,19 +215,19 @@ other control:
 DATA(view) = z2ui5_cl_api_xml=>factory( ).
 
 view->open( n = `View` ns = `mvc`
-            a = VALUE #( ( n = `xmlns`     v = `sap.m` )
-                         ( n = `xmlns:mvc` v = `sap.ui.core.mvc` )
-                         ( n = `xmlns:f`   v = `sap.f` ) )
+            a = VALUE #( ( `xmlns=sap.m` )
+                         ( `xmlns:mvc=sap.ui.core.mvc` )
+                         ( `xmlns:f=sap.f` ) )
     )->leaf( n = `Slider`
-             a = VALUE #( ( n = `value`      v = client->_bind_edit( slider_value ) )
-                          ( n = `liveChange` v = client->_event( `SLIDER_MOVED` ) ) )
+             a = VALUE #( ( `value=`      && client->_bind_edit( slider_value ) )
+                          ( `liveChange=` && client->_event( `SLIDER_MOVED` ) ) )
 
     )->open( n = `Panel`
-             a = VALUE #( ( n = `width` v = client->_bind( panel_width ) ) )
+             a = VALUE #( ( `width=` && client->_bind( panel_width ) ) )
         )->open( `headerToolbar`
             )->open( n = `Toolbar`
                 )->leaf( n = `Title`
-                         a = VALUE #( ( n = `text` v = `Header` ) )
+                         a = VALUE #( ( `text=Header` ) )
 
             )->shut(
         )->shut( ).
@@ -249,17 +252,17 @@ client->view_display( view->stringify( ) ).
   two calls whose verb **differs** (`open`↔`leaf`, and before every `shut`);
   **no** blank line between calls of the **same** verb (`open`/`open`,
   `leaf`/`leaf`, consecutive `shut`s) and **none directly after** a `shut`.
-- **Inside `a = VALUE #( )`, the `v =` columns align** under each other (pad the
-  `n =` names) so attribute values form a straight column.
+- **One attribute per `( … )` row**, one per line; align the `=` (or the values)
+  under each other so the row reads as a column of `key=value` pairs.
 - Long text literals split with `&&` at ~255 chars max per line (§6).
 
 #### Data binding & events
 
 - `client->_bind( var )` — one-way bind (display); `client->_bind_edit( var )` —
   two-way bind (the value flows back into `var` on the next round-trip). Bind the
-  ABAP `DATA` member, e.g. `v = client->_bind( t_items )`.
+  ABAP `DATA` member, e.g. `( `items=` && client->_bind( t_items ) )`.
 - Inside a bound aggregation, child properties use UI5 binding braces on the
-  upper-cased field name: `v = \`{TITLE}\``.
+  upper-cased field name: `( `text={TITLE}` )`.
 - `client->_event( \`NAME\` )` — wire a control event (press, liveChange…) to an
   event named `NAME`; handle it in `on_event( )` with
   `IF client->check_on_event( \`NAME\` ).`. After changing bound data in an
@@ -267,11 +270,11 @@ client->view_display( view->stringify( ) ).
 
 #### Booleans
 
-A literal boolean is just `` `true` `` / `` `false` `` written directly. **Only**
-when the value comes from an ABAP boolean variable, wrap it with
-`z2ui5_cl_api_xml=>as_bool( flag )` — a raw `abap_false` would otherwise
-serialise to an empty string. Never feed `abap_true`/`abap_false` straight into
-an attribute value.
+A literal boolean is just `( `editable=true` )` / `( `editable=false` )`. **Only**
+when the value comes from an ABAP boolean variable, build the row with
+`as_bool( )`: `( `editable=` && z2ui5_cl_api_xml=>as_bool( flag ) )` — a raw
+`abap_false` would otherwise serialise to an empty string. Never feed
+`abap_true`/`abap_false` straight into an attribute value.
 
 #### The 1.71 rule in practice
 

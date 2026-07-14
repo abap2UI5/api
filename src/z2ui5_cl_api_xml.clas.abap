@@ -4,23 +4,22 @@
 "!   leaf  - add a childless control but STAY on the current node (returns same)
 "!   shut  - ASCEND to the parent (returns parent)
 "!   attr  - set one attribute (returns the same node)
-"! Element = n (name), namespace prefix = ns (e.g. `f`, `core`, `l`), attributes
-"! = a (table of n/v). The root <mvc:View> and its xmlns declarations are written
-"! by hand: pass them to factory( ) as attributes, exactly like a real UI5 view.
+"! Element = n (name), namespace prefix = ns (e.g. `f`, `core`, `l`). Attributes
+"! = a, a flat table of `key=value` strings (split on the FIRST `=`, so values
+"! may contain `=`, `&`, spaces): a = VALUE #( ( `width=100%` ) ( `class=x` ) ).
+"! The root <mvc:View> and its xmlns declarations are written by hand: pass them
+"! to the first open( ) as attributes, exactly like a real UI5 view.
 "! For a boolean property fed from an ABAP variable, wrap it with as_bool( ).
 CLASS z2ui5_cl_api_xml DEFINITION PUBLIC CREATE PRIVATE.
 
   PUBLIC SECTION.
 
-    TYPES:
-      BEGIN OF ty_s_attr,
-        n TYPE string,
-        v TYPE string,
-      END OF ty_s_attr.
-    TYPES ty_t_attr TYPE STANDARD TABLE OF ty_s_attr WITH DEFAULT KEY.
+    "! attribute list - one `key=value` string per attribute, e.g.
+    "! a = VALUE #( ( `text=Hello` ) ( `width=100%` ) ). Split on the first `=`.
+    TYPES ty_t_attr TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
 
     "! render an ABAP boolean as the UI5 attribute value `true` / `false`,
-    "! e.g. a = VALUE #( ( n = `visible` v = z2ui5_cl_api_xml=>as_bool( flag ) ) )
+    "! e.g. a = VALUE #( |visible={ z2ui5_cl_api_xml=>as_bool( flag ) }| )
     CLASS-METHODS as_bool
       IMPORTING
         val           TYPE abap_bool
@@ -31,7 +30,7 @@ CLASS z2ui5_cl_api_xml DEFINITION PUBLIC CREATE PRIVATE.
     "! namespaces yourself, exactly like any other control:
     "!   DATA(view) = z2ui5_cl_api_xml=>factory( ).
     "!   view->open( n = `View` ns = `mvc`
-    "!               a = VALUE #( ( n = `xmlns` v = `sap.m` ) ... ) ) ...
+    "!               a = VALUE #( ( `xmlns=sap.m` ) ( `xmlns:mvc=sap.ui.core.mvc` ) ) ) ...
     CLASS-METHODS factory
       RETURNING
         VALUE(result) TYPE REF TO z2ui5_cl_api_xml.
@@ -69,10 +68,16 @@ CLASS z2ui5_cl_api_xml DEFINITION PUBLIC CREATE PRIVATE.
 
   PROTECTED SECTION.
     TYPES ty_t_node TYPE STANDARD TABLE OF REF TO z2ui5_cl_api_xml WITH DEFAULT KEY.
+    TYPES:
+      BEGIN OF ty_s_pair,
+        n TYPE string,
+        v TYPE string,
+      END OF ty_s_pair.
+    TYPES ty_t_pair TYPE STANDARD TABLE OF ty_s_pair WITH DEFAULT KEY.
 
     DATA name   TYPE string.
     DATA prefix TYPE string.
-    DATA t_attr TYPE ty_t_attr.
+    DATA t_pair TYPE ty_t_pair.
     DATA t_child TYPE ty_t_node.
     DATA parent TYPE REF TO z2ui5_cl_api_xml.
     DATA root   TYPE REF TO z2ui5_cl_api_xml.
@@ -84,6 +89,13 @@ CLASS z2ui5_cl_api_xml DEFINITION PUBLIC CREATE PRIVATE.
         a             TYPE ty_t_attr
       RETURNING
         VALUE(result) TYPE REF TO z2ui5_cl_api_xml.
+
+    "! split one `key=value` attribute string on its first `=`
+    METHODS parse_attr
+      IMPORTING
+        kv            TYPE string
+      RETURNING
+        VALUE(result) TYPE ty_s_pair.
 
     METHODS render
       RETURNING
@@ -116,6 +128,19 @@ CLASS z2ui5_cl_api_xml IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD parse_attr.
+
+    DATA(off) = find( val = kv sub = `=` ).
+    IF off < 0.
+      result-n = condense( kv ).
+    ELSE.
+      result-n = condense( substring( val = kv len = off ) ).
+      result-v = substring( val = kv off = off + 1 ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
   METHOD elem.
 
     result = NEW #( ).
@@ -123,7 +148,9 @@ CLASS z2ui5_cl_api_xml IMPLEMENTATION.
     result->parent = me.
     result->name = n.
     result->prefix = ns.
-    result->t_attr = a.
+    LOOP AT a INTO DATA(kv).
+      APPEND parse_attr( kv ) TO result->t_pair.
+    ENDLOOP.
     APPEND result TO t_child.
 
   ENDMETHOD.
@@ -150,7 +177,7 @@ CLASS z2ui5_cl_api_xml IMPLEMENTATION.
 
   METHOD attr.
 
-    APPEND VALUE #( n = n v = v ) TO t_attr.
+    APPEND VALUE #( n = n v = v ) TO t_pair.
     result = me.
 
   ENDMETHOD.
@@ -177,8 +204,8 @@ CLASS z2ui5_cl_api_xml IMPLEMENTATION.
 
     DATA(qname) = COND string( WHEN prefix IS INITIAL THEN name ELSE |{ prefix }:{ name }| ).
     DATA(attrs) = ``.
-    LOOP AT t_attr INTO DATA(at).
-      attrs = |{ attrs } { at-n }="{ xml_escape( at-v ) }"|.
+    LOOP AT t_pair INTO DATA(pair).
+      attrs = |{ attrs } { pair-n }="{ xml_escape( pair-v ) }"|.
     ENDLOOP.
 
     IF t_child IS INITIAL.
