@@ -91,7 +91,7 @@ CLASS z2ui5_cl_api_app_527 IMPLEMENTATION.
                     )->open( `Select`
                         )->attr( n = `forceSelection` v = `false`
                         )->attr( n = `selectedKey`    v = client->_bind_edit( selected_product )
-                        )->attr( n = `items`          v = client->_bind( t_products )
+                        )->attr( n = `items`          v = client->_bind_edit( t_products )
 
                         )->leaf( n = `Item` ns = `core`
                             )->attr( n = `key`  v = `{PRODUCT_ID}`
@@ -110,7 +110,7 @@ CLASS z2ui5_cl_api_app_527 IMPLEMENTATION.
                         )->attr( n = `editable`       v = client->_bind_edit( editable )
                         )->attr( n = `forceSelection` v = `false`
                         )->attr( n = `selectedKey`    v = client->_bind_edit( selected_product2 )
-                        )->attr( n = `items`          v = client->_bind( t_products2 )
+                        )->attr( n = `items`          v = client->_bind_edit( t_products2 )
 
                         )->leaf( n = `Item` ns = `core`
                             )->attr( n = `key`  v = `{PRODUCT_ID}`
@@ -154,7 +154,7 @@ CLASS z2ui5_cl_api_app_527 IMPLEMENTATION.
                         )->attr( n = `type`            v = `IconOnly`
                         )->attr( n = `icon`            v = `sap-icon://filter`
                         )->attr( n = `autoAdjustWidth` v = `true`
-                        )->attr( n = `items`           v = client->_bind( t_products3 )
+                        )->attr( n = `items`           v = client->_bind_edit( t_products3 )
 
                         )->leaf( n = `Item` ns = `core`
                             )->attr( n = `key`  v = `{PRODUCT_ID}`

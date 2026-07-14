@@ -133,7 +133,7 @@ CLASS z2ui5_cl_api_app_440 IMPLEMENTATION.
         )->open( `Table`
             )->attr( n = `id`    v = `idProductsTable`
             )->attr( n = `inset` v = `false`
-            )->attr( n = `items` v = client->_bind( t_products )
+            )->attr( n = `items` v = client->_bind_edit( t_products )
 
             )->open( `headerToolbar`
                 )->open( `Toolbar`

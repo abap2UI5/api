@@ -108,7 +108,7 @@ CLASS z2ui5_cl_api_app_530 IMPLEMENTATION.
                             )->attr( n = `selectedKey` v = client->_bind_edit( selected )
                             )->attr( n = `change`      v = client->_event( val   = `SEP_CHANGE`
                                                                            t_arg = VALUE #( ( `${$parameters>/selectedItem/mProperties/key}` ) ) )
-                            )->attr( n = `items`       v = client->_bind( t_items )
+                            )->attr( n = `items`       v = client->_bind_edit( t_items )
 
                             )->leaf( n = `Item` ns = `core`
                                 )->attr( n = `key`  v = `{TEXT}`

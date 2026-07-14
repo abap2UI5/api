@@ -122,7 +122,7 @@ CLASS z2ui5_cl_api_app_423 IMPLEMENTATION.
 
             )->open( `content`
                 )->open( `ComboBox`
-                    )->attr( n = `items` v = client->_bind( t_countries )
+                    )->attr( n = `items` v = client->_bind_edit( t_countries )
 
                     )->leaf( n = `Item` ns = `core`
                         )->attr( n = `key`  v = `{KEY}`

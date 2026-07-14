@@ -53,7 +53,7 @@ Rules:
   control/stay, shut = ascend). Attributes are added with
   attr( n = `key` v = `value` ) chained right after the control's open/leaf;
   attr targets that control, and v is any string expression (literal, a
-  client->_bind/_event result, a || template). factory( ) returns an empty root
+  client->_bind_edit/_event result, a || template). factory( ) returns an empty root
   - open the <mvc:View> and declare its xmlns namespaces yourself. Blank line
   between controls whose verb differs (open<->leaf, before shut); none between
   same-verb controls, none right after a shut, none between a control and its
@@ -70,7 +70,8 @@ Rules:
     ENDIF.
   Add data_init / on_event only when the app actually has data / events.
 - Move the sample's JSON model data into ABAP (VALUE #( ... )) and bind it
-  with client->_bind / _bind_edit.
+  with client->_bind_edit (the one-way client->_bind is obsolete - always use
+  _bind_edit).
 - Map controller event handlers to check_on_event( ) branches.
 - Use ONLY controls and properties available since UI5 1.71; never use a
   deprecated control/property. If the sample needs anything newer or

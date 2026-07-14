@@ -104,7 +104,7 @@ CLASS z2ui5_cl_api_app_487 IMPLEMENTATION.
         )->open( `Tree`
             )->attr( n = `id`    v = `Tree`
             " '{path: '/'}' -> bind the root table; the nested `nodes` drive the depth
-            )->attr( n = `items` v = client->_bind( t_nodes )
+            )->attr( n = `items` v = client->_bind_edit( t_nodes )
 
             )->leaf( `StandardTreeItem`
                 )->attr( n = `title` v = `{TEXT}` ).

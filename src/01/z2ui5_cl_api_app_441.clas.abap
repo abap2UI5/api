@@ -54,7 +54,7 @@ CLASS z2ui5_cl_api_app_441 IMPLEMENTATION.
 
         )->open( `List`
             )->attr( n = `headerText` v = `Products`
-            )->attr( n = `items`      v = client->_bind( t_products )
+            )->attr( n = `items`      v = client->_bind_edit( t_products )
 
             )->leaf( `StandardListItem`
                 )->attr( n = `title`   v = `{NAME}`

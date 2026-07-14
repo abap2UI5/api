@@ -51,7 +51,7 @@ CLASS z2ui5_cl_api_app_473 IMPLEMENTATION.
 
             )->leaf( `Image`
                 )->attr( n = `src`   v = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-7777-large.jpg`
-                )->attr( n = `width` v = client->_bind( width ) ).
+                )->attr( n = `width` v = client->_bind_edit( width ) ).
 
     client->view_display( view->stringify( ) ).
 

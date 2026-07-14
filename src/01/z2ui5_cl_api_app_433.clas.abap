@@ -73,7 +73,7 @@ CLASS z2ui5_cl_api_app_433 IMPLEMENTATION.
                         )->attr( n = `vertical`   v = `true`
 
                         )->open( `List`
-                            )->attr( n = `items` v = client->_bind( t_products )
+                            )->attr( n = `items` v = client->_bind_edit( t_products )
 
                             )->leaf( `StandardListItem`
                                 )->attr( n = `title`   v = `{NAME}`

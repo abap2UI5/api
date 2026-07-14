@@ -133,7 +133,7 @@ CLASS z2ui5_cl_api_app_474 IMPLEMENTATION.
                     )->shut(
                 )->shut(
                 )->leaf( `Text`
-                    )->attr( n = `text` v = client->_bind( selected_item_text )
+                    )->attr( n = `text` v = client->_bind_edit( selected_item_text )
 
             )->shut(
 

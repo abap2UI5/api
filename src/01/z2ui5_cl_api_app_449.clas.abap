@@ -68,7 +68,7 @@ CLASS z2ui5_cl_api_app_449 IMPLEMENTATION.
             )->attr( n = `showHeader` v = `false`
 
             )->open( `MessageView`
-                )->attr( n = `items` v = client->_bind( t_messages )
+                )->attr( n = `items` v = client->_bind_edit( t_messages )
 
                 )->leaf( `MessageItem`
                     )->attr( n = `type`        v = `{TYPE}`

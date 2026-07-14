@@ -119,7 +119,7 @@ CLASS z2ui5_cl_api_app_401 IMPLEMENTATION.
                     )->attr( n = `mode`      v = `MultiSelect`
                     )->attr( n = `listClose` v = client->_event( val   = `LIST_CLOSE_CATEGORY`
                                                                  t_arg = VALUE #( ( `$event.mParameters.selectedItems` ) ) )
-                    )->attr( n = `items`     v = client->_bind( t_categories )
+                    )->attr( n = `items`     v = client->_bind_edit( t_categories )
 
                     )->leaf( `FacetFilterItem`
                         )->attr( n = `text`    v = `{TEXT}`
@@ -133,7 +133,7 @@ CLASS z2ui5_cl_api_app_401 IMPLEMENTATION.
                     )->attr( n = `mode`      v = `MultiSelect`
                     )->attr( n = `listClose` v = client->_event( val   = `LIST_CLOSE_SUPPLIER`
                                                                  t_arg = VALUE #( ( `$event.mParameters.selectedItems` ) ) )
-                    )->attr( n = `items`     v = client->_bind( t_suppliers )
+                    )->attr( n = `items`     v = client->_bind_edit( t_suppliers )
 
                     )->leaf( `FacetFilterItem`
                         )->attr( n = `text`    v = `{TEXT}`
@@ -146,7 +146,7 @@ CLASS z2ui5_cl_api_app_401 IMPLEMENTATION.
             )->open( `Table`
                 )->attr( n = `id`    v = `idProductsTable`
                 )->attr( n = `inset` v = `false`
-                )->attr( n = `items` v = client->_bind( t_products )
+                )->attr( n = `items` v = client->_bind_edit( t_products )
 
                 )->open( `headerToolbar`
                     )->open( `OverflowToolbar`

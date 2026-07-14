@@ -206,7 +206,7 @@ Arguments: `n` = tag name, `ns` = namespace **prefix** (literal `f`, `l`, `core`
 **Attributes go through `attr( n = `key` v = `value` )`**, chained right after the
 control's `open`/`leaf`. `attr` always targets that control (the last-added child,
 or the node itself if none yet), so it works after both `open` and `leaf`. `v` is
-any string expression — a literal, a `client->_bind( … )` / `_event( … )` result,
+any string expression — a literal, a `client->_bind_edit( … )` / `_event( … )` result,
 or a `|…|` template. (An `open`/`leaf` also accepts an up-front `a = VALUE #( ( `key=value` ) … )`
 string table, split on the first `=` — handy for attributes built in a loop.)
 
@@ -232,7 +232,7 @@ view->open( n = `View` ns = `mvc`
         )->attr( n = `liveChange` v = client->_event( `SLIDER_MOVED` )
 
     )->open( `Panel`
-        )->attr( n = `width` v = client->_bind( panel_width )
+        )->attr( n = `width` v = client->_bind_edit( panel_width )
         )->open( `headerToolbar`
             )->open( `Toolbar`
                 )->leaf( `Title`
@@ -269,9 +269,11 @@ client->view_display( view->stringify( ) ).
 
 #### Data binding & events
 
-- `client->_bind( var )` — one-way bind (display); `client->_bind_edit( var )` —
-  two-way bind (the value flows back into `var` on the next round-trip). Bind the
-  ABAP `DATA` member, e.g. `)->attr( n = `items` v = client->_bind( t_items )`.
+- `client->_bind_edit( var )` — bind an ABAP `DATA` member two-way (the value
+  flows back into `var` on the next round-trip), e.g.
+  `)->attr( n = `items` v = client->_bind_edit( t_items )`. **`client->_bind( )`
+  (one-way) is obsolete — always use `_bind_edit`, even for display-only
+  bindings.**
 - Inside a bound aggregation, child properties use UI5 binding braces on the
   upper-cased field name: `)->attr( n = `text` v = `{TITLE}``.
 - `client->_event( \`NAME\` )` — wire a control event (press, liveChange…) to an

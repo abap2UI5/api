@@ -83,7 +83,7 @@ CLASS z2ui5_cl_api_app_454 IMPLEMENTATION.
             )->open( `MultiInput`
                 )->attr( n = `width`           v = `70%`
                 )->attr( n = `id`              v = `multiInput`
-                )->attr( n = `suggestionItems` v = client->_bind( t_products )
+                )->attr( n = `suggestionItems` v = client->_bind_edit( t_products )
                 )->attr( n = `placeholder`     v = `Products...`
                 )->attr( n = `showValueHelp`   v = `false`
 

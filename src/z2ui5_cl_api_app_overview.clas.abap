@@ -99,7 +99,7 @@ CLASS z2ui5_cl_api_app_overview IMPLEMENTATION.
 
                 )->open( `Table`
                     )->attr( n = `sticky` v = `ColumnHeaders`
-                    )->attr( n = `items`  v = client->_bind( t_app )
+                    )->attr( n = `items`  v = client->_bind_edit( t_app )
 
                     )->open( `columns`
                         )->open( `Column`

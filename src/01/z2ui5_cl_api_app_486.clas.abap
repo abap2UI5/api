@@ -72,7 +72,7 @@ CLASS z2ui5_cl_api_app_486 IMPLEMENTATION.
             )->open( `Toolbar`
                 )->attr( n = `class` v = `sapUiMediumMarginTop`
                 )->attr( n = `id`    v = `toolbar1`
-                )->attr( n = `width` v = client->_bind( toolbar_width )
+                )->attr( n = `width` v = client->_bind_edit( toolbar_width )
 
                 )->leaf( `Label`
                     )->attr( n = `text` v = `I am a text control, so I will shrink whenever the toolbar overflows.`
@@ -93,7 +93,7 @@ CLASS z2ui5_cl_api_app_486 IMPLEMENTATION.
             )->open( `Toolbar`
                 )->attr( n = `class` v = `sapUiMediumMarginTop`
                 )->attr( n = `id`    v = `toolbar2`
-                )->attr( n = `width` v = client->_bind( toolbar_width )
+                )->attr( n = `width` v = client->_bind_edit( toolbar_width )
 
                 )->open( `Label`
                     )->attr( n = `text` v = `I am a non-shrinkable text.`
@@ -129,7 +129,7 @@ CLASS z2ui5_cl_api_app_486 IMPLEMENTATION.
             )->open( `Toolbar`
                 )->attr( n = `class` v = `sapUiMediumMarginTop`
                 )->attr( n = `id`    v = `toolbar3`
-                )->attr( n = `width` v = client->_bind( toolbar_width )
+                )->attr( n = `width` v = client->_bind_edit( toolbar_width )
 
                 )->open( `Label`
                     )->attr( n = `text` v = `I should not shrink by more than 200px, because I am an important text.`
