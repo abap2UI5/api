@@ -1,10 +1,9 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.Breadcrumbs - Breadcrumbs
 "! https://sdk.openui5.org/entity/sap.m.Breadcrumbs/sample/sap.m.sample.Breadcrumbs
-"! NOTES (generation):
-"! - LIVE-TEST: the link press reads the clicked link's text via the event arg
-"!   ${$source>/text}. This $source> form is not used anywhere else in the repo
-"!   and is unverified - confirm it delivers the text in a running system.
+"! CHECKED (2026-07-15): manually verified in a running system - the
+"! ${$source>/text} event arg delivers the clicked link's text as expected,
+"! everything works like the original.
 CLASS z2ui5_cl_api_app_530 DEFINITION PUBLIC.
 
   PUBLIC SECTION.
