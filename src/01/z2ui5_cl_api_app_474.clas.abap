@@ -1,6 +1,7 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.SegmentedButton - SegmentedButton
 "! https://sdk.openui5.org/entity/sap.m.SegmentedButton/sample/sap.m.sample.SegmentedButton
+"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: YES
 CLASS z2ui5_cl_api_app_474 DEFINITION PUBLIC.
 
   PUBLIC SECTION.

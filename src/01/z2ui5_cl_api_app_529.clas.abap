@@ -1,6 +1,7 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.ObjectStatus - ObjectStatus
 "! https://sdk.openui5.org/entity/sap.m.ObjectStatus/sample/sap.m.sample.ObjectStatus
+"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
 "! NOTES (generation):
 "! - 1.71: ObjectStatus states Indication06-Indication20 are newer than UI5 1.71
 "!   (added ~1.130). The controls are kept but their state is set to "None", so

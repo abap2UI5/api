@@ -1,6 +1,7 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.Panel - PanelExpanded
 "! https://sdk.openui5.org/entity/sap.m.Panel/sample/sap.m.sample.PanelExpanded
+"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
 "! NOTES (generation):
 "! - IMPROVISED: the original controller toggles the third panel imperatively
 "!   (onOverflowToolbarPress -> oPanel.setExpanded(!oPanel.getExpanded())). It is

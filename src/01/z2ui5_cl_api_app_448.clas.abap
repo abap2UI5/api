@@ -1,6 +1,7 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.MessageToast - MessageToast
 "! https://sdk.openui5.org/entity/sap.m.MessageToast/sample/sap.m.sample.MessageToast
+"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
 CLASS z2ui5_cl_api_app_448 DEFINITION PUBLIC.
 
   PUBLIC SECTION.

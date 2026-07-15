@@ -1,6 +1,7 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.Toolbar - ToolbarShrinkable
 "! https://sdk.openui5.org/entity/sap.m.Toolbar/sample/sap.m.sample.ToolbarShrinkable
+"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: YES
 "! NOTES (generation):
 "! - IMPROVISED: the sample's controller onSliderLiveChange resizes the toolbars
 "!   in JS; there is no width in the source XML. Rebuilt as a bound width on each

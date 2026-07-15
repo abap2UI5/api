@@ -1,6 +1,7 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.RangeSlider - RangeSlider
 "! https://sdk.openui5.org/entity/sap.m.RangeSlider/sample/sap.m.sample.RangeSlider
+"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
 "! NOTES (generation):
 "! - IMPROVISED: the sample binds the composite RangeSlider "range" property
 "!   (an array [low, high] - range="{/RS1}" / range="0,100"). abap2UI5 binds

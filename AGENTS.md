@@ -552,3 +552,9 @@ How to record it:
   a bare `{COL}` — see §5 "Data binding & events".
 - **abap2UI5 has only one default model** — flatten any named-model binding into
   it — see §5 "`model_init` — the model".
+- **A new header `"!` line must sit right after the URL line (line 3), before any
+  `CHECKED`/`NOTES (generation):` block** — `generate-overview.mjs` greedily
+  captures the `"!` continuation lines that *follow* those markers into the port's
+  overview popup, so a header line placed after them leaks into the app catalog.
+  The "API USAGE AUDIT" line (frontend_action / event t_arg per port) is inserted
+  exactly there for this reason.

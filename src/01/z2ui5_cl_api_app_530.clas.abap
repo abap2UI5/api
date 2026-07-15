@@ -1,6 +1,7 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.Breadcrumbs - Breadcrumbs
 "! https://sdk.openui5.org/entity/sap.m.Breadcrumbs/sample/sap.m.sample.Breadcrumbs
+"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: YES
 "! CHECKED (2026-07-15): manually verified in a running system - the
 "! ${$source>/text} event arg delivers the clicked link's text as expected,
 "! everything works like the original.

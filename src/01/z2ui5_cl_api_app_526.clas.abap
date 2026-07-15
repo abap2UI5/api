@@ -1,6 +1,7 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.Button - Button
 "! https://sdk.openui5.org/entity/sap.m.Button/sample/sap.m.sample.Button
+"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: YES
 "! CHECKED (2026-07-15): manually verified in a running system - each press
 "! toasts the pressed button's client-side control id, read via the event arg
 "! $event.oSource.sId, exactly like the original.

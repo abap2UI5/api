@@ -1,6 +1,7 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.ObjectHeader - ObjectHeader
 "! https://sdk.openui5.org/entity/sap.m.ObjectHeader/sample/sap.m.sample.ObjectHeader
+"! API USAGE AUDIT: (a) frontend_action (_event_client): YES | (b) event t_arg: YES
 "! NOTES (generation):
 "! - IMPROVISED: the sample binds the ObjectHeader to {/ProductCollection/0} and
 "!   its title/number/attributes to model fields (with a Currency type formatter
