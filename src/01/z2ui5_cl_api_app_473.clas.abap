@@ -1,6 +1,7 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.ScrollContainer - ScrollContainer
 "! https://sdk.openui5.org/entity/sap.m.ScrollContainer/sample/sap.m.sample.ScrollContainer
+"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
 "! NOTES (generation):
 "! - IMPROVISED: the Image src binds {img>/products/pic1} in the original, a JSON
 "!   image model not available server-side; a static demo image URL is used instead.

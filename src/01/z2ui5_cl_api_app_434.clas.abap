@@ -1,6 +1,7 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.Image - ImageModeBackground
 "! https://sdk.openui5.org/entity/sap.m.Image/sample/sap.m.sample.ImageModeBackground
+"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
 "! NOTES (generation):
 "! - IMPROVISED: the original binds src/mode/height/width to a JSONModel
 "!   (img>/products, /imageMode, /imageHeight, /imageWidth); the fixed sample

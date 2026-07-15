@@ -1,6 +1,7 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.Input - InputValueState
 "! https://sdk.openui5.org/entity/sap.m.Input/sample/sap.m.sample.InputValueState
+"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
 "! NOTES (generation):
 "! - 1.71: Input property showClearIcon (since UI5 1.94) dropped from three inputs.
 "! - 1.71: the two formattedValueStateText aggregations (a FormattedText carrying

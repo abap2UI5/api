@@ -1,6 +1,7 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.GenericTile - GenericTileAsKPITile
 "! https://sdk.openui5.org/entity/sap.m.GenericTile/sample/sap.m.sample.GenericTileAsKPITile
+"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
 "! NOTES (generation):
 "! - 1.71: frameType OneByHalf / TwoByHalf dropped on several tiles - both enum
 "!   values were added in UI5 1.83; OneByOne / TwoByOne (1.71) are kept.

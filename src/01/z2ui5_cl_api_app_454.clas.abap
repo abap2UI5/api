@@ -1,6 +1,7 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.MultiInput - MultiInput
 "! https://sdk.openui5.org/entity/sap.m.MultiInput/sample/sap.m.sample.MultiInput
+"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
 CLASS z2ui5_cl_api_app_454 DEFINITION PUBLIC.
 
   PUBLIC SECTION.

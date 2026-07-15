@@ -1,6 +1,7 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.Tree - Tree
 "! https://sdk.openui5.org/entity/sap.m.Tree/sample/sap.m.sample.Tree
+"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
 "! NOTES (generation):
 "! - LIVE-TEST: the sample's view is flat (one Tree bound to '/', one
 "!   StandardTreeItem template); the hierarchy is carried entirely by the

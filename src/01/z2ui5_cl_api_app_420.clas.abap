@@ -1,6 +1,7 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.Carousel - CarouselWithControls
 "! https://sdk.openui5.org/entity/sap.m.Carousel/sample/sap.m.sample.CarouselWithControls
+"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
 "! CHECKED (2026-07-15): manually verified in a running system - renders and
 "! scrolls like the original (see the note below on the flattened image model).
 "! NOTES (generation):

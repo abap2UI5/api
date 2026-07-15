@@ -1,6 +1,7 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.Link - LinkEmphasized
 "! https://sdk.openui5.org/entity/sap.m.Link/sample/sap.m.sample.LinkEmphasized
+"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
 "! NOTES (generation):
 "! - IMPROVISED: the last column's original number binding is a
 "!   sap.ui.model.type.Currency formatter (parts Price/CurrencyCode,

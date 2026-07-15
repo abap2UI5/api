@@ -1,6 +1,7 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.ColorPalette - ColorPalette
 "! https://sdk.openui5.org/entity/sap.m.ColorPalette/sample/sap.m.sample.ColorPalette
+"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: YES
 CLASS z2ui5_cl_api_app_422 DEFINITION PUBLIC.
 
   PUBLIC SECTION.

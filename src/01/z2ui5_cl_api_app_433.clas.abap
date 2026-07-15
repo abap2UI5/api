@@ -1,6 +1,7 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.IconTabBar - IconTabBarStretchContent
 "! https://sdk.openui5.org/entity/sap.m.IconTabBar/sample/sap.m.sample.IconTabBarStretchContent
+"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
 "! NOTES (generation):
 "! - IMPROVISED: the IconTabBar property expanded="{device>/isNoPhone}" is
 "!   dropped - abap2UI5 has no device model, so the phone/non-phone binding

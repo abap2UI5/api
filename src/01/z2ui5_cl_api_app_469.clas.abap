@@ -1,6 +1,7 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.PDFViewer - PDFViewerPopup
 "! https://sdk.openui5.org/entity/sap.m.PDFViewer/sample/sap.m.sample.PDFViewerPopup
+"! API USAGE AUDIT: (a) frontend_action (_event_client): YES | (b) event t_arg: YES
 "! NOTES (generation):
 "! - IMPROVISED: the sample's onInit gives each Image its own JSONModel and onPress
 "!   opens a controller-created sap.m.PDFViewer in popup mode via JavaScript. Here the

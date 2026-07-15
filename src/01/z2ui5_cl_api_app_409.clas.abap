@@ -1,6 +1,7 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.TextArea - TextArea
 "! https://sdk.openui5.org/entity/sap.m.TextArea/sample/sap.m.sample.TextArea
+"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
 CLASS z2ui5_cl_api_app_409 DEFINITION PUBLIC.
 
   PUBLIC SECTION.
