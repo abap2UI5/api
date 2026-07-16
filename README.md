@@ -29,7 +29,8 @@ A coding agent runs the pipeline:
    filed under `src/01` in batch subpackages (`b01`, `b02`, …) — one batch of
    related samples per package.
 3. **Store templates** — keep the original UI5 JS/XML templates in
-   [`ui5/`](ui5), one folder per port (named after the port class).
+   [`ui5/`](ui5), one folder per sample — only ported samples are archived;
+   each batch copies its samples over from the OpenUI5 checkout.
 4. **Report** — regenerate the [coverage](#coverage) tables and the in-system
    overview app, marking every sample ✅ ported or ❌ missing. The ❌ rows are
    the backlog.

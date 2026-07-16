@@ -98,8 +98,9 @@ function parseAbap(abap) {
 }
 
 // ---------- per-port original views: everything the manifest lists ----------
-function originalViews(cls) {
-  const dir = path.join(UI5, cls);
+// join key: the sample name (ui5/sap.m/<SampleName>/), derived from meta.sample
+function originalViews(sampleName) {
+  const dir = path.join(UI5, sampleName);
   if (!fs.existsSync(dir)) return [];
   const files = [];
   const walk = (d) => {
@@ -134,7 +135,7 @@ for (const metaFile of fs.readdirSync(META).sort()) {
   if (!fs.existsSync(abapPath)) continue;
   apps++;
 
-  const views = originalViews(meta.class);
+  const views = originalViews(meta.sample.split('.sample.')[1] ?? meta.sample);
   if (!views.length) {
     lines.push(`${meta.class} (${meta.sample}): no original view.xml archived — SKIPPED`);
     continue;

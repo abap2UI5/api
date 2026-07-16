@@ -133,7 +133,7 @@ looped controls. Values are not compared — that stays with review/live checks.
 
 Training signal is only as good as the stored pairs:
 
-- `ui5/<class>/` must archive **everything** `manifest.json` lists under
+- `ui5/<library>/<SampleName>/` must archive **everything** `manifest.json` lists under
   `sample.files` **plus** any mock data used — done since 2026-07-16: the
   missing `Table.view.xml` was fetched and the shared demo kit mock data
   (`products.json`, `img.json`, `countriesExtendedCollection.json`) is

@@ -39,7 +39,7 @@ Everything lives on the working branch, in two separate top-level trees:
 | Path    | Content |
 |---------|---------|
 | `src/`  | The generated abap2UI5 ports (`*.clas.abap`) — the abapGit project (§3). |
-| `ui5/`  | The original UI5 demo kit templates (JS/XML/manifest), one folder per port (§4). |
+| `ui5/`  | The original UI5 demo kit templates (JS/XML/manifest), one folder per ported sample (§4). |
 
 Keep them separate: only `src/` is the abapGit / abaplint scope; `ui5/` is
 plain JS/XML held for reference and to feed the generator.
@@ -83,17 +83,20 @@ number; it is the app's identity linking a port to its template (see §4).
 ## 4. The `ui5/` folder — original templates
 
 Every port's source template is collected under `ui5/`. **The template folder is
-named after the port class**, filed by source library:
+named after the sample**, filed by source library:
 
 ```
-ui5/<library>/<z2ui5_cl_api_app_n>/   ← original Component.js, *.view.xml,
-                                          manifest.json, controllers, resources
+ui5/<library>/<SampleName>/   ← original Component.js, *.view.xml,
+                                  manifest.json, controllers, resources
 ```
 
-The folder name (class) is the join key between a port (`src/`) and its template
-(`ui5/`). Templates are held verbatim — never edited to fit ABAP; that is the
-generator's job. `ui5/` is the generator's local input store; the `api.md`
-**Javascript** column links to the sample's source in the upstream
+The join key between a port (`src/`) and its template is `meta/<class>.json` →
+`sample`. Only **ported** samples are archived: each generation batch copies
+its samples over from the OpenUI5 checkout when the batch is generated — the
+446-sample universe is not mirrored here. Templates are held verbatim — never
+edited to fit ABAP; that is the generator's job. `ui5/` is the generator's
+local input store; the `api.md` **Javascript** column links to the sample's
+source in the upstream
 [OpenUI5 repository](https://github.com/SAP/openui5), not to this copy (§7).
 
 Archive **everything** the sample's `manifest.json` lists under `sap.ui5 >

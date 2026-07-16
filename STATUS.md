@@ -15,7 +15,7 @@ CAPABILITIES.md._
 | Pattern lint | **0 errors, 0 warnings, empty baseline** (`node scripts/pattern-lint.mjs`) |
 | Meta sidecars | 34 in `meta/` — status: 30 `generated`, 4 `checked`; deviations: 35 IMPROVISED, 11 DROPPED_171, 10 LIVE_TEST |
 | Manually verified in a running system | 420, 421, 526, 530 (`CHECKED`) |
-| Archive | `ui5/` complete incl. shared mock data snapshot (`ui5/mock/`, provenance in its README) |
+| Archive | `ui5/sap.m/<SampleName>/` — full originals for the 34 ported samples (+2 cross-referenced: `FacetFilterSimple`, `Table`); mock snapshot in `ui5/mock/`. Unported samples are copied over batch by batch. |
 
 ## Batches
 
