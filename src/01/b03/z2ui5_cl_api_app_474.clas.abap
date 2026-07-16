@@ -1,13 +1,22 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.SegmentedButton - SegmentedButton
 "! https://sdk.openui5.org/entity/sap.m.SegmentedButton/sample/sap.m.sample.SegmentedButton
-"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: YES
+"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
+"! NOTES (generation):
+"! - IMPROVISED: the original reads the selected item via
+"!   oEvent.getParameter("item").getText() / getSelectedItem(). Here the items
+"!   get keys (one/two/three - an addition, SB1 has none in the sample) and
+"!   selectedKey is two-way bound, so the selection arrives with the event and
+"!   no private event path is needed (see CAPABILITIES.md).
+"! - LIVE-TEST: confirm the two-way bound selectedKey is updated before
+"!   on_event runs, so the toast shows the newly selected item.
 CLASS z2ui5_cl_api_app_474 DEFINITION PUBLIC.
 
   PUBLIC SECTION.
     INTERFACES z2ui5_if_app.
 
     DATA selected_item_text TYPE string.
+    DATA selected_key       TYPE string VALUE `one`.
 
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
@@ -119,16 +128,21 @@ CLASS z2ui5_cl_api_app_474 IMPLEMENTATION.
                 )->leaf( `Label`
                     )->a( n = `text` v = `Fire selectionChange event`
 
+                " selectedKey two-way bound + item keys (port addition) so the
+                " selection is read server-side without a private event path
                 )->open( `SegmentedButton`
-                    )->a( n = `selectionChange` v = client->_event( val   = `SELECTION_CHANGE`
-                                                                       t_arg = VALUE #( ( `${$parameters>/item/mProperties/text}` ) ) )
+                    )->a( n = `selectedKey`     v = client->_bind_edit( selected_key )
+                    )->a( n = `selectionChange` v = client->_event( `SELECTION_CHANGE` )
 
                     )->open( `items`
                         )->leaf( `SegmentedButtonItem`
+                            )->a( n = `key`  v = `one`
                             )->a( n = `text` v = `One`
                         )->leaf( `SegmentedButtonItem`
+                            )->a( n = `key`  v = `two`
                             )->a( n = `text` v = `Two`
                         )->leaf( `SegmentedButtonItem`
+                            )->a( n = `key`  v = `three`
                             )->a( n = `text` v = `Three`
 
                     )->shut(
@@ -171,8 +185,13 @@ CLASS z2ui5_cl_api_app_474 IMPLEMENTATION.
     CASE client->get( )-event.
 
       WHEN `SELECTION_CHANGE`.
-        client->message_toast_display( |oEvent.getParameter('item').getText(): '{ client->get_event_arg( 1 ) }' selected| ).
-        selected_item_text = |getSelectedItem(): { client->get_event_arg( 1 ) }|.
+        " map the two-way bound key back to the item text
+        DATA(text) = SWITCH string( selected_key
+                       WHEN `one`   THEN `One`
+                       WHEN `two`   THEN `Two`
+                       WHEN `three` THEN `Three` ).
+        client->message_toast_display( |oEvent.getParameter('item').getText(): '{ text }' selected| ).
+        selected_item_text = |getSelectedItem(): { text }|.
         client->view_model_update( ).
 
     ENDCASE.

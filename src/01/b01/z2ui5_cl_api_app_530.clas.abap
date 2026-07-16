@@ -5,6 +5,11 @@
 "! CHECKED (2026-07-15): manually verified in a running system - the
 "! ${$source>/text} event arg delivers the clicked link's text as expected,
 "! everything works like the original.
+"! NOTES (generation):
+"! - LIVE-TEST: the SEP_CHANGE round-trip (which read a private UI5-internal
+"!   event path) was removed 2026-07-16 - selectedKey and separatorStyle
+"!   share one two-way bound path, so the separator switches client-side.
+"!   Confirm the instant separator change in a running system.
 CLASS z2ui5_cl_api_app_530 DEFINITION PUBLIC.
 
   PUBLIC SECTION.
@@ -102,12 +107,12 @@ CLASS z2ui5_cl_api_app_530 IMPLEMENTATION.
                             )->a( n = `labelFor` v = `separatorSelect`
                             )->a( n = `text`     v = `Change separator style`
 
+                        " no change event: selectedKey and separatorStyle share the same
+                        " two-way bound path, so picking a separator updates instantly client-side
                         )->open( `Select`
                             )->a( n = `class`       v = `sapUiSmallMarginBegin`
                             )->a( n = `id`          v = `separatorSelect`
                             )->a( n = `selectedKey` v = client->_bind_edit( selected )
-                            )->a( n = `change`      v = client->_event( val   = `SEP_CHANGE`
-                                                                           t_arg = VALUE #( ( `${$parameters>/selectedItem/mProperties/key}` ) ) )
                             )->a( n = `items`       v = client->_bind_edit( t_items )
 
                             )->leaf( n = `Item` ns = `core`
@@ -125,10 +130,6 @@ CLASS z2ui5_cl_api_app_530 IMPLEMENTATION.
 
       WHEN `LINK_PRESS`.
         client->message_toast_display( |{ client->get_event_arg( 1 ) } has been activated| ).
-
-      WHEN `SEP_CHANGE`.
-        selected = client->get_event_arg( 1 ).
-        client->view_model_update( ).
 
     ENDCASE.
 

@@ -20,8 +20,8 @@
       "what": "url dropped on the link tiles - added in UI5 1.76."
     },
     {
-      "type": "IMPROVISED",
-      "what": "the custom CSS class tileLayout is dropped from the class attribute - the sample's style.css (float: left) cannot be injected here."
+      "type": "LIVE_TEST",
+      "what": "the custom CSS class tileLayout (float: left) is kept and its style.css injected via a core:HTML content attribute (see CAPABILITIES.md) - confirm the float layout in a running system."
     },
     {
       "type": "IMPROVISED",

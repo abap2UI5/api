@@ -7,6 +7,10 @@
 "!   sap.ui.model.type.Currency formatter (parts Price/CurrencyCode,
 "!   formatOptions showMeasure:false); it is replaced by a plain ObjectNumber
 "!   with a preformatted price text (number={PRICE} unit={CURRENCY_CODE}).
+"! - IMPROVISED: the bound /ProductCollection shows a 6-row subset of the
+"!   123-row mock (ui5/mock/products.json); HT-1002 is not part of the subset.
+"! - IMPROVISED: the binding sorter (path Name) is replaced by a one-time
+"!   ABAP SORT - equivalent for this static data.
 CLASS z2ui5_cl_api_app_440 DEFINITION PUBLIC.
 
   PUBLIC SECTION.
@@ -25,7 +29,7 @@ CLASS z2ui5_cl_api_app_440 DEFINITION PUBLIC.
         weight_unit    TYPE string,
         price          TYPE string,
         currency_code  TYPE string,
-        pic_url        TYPE string,
+        product_pic_url        TYPE string,
       END OF ty_s_product.
     DATA t_products TYPE STANDARD TABLE OF ty_s_product WITH EMPTY KEY.
 
@@ -55,7 +59,7 @@ CLASS z2ui5_cl_api_app_440 IMPLEMENTATION.
           weight_unit    = `KG`
           price          = `956.00`
           currency_code  = `EUR`
-          pic_url        = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1000.jpg` )
+          product_pic_url        = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1000.jpg` )
         ( product_id     = `HT-1001`
           name           = `Notebook Basic 17`
           supplier_name  = `Very Best Screens`
@@ -67,7 +71,7 @@ CLASS z2ui5_cl_api_app_440 IMPLEMENTATION.
           weight_unit    = `KG`
           price          = `1249.00`
           currency_code  = `EUR`
-          pic_url        = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1001.jpg` )
+          product_pic_url        = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1001.jpg` )
         ( product_id     = `HT-1003`
           name           = `Notebook Basic 19`
           supplier_name  = `Smartcards`
@@ -79,7 +83,7 @@ CLASS z2ui5_cl_api_app_440 IMPLEMENTATION.
           weight_unit    = `KG`
           price          = `1650.00`
           currency_code  = `EUR`
-          pic_url        = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1003.jpg` )
+          product_pic_url        = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1003.jpg` )
         ( product_id     = `HT-1007`
           name           = `ITelO Vault`
           supplier_name  = `Technocom`
@@ -91,7 +95,7 @@ CLASS z2ui5_cl_api_app_440 IMPLEMENTATION.
           weight_unit    = `KG`
           price          = `299.00`
           currency_code  = `EUR`
-          pic_url        = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1007.jpg` )
+          product_pic_url        = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1007.jpg` )
         ( product_id     = `HT-1010`
           name           = `Notebook Professional 15`
           supplier_name  = `Very Best Screens`
@@ -103,7 +107,7 @@ CLASS z2ui5_cl_api_app_440 IMPLEMENTATION.
           weight_unit    = `KG`
           price          = `1999.00`
           currency_code  = `EUR`
-          pic_url        = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1010.jpg` )
+          product_pic_url        = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1010.jpg` )
         ( product_id     = `HT-1020`
           name           = `ITelO Vault Net`
           supplier_name  = `Technocom`
@@ -115,7 +119,7 @@ CLASS z2ui5_cl_api_app_440 IMPLEMENTATION.
           weight_unit    = `KG`
           price          = `459.00`
           currency_code  = `EUR`
-          pic_url        = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1020.jpg` ) ).
+          product_pic_url        = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1020.jpg` ) ).
 
     " the original view sorts the table items by name via a binding sorter
     SORT t_products BY name ASCENDING.
@@ -194,7 +198,7 @@ CLASS z2ui5_cl_api_app_440 IMPLEMENTATION.
                         )->leaf( `Link`
                             )->a( n = `text`       v = `{PRODUCT_ID}`
                             )->a( n = `emphasized` v = `true`
-                            )->a( n = `href`       v = `{PIC_URL}`
+                            )->a( n = `href`       v = `{PRODUCT_PIC_URL}`
                         )->leaf( `Text`
                             )->a( n = `text` v = `{SUPPLIER_NAME}`
                         )->leaf( `Text`

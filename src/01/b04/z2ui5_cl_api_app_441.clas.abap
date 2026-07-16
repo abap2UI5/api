@@ -4,6 +4,8 @@
 "! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
 "! NOTES (generation):
 "! - 1.71: headerLevel="H2" on the List (since UI5 1.117) is dropped.
+"! - IMPROVISED: the bound /ProductCollection shows a 11-row subset of the
+"!   123-row mock (ui5/mock/products.json) - a full unroll adds no demo value.
 CLASS z2ui5_cl_api_app_441 DEFINITION PUBLIC.
 
   PUBLIC SECTION.

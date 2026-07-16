@@ -8,6 +8,8 @@
 "! - IMPROVISED: the three carousel images bind to a separate named model in the
 "!   original (img>/products/pic1..3 from sap/ui/demo/mock/img.json); resolved
 "!   here to static image URLs, as abap2UI5 serves a single default model.
+"! - IMPROVISED: the bound /ProductCollection shows a 10-row subset of the
+"!   123-row mock (ui5/mock/products.json) - a full unroll adds no demo value.
 CLASS z2ui5_cl_api_app_420 DEFINITION PUBLIC.
 
   PUBLIC SECTION.

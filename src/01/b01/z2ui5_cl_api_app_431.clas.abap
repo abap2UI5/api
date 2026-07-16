@@ -7,8 +7,9 @@
 "!   values were added in UI5 1.83; OneByOne / TwoByOne (1.71) are kept.
 "! - 1.71: systemInfo and appShortcut dropped - both added in UI5 1.92.
 "! - 1.71: url dropped on the link tiles - added in UI5 1.76.
-"! - IMPROVISED: the custom CSS class tileLayout is dropped from the class
-"!   attribute - the sample's style.css (float: left) cannot be injected here.
+"! - LIVE-TEST: the custom CSS class tileLayout (float: left) is kept and its
+"!   style.css injected via a core:HTML content attribute (see CAPABILITIES.md)
+"!   - confirm the float layout in a running system.
 "! - IMPROVISED: the relative test-resources image and backgroundImage paths are
 "!   resolved to absolute sdk.openui5.org URLs so the tile images load standalone.
 CLASS z2ui5_cl_api_app_431 DEFINITION PUBLIC.
@@ -47,11 +48,16 @@ CLASS z2ui5_cl_api_app_431 IMPLEMENTATION.
     DATA(view) = z2ui5_cl_api_xml=>factory( ).
 
     view->open( n = `View` ns = `mvc`
-        )->a( n = `xmlns`     v = `sap.m`
-        )->a( n = `xmlns:mvc` v = `sap.ui.core.mvc`
+        )->a( n = `xmlns`      v = `sap.m`
+        )->a( n = `xmlns:mvc`  v = `sap.ui.core.mvc`
+        )->a( n = `xmlns:core` v = `sap.ui.core`
+
+        " the sample's style.css, injected via a core:HTML content attribute (see CAPABILITIES.md)
+        )->leaf( n = `HTML` ns = `core`
+            )->a( n = `content` v = `<style>.tileLayout{float:left}</style>`
 
         )->open( `GenericTile`
-            )->a( n = `class`     v = `sapUiTinyMarginBegin sapUiTinyMarginTop`
+            )->a( n = `class`     v = `sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout`
             )->a( n = `header`    v = `Country-Specific Profit Margin`
             )->a( n = `subheader` v = `Expenses`
             )->a( n = `press`     v = client->_event( `PRESS` )
@@ -71,7 +77,7 @@ CLASS z2ui5_cl_api_app_431 IMPLEMENTATION.
         )->shut(
 
         )->open( `GenericTile`
-            )->a( n = `class`  v = `sapUiTinyMarginBegin sapUiTinyMarginTop`
+            )->a( n = `class`  v = `sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout`
             )->a( n = `header` v = `US Profit Margin`
             )->a( n = `press`  v = client->_event( `PRESS` )
 
@@ -89,7 +95,7 @@ CLASS z2ui5_cl_api_app_431 IMPLEMENTATION.
         )->shut(
 
         )->open( `GenericTile`
-            )->a( n = `class`     v = `sapUiTinyMarginBegin sapUiTinyMarginTop`
+            )->a( n = `class`     v = `sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout`
             )->a( n = `header`    v = `Sales Fulfillment Application Title`
             )->a( n = `subheader` v = `Subtitle`
             )->a( n = `press`     v = client->_event( `PRESS` )
@@ -105,7 +111,7 @@ CLASS z2ui5_cl_api_app_431 IMPLEMENTATION.
         )->shut(
 
         )->open( `GenericTile`
-            )->a( n = `class`     v = `sapUiTinyMarginBegin sapUiTinyMarginTop`
+            )->a( n = `class`     v = `sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout`
             )->a( n = `header`    v = `Manage Activity Master Data Type`
             )->a( n = `subheader` v = `Subtitle`
             )->a( n = `press`     v = client->_event( `PRESS` )
@@ -118,7 +124,7 @@ CLASS z2ui5_cl_api_app_431 IMPLEMENTATION.
         )->shut(
 
         )->open( `GenericTile`
-            )->a( n = `class`     v = `sapUiTinyMarginBegin sapUiTinyMarginTop`
+            )->a( n = `class`     v = `sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout`
             )->a( n = `header`    v = `Manage Activity Master Data Type With a Long Title Without an Icon`
             )->a( n = `subheader` v = `Subtitle Launch Tile`
             )->a( n = `mode`      v = `HeaderMode`
@@ -131,7 +137,7 @@ CLASS z2ui5_cl_api_app_431 IMPLEMENTATION.
         )->shut(
 
         )->open( `GenericTile`
-            )->a( n = `class`     v = `sapUiTinyMarginBegin sapUiTinyMarginTop`
+            )->a( n = `class`     v = `sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout`
             )->a( n = `header`    v = `Jessica D. Prince Senior Consultant`
             )->a( n = `subheader` v = `Department`
             )->a( n = `press`     v = client->_event( `PRESS` )
@@ -177,7 +183,7 @@ CLASS z2ui5_cl_api_app_431 IMPLEMENTATION.
         )->shut(
 
         )->open( `GenericTile`
-            )->a( n = `class`     v = `sapUiTinyMarginBegin sapUiTinyMarginTop`
+            )->a( n = `class`     v = `sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout`
             )->a( n = `header`    v = `Country-Specific Profit Margin`
             )->a( n = `subheader` v = `Expenses`
             )->a( n = `press`     v = client->_event( `PRESS` )
@@ -233,7 +239,7 @@ CLASS z2ui5_cl_api_app_431 IMPLEMENTATION.
         )->shut(
 
         )->open( `GenericTile`
-            )->a( n = `class`     v = `sapUiTinyMarginBegin sapUiTinyMarginTop`
+            )->a( n = `class`     v = `sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout`
             )->a( n = `header`    v = `Feed Tile that shows updates of the last feeds given to a specific topic:`
             )->a( n = `frameType` v = `TwoByOne`
             )->a( n = `press`     v = client->_event( `PRESS` )
@@ -250,7 +256,7 @@ CLASS z2ui5_cl_api_app_431 IMPLEMENTATION.
         )->shut(
 
         )->open( `GenericTile`
-            )->a( n = `class`  v = `sapUiTinyMarginBegin sapUiTinyMarginTop`
+            )->a( n = `class`  v = `sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout`
             )->a( n = `header` v = `Country-Specific Profit Margin`
             )->a( n = `press`  v = client->_event( `PRESS` )
 
@@ -269,7 +275,7 @@ CLASS z2ui5_cl_api_app_431 IMPLEMENTATION.
         )->shut(
 
         )->open( `GenericTile`
-            )->a( n = `class`     v = `sapUiTinyMarginBegin sapUiTinyMarginTop`
+            )->a( n = `class`     v = `sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout`
             )->a( n = `header`    v = `Cumulative Totals`
             )->a( n = `subheader` v = `Expenses`
             )->a( n = `press`     v = client->_event( `PRESS` )
@@ -287,7 +293,7 @@ CLASS z2ui5_cl_api_app_431 IMPLEMENTATION.
         )->shut(
 
         )->open( `GenericTile`
-            )->a( n = `class`     v = `sapUiTinyMarginBegin sapUiTinyMarginTop`
+            )->a( n = `class`     v = `sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout`
             )->a( n = `header`    v = `Right click to open in new tab`
             )->a( n = `subheader` v = `Link tile`
             )->a( n = `press`     v = client->_event( `PRESS` )
@@ -300,7 +306,7 @@ CLASS z2ui5_cl_api_app_431 IMPLEMENTATION.
         )->shut(
 
         )->open( `GenericTile`
-            )->a( n = `class`  v = `sapUiTinyMarginBegin sapUiTinyMarginTop`
+            )->a( n = `class`  v = `sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout`
             )->a( n = `header` v = `US Profit Margin`
             )->a( n = `press`  v = client->_event( `PRESS` )
 
@@ -318,7 +324,7 @@ CLASS z2ui5_cl_api_app_431 IMPLEMENTATION.
         )->shut(
 
         )->open( `GenericTile`
-            )->a( n = `class`     v = `sapUiTinyMarginBegin sapUiTinyMarginTop`
+            )->a( n = `class`     v = `sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout`
             )->a( n = `header`    v = `Sales Fulfillment Application Title`
             )->a( n = `subheader` v = `Subtitle`
             )->a( n = `press`     v = client->_event( `PRESS` )
@@ -334,7 +340,7 @@ CLASS z2ui5_cl_api_app_431 IMPLEMENTATION.
         )->shut(
 
         )->open( `GenericTile`
-            )->a( n = `class`     v = `sapUiTinyMarginBegin sapUiTinyMarginTop`
+            )->a( n = `class`     v = `sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout`
             )->a( n = `header`    v = `Cumulative Totals`
             )->a( n = `subheader` v = `Expenses`
             )->a( n = `press`     v = client->_event( `PRESS` )
@@ -352,7 +358,7 @@ CLASS z2ui5_cl_api_app_431 IMPLEMENTATION.
         )->shut(
 
         )->open( `GenericTile`
-            )->a( n = `class`     v = `sapUiTinyMarginBegin sapUiTinyMarginTop`
+            )->a( n = `class`     v = `sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout`
             )->a( n = `header`    v = `Right click to open in new tab`
             )->a( n = `subheader` v = `Link tile`
             )->a( n = `frameType` v = `TwoByOne`

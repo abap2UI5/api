@@ -9,5 +9,10 @@
     "date": "2026-07-15",
     "note": "manually verified in a running system - the ${$source>/text} event arg delivers the clicked link's text as expected, everything works like the original."
   },
-  "deviations": []
+  "deviations": [
+    {
+      "type": "LIVE_TEST",
+      "what": "the SEP_CHANGE round-trip (which read a private UI5-internal event path) was removed 2026-07-16 - selectedKey and separatorStyle share one two-way bound path, so the separator switches client-side. Confirm the instant separator change in a running system."
+    }
+  ]
 }

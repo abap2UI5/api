@@ -1,14 +1,15 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.ObjectStatus - ObjectStatus
 "! https://sdk.openui5.org/entity/sap.m.ObjectStatus/sample/sap.m.sample.ObjectStatus
-"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
+"! API USAGE AUDIT: (a) frontend_action (_event_client): YES - popup_close | (b) event t_arg: NO
 "! NOTES (generation):
 "! - 1.71: ObjectStatus states Indication06-Indication20 are newer than UI5 1.71
 "!   (added ~1.130). The controls are kept but their state is set to "None", so
 "!   the indication colours differ from the original - verify if relevant.
-"! - IMPROVISED: the active status press originally opens a controller-built
-"!   Dialog; replaced with message_toast_display, since a Dialog is not a 1:1
-"!   view element.
+"! - LIVE-TEST: the active status press opens the controller-built Dialog 1:1
+"!   (core:FragmentDefinition + popup_display, per CAPABILITIES.md): a Dialog
+"!   with a VBox, a Text and an OK Button - these popup controls are extra to
+"!   the view XML. Confirm the popup opens and closes in a running system.
 CLASS z2ui5_cl_api_app_529 DEFINITION PUBLIC.
 
   PUBLIC SECTION.
@@ -426,8 +427,29 @@ CLASS z2ui5_cl_api_app_529 IMPLEMENTATION.
     CASE client->get( )-event.
 
       WHEN `STATUS_PRESSED`.
-        " the original controller opens a Dialog showing this error description
-        client->message_toast_display( `Product was damaged along transportation.` ).
+        " the original controller builds this Dialog (title/VBox/Text/OK button) and opens it
+        DATA(popup) = z2ui5_cl_api_xml=>factory( ).
+
+        popup->open( n = `FragmentDefinition` ns = `core`
+            )->a( n = `xmlns`      v = `sap.m`
+            )->a( n = `xmlns:core` v = `sap.ui.core`
+
+            )->open( `Dialog`
+                )->a( n = `title` v = `Error description`
+
+                )->open( `VBox`
+                    )->a( n = `fitContainer` v = `true`
+
+                    )->leaf( `Text`
+                        )->a( n = `text` v = `Product was damaged along transportation.`
+
+                )->shut(
+                )->open( `buttons`
+                    )->leaf( `Button`
+                        )->a( n = `text`  v = `OK`
+                        )->a( n = `press` v = client->_event_client( client->cs_event-popup_close ) ).
+
+        client->popup_display( popup->stringify( ) ).
 
     ENDCASE.
 

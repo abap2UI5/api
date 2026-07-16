@@ -3,11 +3,10 @@
 "! https://sdk.openui5.org/entity/sap.m.FlexBox/sample/sap.m.sample.FlexBoxNested
 "! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
 "! NOTES (generation):
-"! - IMPROVISED: the original sample colours .item1..item6 and the h2 headings
-"!   via a separate style.css; the previous port injected it through an
-"!   html:style block. z2ui5_cl_api_xml has no raw-text/CDATA node, so that CSS
-"!   cannot be emitted - the styleClass attributes are ported 1:1 but the flex
-"!   items render without their background colours. Dropped.
+"! - LIVE-TEST: the original colours .item1..item6 and the h2 headings via a
+"!   separate style.css; here it is injected as a core:HTML content attribute
+"!   (a style tag, minified - see CAPABILITIES.md). Confirm the flex items
+"!   render with their background colours in a running system.
 CLASS z2ui5_cl_api_app_404 DEFINITION PUBLIC.
 
   PUBLIC SECTION.
@@ -36,14 +35,25 @@ CLASS z2ui5_cl_api_app_404 IMPLEMENTATION.
 
   METHOD view_display.
 
-    " the original sample's style.css cannot be injected via z2ui5_cl_api_xml
-    " (no raw-text node) - see NOTES; styleClass item1..item6 kept but unstyled
+    " the sample's style.css, injected via a core:HTML content attribute
+    " (see CAPABILITIES.md) - placed before the HBox so it is no flex item
+    DATA(css) = `<style>.nestedFlexboxes .item1{padding:1rem;background-color:#d1dbbd}` &&
+                `.nestedFlexboxes .item2{padding:1rem;background-color:#7D8A2E}` &&
+                `.nestedFlexboxes .item3{padding:1rem;background-color:#C9D787}` &&
+                `.nestedFlexboxes .item4{padding:1rem;background-color:#FFFFFF}` &&
+                `.nestedFlexboxes .item5{padding:1rem;background-color:#FFC0A9}` &&
+                `.nestedFlexboxes .item6{padding:1rem;background-color:#FF8598}` &&
+                `.nestedFlexboxes h2{color:#32363a}</style>`.
+
     DATA(view) = z2ui5_cl_api_xml=>factory( ).
 
     view->open( n = `View` ns = `mvc`
         )->a( n = `xmlns`      v = `sap.m`
         )->a( n = `xmlns:mvc`  v = `sap.ui.core.mvc`
         )->a( n = `xmlns:core` v = `sap.ui.core`
+
+        )->leaf( n = `HTML` ns = `core`
+            )->a( n = `content` v = css
 
         )->open( `HBox`
             )->a( n = `fitContainer` v = `true`

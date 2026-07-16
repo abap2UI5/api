@@ -43,16 +43,19 @@ CLASS z2ui5_cl_api_app_528 IMPLEMENTATION.
                 )->open( n = `Switch` a = VALUE #( ( `state=true` ) )
                     )->open( `layoutData`
                         )->leaf( n = `FlexItemData` a = VALUE #( ( `growFactor=1` ) )
+
                     )->shut(
                 )->shut(
                 )->open( n = `Switch` a = VALUE #( ( `state=false` ) )
                     )->open( `layoutData`
                         )->leaf( n = `FlexItemData` a = VALUE #( ( `growFactor=1` ) )
+
                     )->shut(
                 )->shut(
                 )->open( n = `Switch` a = VALUE #( ( `state=true` ) ( `enabled=false` ) )
                     )->open( `layoutData`
                         )->leaf( n = `FlexItemData` a = VALUE #( ( `growFactor=1` ) )
+
                     )->shut(
                 )->shut(
             )->shut(
@@ -61,16 +64,19 @@ CLASS z2ui5_cl_api_app_528 IMPLEMENTATION.
                 )->open( n = `Switch` a = VALUE #( ( `state=true` ) ( `customTextOn=Yes` ) ( `customTextOff=No` ) )
                     )->open( `layoutData`
                         )->leaf( n = `FlexItemData` a = VALUE #( ( `growFactor=1` ) )
+
                     )->shut(
                 )->shut(
                 )->open( n = `Switch` a = VALUE #( ( `state=false` ) ( `customTextOn=Yes` ) ( `customTextOff=No` ) )
                     )->open( `layoutData`
                         )->leaf( n = `FlexItemData` a = VALUE #( ( `growFactor=1` ) )
+
                     )->shut(
                 )->shut(
                 )->open( n = `Switch` a = VALUE #( ( `state=true` ) ( `customTextOn=Yes` ) ( `customTextOff=No` ) ( `enabled=false` ) )
                     )->open( `layoutData`
                         )->leaf( n = `FlexItemData` a = VALUE #( ( `growFactor=1` ) )
+
                     )->shut(
                 )->shut(
             )->shut(
@@ -79,16 +85,19 @@ CLASS z2ui5_cl_api_app_528 IMPLEMENTATION.
                 )->open( n = `Switch` a = VALUE #( ( `state=true` ) ( `customTextOn= ` ) ( `customTextOff= ` ) )
                     )->open( `layoutData`
                         )->leaf( n = `FlexItemData` a = VALUE #( ( `growFactor=1` ) )
+
                     )->shut(
                 )->shut(
                 )->open( n = `Switch` a = VALUE #( ( `state=false` ) ( `customTextOn= ` ) ( `customTextOff= ` ) )
                     )->open( `layoutData`
                         )->leaf( n = `FlexItemData` a = VALUE #( ( `growFactor=1` ) )
+
                     )->shut(
                 )->shut(
                 )->open( n = `Switch` a = VALUE #( ( `state=true` ) ( `customTextOn= ` ) ( `customTextOff= ` ) ( `enabled=false` ) )
                     )->open( `layoutData`
                         )->leaf( n = `FlexItemData` a = VALUE #( ( `growFactor=1` ) )
+
                     )->shut(
                 )->shut(
             )->shut(
@@ -97,16 +106,19 @@ CLASS z2ui5_cl_api_app_528 IMPLEMENTATION.
                 )->open( n = `Switch` a = VALUE #( ( `type=AcceptReject` ) ( `state=true` ) )
                     )->open( `layoutData`
                         )->leaf( n = `FlexItemData` a = VALUE #( ( `growFactor=1` ) )
+
                     )->shut(
                 )->shut(
                 )->open( n = `Switch` a = VALUE #( ( `type=AcceptReject` ) ( `state=false` ) )
                     )->open( `layoutData`
                         )->leaf( n = `FlexItemData` a = VALUE #( ( `growFactor=1` ) )
+
                     )->shut(
                 )->shut(
                 )->open( n = `Switch` a = VALUE #( ( `type=AcceptReject` ) ( `state=true` ) ( `enabled=false` ) )
                     )->open( `layoutData`
                         )->leaf( n = `FlexItemData` a = VALUE #( ( `growFactor=1` ) )
+
                     )->shut( ).
 
     client->view_display( view->stringify( ) ).

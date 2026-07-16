@@ -4,10 +4,14 @@
 "! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
 "! NOTES (generation):
 "! - IMPROVISED: the original binds items with a model sorter (group: true) and a
-"!   groupHeaderFactory, neither of which is expressible in abap2UI5 - so the
+"!   custom groupHeaderFactory (the latter not expressible in abap2UI5) - so the
 "!   grouped items are rendered statically as core:SeparatorItem headers +
 "!   core:Item entries, built in a LOOP over the ABAP data instead of a bound
 "!   aggregation.
+"! - IMPROVISED: 16-row subset of the 123-row mock (ui5/mock/products.json).
+"! - LIVE-TEST: a bound items template with a raw sorter binding-info string
+"!   ({path, sorter: {path, group: true}}) may replace the static unroll -
+"!   see CAPABILITIES.md, needs an in-system check.
 CLASS z2ui5_cl_api_app_452 DEFINITION PUBLIC.
 
   PUBLIC SECTION.

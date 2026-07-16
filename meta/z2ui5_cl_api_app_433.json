@@ -10,6 +10,10 @@
     {
       "type": "IMPROVISED",
       "what": "the IconTabBar property expanded=\"{device>/isNoPhone}\" is dropped - abap2UI5 has no device model, so the phone/non-phone binding cannot be expressed. The tab bar stays expanded."
+    },
+    {
+      "type": "IMPROVISED",
+      "what": "the bound /ProductCollection shows a 8-row subset of the 123-row mock (ui5/mock/products.json) - a full unroll adds no demo value."
     }
   ]
 }

@@ -6,6 +6,8 @@
 "! - IMPROVISED: the IconTabBar property expanded="{device>/isNoPhone}" is
 "!   dropped - abap2UI5 has no device model, so the phone/non-phone binding
 "!   cannot be expressed. The tab bar stays expanded.
+"! - IMPROVISED: the bound /ProductCollection shows a 8-row subset of the
+"!   123-row mock (ui5/mock/products.json) - a full unroll adds no demo value.
 CLASS z2ui5_cl_api_app_433 DEFINITION PUBLIC.
 
   PUBLIC SECTION.

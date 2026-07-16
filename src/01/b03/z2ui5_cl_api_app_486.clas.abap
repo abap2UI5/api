@@ -1,25 +1,26 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.Toolbar - ToolbarShrinkable
 "! https://sdk.openui5.org/entity/sap.m.Toolbar/sample/sap.m.sample.ToolbarShrinkable
-"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: YES
+"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
 "! NOTES (generation):
 "! - IMPROVISED: the sample's controller onSliderLiveChange resizes the toolbars
-"!   in JS; there is no width in the source XML. Rebuilt as a bound width on each
-"!   Toolbar fed by the SLIDER_CHANGE liveChange event - this width binding is an
-"!   addition not present in Toolbar.view.xml.
+"!   in JS; there is no width in the source XML. Rebuilt as a client-side
+"!   expression binding {= slider + '%' } on each Toolbar width - no event
+"!   round-trip, resizes instantly like the original (see CAPABILITIES.md).
+"! - LIVE-TEST: confirm the expression-bound widths follow the slider in a
+"!   running system.
 CLASS z2ui5_cl_api_app_486 DEFINITION PUBLIC.
 
   PUBLIC SECTION.
     INTERFACES z2ui5_if_app.
 
-    DATA toolbar_width TYPE string.
+    DATA slider_value TYPE string.
 
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
 
     METHODS model_init.
     METHODS view_display.
-    METHODS on_event.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -33,8 +34,6 @@ CLASS z2ui5_cl_api_app_486 IMPLEMENTATION.
     IF client->check_on_init( ).
       model_init( ).
       view_display( ).
-    ELSEIF client->check_on_event( ).
-      on_event( ).
     ENDIF.
 
   ENDMETHOD.
@@ -42,12 +41,16 @@ CLASS z2ui5_cl_api_app_486 IMPLEMENTATION.
 
   METHOD model_init.
 
-    toolbar_width = `100%`.
+    slider_value = `100`.
 
   ENDMETHOD.
 
 
   METHOD view_display.
+
+    " the toolbars derive their width from the slider purely client-side
+    " via an expression binding - no event round-trip (see CAPABILITIES.md)
+    DATA(slider_bind) = client->_bind_edit( slider_value ).
 
     DATA(view) = z2ui5_cl_api_xml=>factory( ).
 
@@ -60,10 +63,8 @@ CLASS z2ui5_cl_api_app_486 IMPLEMENTATION.
             )->a( n = `showHeader` v = `false`
 
             )->leaf( `Slider`
-                )->a( n = `liveChange` v = client->_event( val   = `SLIDER_CHANGE`
-                                                              t_arg = VALUE #( ( `${$parameters>/value}` ) ) )
-                )->a( n = `step`       v = `20`
-                )->a( n = `value`      v = `100`
+                )->a( n = `step`  v = `20`
+                )->a( n = `value` v = slider_bind
 
             )->leaf( `MessageStrip`
                 )->a( n = `text`  v = `By default, Toolbar items are shrinkable if they have percent-based width (e.g. Input, Slider)` &&
@@ -73,7 +74,7 @@ CLASS z2ui5_cl_api_app_486 IMPLEMENTATION.
             )->open( `Toolbar`
                 )->a( n = `class` v = `sapUiMediumMarginTop`
                 )->a( n = `id`    v = `toolbar1`
-                )->a( n = `width` v = client->_bind_edit( toolbar_width )
+                )->a( n = `width` v = |\{= ${ slider_bind } + '%' \}|
 
                 )->leaf( `Label`
                     )->a( n = `text` v = `I am a text control, so I will shrink whenever the toolbar overflows.`
@@ -94,7 +95,7 @@ CLASS z2ui5_cl_api_app_486 IMPLEMENTATION.
             )->open( `Toolbar`
                 )->a( n = `class` v = `sapUiMediumMarginTop`
                 )->a( n = `id`    v = `toolbar2`
-                )->a( n = `width` v = client->_bind_edit( toolbar_width )
+                )->a( n = `width` v = |\{= ${ slider_bind } + '%' \}|
 
                 )->open( `Label`
                     )->a( n = `text` v = `I am a non-shrinkable text.`
@@ -130,7 +131,7 @@ CLASS z2ui5_cl_api_app_486 IMPLEMENTATION.
             )->open( `Toolbar`
                 )->a( n = `class` v = `sapUiMediumMarginTop`
                 )->a( n = `id`    v = `toolbar3`
-                )->a( n = `width` v = client->_bind_edit( toolbar_width )
+                )->a( n = `width` v = |\{= ${ slider_bind } + '%' \}|
 
                 )->open( `Label`
                     )->a( n = `text` v = `I should not shrink by more than 200px, because I am an important text.`
@@ -153,26 +154,12 @@ CLASS z2ui5_cl_api_app_486 IMPLEMENTATION.
 
                     )->shut(
                 )->shut(
-
             )->shut(
-
         )->shut( ).
 
     client->view_display( view->stringify( ) ).
 
   ENDMETHOD.
 
-
-  METHOD on_event.
-
-    CASE client->get( )-event.
-
-      WHEN `SLIDER_CHANGE`.
-        toolbar_width = |{ client->get_event_arg( 1 ) }%|.
-        client->view_model_update( ).
-
-    ENDCASE.
-
-  ENDMETHOD.
 
 ENDCLASS.

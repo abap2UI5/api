@@ -72,6 +72,7 @@ CLASS z2ui5_cl_api_app_434 IMPLEMENTATION.
                                 )->open( `layoutData`
                                     )->leaf( `FlexItemData`
                                         )->a( n = `growFactor` v = `1`
+
                                 )->shut(
                             )->shut(
                             )->leaf( `Text`
@@ -93,6 +94,7 @@ CLASS z2ui5_cl_api_app_434 IMPLEMENTATION.
                                 )->open( `layoutData`
                                     )->leaf( `FlexItemData`
                                         )->a( n = `growFactor` v = `1`
+
                                 )->shut(
                             )->shut(
                             )->leaf( `Text`
@@ -114,6 +116,7 @@ CLASS z2ui5_cl_api_app_434 IMPLEMENTATION.
                                 )->open( `layoutData`
                                     )->leaf( `FlexItemData`
                                         )->a( n = `growFactor` v = `1`
+
                                 )->shut(
                             )->shut(
                             )->leaf( `Text`

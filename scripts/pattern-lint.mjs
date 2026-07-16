@@ -23,11 +23,7 @@ const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = path.join(ROOT, 'src');
 
 // known, still-open findings (tracked in STATUS.md) — 'rule-id|repo-relative-file'
-const BASELINE = new Set([
-  'private-mproperties|src/01/b01/z2ui5_cl_api_app_530.clas.abap',
-  'private-mproperties|src/01/b03/z2ui5_cl_api_app_474.clas.abap',
-  'event-arg-no-index|src/01/b03/z2ui5_cl_api_app_526.clas.abap',
-]);
+const BASELINE = new Set([]);
 
 // return the content of the parenthesized region starting at content[open] === '('
 function parenRegion(content, open) {

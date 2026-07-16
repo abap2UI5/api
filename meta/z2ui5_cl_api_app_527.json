@@ -6,5 +6,10 @@
   "batch": "b02",
   "status": "generated",
   "checked": null,
-  "deviations": []
+  "deviations": [
+    {
+      "type": "IMPROVISED",
+      "what": "the binding sorter (path Name) is replaced by a one-time ABAP SORT - equivalent for this static data."
+    }
+  ]
 }

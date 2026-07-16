@@ -8,8 +8,8 @@
   "checked": null,
   "deviations": [
     {
-      "type": "IMPROVISED",
-      "what": "the original sample colours .item1..item6 and the h2 headings via a separate style.css; the previous port injected it through an html:style block. z2ui5_cl_api_xml has no raw-text/CDATA node, so that CSS cannot be emitted - the styleClass attributes are ported 1:1 but the flex items render without their background colours. Dropped."
+      "type": "LIVE_TEST",
+      "what": "the original colours .item1..item6 and the h2 headings via a separate style.css; here it is injected as a core:HTML content attribute (a style tag, minified - see CAPABILITIES.md). Confirm the flex items render with their background colours in a running system."
     }
   ]
 }

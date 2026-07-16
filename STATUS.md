@@ -12,7 +12,7 @@ CAPABILITIES.md._
 | Ports | 34 / 446 `sap.m` samples (7.6 %) |
 | CI | ABAP_STANDARD, ABAP_CLOUD, ABAP_702 all green |
 | Structural view diff | **0 undeclared differences** across all 34 ports (`node scripts/structural-diff.mjs --strict`) |
-| Pattern lint | **0 errors** (3 baselined known findings: mProperties in 474/530, argless `get_event_arg` in 526); 17 style warnings (`node scripts/pattern-lint.mjs`) |
+| Pattern lint | **0 errors, 0 warnings, empty baseline** (`node scripts/pattern-lint.mjs`) |
 | Meta sidecars | 34 in `meta/` — status: 30 `generated`, 4 `checked`; deviations: 28 IMPROVISED, 9 DROPPED_171, 3 LIVE_TEST |
 | Manually verified in a running system | 420, 421, 526, 530 (`CHECKED`) |
 | Archive | `ui5/` complete incl. shared mock data snapshot (`ui5/mock/`, provenance in its README) |
@@ -55,44 +55,42 @@ reviewers), followed by fixes:
   instead of raw `X`/space.
 - **Apps 441/469/481** — existing deviations declared in the header NOTES.
 
-## Open findings (backlog, from the 2026-07-16 review)
+## Verified fixed (2026-07-16, second pass — fidelity backlog)
 
-Fidelity / better generation:
-- [ ] **529**: status press shows a toast; the original opens a Dialog —
-  expressible 1:1 via `popup_display` (see app 469, CAPABILITIES.md). Fix +
-  drop the wrong IMPROVISED justification.
-- [ ] **404 / 431**: dropped sample CSS is expressible via a `core:HTML` leaf
-  with the `content` attribute (`<style>…</style>`); 404's colored flex boxes
-  are the sample's whole point.
-- [ ] **530**: `SEP_CHANGE` round-trip is redundant (shared two-way binding
-  already updates the Breadcrumbs) and reads private `mProperties` — drop the
-  event.
-- [ ] **486**: toolbar width round-trip could be a pure expression binding
-  (`{= ${slider} + '%' }`), removing `on_event`.
-- [ ] **474**: `${$parameters>/item/mProperties/text}` relies on private
-  internals without a LIVE-TEST note — restructure or declare.
-- [ ] **420/433/440/441/452**: mock-data row subsets partly undeclared
-  (433 vs 441 even render different rows for the same collection) — declare
-  per port, now checkable against `ui5/mock/products.json`.
-- [ ] **423/527**: binding `sorter` replaced by ABAP `SORT` with inline comment
-  only — needs a NOTES bullet (527 has no block at all).
-- [ ] **452**: try the bound-template variant with a raw binding-info string
-  (`sorter: { group: true }`) instead of the static unroll — needs LIVE-TEST.
+- **529**: toast replaced by the original's controller-built Dialog
+  (`popup_display` + FragmentDefinition, per CAPABILITIES.md).
+- **404 / 431**: the dropped sample CSS is injected via a `core:HTML`
+  `content` attribute; 431 also carries the `tileLayout` class again on the
+  15 tiles that have it in the original.
+- **530**: redundant `SEP_CHANGE` round-trip removed — selectedKey and
+  separatorStyle share one two-way path; the private event path is gone.
+- **486**: toolbar widths are a pure expression binding
+  (`{= ${slider} + '%' }`); `on_event` removed.
+- **474**: private event path replaced by a two-way bound `selectedKey`
+  (+ item keys as a declared port addition).
+- **420/433/440/441/452**: mock-data subsets declared per port (the mock has
+  123 rows — full unrolls add no demo value); **423/527**: sorter→`SORT`
+  declared; **440**: `pic_url` renamed to convention (`product_pic_url`).
+- Idiom: **526** captures the shared press event once + `get_event_arg( 1 )`;
+  **528/434** blank-line fixes — pattern-lint is at 0/0 with an empty baseline.
+
+## Open findings (backlog)
 
 Live tests pending (in-system):
 - [ ] **401** — Reset unchecks the facet popover checkboxes (two-way selected).
 - [ ] **469** — PDFViewer renders inside the Dialog at height 100%.
 - [ ] **487** — 5-level nested tree binding renders expandable levels.
+- [ ] **529** — the press Dialog opens/closes (popup_display).
+- [ ] **404/431** — injected CSS styles the flex items / floats the tiles.
+- [ ] **486** — expression-bound toolbar widths follow the slider.
+- [ ] **530** — separator switches instantly via the shared two-way path.
+- [ ] **474** — two-way selectedKey is updated before on_event runs.
+- [ ] **452** — try the bound-template variant with a raw binding-info string
+  (`sorter: { group: true }`) instead of the static unroll.
 
 Idiom / style (low):
-- [ ] **526**: 12× duplicated `_event` literal — capture once; lone
-  `get_event_arg( )` without index.
-- [ ] **528**: off-style up-front attr-table form for static attributes; no
-  blank before shuts.
-- [ ] Blank-line convention violations: 420, 422, 431, 439, 447, 486.
-- [ ] **440**: field `pic_url` breaks the JSON-key naming convention
-  (`product_pic_url`).
-- [ ] `main` method placed last in 420–423, 527, 530 (skeleton puts it first).
+- [ ] `main` method placed last in 420–423, 527, 530 (skeleton puts it
+  first) — cosmetic, postponed.
 
 Infrastructure:
 - [ ] **generate-coverage.mjs**: `FOCUS_LIBS` filter undocumented /
