@@ -64,7 +64,7 @@ CLASS z2ui5_cl_api_app_421 IMPLEMENTATION.
                 )->a( n = `selected`          v = |\{= ${ child1_bind } \|\| ${ child2_bind } \|\| ${ child3_bind } \}|
                 )->a( n = `partiallySelected` v = |\{= !(${ child1_bind } && ${ child2_bind } && ${ child3_bind })\}|
                 )->a( n = `select`            v = client->_event( val   = `PARENT_CLICKED`
-                                                                     t_arg = VALUE #( ( `${$parameters>/selected}` ) ) )
+                                                                  t_arg = VALUE #( ( `${$parameters>/selected}` ) ) )
             )->leaf( n = `HTML` ns = `c`
                 )->a( n = `content` v = `<hr>`
             )->leaf( `CheckBox`

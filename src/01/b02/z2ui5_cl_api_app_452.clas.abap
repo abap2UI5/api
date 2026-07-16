@@ -64,10 +64,6 @@ CLASS z2ui5_cl_api_app_452 IMPLEMENTATION.
     " string (see CAPABILITIES.md - attribute values reach UI5 unmangled). The
     " custom groupHeaderFactory of the sample builds a SeparatorItem with the
     " group key, which is exactly what UI5's default group header renders.
-    DATA(items_bind) = client->_bind_edit( t_products ).
-    DATA(items_path) = substring( val = items_bind
-                                  off = 1
-                                  len = strlen( items_bind ) - 2 ).
 
     DATA(view) = z2ui5_cl_api_xml=>factory( ).
 
@@ -84,7 +80,7 @@ CLASS z2ui5_cl_api_app_452 IMPLEMENTATION.
 
             )->open( `MultiComboBox`
                 )->a( n = `width` v = `500px`
-                )->a( n = `items` v = |\{ path: '{ items_path }', sorter: \{ path: 'SUPPLIER_NAME', descending: false, group: true \} \}|
+                )->a( n = `items` v = |\{ path: '{ client->_bind_edit( val = t_products path = abap_true ) }', sorter: \{ path: 'SUPPLIER_NAME', descending: false, group: true \} \}|
 
                 )->leaf( n = `Item` ns = `core`
                     )->a( n = `key`  v = `{PRODUCT_ID}`
