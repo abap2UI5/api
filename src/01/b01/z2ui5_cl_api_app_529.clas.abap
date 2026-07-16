@@ -1,15 +1,3 @@
-"! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
-"! sap.m.ObjectStatus - ObjectStatus
-"! https://sdk.openui5.org/entity/sap.m.ObjectStatus/sample/sap.m.sample.ObjectStatus
-"! API USAGE AUDIT: (a) frontend_action (_event_client): YES - popup_close | (b) event t_arg: NO
-"! NOTES (generation):
-"! - 1.71: ObjectStatus states Indication06-Indication20 are newer than UI5 1.71
-"!   (added ~1.130). The controls are kept but their state is set to "None", so
-"!   the indication colours differ from the original - verify if relevant.
-"! - LIVE-TEST: the active status press opens the controller-built Dialog 1:1
-"!   (core:FragmentDefinition + popup_display, per CAPABILITIES.md): a Dialog
-"!   with a VBox, a Text and an OK Button - these popup controls are extra to
-"!   the view XML. Confirm the popup opens and closes in a running system.
 CLASS z2ui5_cl_api_app_529 DEFINITION PUBLIC.
 
   PUBLIC SECTION.

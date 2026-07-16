@@ -1,16 +1,3 @@
-"! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
-"! sap.m.Link - LinkEmphasized
-"! https://sdk.openui5.org/entity/sap.m.Link/sample/sap.m.sample.LinkEmphasized
-"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
-"! NOTES (generation):
-"! - IMPROVISED: the last column's original number binding is a
-"!   sap.ui.model.type.Currency formatter (parts Price/CurrencyCode,
-"!   formatOptions showMeasure:false); it is replaced by a plain ObjectNumber
-"!   with a preformatted price text (number={PRICE} unit={CURRENCY_CODE}).
-"! - IMPROVISED: the bound /ProductCollection shows a 6-row subset of the
-"!   123-row mock (ui5/mock/products.json); HT-1002 is not part of the subset.
-"! - IMPROVISED: the binding sorter (path Name) is replaced by a one-time
-"!   ABAP SORT - equivalent for this static data.
 CLASS z2ui5_cl_api_app_440 DEFINITION PUBLIC.
 
   PUBLIC SECTION.

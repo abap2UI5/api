@@ -99,7 +99,10 @@ Infrastructure:
   scripts.
 - [ ] Builder hardening: `a()` on the empty root is silently dropped; `shut()`
   past the root null-refs; duplicate attribute names render invalid XML.
-- [ ] TRAINING.md stage 2: generate the header block from `meta/` (inversion).
+- [x] ~~TRAINING.md stage 2: generate the header block from `meta/`
+  (inversion)~~ — done 2026-07-16, stricter than planned: port classes carry
+  no header at all; `meta/` is the source of truth (validate-meta in CI,
+  pattern-lint blocks `"!` in ports).
 - [x] ~~Run `structural-diff.mjs --strict` in CI~~ — done 2026-07-16: the
   `checks` workflow runs pattern-lint, structural-diff --strict and a
   generated-artifacts sync check on every PR.

@@ -1,14 +1,3 @@
-"! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
-"! sap.m.Toolbar - ToolbarShrinkable
-"! https://sdk.openui5.org/entity/sap.m.Toolbar/sample/sap.m.sample.ToolbarShrinkable
-"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
-"! NOTES (generation):
-"! - IMPROVISED: the sample's controller onSliderLiveChange resizes the toolbars
-"!   in JS; there is no width in the source XML. Rebuilt as a client-side
-"!   expression binding {= slider + '%' } on each Toolbar width - no event
-"!   round-trip, resizes instantly like the original (see CAPABILITIES.md).
-"! - LIVE-TEST: confirm the expression-bound widths follow the slider in a
-"!   running system.
 CLASS z2ui5_cl_api_app_486 DEFINITION PUBLIC.
 
   PUBLIC SECTION.

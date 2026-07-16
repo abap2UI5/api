@@ -1,7 +1,3 @@
-"! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
-"! sap.m.Text - Text
-"! https://sdk.openui5.org/entity/sap.m.Text/sample/sap.m.sample.Text
-"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
 CLASS z2ui5_cl_api_app_408 DEFINITION PUBLIC.
 
   PUBLIC SECTION.

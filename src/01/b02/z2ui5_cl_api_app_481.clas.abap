@@ -1,14 +1,3 @@
-"! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
-"! sap.m.StepInput - StepInput
-"! https://sdk.openui5.org/entity/sap.m.StepInput/sample/sap.m.sample.StepInput
-"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: YES
-"! NOTES (generation):
-"! - IMPROVISED: the sample binds a List to the JSON model /modelData and renders
-"!   one templated CustomListItem per row. The rows are unrolled into static list
-"!   items here because every row sets a different subset of the StepInput
-"!   properties - an empty ABAP model field would bind as "" instead of leaving
-"!   the property at its default, so a bound template would not render 1:1.
-"!   Template properties no row ever sets (valueState) are dropped with it.
 CLASS z2ui5_cl_api_app_481 DEFINITION PUBLIC.
 
   PUBLIC SECTION.

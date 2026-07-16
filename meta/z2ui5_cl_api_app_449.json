@@ -4,6 +4,7 @@
   "entity": "sap.m.MessageView",
   "file": "src/01/b03/z2ui5_cl_api_app_449.clas.abap",
   "batch": "b03",
+  "audit": "(a) frontend_action (_event_client): NO | (b) event t_arg: NO",
   "status": "generated",
   "checked": null,
   "deviations": [

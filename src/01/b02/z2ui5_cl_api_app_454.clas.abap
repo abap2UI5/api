@@ -1,18 +1,3 @@
-"! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
-"! sap.m.MultiInput - MultiInput
-"! https://sdk.openui5.org/entity/sap.m.MultiInput/sample/sap.m.sample.MultiInput
-"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
-"! NOTES (generation):
-"! - IMPROVISED: the controller's onInit pre-sets the tokens on both MultiInputs
-"!   (Token 1..6 and one long token); they are declared statically in the view's
-"!   tokens aggregation instead - same rendering.
-"! - IMPROVISED: the controller's addValidator (typing free text + Enter creates
-"!   a token client-side) is dropped - abap2UI5 has no client-side validator hook.
-"! - IMPROVISED: the suggestion data is a 16-row subset of the mock
-"!   /ProductCollection (ui5/mock/products.json).
-"! - The original's stray placeholder attributes on the two Labels (not a Label
-"!   property) are dropped.
-"! - 1.71: showClearIcon (since UI5 1.94) dropped from the suggestion MultiInput.
 CLASS z2ui5_cl_api_app_454 DEFINITION PUBLIC.
 
   PUBLIC SECTION.

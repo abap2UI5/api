@@ -1,30 +1,3 @@
-"! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
-"! sap.m.FacetFilter - FacetFilterLight
-"! https://sdk.openui5.org/entity/sap.m.FacetFilter/sample/sap.m.sample.FacetFilterLight
-"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
-"! NOTES (generation):
-"! - IMPROVISED: the bound lists="{/ProductCollectionStats/Filters}" collection
-"!   is unrolled into two static FacetFilterLists (Category, SupplierName); the
-"!   facet values inside each list stay bound.
-"! - IMPROVISED: selection transport - every FacetFilterItem binds selected
-"!   two-way; on listClose/reset the backend reads/clears the flags and
-"!   re-filters (the original filters client-side via sap.ui.model.Filter).
-"! - LIVE-TEST: confirm in a running system that clearing the bound selected
-"!   flags on Reset also unchecks the facet popover checkboxes (FacetFilterList
-"!   caches its selection client-side).
-"! - IMPROVISED: the original controller appends the sap.m.sample.Table
-"!   component's table with its first cell swapped for an ObjectIdentifier
-"!   {Name}/{Category}; that table is rebuilt inline, its Currency-formatter
-"!   price column preformatted (PRICE text) and Formatter.js weightState
-"!   precomputed in WEIGHT_STATE.
-"! - IMPROVISED: the appended table's header toolbar keeps only Title and
-"!   ToolbarSpacer - the sample's popin-layout ComboBox (with core:Item entries),
-"!   the sticky CheckBoxes with their Label and the Hide/Show ToggleButton drive
-"!   client-side table APIs (setSticky, popin layout) with no abap2UI5
-"!   equivalent; the infoToolbar (an OverflowToolbar with a Label) and the
-"!   p:ColumnAIAction column plugin (newer than UI5 1.71) are dropped as well.
-"! - IMPROVISED: data is a 10-row subset of the mock /ProductCollection
-"!   (ui5/mock/products.json), facet counters recomputed for the subset.
 CLASS z2ui5_cl_api_app_401 DEFINITION PUBLIC.
 
   PUBLIC SECTION.

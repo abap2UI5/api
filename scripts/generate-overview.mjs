@@ -6,7 +6,8 @@
  * source, ↗ -> live OpenUI5 fullscreen sample) and abap2UI5 (class name ->
  * generated class on GitHub, ↗ -> starts the app). Every link opens in a NEW
  * browser tab (target="_blank"; the ↗ start link uses the ?app_start= URL).
- * Depends only on src/ (no OpenUI5 checkout needed).
+ * Reads everything from the meta/ sidecars (the source of truth for sample,
+ * entity, checked and deviations - the port classes carry no header).
  *
  * Run:  node scripts/generate-overview.mjs
  */
@@ -17,6 +18,7 @@ import { fileURLToPath } from 'url';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = path.join(ROOT, 'src');
+const META = path.join(ROOT, 'meta');
 const CLASS = 'z2ui5_cl_api_app_overview';
 const OUT_ABAP = path.join(SRC, `${CLASS}.clas.abap`);
 const OUT_XML = path.join(SRC, `${CLASS}.clas.xml`);
@@ -33,56 +35,20 @@ function walk(dir, out = []) {
 // collect ported apps: control (entity), module (library), sample name, class,
 // and the repo-relative path of the generated class (for the ABAP GitHub link)
 const apps = [];
-for (const f of walk(SRC)) {
-  if (!f.endsWith('.clas.abap')) continue;
-  const cls = path.basename(f, '.clas.abap');
-  const content = fs.readFileSync(f, 'utf8');
-  // the header is everything above the CLASS statement; the demo kit URL must
-  // be a header line (anchored), so URLs in the view/body can never match
-  const classAt = content.search(/^CLASS /m);
-  const header = classAt === -1 ? '' : content.slice(0, classAt);
-  const m = header.match(/^"! https:\/\/sdk\.openui5\.org\/entity\/([\w.]+)\/sample\/([\w.]+)/m);
-  if (!m) continue;
-  const entity = m[1];
-  const id = m[2];
-  const i = id.indexOf('.sample.');
+const DEV_LABEL = { IMPROVISED: 'IMPROVISED', LIVE_TEST: 'LIVE-TEST', DROPPED_171: '1.71', SUBSET_DATA: 'SUBSET', NOTE: 'NOTE' };
+for (const mf of fs.readdirSync(META)) {
+  if (!mf.endsWith('.json')) continue;
+  const m = JSON.parse(fs.readFileSync(path.join(META, mf), 'utf8'));
+  const i = m.sample.indexOf('.sample.');
   if (i === -1) continue;
-  // parse the header as sections, line by line. A section starts at its marker
-  // ("! CHECKED (<yyyy-mm-dd>): manual in-system verification, shown as a green
-  // check; "! NOTES (generation): the port's caveats, shown in the hint popup)
-  // and ends at the next ALL-CAPS "MARKER:" line — so a new header marker (e.g.
-  // API USAGE AUDIT) never leaks into the section before it, and blank lines
-  // before CLASS don't drop anything. Inside NOTES, "! -  starts a bullet and
-  // indented lines continue it; bullets are joined by " // ".
-  let checked = '';
-  const bullets = [];
-  let section = null;
-  for (const raw of header.split('\n')) {
-    if (!raw.startsWith('"!')) continue;
-    const t = raw.replace(/^"!\s?/, '').replace(/\s+$/, '');
-    if (/^CHECKED \(\d{4}-\d{2}-\d{2}\):/.test(t)) {
-      section = 'checked';
-      checked = t;
-    } else if (/^NOTES \(generation\):$/.test(t)) {
-      section = 'notes';
-    } else if (/^[A-Z][A-Z0-9 ()/_-]*:/.test(t) && !t.startsWith('- ')) {
-      section = null; // unknown marker line — ends the current section
-    } else if (section === 'checked') {
-      checked += ' ' + t.trim();
-    } else if (section === 'notes') {
-      if (t.startsWith('- ')) bullets.push(t.slice(2));
-      else if (bullets.length) bullets[bullets.length - 1] += ' ' + t.trim();
-    }
-  }
-  const notes = bullets.join(' // ');
   apps.push({
-    module: id.slice(0, i),
-    control: entity,
-    name: id.slice(i + '.sample.'.length),
-    cls,
-    file: path.relative(ROOT, f).split(path.sep).join('/'),
-    checked,
-    notes,
+    module: m.sample.slice(0, i),
+    control: m.entity,
+    name: m.sample.slice(i + '.sample.'.length),
+    cls: m.class,
+    file: m.file,
+    checked: m.checked ? `CHECKED (${m.checked.date}): ${m.checked.note}` : '',
+    notes: (m.deviations || []).map((d) => `${DEV_LABEL[d.type] ?? d.type}: ${d.what}`).join(' // '),
   });
 }
 // order by module, then control, then sample name (case-insensitive)

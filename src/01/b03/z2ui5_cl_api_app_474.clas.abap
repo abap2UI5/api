@@ -1,15 +1,3 @@
-"! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
-"! sap.m.SegmentedButton - SegmentedButton
-"! https://sdk.openui5.org/entity/sap.m.SegmentedButton/sample/sap.m.sample.SegmentedButton
-"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
-"! NOTES (generation):
-"! - IMPROVISED: the original reads the selected item via
-"!   oEvent.getParameter("item").getText() / getSelectedItem(). Here the items
-"!   get keys (one/two/three - an addition, SB1 has none in the sample) and
-"!   selectedKey is two-way bound, so the selection arrives with the event and
-"!   no private event path is needed (see CAPABILITIES.md).
-"! - LIVE-TEST: confirm the two-way bound selectedKey is updated before
-"!   on_event runs, so the toast shows the newly selected item.
 CLASS z2ui5_cl_api_app_474 DEFINITION PUBLIC.
 
   PUBLIC SECTION.

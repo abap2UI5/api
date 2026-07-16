@@ -1,17 +1,3 @@
-"! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
-"! sap.m.PDFViewer - PDFViewerPopup
-"! https://sdk.openui5.org/entity/sap.m.PDFViewer/sample/sap.m.sample.PDFViewerPopup
-"! API USAGE AUDIT: (a) frontend_action (_event_client): YES | (b) event t_arg: YES
-"! NOTES (generation):
-"! - IMPROVISED: the sample's onInit gives each Image its own JSONModel and onPress
-"!   opens a controller-created sap.m.PDFViewer in popup mode via JavaScript. Here the
-"!   per-image Source/Preview URLs are resolved statically and the PDFViewer is embedded
-"!   into a sap.m.Dialog opened on the press event instead, closed by an added
-"!   OK Button (the popup-mode PDFViewer brings its own close button).
-"! - 1.71: the PDFViewer property isTrustedSource of the original is omitted - it is
-"!   available only in UI5 releases higher than 1.71.
-"! - LIVE-TEST: confirm the PDFViewer renders inside the dialog at height 100% in a
-"!   running system.
 CLASS z2ui5_cl_api_app_469 DEFINITION PUBLIC.
 
   PUBLIC SECTION.

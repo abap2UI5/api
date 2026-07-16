@@ -1,9 +1,10 @@
 # TRAINING.md — using this repo to train the porting agent
 
-**Status: partially implemented** — the metadata sidecars
-(`scripts/generate-meta.mjs` → `meta/`) and the structural view diff
-(`scripts/structural-diff.mjs`) exist and run clean; the header→sidecar
-inversion (headers generated *from* meta.json) is still open. This file
+**Status: implemented** — the metadata sidecars (`meta/`, validated by
+`scripts/validate-meta.mjs`) are the source of truth, the port classes carry
+no ABAP Doc header at all (stage-2 inversion done 2026-07-16, enforced by
+pattern-lint), and the structural view diff (`scripts/structural-diff.mjs`)
+runs clean. This file
 describes how the repo is meant to make the generating agent better over time. "Training" here means improving the system
 around the agent — rules, golden examples, verification loops — not (yet)
 fine-tuning model weights.
@@ -46,7 +47,8 @@ PR. Per batch:
    it must only be spent on what machines cannot see.
 3. **Human live check** — pull the batch package via abapGit, start every app,
    correct in the system, push corrections back as their own commits
-   (separate from generation, so the diff *is* the training signal).
+   (separate from generation, so the diff *is* the training signal); promote
+   the port in its sidecar (`status: "checked"` + `checked {date, note}`).
 4. **Distill** — the agent classifies every human correction: fidelity bug →
    rule in AGENTS/CAPABILITIES **and, where greppable, a deterministic check**
    (structural diff / pattern lint), style → convention update, new technique →
@@ -74,13 +76,13 @@ references and only they graduate to the curated samples repo.
 
 ## Per-port metadata
 
-**Implemented (stage 1):** `scripts/generate-meta.mjs` derives one sidecar per
-port into `meta/<class>.json` — outside `src/`, so abapGit never sees them.
-The ABAP Doc headers remain the source of truth for now; regenerate the
-sidecars after any header change. Stage 2 (open) inverts the direction: the
-header block, overview app and coverage tables get *generated* from the
-sidecar. Manual status promotions (`reviewed`, `golden`) set directly in a
-sidecar survive regeneration. The shape:
+**Implemented (stage 2):** `meta/<class>.json` is the source of truth — the
+generator writes it together with the class, the port classes carry **no**
+ABAP Doc header (pattern-lint blocks `"!` lines in ports), and the overview
+app + coverage tables are generated from the sidecars.
+`scripts/validate-meta.mjs` guards schema and referential integrity in CI.
+Status promotions (`checked` after a live check, `reviewed`/`golden`) are
+edited directly in the sidecar. The shape:
 
 ```jsonc
 {
@@ -99,10 +101,8 @@ sidecar survive regeneration. The shape:
 ```
 
 Deviation types are closed vocabulary (`DROPPED_171`, `IMPROVISED`,
-`SUBSET_DATA`, `LIVE_TEST`, …) so they can be counted: "how often does the
-agent improvise unnecessarily" becomes a query, not an impression. Migration
-path: script converts existing headers → meta.json once, then headers become
-generated output.
+`SUBSET_DATA`, `LIVE_TEST`, `NOTE`) so they can be counted: "how often does
+the agent improvise unnecessarily" becomes a query, not an impression.
 
 ## Verification: structural view diff
 

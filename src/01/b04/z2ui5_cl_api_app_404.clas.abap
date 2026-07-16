@@ -1,12 +1,3 @@
-"! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
-"! sap.m.FlexBox - FlexBoxNested
-"! https://sdk.openui5.org/entity/sap.m.FlexBox/sample/sap.m.sample.FlexBoxNested
-"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
-"! NOTES (generation):
-"! - LIVE-TEST: the original colours .item1..item6 and the h2 headings via a
-"!   separate style.css; here it is injected as a core:HTML content attribute
-"!   (a style tag, minified - see CAPABILITIES.md). Confirm the flex items
-"!   render with their background colours in a running system.
 CLASS z2ui5_cl_api_app_404 DEFINITION PUBLIC.
 
   PUBLIC SECTION.

@@ -1,12 +1,3 @@
-"! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
-"! sap.m.ObjectHeader - ObjectHeader
-"! https://sdk.openui5.org/entity/sap.m.ObjectHeader/sample/sap.m.sample.ObjectHeader
-"! API USAGE AUDIT: (a) frontend_action (_event_client): YES | (b) event t_arg: YES
-"! NOTES (generation):
-"! - IMPROVISED: the sample binds the ObjectHeader to {/ProductCollection/0} and
-"!   its title/number/attributes to model fields (with a Currency type formatter
-"!   on number). The port carries no model, so those bindings are resolved to the
-"!   static values of the first ProductCollection product (Notebook Basic 15).
 CLASS z2ui5_cl_api_app_460 DEFINITION PUBLIC.
 
   PUBLIC SECTION.

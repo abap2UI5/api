@@ -90,6 +90,13 @@ const RULES = [
     find: grepLines(/^"!.*<[a-zA-Z][^ >]*>/),
   },
   {
+    id: 'header-in-port',
+    level: 'error',
+    doc: 'port classes carry no ABAP Doc header — sample/entity/status/checked/deviations live in meta/<class>.json (AGENTS §5)',
+    portsOnly: true,
+    find: grepLines(/^"!/),
+  },
+  {
     id: 'blank-between-shuts',
     level: 'warn',
     doc: 'blank line between two )->shut( lines — §5 formatting: none after a shut or between shuts (a blank before the next open/leaf sibling block is fine)',
@@ -145,8 +152,10 @@ const seenBaseline = new Set();
 
 for (const f of walk(SRC).sort()) {
   const rel = path.relative(ROOT, f).split(path.sep).join('/');
+  const isPort = /^src\/[^/]+\/b\d+\//.test(rel);
   const content = fs.readFileSync(f, 'utf8');
   for (const rule of RULES) {
+    if (rule.portsOnly && !isPort) continue;
     const hits = rule.find(content);
     if (!hits.length) continue;
     const key = `${rule.id}|${rel}`;

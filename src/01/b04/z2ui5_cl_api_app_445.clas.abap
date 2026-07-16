@@ -1,7 +1,3 @@
-"! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
-"! sap.m.List - ListNoData
-"! https://sdk.openui5.org/entity/sap.m.List/sample/sap.m.sample.ListNoData
-"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
 CLASS z2ui5_cl_api_app_445 DEFINITION PUBLIC.
 
   PUBLIC SECTION.

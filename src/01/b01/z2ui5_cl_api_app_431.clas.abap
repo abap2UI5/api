@@ -1,17 +1,3 @@
-"! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
-"! sap.m.GenericTile - GenericTileAsKPITile
-"! https://sdk.openui5.org/entity/sap.m.GenericTile/sample/sap.m.sample.GenericTileAsKPITile
-"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
-"! NOTES (generation):
-"! - 1.71: frameType OneByHalf / TwoByHalf dropped on several tiles - both enum
-"!   values were added in UI5 1.83; OneByOne / TwoByOne (1.71) are kept.
-"! - 1.71: systemInfo and appShortcut dropped - both added in UI5 1.92.
-"! - 1.71: url dropped on the link tiles - added in UI5 1.76.
-"! - LIVE-TEST: the custom CSS class tileLayout (float: left) is kept and its
-"!   style.css injected via a core:HTML content attribute (see CAPABILITIES.md)
-"!   - confirm the float layout in a running system.
-"! - IMPROVISED: the relative test-resources image and backgroundImage paths are
-"!   resolved to absolute sdk.openui5.org URLs so the tile images load standalone.
 CLASS z2ui5_cl_api_app_431 DEFINITION PUBLIC.
 
   PUBLIC SECTION.
@@ -43,8 +29,8 @@ CLASS z2ui5_cl_api_app_431 IMPLEMENTATION.
 
   METHOD view_display.
 
-    " see the NOTES block above for the tileLayout, frameType, systemInfo,
-    " appShortcut, url and image-path deviations applied throughout this view
+    " see meta/z2ui5_cl_api_app_431.json for the tileLayout, frameType,
+    " systemInfo, appShortcut, url and image-path deviations in this view
     DATA(view) = z2ui5_cl_api_xml=>factory( ).
 
     view->open( n = `View` ns = `mvc`

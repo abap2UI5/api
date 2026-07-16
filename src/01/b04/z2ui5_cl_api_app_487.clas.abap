@@ -1,13 +1,3 @@
-"! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
-"! sap.m.Tree - Tree
-"! https://sdk.openui5.org/entity/sap.m.Tree/sample/sap.m.sample.Tree
-"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
-"! NOTES (generation):
-"! - LIVE-TEST: the sample's view is flat (one Tree bound to '/', one
-"!   StandardTreeItem template); the hierarchy is carried entirely by the
-"!   model. Each row's nested `nodes` sub-table (5 levels deep) is what UI5's
-"!   JSONModel tree binding walks to build the child nodes - confirm the nested
-"!   tables render as expandable levels in a running system.
 CLASS z2ui5_cl_api_app_487 DEFINITION PUBLIC.
 
   PUBLIC SECTION.

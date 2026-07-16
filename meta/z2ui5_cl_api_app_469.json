@@ -4,6 +4,7 @@
   "entity": "sap.m.PDFViewer",
   "file": "src/01/b03/z2ui5_cl_api_app_469.clas.abap",
   "batch": "b03",
+  "audit": "(a) frontend_action (_event_client): YES | (b) event t_arg: YES",
   "status": "generated",
   "checked": null,
   "deviations": [

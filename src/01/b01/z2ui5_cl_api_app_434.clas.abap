@@ -1,16 +1,3 @@
-"! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
-"! sap.m.Image - ImageModeBackground
-"! https://sdk.openui5.org/entity/sap.m.Image/sample/sap.m.sample.ImageModeBackground
-"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
-"! NOTES (generation):
-"! - IMPROVISED: the original binds src/mode/height/width to a JSONModel
-"!   (img>/products, /imageMode, /imageHeight, /imageWidth); the fixed sample
-"!   values are inlined here as literals (mode Background, the HT-7777 / HT-6100
-"!   demo images).
-"! - IMPROVISED: image height/width are device dependent in the original
-"!   (5em on a phone) - fixed to 10em here.
-"! - IMPROVISED: the custom CSS class imageContainer (light blue background) of
-"!   the box4 HBox is dropped - its stylesheet is not available in abap2UI5.
 CLASS z2ui5_cl_api_app_434 DEFINITION PUBLIC.
 
   PUBLIC SECTION.

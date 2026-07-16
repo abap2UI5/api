@@ -31,9 +31,10 @@ jobs:
         node-version: '22'
     - run: node scripts/structural-diff.mjs --strict
 
-  generated_in_sync:
-    # meta/ sidecars and the overview app are generated from the port headers —
-    # fail when a change forgot to regenerate them
+  meta_valid:
+    # meta/ sidecars are the source of truth (schema + referential integrity),
+    # and the overview app is generated from them — fail on invalid sidecars
+    # or when a change forgot to regenerate the overview
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -41,6 +42,6 @@ jobs:
     - uses: actions/setup-node@v6
       with:
         node-version: '22'
-    - run: node scripts/generate-meta.mjs
+    - run: node scripts/validate-meta.mjs
     - run: node scripts/generate-overview.mjs
-    - run: git diff --exit-code -- meta src
+    - run: git diff --exit-code -- src

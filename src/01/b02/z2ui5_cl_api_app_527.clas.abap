@@ -1,10 +1,3 @@
-"! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
-"! sap.m.Select - Select
-"! https://sdk.openui5.org/entity/sap.m.Select/sample/sap.m.sample.Select
-"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
-"! NOTES (generation):
-"! - IMPROVISED: the binding sorter (path Name) is replaced by a one-time
-"!   ABAP SORT - equivalent for this static data.
 CLASS z2ui5_cl_api_app_527 DEFINITION PUBLIC.
 
   PUBLIC SECTION.

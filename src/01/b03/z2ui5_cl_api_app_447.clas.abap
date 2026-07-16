@@ -1,15 +1,3 @@
-"! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
-"! sap.m.MessageBox - MessageBoxInitialFocus
-"! https://sdk.openui5.org/entity/sap.m.MessageBox/sample/sap.m.sample.MessageBoxInitialFocus
-"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
-"! NOTES (generation):
-"! - IMPROVISED: the sample opens a sap.m.MessageBox from its controller; there
-"!   is no such control in the view. It is mapped to abap2UI5's
-"!   client->message_box_display, driven by two buttons wired to events.
-"! - 1.71: the buttons' ariaHasPopup="Dialog" is dropped (available only since
-"!   UI5 1.84).
-"! - 1.71: the MessageBox emphasizedAction / dependentOn options of the original
-"!   are dropped (available only since UI5 1.75 / 1.124).
 CLASS z2ui5_cl_api_app_447 DEFINITION PUBLIC.
 
   PUBLIC SECTION.

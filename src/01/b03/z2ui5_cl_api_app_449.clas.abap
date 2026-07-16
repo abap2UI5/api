@@ -1,10 +1,3 @@
-"! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
-"! sap.m.MessageView - MessageViewMessageManager
-"! https://sdk.openui5.org/entity/sap.m.MessageView/sample/sap.m.sample.MessageViewMessageManager
-"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
-"! NOTES (generation):
-"! - IMPROVISED: the MessageManager/message model of the original is not
-"!   available in abap2UI5 - the messages are bound from a hardcoded table instead.
 CLASS z2ui5_cl_api_app_449 DEFINITION PUBLIC.
 
   PUBLIC SECTION.

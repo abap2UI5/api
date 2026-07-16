@@ -111,23 +111,30 @@ redirect) at `src/sap.ui.documentation/test/sap/ui/documentation/sdk/`.
 
 ## 5. Generation rules
 
-Each generated port carries ABAP Doc directly above `CLASS ... DEFINITION`:
+**Port classes carry no ABAP Doc header** — the class starts directly with
+`CLASS ... DEFINITION` (pattern-lint enforces this). Everything that identifies
+and annotates a port lives in its sidecar **`meta/<class>.json`**, the single
+source of truth:
 
-```abap
-"! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
-"! <entity> - <SampleName>
-"! <demo kit url>
+```jsonc
+{
+  "class":   "z2ui5_cl_api_app_421",
+  "sample":  "sap.m.sample.CheckBoxTriState",   // join key to ui5/<lib>/<Name>/
+  "entity":  "sap.m.CheckBox",
+  "file":    "src/01/b02/z2ui5_cl_api_app_421.clas.abap",
+  "batch":   "b02",
+  "audit":   "(a) frontend_action (_event_client): NO | (b) event t_arg: YES",
+  "status":  "generated",                       // generated|reviewed|checked|golden
+  "checked": { "date": "2026-07-15", "note": "verified in a running system - ..." },
+  "deviations": [ { "type": "IMPROVISED", "what": "..." } ]
+}
 ```
 
-- Line 1 is fixed and literal. Line 2 is `<entity> - <SampleName>`, e.g.
-  `sap.m.CheckBox - CheckBoxTriState` (the `<SampleName>` is the sample id tail
-  after `.sample.`).
-- Line 3 `<demo kit url>` is the **OpenUI5** demo kit link
-  (`https://sdk.openui5.org/entity/<entity>/sample/<lib>.sample.<Name>`) — its
-  `.../entity/<entity>/sample/<lib>.sample.<Name>` tail is what the coverage and
-  overview generators parse to match a port to its source sample (§7). Always use
-  the OpenUI5 host (`sdk.openui5.org`), never the commercial SAPUI5 one. **Never
-  remove or reword this URL line.**
+- The generator writes the sidecar **together with** the class; overview app
+  and coverage read only `meta/` (§7). `node scripts/validate-meta.mjs` checks
+  schema + referential integrity (file/batch/template exist) and runs in CI.
+- A human live check promotes `status` to `checked` and fills `checked`
+  directly in the sidecar; `reviewed`/`golden` are manual promotions too.
 - The abapGit `<DESCRIPT>` follows `<entity> - <demo kit description>`
   (e.g. `sap.m.Switch - Some say it is only a switch...`), truncated to 60 chars.
 - Use **only** controls and properties available since UI5 1.71; never a
@@ -373,40 +380,33 @@ stay compatible with UI5 1.71`) if the sample still works without it, or — if 
 sample's whole point needs the newer/deprecated control — **do not port it** and
 leave it as an ❌ gap. Never silently substitute a different control.
 
-#### Generation notes — record every caveat in the port
+#### Generation notes — record every caveat in the sidecar
 
 When the port is **not** a clean 1:1 — you improvised, dropped/downgraded
 something for 1.71, replaced a controller-only behaviour, or relied on a
-binding/event form you could not verify — record it in the **header ABAP Doc**,
-as extra `"! ` lines appended **right after the three fixed header lines** (the
-`GENERATED …` / `<entity> - <SampleName>` / url lines) and before
-`CLASS … DEFINITION`:
+binding/event form you could not verify — record it as an entry in the
+`deviations` array of `meta/<class>.json` (§5 intro). One entry per caveat,
+with a closed `type` vocabulary so deviations stay countable:
 
-```abap
-"! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
-"! <entity> - <SampleName>
-"! <demo kit url>
-"! NOTES (generation):
-"! - IMPROVISED: …
-"! - 1.71: …
-CLASS z2ui5_cl_api_app_<n> DEFINITION PUBLIC.
-```
-
-One bullet per caveat, tagged so a reviewer can scan them:
-
-- `LIVE-TEST:` needs checking in a running system — an unverified binding/event
-  path, or uncertain rendering (e.g. app 530's `${$source>/text}` event arg).
-- `IMPROVISED:` deviates from the sample — e.g. a named model flattened to
+- `LIVE_TEST` — needs checking in a running system: an unverified
+  binding/event path, or uncertain rendering (e.g. app 530's `${$source>/text}`
+  event arg).
+- `IMPROVISED` — deviates from the sample: e.g. a named model flattened to
   static values (app 420), or a MessageManager replaced by a hardcoded message
   table (app 449). Only improvise what `CAPABILITIES.md` does not mark
   expressible — app 529's Dialog→toast substitution was a wrong improvisation;
   app 469 shows the 1:1 way (`popup_display`).
-- `1.71:` a control / property / enum value newer than 1.71 was dropped or
-  downgraded (app 529's `Indication06`+ states set to `None`).
+- `DROPPED_171` — a control / property / enum value newer than 1.71 was
+  dropped or downgraded (app 529's `Indication06`+ states set to `None`).
+- `SUBSET_DATA` — the port binds a row subset of the sample's mock data
+  (checkable against `ui5/mock/`).
+- `NOTE` — anything else worth flagging.
 
-Keep the block **only** when there is something to flag — omit it for a faithful
-1:1 port. Still add the inline `"` comment at the exact spot of each deviation;
-the NOTES block is the scannable summary of those.
+The `what` text carries the full explanation. Keep the array **empty** for a
+faithful 1:1 port. Still add the inline `"` comment at the exact spot of each
+deviation in the ABAP code; the sidecar is the scannable summary of those —
+the structural diff (§6) matches undeclared view differences against exactly
+these entries.
 
 #### Worked references
 
@@ -607,12 +607,8 @@ How to record it:
   a bare `{COL}` — see §5 "Data binding & events".
 - **abap2UI5 has only one default model** — flatten any named-model binding into
   it — see §5 "`model_init` — the model".
-- **Header markers are `ALL-CAPS ...:` lines** — `generate-overview.mjs` parses
-  the header line by line: a `"! MARKER:` line (e.g. `CHECKED (...)`, `NOTES
-  (generation):`, `API USAGE AUDIT:`) starts/ends a section, plain `"!` lines
-  continue the current one. So a new marker line may sit anywhere in the header
-  (the old "must be line 4" rule is gone), but its *continuation* lines must not
-  themselves start with an all-caps `WORD:` or they end the section. Keep the
-  convention of URL line 3 first, then AUDIT, then CHECKED, then NOTES. Also note
-  the demo kit URL is only recognized on a `"!` header line (anchored match), and
-  a blank line before `CLASS` no longer drops the NOTES.
+- **Port classes carry no ABAP Doc header** — everything (sample, entity,
+  status, checked, deviations, audit) lives in `meta/<class>.json`; edit the
+  sidecar, never write `"!` lines into a port (pattern-lint blocks them, and
+  `validate-meta.mjs` checks the sidecars). The old header-marker parsing in
+  `generate-overview.mjs` is gone — the overview and the coverage read `meta/`.

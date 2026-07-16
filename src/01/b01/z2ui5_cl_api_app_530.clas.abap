@@ -1,15 +1,3 @@
-"! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
-"! sap.m.Breadcrumbs - Breadcrumbs
-"! https://sdk.openui5.org/entity/sap.m.Breadcrumbs/sample/sap.m.sample.Breadcrumbs
-"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: YES
-"! CHECKED (2026-07-15): manually verified in a running system - the
-"! ${$source>/text} event arg delivers the clicked link's text as expected,
-"! everything works like the original.
-"! NOTES (generation):
-"! - LIVE-TEST: the SEP_CHANGE round-trip (which read a private UI5-internal
-"!   event path) was removed 2026-07-16 - selectedKey and separatorStyle
-"!   share one two-way bound path, so the separator switches client-side.
-"!   Confirm the instant separator change in a running system.
 CLASS z2ui5_cl_api_app_530 DEFINITION PUBLIC.
 
   PUBLIC SECTION.
