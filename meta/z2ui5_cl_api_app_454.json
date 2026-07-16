@@ -25,8 +25,8 @@
       "what": "The original's stray placeholder attributes on the two Labels (not a Label property) are dropped."
     },
     {
-      "type": "DROPPED_171",
-      "what": "showClearIcon (since UI5 1.94) dropped from the suggestion MultiInput."
+      "type": "POST_171",
+      "what": "showClearIcon (since UI5 1.94) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.94 to render it."
     }
   ]
 }

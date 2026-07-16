@@ -5,7 +5,8 @@
  * columns: Module, Control (-> OpenUI5 API), Sample (name -> OpenUI5 repo
  * source, ↗ -> live OpenUI5 fullscreen sample), abap2UI5 (class name ->
  * generated class on GitHub, ↗ -> starts the app) and Note (green check when
- * live-verified; hint button opens the deviations popup). Every link opens in
+ * live-verified; orange 1.71+ badge when the port keeps members newer than
+ * UI5 1.71; hint button opens the deviations popup). Every link opens in
  * a NEW browser tab (target="_blank"; the ↗ start link uses ?app_start=).
  * Reads everything from the meta/ sidecars (the source of truth for sample,
  * entity, checked and deviations - the port classes carry no header).
@@ -50,6 +51,7 @@ for (const mf of fs.readdirSync(META)) {
     file: m.file,
     checked: m.checked ? `CHECKED (${m.checked.date}): ${m.checked.note}` : '',
     notes: (m.deviations || []).map((d) => `${DEV_LABEL[d.type] ?? d.type}: ${d.what}`).join(' // '),
+    post171: (m.deviations || []).filter((d) => d.type === 'POST_171').map((d) => d.what).join(' // '),
   });
 }
 // order by module, then control, then sample name (case-insensitive)
@@ -93,6 +95,7 @@ const rows = apps.map((a) => {
   const extras = [];
   if (a.checked) extras.push(`checked = ${abapStr(a.checked)}`);
   if (a.notes) extras.push(`notes = ${abapStr(a.notes)}`);
+  if (a.post171) extras.push(`post171 = ${abapStr(a.post171)}`);
   return extras.length ? `${base}\n        ${extras.join('\n        ')} )` : `${base} )`;
 });
 
@@ -126,6 +129,8 @@ CLASS ${CLASS} DEFINITION PUBLIC.
         has_check TYPE abap_bool,
         notes     TYPE string,
         has_notes TYPE abap_bool,
+        post171   TYPE string,
+        has_p171  TYPE abap_bool,
       END OF ty_s_app.
     TYPES ty_t_app TYPE STANDARD TABLE OF ty_s_app WITH EMPTY KEY.
 
@@ -224,6 +229,7 @@ CLASS ${CLASS} IMPLEMENTATION.
       <app>-start_url = |{ start }{ to_upper( <app>-class ) }|.
       <app>-has_check = xsdbool( <app>-checked IS NOT INITIAL ).
       <app>-has_notes = xsdbool( <app>-notes IS NOT INITIAL ).
+      <app>-has_p171  = xsdbool( <app>-post171 IS NOT INITIAL ).
 
     ENDLOOP.
 
@@ -316,6 +322,12 @@ CLASS ${CLASS} IMPLEMENTATION.
                                         )->a( n = \`color\`   v = \`#107e3e\`
                                         )->a( n = \`tooltip\` v = \`{CHECKED}\`
                                         )->a( n = \`visible\` v = \`{HAS_CHECK}\`
+                                    " orange badge when the port keeps members newer than UI5 1.71 (POST_171)
+                                    )->leaf( \`ObjectStatus\`
+                                        )->a( n = \`text\`    v = \`1.71+\`
+                                        )->a( n = \`state\`   v = \`Warning\`
+                                        )->a( n = \`tooltip\` v = \`{POST171}\`
+                                        )->a( n = \`visible\` v = \`{HAS_P171}\`
                                     )->leaf( \`Button\`
                                         )->a( n = \`icon\`    v = \`sap-icon://hint\`
                                         )->a( n = \`type\`    v = \`Transparent\`
