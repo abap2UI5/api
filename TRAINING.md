@@ -18,7 +18,7 @@ The agent improves through three artifacts, all versioned in this repo:
 2. **Golden examples** — verified sample↔port pairs the generation prompt
    receives as references. One good example outweighs ten rules.
 3. **Verification loops** — everything that catches an error before a human
-   has to: abaplint ×3 (exists), the structural view diff (planned, below),
+   has to: abaplint ×3, validate-meta, the structural view diff, pattern-lint,
    the AI review pass, the in-system live check.
 
 The cycle per batch:
