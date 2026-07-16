@@ -18,6 +18,18 @@ ENDCLASS.
 
 CLASS z2ui5_cl_api_app_469 IMPLEMENTATION.
 
+  METHOD z2ui5_if_app~main.
+
+    me->client = client.
+    IF client->check_on_init( ).
+      view_display( ).
+    ELSEIF client->check_on_event( ).
+      on_event( ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
   METHOD view_display.
 
     " images and PDF files of the original sample sap/m/demokit/sample/PDFViewerPopup
@@ -56,7 +68,7 @@ CLASS z2ui5_cl_api_app_469 IMPLEMENTATION.
     CASE client->get( )-event.
 
       WHEN `SHOW_PDF`.
-        pdf_source = `https://sdk.openui5.org/test-resources/sap/m/demokit/sample/PDFViewerPopup/` && client->get_event_arg( 1 ).
+        pdf_source = `https://sdk.openui5.org/test-resources/sap/m/demokit/sample/PDFViewerPopup/` && client->get_event_arg( ).
         popup_display( ).
 
     ENDCASE.
@@ -89,18 +101,6 @@ CLASS z2ui5_cl_api_app_469 IMPLEMENTATION.
                     )->a( n = `press` v = client->_event_client( client->cs_event-popup_close ) ).
 
     client->popup_display( popup->stringify( ) ).
-
-  ENDMETHOD.
-
-
-  METHOD z2ui5_if_app~main.
-
-    me->client = client.
-    IF client->check_on_init( ).
-      view_display( ).
-    ELSEIF client->check_on_event( ).
-      on_event( ).
-    ENDIF.
 
   ENDMETHOD.
 

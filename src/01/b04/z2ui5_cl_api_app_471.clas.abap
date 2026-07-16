@@ -17,6 +17,18 @@ ENDCLASS.
 
 CLASS z2ui5_cl_api_app_471 IMPLEMENTATION.
 
+  METHOD z2ui5_if_app~main.
+
+    me->client = client.
+    IF client->check_on_init( ).
+      view_display( ).
+    ELSEIF client->check_on_event( ).
+      on_event( ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
   METHOD view_display.
 
     " placeholder text reused by all three panels of the original sample
@@ -109,18 +121,6 @@ CLASS z2ui5_cl_api_app_471 IMPLEMENTATION.
         client->view_model_update( ).
 
     ENDCASE.
-
-  ENDMETHOD.
-
-
-  METHOD z2ui5_if_app~main.
-
-    me->client = client.
-    IF client->check_on_init( ).
-      view_display( ).
-    ELSEIF client->check_on_event( ).
-      on_event( ).
-    ENDIF.
 
   ENDMETHOD.
 

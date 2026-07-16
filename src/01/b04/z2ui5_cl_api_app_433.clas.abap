@@ -22,6 +22,17 @@ ENDCLASS.
 
 CLASS z2ui5_cl_api_app_433 IMPLEMENTATION.
 
+  METHOD z2ui5_if_app~main.
+
+    me->client = client.
+    IF client->check_on_init( ).
+      model_init( ).
+      view_display( ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
   METHOD model_init.
 
     " Data taken from the shared mock data sap/ui/demo/mock/products.json of the original sample
@@ -99,17 +110,6 @@ CLASS z2ui5_cl_api_app_433 IMPLEMENTATION.
                         )->a( n = `text` v = `People content goes here ...` ).
 
     client->view_display( view->stringify( ) ).
-
-  ENDMETHOD.
-
-
-  METHOD z2ui5_if_app~main.
-
-    me->client = client.
-    IF client->check_on_init( ).
-      model_init( ).
-      view_display( ).
-    ENDIF.
 
   ENDMETHOD.
 

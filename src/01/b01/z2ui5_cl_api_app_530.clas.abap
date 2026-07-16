@@ -24,6 +24,19 @@ ENDCLASS.
 
 CLASS z2ui5_cl_api_app_530 IMPLEMENTATION.
 
+  METHOD z2ui5_if_app~main.
+
+    me->client = client.
+    IF client->check_on_init( ).
+      model_init( ).
+      view_display( ).
+    ELSEIF client->check_on_event( ).
+      on_event( ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
   METHOD model_init.
 
     " Rows built in the original onInit from the sap.m BreadcrumbsSeparatorStyle enum
@@ -117,22 +130,9 @@ CLASS z2ui5_cl_api_app_530 IMPLEMENTATION.
     CASE client->get( )-event.
 
       WHEN `LINK_PRESS`.
-        client->message_toast_display( |{ client->get_event_arg( 1 ) } has been activated| ).
+        client->message_toast_display( |{ client->get_event_arg( ) } has been activated| ).
 
     ENDCASE.
-
-  ENDMETHOD.
-
-
-  METHOD z2ui5_if_app~main.
-
-    me->client = client.
-    IF client->check_on_init( ).
-      model_init( ).
-      view_display( ).
-    ELSEIF client->check_on_event( ).
-      on_event( ).
-    ENDIF.
 
   ENDMETHOD.
 

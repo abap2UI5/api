@@ -15,6 +15,18 @@ ENDCLASS.
 
 CLASS z2ui5_cl_api_app_422 IMPLEMENTATION.
 
+  METHOD z2ui5_if_app~main.
+
+    me->client = client.
+    IF client->check_on_init( ).
+      view_display( ).
+    ELSEIF client->check_on_event( ).
+      on_event( ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
   METHOD view_display.
 
     DATA(view) = z2ui5_cl_api_xml=>factory( ).
@@ -59,21 +71,9 @@ CLASS z2ui5_cl_api_app_422 IMPLEMENTATION.
         DATA(default_action) = COND string( WHEN client->get_event_arg( 2 ) = abap_true
                                             THEN `true`
                                             ELSE `false` ).
-        client->message_toast_display( |Color Selected: value - { client->get_event_arg( 1 ) }, \n defaultAction - { default_action }| ).
+        client->message_toast_display( |Color Selected: value - { client->get_event_arg( ) }, \n defaultAction - { default_action }| ).
 
     ENDCASE.
-
-  ENDMETHOD.
-
-
-  METHOD z2ui5_if_app~main.
-
-    me->client = client.
-    IF client->check_on_init( ).
-      view_display( ).
-    ELSEIF client->check_on_event( ).
-      on_event( ).
-    ENDIF.
 
   ENDMETHOD.
 

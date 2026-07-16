@@ -89,8 +89,11 @@ Live tests pending (in-system):
   (`sorter: { group: true }`) instead of the static unroll.
 
 Idiom / style (low):
-- [ ] `main` method placed last in 420–423, 527, 530 (skeleton puts it
-  first) — cosmetic, postponed.
+- [x] ~~`main` method placed last in several ports~~ — done 2026-07-16: new
+  convention, `z2ui5_if_app~main` is always the first method and the rest
+  follow in call order (17 ports reordered, pattern-lint enforces main-first);
+  also `get_event_arg( )` is now the required simplest form (index only for
+  position 2+ — the earlier index-1 rule was inverted by decision).
 
 Infrastructure:
 - [x] ~~generate-coverage.mjs: `FOCUS_LIBS` undocumented; orphan ports vanish

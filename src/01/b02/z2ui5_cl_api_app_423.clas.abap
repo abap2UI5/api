@@ -22,6 +22,17 @@ ENDCLASS.
 
 CLASS z2ui5_cl_api_app_423 IMPLEMENTATION.
 
+  METHOD z2ui5_if_app~main.
+
+    me->client = client.
+    IF client->check_on_init( ).
+      model_init( ).
+      view_display( ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
   METHOD model_init.
 
     " Data of the mock model sap/ui/demo/mock/countriesExtendedCollection.json used by the original sample
@@ -126,17 +137,6 @@ CLASS z2ui5_cl_api_app_423 IMPLEMENTATION.
                         )->a( n = `text` v = `{TEXT}` ).
 
     client->view_display( view->stringify( ) ).
-
-  ENDMETHOD.
-
-
-  METHOD z2ui5_if_app~main.
-
-    me->client = client.
-    IF client->check_on_init( ).
-      model_init( ).
-      view_display( ).
-    ENDIF.
 
   ENDMETHOD.
 

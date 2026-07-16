@@ -24,6 +24,17 @@ ENDCLASS.
 
 CLASS z2ui5_cl_api_app_449 IMPLEMENTATION.
 
+  METHOD z2ui5_if_app~main.
+
+    me->client = client.
+    IF client->check_on_init( ).
+      model_init( ).
+      view_display( ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
   METHOD model_init.
 
     " messages the original registers on the sap.ui.core.message.MessageManager
@@ -71,17 +82,6 @@ CLASS z2ui5_cl_api_app_449 IMPLEMENTATION.
                     )->a( n = `description` v = `{DESCRIPTION}` ).
 
     client->view_display( view->stringify( ) ).
-
-  ENDMETHOD.
-
-
-  METHOD z2ui5_if_app~main.
-
-    me->client = client.
-    IF client->check_on_init( ).
-      model_init( ).
-      view_display( ).
-    ENDIF.
 
   ENDMETHOD.
 

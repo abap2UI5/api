@@ -165,7 +165,7 @@ CLASS ${CLASS} IMPLEMENTATION.
 
       WHEN \`SHOW_NOTES\`.
         " one Text per bullet of the clicked row's generation notes
-        SPLIT client->get_event_arg( 1 ) AT \` // \` INTO TABLE DATA(lt_line).
+        SPLIT client->get_event_arg( ) AT \` // \` INTO TABLE DATA(lt_line).
 
         DATA(popup) = z2ui5_cl_api_xml=>factory( ).
         DATA(box) = popup->open( n = \`FragmentDefinition\` ns = \`core\`

@@ -212,6 +212,11 @@ METHOD z2ui5_if_app~main.
 ENDMETHOD.
 ```
 
+- **Method order in the implementation**: `z2ui5_if_app~main` is always the
+  **first** method; the remaining methods follow **in the order they are
+  called from `main`**, depth-first (`model_init` → `view_display` →
+  `on_event` → helpers right after their caller). pattern-lint checks that
+  main comes first.
 - `check_on_init( )` fires once when the app starts — seed the data, draw the view.
 - `check_on_event( )` fires on every user interaction — dispatch in `on_event( )`.
 - Add `model_init( )` / `on_event( )` **only when the app actually has data /
@@ -334,10 +339,12 @@ client->view_display( view->stringify( ) ).
   event (never an `IF check_on_event( )`). After changing bound data in an event,
   call `client->view_model_update( )` to push it back (no full redraw).
 - Read event parameters (declared via `_event( … t_arg = … )`) with
-  `client->get_event_arg( n )`. A **boolean** parameter (e.g. a CheckBox
+  `client->get_event_arg( )` — the index defaults to 1; **write it only for
+  position 2+** (`get_event_arg( 2 )`), never `get_event_arg( 1 )`
+  (pattern-lint flags it). A **boolean** parameter (e.g. a CheckBox
   `selected`, `${$parameters>/selected}`) already arrives as `abap_bool`
   (`X` / space), **not** the string `` `true` `` — assign it straight into an
-  `abap_bool` field (`flag = client->get_event_arg( 1 ).`); never test `… = \`true\``.
+  `abap_bool` field (`flag = client->get_event_arg( ).`); never test `… = \`true\``.
 - **Passing a value *into* an event uses the `$`-prefixed form — never a bare
   `{…}`.** The runtime (`z2ui5_cl_core_srv_event=>get_t_arg`) sends every
   `t_arg` entry that starts with `$` or `{` to the frontend **verbatim** and
@@ -555,6 +562,9 @@ and the detailed conventions in the
 (§7 code conventions, §9 app lifecycle, §10 view building, §11 app structure) —
 the ports share that style. Essentials:
 
+- **Always the simplest possible notation**: omit parameters that equal the
+  default (`get_event_arg( )`, not `get_event_arg( 1 )`), no pass-through
+  methods, no explicit forms where the implicit one reads the same.
 - Class names **lowercase** in `DEFINITION` and `IMPLEMENTATION`; not `FINAL`;
   `DEFINITION PUBLIC.` (never `CREATE PUBLIC`).
 - Always include `PROTECTED SECTION.` and `PRIVATE SECTION.` (keep `PRIVATE`

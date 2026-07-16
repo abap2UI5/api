@@ -25,6 +25,17 @@ ENDCLASS.
 
 CLASS z2ui5_cl_api_app_420 IMPLEMENTATION.
 
+  METHOD z2ui5_if_app~main.
+
+    me->client = client.
+    IF client->check_on_init( ).
+      model_init( ).
+      view_display( ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
   METHOD model_init.
 
     " Image URLs of the mock models sap/ui/demo/mock/img.json and products.json used by the original sample
@@ -108,17 +119,6 @@ CLASS z2ui5_cl_api_app_420 IMPLEMENTATION.
                 )->a( n = `alt` v = `Example picture of spotlight` ).
 
     client->view_display( view->stringify( ) ).
-
-  ENDMETHOD.
-
-
-  METHOD z2ui5_if_app~main.
-
-    me->client = client.
-    IF client->check_on_init( ).
-      model_init( ).
-      view_display( ).
-    ENDIF.
 
   ENDMETHOD.
 

@@ -72,10 +72,24 @@ const RULES = [
     find: grepLines(/->_bind\(/),
   },
   {
-    id: 'event-arg-no-index',
+    id: 'event-arg-default-index',
     level: 'error',
-    doc: 'get_event_arg( ) without an index — always pass the position, e.g. get_event_arg( 1 )',
-    find: grepLines(/get_event_arg\(\s*\)/),
+    doc: 'get_event_arg( 1 ) spells out the default — simplest notation is get_event_arg( ); only pass an index for position 2+ (AGENTS §8)',
+    find: grepLines(/get_event_arg\(\s*1\s*\)/),
+  },
+  {
+    id: 'main-not-first',
+    level: 'error',
+    doc: 'z2ui5_if_app~main must be the FIRST method in the implementation; the rest follow in call order from main (AGENTS §5)',
+    portsOnly: true,
+    find(content) {
+      const impl = content.split(/^CLASS \w+ IMPLEMENTATION\.$/m)[1] || '';
+      const first = impl.match(/^  METHOD (\S+)\./m);
+      if (first && first[1] !== 'z2ui5_if_app~main') {
+        return [{ line: lineOf(content, content.indexOf(first[0])), text: `first method is ${first[1]}` }];
+      }
+      return [];
+    },
   },
   {
     id: 'commercial-ui5-host',

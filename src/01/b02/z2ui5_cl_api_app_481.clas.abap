@@ -199,7 +199,7 @@ CLASS z2ui5_cl_api_app_481 IMPLEMENTATION.
     CASE client->get( )-event.
 
       WHEN `CHANGE`.
-        client->message_toast_display( |Value changed to '{ client->get_event_arg( 1 ) }'| ).
+        client->message_toast_display( |Value changed to '{ client->get_event_arg( ) }'| ).
 
     ENDCASE.
 

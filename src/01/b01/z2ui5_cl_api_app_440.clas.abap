@@ -32,6 +32,17 @@ ENDCLASS.
 
 CLASS z2ui5_cl_api_app_440 IMPLEMENTATION.
 
+  METHOD z2ui5_if_app~main.
+
+    me->client = client.
+    IF client->check_on_init( ).
+      model_init( ).
+      view_display( ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
   METHOD model_init.
 
     t_products = VALUE #(
@@ -198,17 +209,6 @@ CLASS z2ui5_cl_api_app_440 IMPLEMENTATION.
                             )->a( n = `unit`   v = `{CURRENCY_CODE}` ).
 
     client->view_display( view->stringify( ) ).
-
-  ENDMETHOD.
-
-
-  METHOD z2ui5_if_app~main.
-
-    me->client = client.
-    IF client->check_on_init( ).
-      model_init( ).
-      view_display( ).
-    ENDIF.
 
   ENDMETHOD.
 

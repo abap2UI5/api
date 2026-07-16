@@ -186,7 +186,7 @@ CLASS z2ui5_cl_api_app_526 IMPLEMENTATION.
       WHEN `PRESS`.
         " like the original: evt.getSource().getId() + " Pressed" -
         " the client-side control id arrives as event arg $event.oSource.sId
-        client->message_toast_display( |{ client->get_event_arg( 1 ) } Pressed| ).
+        client->message_toast_display( |{ client->get_event_arg( ) } Pressed| ).
 
     ENDCASE.
 

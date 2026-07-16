@@ -20,6 +20,19 @@ ENDCLASS.
 
 CLASS z2ui5_cl_api_app_421 IMPLEMENTATION.
 
+  METHOD z2ui5_if_app~main.
+
+    me->client = client.
+    IF client->check_on_init( ).
+      model_init( ).
+      view_display( ).
+    ELSEIF client->check_on_event( ).
+      on_event( ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
   METHOD model_init.
 
     child1 = abap_true.
@@ -74,25 +87,12 @@ CLASS z2ui5_cl_api_app_421 IMPLEMENTATION.
     CASE client->get( )-event.
 
       WHEN `PARENT_CLICKED`.
-        child1 = client->get_event_arg( 1 ).
-        child2 = client->get_event_arg( 1 ).
-        child3 = client->get_event_arg( 1 ).
+        child1 = client->get_event_arg( ).
+        child2 = client->get_event_arg( ).
+        child3 = client->get_event_arg( ).
         client->view_model_update( ).
 
     ENDCASE.
-
-  ENDMETHOD.
-
-
-  METHOD z2ui5_if_app~main.
-
-    me->client = client.
-    IF client->check_on_init( ).
-      model_init( ).
-      view_display( ).
-    ELSEIF client->check_on_event( ).
-      on_event( ).
-    ENDIF.
 
   ENDMETHOD.
 

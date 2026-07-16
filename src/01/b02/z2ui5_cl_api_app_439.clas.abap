@@ -14,6 +14,16 @@ ENDCLASS.
 
 CLASS z2ui5_cl_api_app_439 IMPLEMENTATION.
 
+  METHOD z2ui5_if_app~main.
+
+    me->client = client.
+    IF client->check_on_init( ).
+      view_display( ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
   METHOD view_display.
 
     DATA(warning_text) = `Warning message. Extra long text used as a warning message. Extra long text used as a warning message - 2. ` &&
@@ -68,16 +78,6 @@ CLASS z2ui5_cl_api_app_439 IMPLEMENTATION.
                 )->a( n = `class`      v = `sapUiSmallMarginTopBottom` ).
 
     client->view_display( view->stringify( ) ).
-
-  ENDMETHOD.
-
-
-  METHOD z2ui5_if_app~main.
-
-    me->client = client.
-    IF client->check_on_init( ).
-      view_display( ).
-    ENDIF.
 
   ENDMETHOD.
 

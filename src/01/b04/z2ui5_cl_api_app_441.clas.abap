@@ -22,6 +22,17 @@ ENDCLASS.
 
 CLASS z2ui5_cl_api_app_441 IMPLEMENTATION.
 
+  METHOD z2ui5_if_app~main.
+
+    me->client = client.
+    IF client->check_on_init( ).
+      model_init( ).
+      view_display( ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
   METHOD model_init.
 
     t_products = VALUE #(
@@ -58,17 +69,6 @@ CLASS z2ui5_cl_api_app_441 IMPLEMENTATION.
                 )->a( n = `counter` v = `{QUANTITY}` ).
 
     client->view_display( view->stringify( ) ).
-
-  ENDMETHOD.
-
-
-  METHOD z2ui5_if_app~main.
-
-    me->client = client.
-    IF client->check_on_init( ).
-      model_init( ).
-      view_display( ).
-    ENDIF.
 
   ENDMETHOD.
 

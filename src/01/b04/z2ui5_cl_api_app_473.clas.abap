@@ -17,6 +17,17 @@ ENDCLASS.
 
 CLASS z2ui5_cl_api_app_473 IMPLEMENTATION.
 
+  METHOD z2ui5_if_app~main.
+
+    me->client = client.
+    IF client->check_on_init( ).
+      model_init( ).
+      view_display( ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
   METHOD model_init.
 
     " original uses 50em on phone devices (sap/ui/Device is not available server-side)
@@ -46,17 +57,6 @@ CLASS z2ui5_cl_api_app_473 IMPLEMENTATION.
                 )->a( n = `width` v = client->_bind_edit( width ) ).
 
     client->view_display( view->stringify( ) ).
-
-  ENDMETHOD.
-
-
-  METHOD z2ui5_if_app~main.
-
-    me->client = client.
-    IF client->check_on_init( ).
-      model_init( ).
-      view_display( ).
-    ENDIF.
 
   ENDMETHOD.
 

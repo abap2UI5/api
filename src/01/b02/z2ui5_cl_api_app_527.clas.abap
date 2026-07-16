@@ -30,6 +30,17 @@ ENDCLASS.
 
 CLASS z2ui5_cl_api_app_527 IMPLEMENTATION.
 
+  METHOD z2ui5_if_app~main.
+
+    me->client = client.
+    IF client->check_on_init( ).
+      model_init( ).
+      view_display( ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
   METHOD model_init.
 
     " Data of the inline JSON model defined in the original sample controller
@@ -158,17 +169,6 @@ CLASS z2ui5_cl_api_app_527 IMPLEMENTATION.
                             )->a( n = `text` v = `{NAME}` ).
 
     client->view_display( view->stringify( ) ).
-
-  ENDMETHOD.
-
-
-  METHOD z2ui5_if_app~main.
-
-    me->client = client.
-    IF client->check_on_init( ).
-      model_init( ).
-      view_display( ).
-    ENDIF.
 
   ENDMETHOD.
 
