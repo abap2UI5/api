@@ -12,6 +12,7 @@ CAPABILITIES.md._
 | Ports | 34 / 446 `sap.m` samples (7.6 %) |
 | CI | ABAP_STANDARD, ABAP_CLOUD, ABAP_702 all green |
 | Structural view diff | **0 undeclared differences** across all 34 ports (`node scripts/structural-diff.mjs --strict`) |
+| Pattern lint | **0 errors** (3 baselined known findings: mProperties in 474/530, argless `get_event_arg` in 526); 17 style warnings (`node scripts/pattern-lint.mjs`) |
 | Meta sidecars | 34 in `meta/` — status: 30 `generated`, 4 `checked`; deviations: 28 IMPROVISED, 9 DROPPED_171, 3 LIVE_TEST |
 | Manually verified in a running system | 420, 421, 526, 530 (`CHECKED`) |
 | Archive | `ui5/` complete incl. shared mock data snapshot (`ui5/mock/`, provenance in its README) |
@@ -101,7 +102,9 @@ Infrastructure:
 - [ ] Builder hardening: `a()` on the empty root is silently dropped; `shut()`
   past the root null-refs; duplicate attribute names render invalid XML.
 - [ ] TRAINING.md stage 2: generate the header block from `meta/` (inversion).
-- [ ] Run `structural-diff.mjs --strict` in CI.
+- [x] ~~Run `structural-diff.mjs --strict` in CI~~ — done 2026-07-16: the
+  `checks` workflow runs pattern-lint, structural-diff --strict and a
+  generated-artifacts sync check on every PR.
 - [x] ~~AGENTS.md §5 "Worked references" points at nonexistent
   `src/04/z2ui5_cl_api_app_416`; §8 names the wrong builder classes~~ — fixed
   2026-07-16 (416 row replaced by app 421, §8 corrected to `z2ui5_cl_api_xml`).

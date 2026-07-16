@@ -1,0 +1,46 @@
+name: checks
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pattern_lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@v7
+    - uses: actions/setup-node@v6
+      with:
+        node-version: '22'
+    - run: node scripts/pattern-lint.mjs
+
+  structural_diff:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@v7
+    - uses: actions/setup-node@v6
+      with:
+        node-version: '22'
+    - run: node scripts/structural-diff.mjs --strict
+
+  generated_in_sync:
+    # meta/ sidecars and the overview app are generated from the port headers —
+    # fail when a change forgot to regenerate them
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@v7
+    - uses: actions/setup-node@v6
+      with:
+        node-version: '22'
+    - run: node scripts/generate-meta.mjs
+    - run: node scripts/generate-overview.mjs
+    - run: git diff --exit-code -- meta src
