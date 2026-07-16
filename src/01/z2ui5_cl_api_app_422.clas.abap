@@ -58,7 +58,12 @@ CLASS z2ui5_cl_api_app_422 IMPLEMENTATION.
     CASE client->get( )-event.
 
       WHEN `COLOR_SELECT`.
-        client->message_toast_display( |Color Selected: value - { client->get_event_arg( 1 ) }, \n defaultAction - { client->get_event_arg( 2 ) }| ).
+        " the boolean defaultAction parameter arrives as abap_bool (X/space) -
+        " render it as true/false, like the original controller's string output
+        DATA(default_action) = COND string( WHEN client->get_event_arg( 2 ) = abap_true
+                                            THEN `true`
+                                            ELSE `false` ).
+        client->message_toast_display( |Color Selected: value - { client->get_event_arg( 1 ) }, \n defaultAction - { default_action }| ).
 
     ENDCASE.
 

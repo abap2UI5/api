@@ -1,7 +1,30 @@
 "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
 "! sap.m.FacetFilter - FacetFilterLight
 "! https://sdk.openui5.org/entity/sap.m.FacetFilter/sample/sap.m.sample.FacetFilterLight
-"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: YES
+"! API USAGE AUDIT: (a) frontend_action (_event_client): NO | (b) event t_arg: NO
+"! NOTES (generation):
+"! - IMPROVISED: the bound lists="{/ProductCollectionStats/Filters}" collection
+"!   is unrolled into two static FacetFilterLists (Category, SupplierName); the
+"!   facet values inside each list stay bound.
+"! - IMPROVISED: selection transport - every FacetFilterItem binds selected
+"!   two-way; on listClose/reset the backend reads/clears the flags and
+"!   re-filters (the original filters client-side via sap.ui.model.Filter).
+"! - LIVE-TEST: confirm in a running system that clearing the bound selected
+"!   flags on Reset also unchecks the facet popover checkboxes (FacetFilterList
+"!   caches its selection client-side).
+"! - IMPROVISED: the original controller appends the sap.m.sample.Table
+"!   component's table with its first cell swapped for an ObjectIdentifier
+"!   {Name}/{Category}; that table is rebuilt inline, its Currency-formatter
+"!   price column preformatted (PRICE text) and Formatter.js weightState
+"!   precomputed in WEIGHT_STATE.
+"! - IMPROVISED: the appended table's header toolbar keeps only Title and
+"!   ToolbarSpacer - the sample's popin-layout ComboBox (with core:Item entries),
+"!   the sticky CheckBoxes with their Label and the Hide/Show ToggleButton drive
+"!   client-side table APIs (setSticky, popin layout) with no abap2UI5
+"!   equivalent; the infoToolbar (an OverflowToolbar with a Label) and the
+"!   p:ColumnAIAction column plugin (newer than UI5 1.71) are dropped as well.
+"! - IMPROVISED: data is a 10-row subset of the mock /ProductCollection
+"!   (ui5/mock/products.json), facet counters recomputed for the subset.
 CLASS z2ui5_cl_api_app_401 DEFINITION PUBLIC.
 
   PUBLIC SECTION.
@@ -22,8 +45,9 @@ CLASS z2ui5_cl_api_app_401 DEFINITION PUBLIC.
     TYPES ty_t_product TYPE STANDARD TABLE OF ty_s_product WITH EMPTY KEY.
     TYPES:
       BEGIN OF ty_s_facet,
-        text  TYPE string,
-        count TYPE i,
+        text     TYPE string,
+        count    TYPE i,
+        selected TYPE abap_bool,
       END OF ty_s_facet.
     TYPES ty_t_facet TYPE STANDARD TABLE OF ty_s_facet WITH EMPTY KEY.
     DATA t_products   TYPE ty_t_product.
@@ -33,16 +57,12 @@ CLASS z2ui5_cl_api_app_401 DEFINITION PUBLIC.
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
     " not bound - kept out of PUBLIC so the round-trip model scan stays small
-    DATA t_products_all   TYPE ty_t_product.
-    DATA t_range_category TYPE RANGE OF string.
-    DATA t_range_supplier TYPE RANGE OF string.
+    DATA t_products_all TYPE ty_t_product.
 
     METHODS model_init.
     METHODS view_display.
     METHODS on_event.
-    METHODS on_event_list_close
-      IMPORTING
-        facet TYPE string.
+    METHODS apply_filter.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -81,7 +101,8 @@ CLASS z2ui5_cl_api_app_401 IMPLEMENTATION.
     SORT t_products BY name.
     t_products_all = t_products.
 
-    " Facet values with counters as delivered precomputed in /ProductCollectionStats/Filters
+    " Facet values with counters recomputed for the 10-row subset above
+    " (the original binds the precomputed /ProductCollectionStats/Filters)
     t_categories = VALUE #(
         ( text = `Accessories` count = 6 )
         ( text = `Flat Screen Monitors` count = 1 )
@@ -114,36 +135,37 @@ CLASS z2ui5_cl_api_app_401 IMPLEMENTATION.
                 )->a( n = `showReset`           v = `true`
                 )->a( n = `reset`               v = client->_event( `RESET` )
 
+                " each item binds selected two-way - listClose only signals the
+                " backend to read the flags, no event payload needed
                 )->open( `FacetFilterList`
                     )->a( n = `title`     v = `Category`
                     )->a( n = `key`       v = `Category`
                     )->a( n = `mode`      v = `MultiSelect`
-                    )->a( n = `listClose` v = client->_event( val   = `LIST_CLOSE_CATEGORY`
-                                                                 t_arg = VALUE #( ( `$event.mParameters.selectedItems` ) ) )
+                    )->a( n = `listClose` v = client->_event( `LIST_CLOSE` )
                     )->a( n = `items`     v = client->_bind_edit( t_categories )
 
                     )->leaf( `FacetFilterItem`
-                        )->a( n = `text`    v = `{TEXT}`
-                        )->a( n = `key`     v = `{TEXT}`
-                        )->a( n = `counter` v = `{COUNT}`
+                        )->a( n = `text`     v = `{TEXT}`
+                        )->a( n = `key`      v = `{TEXT}`
+                        )->a( n = `counter`  v = `{COUNT}`
+                        )->a( n = `selected` v = `{SELECTED}`
 
                 )->shut(
                 )->open( `FacetFilterList`
                     )->a( n = `title`     v = `SupplierName`
                     )->a( n = `key`       v = `SupplierName`
                     )->a( n = `mode`      v = `MultiSelect`
-                    )->a( n = `listClose` v = client->_event( val   = `LIST_CLOSE_SUPPLIER`
-                                                                 t_arg = VALUE #( ( `$event.mParameters.selectedItems` ) ) )
+                    )->a( n = `listClose` v = client->_event( `LIST_CLOSE` )
                     )->a( n = `items`     v = client->_bind_edit( t_suppliers )
 
                     )->leaf( `FacetFilterItem`
-                        )->a( n = `text`    v = `{TEXT}`
-                        )->a( n = `key`     v = `{TEXT}`
-                        )->a( n = `counter` v = `{COUNT}`
+                        )->a( n = `text`     v = `{TEXT}`
+                        )->a( n = `key`      v = `{TEXT}`
+                        )->a( n = `counter`  v = `{COUNT}`
+                        )->a( n = `selected` v = `{SELECTED}`
 
                 )->shut(
             )->shut(
-
             )->open( `Table`
                 )->a( n = `id`    v = `idProductsTable`
                 )->a( n = `inset` v = `false`
@@ -158,7 +180,6 @@ CLASS z2ui5_cl_api_app_401 IMPLEMENTATION.
 
                     )->shut(
                 )->shut(
-
                 )->open( `columns`
                     )->open( `Column`
                         )->a( n = `width` v = `12em`
@@ -201,7 +222,6 @@ CLASS z2ui5_cl_api_app_401 IMPLEMENTATION.
 
                     )->shut(
                 )->shut(
-
                 )->open( `items`
                     )->open( `ColumnListItem`
                         )->a( n = `vAlign` v = `Middle`
@@ -232,45 +252,44 @@ CLASS z2ui5_cl_api_app_401 IMPLEMENTATION.
     CASE client->get( )-event.
 
       WHEN `RESET`.
-        t_range_category = VALUE #( ).
-        t_range_supplier = VALUE #( ).
-        t_products = t_products_all.
-        client->view_model_update( ).
+        " like handleFacetFilterReset: clear every list's selection (via the
+        " two-way bound flags) and drop the table filter
+        LOOP AT t_categories ASSIGNING FIELD-SYMBOL(<category>).
+          <category>-selected = abap_false.
+        ENDLOOP.
+        LOOP AT t_suppliers ASSIGNING FIELD-SYMBOL(<supplier>).
+          <supplier>-selected = abap_false.
+        ENDLOOP.
+        apply_filter( ).
 
-      WHEN `LIST_CLOSE_CATEGORY`.
-        on_event_list_close( `CATEGORY` ).
-
-      WHEN `LIST_CLOSE_SUPPLIER`.
-        on_event_list_close( `SUPPLIER` ).
+      WHEN `LIST_CLOSE`.
+        apply_filter( ).
 
     ENDCASE.
 
   ENDMETHOD.
 
 
-  METHOD on_event_list_close.
+  METHOD apply_filter.
 
-    DATA t_range TYPE RANGE OF string.
+    DATA t_range_category TYPE RANGE OF string.
+    DATA t_range_supplier TYPE RANGE OF string.
 
-    TRY.
-        DATA(t_arg) = client->get( )-t_event_arg.
-        DATA(json) = z2ui5_cl_ajson=>parse( t_arg[ 1 ] ).
+    " the two-way bound selected flags arrive with the event - build one range
+    " per facet group from them
+    LOOP AT t_categories INTO DATA(category) WHERE selected = abap_true.
+      APPEND VALUE #( sign   = `I`
+                      option = `EQ`
+                      low    = category-text ) TO t_range_category.
+    ENDLOOP.
+    LOOP AT t_suppliers INTO DATA(supplier) WHERE selected = abap_true.
+      APPEND VALUE #( sign   = `I`
+                      option = `EQ`
+                      low    = supplier-text ) TO t_range_supplier.
+    ENDLOOP.
 
-        LOOP AT json->members( `/` ) INTO DATA(member).
-          APPEND VALUE #( sign   = `I`
-                          option = `EQ`
-                          low    = json->get( |/{ member }/mProperties/text| ) ) TO t_range.
-        ENDLOOP.
-
-      CATCH cx_root.
-    ENDTRY.
-
-    IF facet = `CATEGORY`.
-      t_range_category = t_range.
-    ELSE.
-      t_range_supplier = t_range.
-    ENDIF.
-
+    " like _filterModel: ANDs between the facet groups, ORs inside a group -
+    " an empty range matches all rows, like a list without selections is skipped
     t_products = t_products_all.
     DELETE t_products WHERE category NOT IN t_range_category OR supplier_name NOT IN t_range_supplier.
 

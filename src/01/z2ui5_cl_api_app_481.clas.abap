@@ -8,6 +8,7 @@
 "!   items here because every row sets a different subset of the StepInput
 "!   properties - an empty ABAP model field would bind as "" instead of leaving
 "!   the property at its default, so a bound template would not render 1:1.
+"!   Template properties no row ever sets (valueState) are dropped with it.
 CLASS z2ui5_cl_api_app_481 DEFINITION PUBLIC.
 
   PUBLIC SECTION.
