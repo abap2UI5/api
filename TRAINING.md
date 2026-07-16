@@ -56,8 +56,9 @@ PR. Per batch:
 4. **Distill** — the agent classifies every human correction: fidelity bug →
    rule in AGENTS/CAPABILITIES **and, where greppable, a deterministic check**
    (structural diff / pattern lint), style → convention update, new technique →
-   CAPABILITIES row. Corrected ports become `checked`/`golden`; STATUS.md is
-   updated in the same change.
+   CAPABILITIES row, framework limitation → forwardable request under `pr/`
+   (one folder per request). Corrected ports become `checked`/`golden`;
+   STATUS.md is updated in the same change.
 5. **Regression probe** (every few batches) — re-generate a handful of
    `golden` ports plus the hold-out set from scratch with the current setup
    and diff: a re-appearing old mistake means the rule was too weak.

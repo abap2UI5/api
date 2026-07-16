@@ -144,6 +144,7 @@ the coverage and the structural diff read from.
 | [`STATUS.md`](STATUS.md) | Point-in-time state + the open findings backlog |
 | [`api.md`](api.md) | One row per demo kit sample: ported, backlog or out of scope |
 | [`meta/`](meta) | One sidecar per port — status, checked, typed deviations |
+| [`pr/`](pr) | Forwardable improvement requests for the abap2UI5 framework, distilled from porting gaps |
 
 ## Coverage
 

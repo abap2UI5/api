@@ -159,6 +159,11 @@ source of truth:
   Dialog with a toast although app 469 shows Dialogs work 1:1 via
   `popup_display`). When a port proves a new technique or disproves a ❌,
   update `CAPABILITIES.md` in the same change.
+- **Every improvement idea for the abap2UI5 framework goes into `pr/`** — one
+  folder per request with a self-contained, forwardable README (motivation
+  with the sample/port that hit it, current behavior with source references,
+  proposed change, example). Add it in the same change that discovers the
+  gap; see `pr/README.md`.
 - Every port must pass all three CI checks (§6).
 
 ### App skeleton — how a port is built
