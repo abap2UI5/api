@@ -66,6 +66,30 @@ PR. Per batch:
 A batch folder is closed once merged — follow-ups amend the port in place, new
 ports go into the next `b<nn>`.
 
+## Reference repositories
+
+Two read-only reference clones feed the loop (policy since 2026-07-16; clone
+them into the session when generating or reviewing):
+
+- **`abap2UI5/abap2UI5`** (framework, main) — the truth about what is
+  *possible*. Capability questions are answered by reading the source
+  (public API surface only: `z2ui5_if_client` and what it reaches — never
+  build on internals) and recorded in CAPABILITIES.md as **source-verified**.
+  A live check remains the final confirmation for rendering/UX.
+- **`abap2UI5/samples` (branch `cloud`)** — the truth about what is
+  *idiomatic*. Its `src/01/08/*` tree is the direct analogue of our ports
+  (all ABAP-Cloud-ready, 1.71+, non-deprecated). Golden external references
+  for generation prompts:
+  `src/01/08/00/z2ui5_cl_demo_app_022` (lifecycle + scalar state),
+  `…_app_038` (popup/popover), `…_app_375` (full dispatcher + event args).
+  **Do NOT imitate** where samples conflict with this repo's rules: samples
+  put `main` last (we: first, call-order), still use one-way `_bind`
+  (we: always `_bind_edit`), require an ABAP Doc header (we: forbidden —
+  sidecar instead), use inline `check_on_event( 'X' )` for few events
+  (we: always CASE in `on_event`), and their view builder is the typed
+  `z2ui5_cl_xml_view` (we: generic `z2ui5_cl_api_xml`) — view-building idiom
+  does not transfer. Where the two conflict, THIS repo's AGENTS.md wins.
+
 ## Quality ladder
 
 Every port sits on exactly one rung; only `golden` ports may be used as prompt

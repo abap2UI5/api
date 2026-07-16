@@ -76,17 +76,24 @@ reviewers), followed by fixes:
 
 ## Open findings (backlog)
 
-Live tests pending (in-system):
-- [ ] **401** — Reset unchecks the facet popover checkboxes (two-way selected).
+Live tests pending (in-system) — the 2026-07-16 framework source pass
+(CAPABILITIES.md) already confirmed the *mechanics* of several; what remains
+is visual/UX confirmation:
+- [ ] **401** — Reset unchecks the facet popover checkboxes (mechanics
+  source-verified: model applied before on_event).
 - [ ] **469** — PDFViewer renders inside the Dialog at height 100%.
-- [ ] **487** — 5-level nested tree binding renders expandable levels.
+- [ ] **487** — nested tree binding renders expandable levels (serialization
+  source-verified; framework ships z2ui5.cc.Tree).
 - [ ] **529** — the press Dialog opens/closes (popup_display).
 - [ ] **404/431** — injected CSS styles the flex items / floats the tiles.
 - [ ] **486** — expression-bound toolbar widths follow the slider.
 - [ ] **530** — separator switches instantly via the shared two-way path.
-- [ ] **474** — two-way selectedKey is updated before on_event runs.
-- [ ] **452** — try the bound-template variant with a raw binding-info string
-  (`sorter: { group: true }`) instead of the static unroll.
+- [ ] **474** — toast shows the newly selected item (timing source-verified).
+- [ ] **452** — convert to the bound-template variant with a raw binding-info
+  string (pass-through source-verified) — then LIVE-TEST the group headers.
+- [ ] **433/473** — NEW: the `device>` model IS available in main views
+  (source-verified) — restore the original `{device>/…}` bindings that were
+  dropped as "not expressible", then LIVE-TEST.
 
 Idiom / style (low):
 - [x] ~~`main` method placed last in several ports~~ — done 2026-07-16: new
