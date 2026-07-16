@@ -1,0 +1,20 @@
+{
+  "class": "z2ui5_cl_api_app_439",
+  "sample": "sap.m.sample.InputValueState",
+  "entity": "sap.m.Input",
+  "file": "src/01/b02/z2ui5_cl_api_app_439.clas.abap",
+  "batch": "b02",
+  "audit": "(a) frontend_action (_event_client): NO | (b) event t_arg: NO",
+  "status": "generated",
+  "checked": null,
+  "deviations": [
+    {
+      "type": "DROPPED_171",
+      "what": "Input property showClearIcon (since UI5 1.94) dropped from three inputs."
+    },
+    {
+      "type": "DROPPED_171",
+      "what": "the two formattedValueStateText aggregations (a FormattedText carrying Links, since UI5 1.78) omitted; valueState/valueStateText still render the state."
+    }
+  ]
+}

@@ -14,6 +14,13 @@ rebuild it as an abap2UI5 sample**. Doing that systematically reveals the gaps
 between what UI5 ships and what abap2UI5 can already express — and those gaps
 become the backlog to close.
 
+**Porting scope**: a sample is in scope when its **control exists since UI5
+1.71** and is **not deprecated** in the current release (legacy-free ready) —
+computed per sample from `ui5/universe.json` by `generate-coverage.mjs`
+(`scopeOf`). Out-of-scope samples stay listed in `api.md` (marked `✗`) but are
+never ported; `node scripts/generate-coverage.mjs --backlog` prints the
+in-scope, unported samples for batch planning.
+
 The pipeline (run by a coding agent):
 
 1. **Read** — clone [OpenUI5](https://github.com/SAP/openui5), scan every demo
@@ -39,7 +46,7 @@ Everything lives on the working branch, in two separate top-level trees:
 | Path    | Content |
 |---------|---------|
 | `src/`  | The generated abap2UI5 ports (`*.clas.abap`) — the abapGit project (§3). |
-| `ui5/`  | The original UI5 demo kit templates (JS/XML/manifest), one folder per port (§4). |
+| `ui5/`  | The original UI5 demo kit templates (JS/XML/manifest), one folder per ported sample (§4). |
 
 Keep them separate: only `src/` is the abapGit / abaplint scope; `ui5/` is
 plain JS/XML held for reference and to feed the generator.
@@ -62,6 +69,14 @@ by the UI5 **library** of the demo kit sample they rebuild:
 The split key is the **second-level namespace** of the sample's entity. New
 libraries get the next free `src/NN` folder with a matching `package.devc.xml`.
 
+Inside a library folder, ports are grouped into **batch subpackages**
+`src/<NN>/b<nn>/` — one folder per generation/review batch (~10 related
+samples, e.g. `b01` display & navigation), each with its own
+`package.devc.xml`, so every batch is a separate ABAP package in the system
+and one PR in git. A port's batch is recorded in its `meta/<class>.json`
+(derived from the path). New ports always go into a new batch folder, never
+into a closed one — see TRAINING.md for the batch process.
+
 Because `FOLDER_LOGIC=PREFIX`, class names never encode the folder — moving a
 class between folders needs no rename.
 
@@ -75,45 +90,71 @@ number; it is the app's identity linking a port to its template (see §4).
 ## 4. The `ui5/` folder — original templates
 
 Every port's source template is collected under `ui5/`. **The template folder is
-named after the port class**, filed by source library:
+named after the sample**, filed by source library:
 
 ```
-ui5/<library>/<z2ui5_cl_api_app_n>/   ← original Component.js, *.view.xml,
-                                          manifest.json, controllers, resources
+ui5/<library>/<SampleName>/   ← original Component.js, *.view.xml,
+                                  manifest.json, controllers, resources
 ```
 
-The folder name (class) is the join key between a port (`src/`) and its template
-(`ui5/`). Templates are held verbatim — never edited to fit ABAP; that is the
-generator's job. `ui5/` is the generator's local input store; the `api.md`
-**Javascript** column links to the sample's source in the upstream
+The join key between a port (`src/`) and its template is `meta/<class>.json` →
+`sample`. Only **ported** samples are archived: each generation batch copies
+its samples over from the OpenUI5 checkout when the batch is generated — the
+446-sample universe is not mirrored here. Templates are held verbatim — never
+edited to fit ABAP; that is the generator's job. `ui5/` is the generator's
+local input store; the `api.md` **Sample** column links to the sample's
+source in the upstream
 [OpenUI5 repository](https://github.com/SAP/openui5), not to this copy (§7).
+
+Archive **everything** the sample's `manifest.json` lists under `sap.ui5 >
+config > sample > files` (resolving `../<OtherSample>/` references), or fidelity
+cannot be verified offline — app 401 was missing its controller and table for a
+while. Shared demo kit mock data (`sap/ui/demo/mock/*.json`) is snapshotted once
+under `ui5/mock/` (see its README for provenance); upstream it lives in the
+[UI5/openui5](https://github.com/UI5/openui5) repository (the SAP/openui5 URLs
+redirect) at `src/sap.ui.documentation/test/sap/ui/documentation/sdk/`.
 
 ---
 
 ## 5. Generation rules
 
-Each generated port carries ABAP Doc directly above `CLASS ... DEFINITION`:
+**Port classes carry no ABAP Doc header** — the class starts directly with
+`CLASS ... DEFINITION` (pattern-lint enforces this). Everything that identifies
+and annotates a port lives in its sidecar **`meta/<class>.json`**, the single
+source of truth:
 
-```abap
-"! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
-"! <entity> - <SampleName>
-"! <demo kit url>
+```jsonc
+{
+  "class":   "z2ui5_cl_api_app_421",
+  "sample":  "sap.m.sample.CheckBoxTriState",   // join key to ui5/<lib>/<Name>/
+  "entity":  "sap.m.CheckBox",
+  "file":    "src/01/b02/z2ui5_cl_api_app_421.clas.abap",
+  "batch":   "b02",
+  "audit":   "(a) frontend_action (_event_client): NO | (b) event t_arg: YES",
+  "status":  "generated",                       // generated|reviewed|checked|golden
+  "checked": { "date": "2026-07-15", "note": "verified in a running system - ..." },
+  "deviations": [ { "type": "IMPROVISED", "what": "..." } ]
+}
 ```
 
-- Line 1 is fixed and literal. Line 2 is `<entity> - <SampleName>`, e.g.
-  `sap.m.CheckBox - CheckBoxTriState` (the `<SampleName>` is the sample id tail
-  after `.sample.`).
-- Line 3 `<demo kit url>` is the **OpenUI5** demo kit link
-  (`https://sdk.openui5.org/entity/<entity>/sample/<lib>.sample.<Name>`) — its
-  `.../entity/<entity>/sample/<lib>.sample.<Name>` tail is what the coverage and
-  overview generators parse to match a port to its source sample (§7). Always use
-  the OpenUI5 host (`sdk.openui5.org`), never the commercial SAPUI5 one. **Never
-  remove or reword this URL line.**
+- The generator writes the sidecar **together with** the class; overview app
+  and coverage read only `meta/` (§7). `node scripts/validate-meta.mjs` checks
+  schema + referential integrity (file/batch/template exist) and runs in CI.
+- A human live check promotes `status` to `checked` and fills `checked`
+  directly in the sidecar; `reviewed`/`golden` are manual promotions too.
 - The abapGit `<DESCRIPT>` follows `<entity> - <demo kit description>`
   (e.g. `sap.m.Switch - Some say it is only a switch...`), truncated to 60 chars.
 - Use **only** controls and properties available since UI5 1.71; never a
-  deprecated one. If a sample needs anything newer or deprecated, **do not
-  port it** — leave it as an ❌ gap in the coverage report.
+  deprecated one. Samples whose **control** is newer than 1.71 or deprecated
+  are **out of scope** (§1) and never enter a batch. When an in-scope sample
+  merely uses a newer *optional property*, drop it with a `DROPPED_171`
+  deviation.
+- **Before declaring any sample feature inexpressible, check `CAPABILITIES.md`**
+  — the map of what abap2UI5 can express, each entry backed by a port that
+  proves it. Never improvise around a feature it marks ✅/🔶 (app 529 replaced a
+  Dialog with a toast although app 469 shows Dialogs work 1:1 via
+  `popup_display`). When a port proves a new technique or disproves a ❌,
+  update `CAPABILITIES.md` in the same change.
 - Every port must pass all three CI checks (§6).
 
 ### App skeleton — how a port is built
@@ -124,8 +165,8 @@ Follow it exactly so every port looks the same and stays maintainable.
 **Inputs** — the sample's original files from the OpenUI5 checkout: the
 `*.view.xml` (the UI), the controller (`*.controller.js` — event handlers),
 `Component.js` / `manifest.json` (which model data is loaded), plus any local
-`*.json` mock data. All of these are also copied verbatim into the port's
-`ui5/<library>/<class>/` folder (§4).
+`*.json` mock data. All of these are also copied verbatim into the sample's
+`ui5/<library>/<SampleName>/` folder (§4).
 
 **Output** — one class `z2ui5_cl_api_app_<n>` implementing `z2ui5_if_app`, whose
 view is a **1:1** rebuild of the sample's XML.
@@ -171,6 +212,11 @@ METHOD z2ui5_if_app~main.
 ENDMETHOD.
 ```
 
+- **Method order in the implementation**: `z2ui5_if_app~main` is always the
+  **first** method; the remaining methods follow **in the order they are
+  called from `main`**, depth-first (`model_init` → `view_display` →
+  `on_event` → helpers right after their caller). pattern-lint checks that
+  main comes first.
 - `check_on_init( )` fires once when the app starts — seed the data, draw the view.
 - `check_on_event( )` fires on every user interaction — dispatch in `on_event( )`.
 - Add `model_init( )` / `on_event( )` **only when the app actually has data /
@@ -184,7 +230,8 @@ ENDMETHOD.
 The sample's JSON model becomes ABAP: one `ty_s_`/`ty_t_` type per JSON array,
 filled with `VALUE #( ( … ) ( … ) )`. Field names are the JSON keys, upper-cased
 by ABAP; bindings reference them in braces (`{TITLE}`, `{PRODUCT_ID}`). Keep the
-data verbatim from the sample (same rows, same text). See app 416 / 454.
+data verbatim from the sample (same rows, same text); a row subset needs an
+IMPROVISED note (checkable against `ui5/mock/`). See app 454.
 
 **abap2UI5 serves a single default model — there are no named models.** A sample
 that binds against a named model (`img>/products/pic1`, a separate `JSONModel`,
@@ -292,10 +339,12 @@ client->view_display( view->stringify( ) ).
   event (never an `IF check_on_event( )`). After changing bound data in an event,
   call `client->view_model_update( )` to push it back (no full redraw).
 - Read event parameters (declared via `_event( … t_arg = … )`) with
-  `client->get_event_arg( n )`. A **boolean** parameter (e.g. a CheckBox
+  `client->get_event_arg( )` — the index defaults to 1; **write it only for
+  position 2+** (`get_event_arg( 2 )`), never `get_event_arg( 1 )`
+  (pattern-lint flags it). A **boolean** parameter (e.g. a CheckBox
   `selected`, `${$parameters>/selected}`) already arrives as `abap_bool`
   (`X` / space), **not** the string `` `true` `` — assign it straight into an
-  `abap_bool` field (`flag = client->get_event_arg( 1 ).`); never test `… = \`true\``.
+  `abap_bool` field (`flag = client->get_event_arg( ).`); never test `… = \`true\``.
 - **Passing a value *into* an event uses the `$`-prefixed form — never a bare
   `{…}`.** The runtime (`z2ui5_cl_core_srv_event=>get_t_arg`) sends every
   `t_arg` entry that starts with `$` or `{` to the frontend **verbatim** and
@@ -347,38 +396,33 @@ stay compatible with UI5 1.71`) if the sample still works without it, or — if 
 sample's whole point needs the newer/deprecated control — **do not port it** and
 leave it as an ❌ gap. Never silently substitute a different control.
 
-#### Generation notes — record every caveat in the port
+#### Generation notes — record every caveat in the sidecar
 
 When the port is **not** a clean 1:1 — you improvised, dropped/downgraded
 something for 1.71, replaced a controller-only behaviour, or relied on a
-binding/event form you could not verify — record it in the **header ABAP Doc**,
-as extra `"! ` lines appended **right after the three fixed header lines** (the
-`GENERATED …` / `<entity> - <SampleName>` / url lines) and before
-`CLASS … DEFINITION`:
+binding/event form you could not verify — record it as an entry in the
+`deviations` array of `meta/<class>.json` (§5 intro). One entry per caveat,
+with a closed `type` vocabulary so deviations stay countable:
 
-```abap
-"! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
-"! <entity> - <SampleName>
-"! <demo kit url>
-"! NOTES (generation):
-"! - IMPROVISED: …
-"! - 1.71: …
-CLASS z2ui5_cl_api_app_<n> DEFINITION PUBLIC.
-```
+- `LIVE_TEST` — needs checking in a running system: an unverified
+  binding/event path, or uncertain rendering (e.g. app 530's `${$source>/text}`
+  event arg).
+- `IMPROVISED` — deviates from the sample: e.g. a named model flattened to
+  static values (app 420), or a MessageManager replaced by a hardcoded message
+  table (app 449). Only improvise what `CAPABILITIES.md` does not mark
+  expressible — app 529's Dialog→toast substitution was a wrong improvisation;
+  app 469 shows the 1:1 way (`popup_display`).
+- `DROPPED_171` — a control / property / enum value newer than 1.71 was
+  dropped or downgraded (app 529's `Indication06`+ states set to `None`).
+- `SUBSET_DATA` — the port binds a row subset of the sample's mock data
+  (checkable against `ui5/mock/`).
+- `NOTE` — anything else worth flagging.
 
-One bullet per caveat, tagged so a reviewer can scan them:
-
-- `LIVE-TEST:` needs checking in a running system — an unverified binding/event
-  path, or uncertain rendering (e.g. app 530's `${$source>/text}` event arg).
-- `IMPROVISED:` deviates from the sample — e.g. a controller-built Dialog shown
-  as a `message_toast_display` instead (app 529), or an event that reads a
-  client-only value replaced with a static one (app 526).
-- `1.71:` a control / property / enum value newer than 1.71 was dropped or
-  downgraded (app 529's `Indication06`+ states set to `None`).
-
-Keep the block **only** when there is something to flag — omit it for a faithful
-1:1 port. Still add the inline `"` comment at the exact spot of each deviation;
-the NOTES block is the scannable summary of those.
+The `what` text carries the full explanation. Keep the array **empty** for a
+faithful 1:1 port. Still add the inline `"` comment at the exact spot of each
+deviation in the ABAP code; the sidecar is the scannable summary of those —
+the structural diff (§6) matches undeclared view differences against exactly
+these entries.
 
 #### Worked references
 
@@ -386,9 +430,9 @@ Three PoC ports show the full range — read them before writing a new one:
 
 | App | Sample | Shows |
 |-----|--------|-------|
-| `src/01/z2ui5_cl_api_app_408` | `sap.m.Text` | static view, no data/events, `&&`-split text |
-| `src/04/z2ui5_cl_api_app_416` | `sap.f.GridList` | data + two-way bind + `liveChange` event + `view_model_update` |
-| `src/01/z2ui5_cl_api_app_454` | `sap.m.MultiInput` | data, bound aggregation, `core:Item`, 1.71 omission comment |
+| `src/01/b01/z2ui5_cl_api_app_408` | `sap.m.Text` | static view, no data/events, `&&`-split text |
+| `src/01/b02/z2ui5_cl_api_app_421` | `sap.m.CheckBox` | two-way bind, expression bindings, boolean event arg (CHECKED in-system) |
+| `src/01/b02/z2ui5_cl_api_app_454` | `sap.m.MultiInput` | data, bound aggregation, `core:Item`, tokens, NOTES block |
 
 ### Generation prompt
 
@@ -413,10 +457,23 @@ is no `src/00` "restricted" area here (unlike abap2UI5/samples); everything must
 survive all three builds. The `auto_cloud` / `auto_downport` workflows rebuild
 the `cloud` / `702` branches via `auto_branch.yaml`.
 
+A fourth workflow, `checks`, runs three deterministic gates on every PR:
+
+| Job | Command | Fails when |
+|-----|---------|------------|
+| `pattern_lint` | `node scripts/pattern-lint.mjs` | a known-bad pattern reappears (each rule encodes a distilled §10 lesson; known open findings live in the script's BASELINE and in STATUS.md) |
+| `structural_diff` | `node scripts/structural-diff.mjs --strict` | a port's rendered view deviates from the original `view.xml` without a declared deviation |
+| `generated_in_sync` | regenerate `meta/` + overview, `git diff --exit-code` | a change forgot to regenerate the generated artifacts |
+
+**When a distilled lesson is greppable, add it as a pattern-lint rule in the
+same change** — that is what makes a lesson unrepeatable rather than advisory.
+
 **Run before every commit:**
 ```bash
 npm ci
 npx abaplint ./abaplint.jsonc          # expect 0 issues
+node scripts/pattern-lint.mjs          # expect 0 errors
+node scripts/structural-diff.mjs --strict
 ```
 
 ### abapGit file format (all serialized files)
@@ -434,12 +491,13 @@ scripts.**
 
 - **`README.md`** (between the `<!-- coverage:start/end -->` markers) — the
   per-module coverage summary.
-- **`api.md`** — one flat table, the same layout as the overview app (minus its
-  "start the app" link, since api.md is static). One row per UI5 demo kit sample,
-  sorted module → control → sample. Columns: **Module** · **Control** (→ OpenUI5
-  API) · **Sample** · **JavaScript** (↗ → OpenUI5 repo source) · **UI5 App**
-  (↗ → live OpenUI5 fullscreen sample) · **ABAP** (↗ → generated class,
-  `—` = not ported).
+- **`api.md`** — ONE flat table, one row per UI5 demo kit sample, sorted
+  module → control → sample. Columns: **Module** · **Control** (→ OpenUI5 API,
+  ~~struck~~ when deprecated) · **Since** · **Deprecated** (deprecation version
+  + replacement hint from the release's `api.json`, empty = not deprecated) ·
+  **Sample** (→ OpenUI5 repo source, ↗ → live fullscreen sample) · **ABAP**
+  (→ generated class, `—` = not ported; those rows are the backlog). There is
+  no separate deprecated-controls section — everything sits in this table.
 - **`src/z2ui5_cl_api_app_overview.clas.*`** — the in-system overview **app**:
   an abap2UI5 app that lists every ported app as one row of a `sap.m.Table`,
   sorted by module → control → sample. Columns:
@@ -453,31 +511,45 @@ scripts.**
   system origin), the static facts come from `get_catalog`.
 
 ```bash
-OPENUI5_DIR=../openui5 node scripts/generate-coverage.mjs   # README + api.md
-node scripts/generate-overview.mjs                          # the overview app (src only)
+node scripts/generate-coverage.mjs          # README + api.md (offline, from ui5/universe.json)
+node scripts/generate-overview.mjs          # the overview app (src only, from meta/)
+node scripts/validate-meta.mjs              # sidecar schema + referential integrity
+node scripts/structural-diff.mjs [--strict] # port vs original view check
+node scripts/pattern-lint.mjs               # distilled-lesson gate
 ```
 
-- **Universe of samples** — every `demokit/sample/<Name>` directory in the
-  OpenUI5 checkout at `$OPENUI5_DIR` (default `./openui5`).
-- **Ported set** — parsed from each `src/**/*.clas.abap` port's header URL line
-  `"! .../entity/<entity>/sample/<lib>.sample.<Name>`.
-- A port matches a sample on `(library, Name)`.
-- **Control (entity) for grouping / the demo kit link** — from each library's
-  `demokit/docuindex.json` (`explored.entities[].samples[]`), with the port's
-  header URL (`.../entity/<entity>/sample/...`) as fallback.
+- **`validate-meta.mjs`** checks the `meta/<class>.json` sidecars — the source
+  of truth for sample/entity/status/checked/deviations (§5); `meta/` sits
+  outside `src/` so abapGit ignores it. See TRAINING.md.
+- **`structural-diff.mjs`** compares each port's builder-emitted view structure
+  (controls + attribute names) against its archived original view.xml and fails
+  (`--strict`) on any difference not covered by a declared deviation — run it
+  before committing a new or changed port; every hit means: fix the port or
+  declare the deviation in the sidecar.
+
+- **Universe of samples** — `ui5/universe.json`, a committed snapshot of every
+  `demokit/sample/<Name>` of the focused libraries (`FOCUS_LIBS` in
+  `generate-coverage.mjs`, currently `sap.m`) with entity/Since/deprecation
+  from the release's `api.json`. When an OpenUI5 checkout is present
+  (`$OPENUI5_DIR`), `generate-coverage.mjs` REBUILDS the snapshot from it (the
+  weekly `generate_result` workflow does exactly that); offline it reads the
+  snapshot, so coverage regenerates without a checkout.
+- **Ported set** — the `meta/<class>.json` sidecars; a port matches a sample on
+  `(library, Name)` from `meta.sample`. Ports matching no universe sample are
+  reported as orphans (rename/removal upstream, or outside `FOCUS_LIBS`).
 - **api.md links are external** (absolute URLs, overridable via env) and point
   at **OpenUI5** — only the ABAP column links back to this repo:
   Control → the control's OpenUI5 API reference
   (`DEMOKIT`=`https://sdk.openui5.org`/api/`<entity>`),
-  JavaScript → the sample's source folder in the OpenUI5 repository
+  Sample → the sample's source folder in the OpenUI5 repository
   (`OPENUI5`=`https://github.com/SAP/openui5`/tree/`OPENUI5_REF`/src/…/demokit/sample/`<Name>`),
-  UI5 App → the live OpenUI5 fullscreen sample runner
+  Sample ↗ → the live OpenUI5 fullscreen sample runner
   (`DEMOKIT`/resources/…/index.html?sap-ui-xx-sample-id=…&sap-ui-xx-sample-lib=…),
   ABAP → the generated `.clas.abap` (`REPO`/`REF`).
 
 The `generate_result` workflow (`workflow_dispatch` + weekly) shallow-clones
-OpenUI5, runs both scripts, stamps the `<!-- last-run -->` timestamp into
-`README.md`, and opens a pull request. The overview app must stay abaplint-clean
+OpenUI5, refreshes `ui5/universe.json`, regenerates coverage + overview, stamps
+the `<!-- last-run -->` timestamp into `README.md`, and opens a pull request. The overview app must stay abaplint-clean
 (§6) — it lives in `src/` and is part of every CI build.
 
 ---
@@ -490,6 +562,9 @@ and the detailed conventions in the
 (§7 code conventions, §9 app lifecycle, §10 view building, §11 app structure) —
 the ports share that style. Essentials:
 
+- **Always the simplest possible notation**: omit parameters that equal the
+  default (`get_event_arg( )`, not `get_event_arg( 1 )`), no pass-through
+  methods, no explicit forms where the implicit one reads the same.
 - Class names **lowercase** in `DEFINITION` and `IMPLEMENTATION`; not `FINAL`;
   `DEFINITION PUBLIC.` (never `CREATE PUBLIC`).
 - Always include `PROTECTED SECTION.` and `PRIVATE SECTION.` (keep `PRIVATE`
@@ -500,8 +575,9 @@ the ports share that style. Essentials:
 - Lifecycle: chain `check_on_init( )` / `check_on_navigated( )` /
   `check_on_event( )` with `ELSEIF`. Re-display the view in the
   `check_on_navigated( )` branch.
-- Build views with `z2ui5_cl_xml_view` (typed) or `z2ui5_cl_util_xml` (generic);
-  `client->view_display( view->stringify( ) )` as a standalone final statement.
+- Build views with `z2ui5_cl_api_xml` (see §5 — the only view builder in this
+  repo); `client->view_display( view->stringify( ) )` as a standalone final
+  statement.
 - **ABAP Doc (`"!`) is parsed as HTML.** A raw `<…>` is read as an HTML tag, so
   never put a literal UI5 element (`<mvc:View>`) or any other `<tag>` in a `"!`
   comment — write it plain (`mvc:View element`). A `<tag>` there is flagged as an
@@ -552,9 +628,8 @@ How to record it:
   a bare `{COL}` — see §5 "Data binding & events".
 - **abap2UI5 has only one default model** — flatten any named-model binding into
   it — see §5 "`model_init` — the model".
-- **A new header `"!` line must sit right after the URL line (line 3), before any
-  `CHECKED`/`NOTES (generation):` block** — `generate-overview.mjs` greedily
-  captures the `"!` continuation lines that *follow* those markers into the port's
-  overview popup, so a header line placed after them leaks into the app catalog.
-  The "API USAGE AUDIT" line (frontend_action / event t_arg per port) is inserted
-  exactly there for this reason.
+- **Port classes carry no ABAP Doc header** — everything (sample, entity,
+  status, checked, deviations, audit) lives in `meta/<class>.json`; edit the
+  sidecar, never write `"!` lines into a port (pattern-lint blocks them, and
+  `validate-meta.mjs` checks the sidecars). The old header-marker parsing in
+  `generate-overview.mjs` is gone — the overview and the coverage read `meta/`.

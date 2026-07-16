@@ -10,10 +10,12 @@
 
 _Last generated: <!-- last-run -->2026-07-14 09:00 UTC<!-- /last-run -->_
 
-> **This repository is AI-generated.** From *every* official **`sap.m`** UI5 demo
-> kit sample it automatically builds an abap2UI5 app, exposing the **functional
-> gaps** between what UI5 offers and what abap2UI5 can already express — so they
-> can be closed. Other UI5 libraries follow later.
+> **This repository is AI-generated.** From every official **`sap.m`** UI5 demo
+> kit sample whose control **exists since UI5 1.71** and is **not deprecated**
+> (legacy-free ready) it automatically builds an abap2UI5 app, exposing the
+> **functional gaps** between what UI5 offers and what abap2UI5 can already
+> express — so they can be closed. Deprecated or newer controls are listed as
+> out of scope; other UI5 libraries follow later.
 >
 > See the result in **[api.md](api.md)**, or try it live: pull this repo into
 > your ABAP system and start **`z2ui5_cl_api_app_overview`**, which lists every
@@ -26,9 +28,11 @@ A coding agent runs the pipeline:
 1. **Read** — clone [OpenUI5](https://github.com/SAP/openui5) and scan every
    `sap.m` demo kit sample (`src/sap.m/test/sap/m/demokit/sample/<Name>/`).
 2. **Generate** — rebuild each sample 1:1 as an abap2UI5 app (`z2ui5_if_app`),
-   filed under `src/01`.
+   filed under `src/01` in batch subpackages (`b01`, `b02`, …) — one batch of
+   related samples per package.
 3. **Store templates** — keep the original UI5 JS/XML templates in
-   [`ui5/`](ui5), one folder per port (named after the port class).
+   [`ui5/`](ui5), one folder per sample — only ported samples are archived;
+   each batch copies its samples over from the OpenUI5 checkout.
 4. **Report** — regenerate the [coverage](#coverage) tables and the in-system
    overview app, marking every sample ✅ ported or ❌ missing. The ❌ rows are
    the backlog.
@@ -82,12 +86,10 @@ Rules:
   deprecated control/property. If the sample needs anything newer or
   deprecated, stop and report the gap instead of porting.
 - Must pass abaplint for ABAP_STANDARD, ABAP_CLOUD and ABAP_702 (downport).
-- Add ABAP Doc above the class (line 1 fixed; line 2 `<entity> - <SampleName>`;
-  line 3 the OpenUI5 demo kit url on sdk.openui5.org, never the commercial
-  SAPUI5 host):
-    "! GENERATED ABAP CODE BASED ON UI5 DEMO KIT SAMPLE
-    "! <entity> - <SampleName>
-    "! https://sdk.openui5.org/entity/<entity>/sample/<lib>.sample.<Name>
+- The class carries NO ABAP Doc header. Write the port's sidecar
+  meta/z2ui5_cl_api_app_<n>.json instead (sample, entity, file, batch, audit,
+  status, deviations) - see AGENTS.md section 5; validate with
+  node scripts/validate-meta.mjs.
 - Any runtime asset URLs the sample uses (test-resources / resources images)
   also point at the OpenUI5 host (sdk.openui5.org), never SAPUI5.
 - Set the abapGit <DESCRIPT> to `<entity> - <demo kit description>`.
@@ -96,8 +98,9 @@ Rules:
 
 </details>
 
-The focus is currently on **`sap.m`** — all ports live under `src/01`. Other UI5
-libraries are brought back in later.
+The focus is currently on **`sap.m`** — all ports live under `src/01`, grouped
+into batch subpackages `src/01/b<nn>` (one generation/review batch = one ABAP
+package). Other UI5 libraries are brought back in later.
 
 ## Compatibility
 
@@ -123,13 +126,15 @@ have an abap2UI5 port.
 
 <!-- coverage:start -->
 
-Overall **34 / 446** demo kit samples ported (7.6 %).
+Overall **34 / 403** in-scope demo kit samples ported (8.4 %).
+**In scope**: samples whose control exists since **UI5 1.71** and is **not deprecated** (legacy-free ready).
+Out of scope: 43 of 446 samples — 16 on deprecated controls, 21 on controls newer than 1.71, 6 without control metadata.
 Control metadata from OpenUI5 **1.151.0**.
 
-| Module | Samples | Ported | Coverage | |
-|--------|--------:|-------:|---------:|---|
-| `sap.m` | 446 | 34 | 7.6 % | █░░░░░░░░░ |
-| **Total** | **446** | **34** | **7.6 %** | █░░░░░░░░░ |
+| Module | Samples | In scope | Ported | Coverage | |
+|--------|--------:|---------:|-------:|---------:|---|
+| `sap.m` | 446 | 403 | 34 | 8.4 % | █░░░░░░░░░ |
+| **Total** | **446** | **403** | **34** | **8.4 %** | █░░░░░░░░░ |
 
 <!-- coverage:end -->
 

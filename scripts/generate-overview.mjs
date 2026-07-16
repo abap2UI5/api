@@ -6,16 +6,19 @@
  * source, ↗ -> live OpenUI5 fullscreen sample) and abap2UI5 (class name ->
  * generated class on GitHub, ↗ -> starts the app). Every link opens in a NEW
  * browser tab (target="_blank"; the ↗ start link uses the ?app_start= URL).
- * Depends only on src/ (no OpenUI5 checkout needed).
+ * Reads everything from the meta/ sidecars (the source of truth for sample,
+ * entity, checked and deviations - the port classes carry no header).
  *
  * Run:  node scripts/generate-overview.mjs
  */
 
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-const ROOT = path.join(path.dirname(new URL(import.meta.url).pathname), '..');
+const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = path.join(ROOT, 'src');
+const META = path.join(ROOT, 'meta');
 const CLASS = 'z2ui5_cl_api_app_overview';
 const OUT_ABAP = path.join(SRC, `${CLASS}.clas.abap`);
 const OUT_XML = path.join(SRC, `${CLASS}.clas.xml`);
@@ -32,46 +35,20 @@ function walk(dir, out = []) {
 // collect ported apps: control (entity), module (library), sample name, class,
 // and the repo-relative path of the generated class (for the ABAP GitHub link)
 const apps = [];
-for (const f of walk(SRC)) {
-  if (!f.endsWith('.clas.abap')) continue;
-  const cls = path.basename(f, '.clas.abap');
-  const content = fs.readFileSync(f, 'utf8');
-  const m = content.match(/entity\/([^/\s]+)\/sample\/(\S+)/);
-  if (!m) continue;
-  const entity = m[1];
-  const id = m[2];
-  const i = id.indexOf('.sample.');
+const DEV_LABEL = { IMPROVISED: 'IMPROVISED', LIVE_TEST: 'LIVE-TEST', DROPPED_171: '1.71', SUBSET_DATA: 'SUBSET', NOTE: 'NOTE' };
+for (const mf of fs.readdirSync(META)) {
+  if (!mf.endsWith('.json')) continue;
+  const m = JSON.parse(fs.readFileSync(path.join(META, mf), 'utf8'));
+  const i = m.sample.indexOf('.sample.');
   if (i === -1) continue;
-  // the optional "! CHECKED (<yyyy-mm-dd>): ... header marker (incl. its plain
-  // "! continuation lines) — set when the port was manually verified in a
-  // running system; shown as a green check in the overview
-  let checked = '';
-  const cm = content.match(/"! (CHECKED \(\d{4}-\d{2}-\d{2}\):.*\n(?:"! (?!NOTES \(generation\):|- ).*\n)*)/);
-  if (cm) {
-    checked = cm[1].split('\n').filter(Boolean)
-      .map((l) => l.replace(/^"!\s?/, '').trim()).join(' ');
-  }
-  // the header "! NOTES (generation): block, flattened to bullets joined by " // "
-  let notes = '';
-  const nm = content.match(/"! NOTES \(generation\):\n((?:"!.*\n)+?)CLASS /);
-  if (nm) {
-    const bullets = [];
-    for (const raw of nm[1].split('\n')) {
-      if (!raw.startsWith('"!')) continue;
-      const t = raw.replace(/^"!\s?/, '').replace(/\s+$/, '');
-      if (t.startsWith('- ')) bullets.push(t.slice(2));
-      else if (bullets.length) bullets[bullets.length - 1] += ' ' + t.trim();
-    }
-    notes = bullets.join(' // ');
-  }
   apps.push({
-    module: id.slice(0, i),
-    control: entity,
-    name: id.slice(i + '.sample.'.length),
-    cls,
-    file: path.relative(ROOT, f).split(path.sep).join('/'),
-    checked,
-    notes,
+    module: m.sample.slice(0, i),
+    control: m.entity,
+    name: m.sample.slice(i + '.sample.'.length),
+    cls: m.class,
+    file: m.file,
+    checked: m.checked ? `CHECKED (${m.checked.date}): ${m.checked.note}` : '',
+    notes: (m.deviations || []).map((d) => `${DEV_LABEL[d.type] ?? d.type}: ${d.what}`).join(' // '),
   });
 }
 // order by module, then control, then sample name (case-insensitive)
@@ -94,10 +71,15 @@ const abapStr = (s) => {
   while (rest.length > 200) {
     let cut = rest.lastIndexOf(' ', 200);
     if (cut < 100) cut = 200;
+    // never split a doubled backtick escape across two literals: if an odd
+    // number of consecutive backticks ends at the cut, shift the cut past the pair
+    let bt = 0;
+    while (bt < cut && rest[cut - 1 - bt] === '`') bt++;
+    if (bt % 2 === 1) cut++;
     parts.push(rest.slice(0, cut));
     rest = rest.slice(cut);
   }
-  parts.push(rest);
+  if (rest) parts.push(rest);
   return parts.map(q).join(' &&\n                 ');
 };
 const rows = apps.map((a) => {
@@ -183,7 +165,7 @@ CLASS ${CLASS} IMPLEMENTATION.
 
       WHEN \`SHOW_NOTES\`.
         " one Text per bullet of the clicked row's generation notes
-        SPLIT client->get_event_arg( 1 ) AT \` // \` INTO TABLE DATA(lt_line).
+        SPLIT client->get_event_arg( ) AT \` // \` INTO TABLE DATA(lt_line).
 
         DATA(popup) = z2ui5_cl_api_xml=>factory( ).
         DATA(box) = popup->open( n = \`FragmentDefinition\` ns = \`core\`
