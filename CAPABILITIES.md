@@ -23,7 +23,7 @@ table marks ✅/🔶.
 | Aggregations filled by the controller in `onInit` (e.g. pre-set `tokens` on MultiInput) | ✅ | declare the aggregation in the view: `open( 'tokens' )` → `leaf( 'Token' )` per entry | missed in app 454 — the tokens aggregation is public since 1.16; do not skip these |
 | Custom CSS (`style.css`, `html:style` blocks) | 🔶 | `core:HTML` leaf with the `content` **attribute** carrying `<style>…</style>` — the builder escapes attribute values, no CDATA node needed | app 404 already uses `content` for `<h2>…</h2>` markup; its CSS drop (and app 431's `tileLayout`) was avoidable |
 | Composite/array properties (RangeSlider `range="[lo,hi]"`) | 🔶 | split into the scalar sibling properties the control keeps in sync (`value`/`value2`) | app 472 |
-| Literal line breaks inside attribute values (`&#xA;` in the original) | ❌ | the builder emits a literal LF which XML attribute normalization turns into a space; `xml_escape` cannot emit `&#xA;` yet — builder gap, avoid multi-line attribute text until fixed | bit us in app 445 (`noDataText`) |
+| Literal line breaks inside attribute values (`&#xA;` in the original) | ✅ | write the break as `\n` in a `\|...\|` template — `xml_escape` emits it as `&#xA;`/`&#xD;`/`&#x9;` so it survives XML attribute-value normalization | app 445 (`noDataText`); builder fix 2026-07-16 |
 | Raw text / CDATA child nodes | ❌ | `z2ui5_cl_api_xml` has element+attribute nodes only; for markup/CSS use the `core:HTML` `content` attribute (row above) | app 404 NOTES |
 
 ## Popups & messages
@@ -57,6 +57,7 @@ table marks ✅/🔶.
 | Controller event handlers | ✅ | `client->_event( val = 'NAME' … )` + `check_on_event( )` CASE branches | all interactive ports |
 | Passing event/source values to the backend | ✅ | `$`-prefixed `t_arg` forms: `${COL}`, `$event.oSource.sId`, `${$parameters>/value}` — never a bare `{COL}` | AGENTS §5; apps 486, 526 |
 | Boolean event parameters | 🔶 | arrive as `abap_bool` (`X`/space) — map back to `true`/`false` when echoing to the UI | app 421 (correct), app 422 (echoes raw `X`) |
-| Reading control-internal state via `$parameters>/…/mProperties/…` | ❌ | private UI5 internals, fragile across patches — restructure to a two-way binding or a public parameter instead | apps 474, 530, 401 rely on it; avoid |
+| Reading control-internal state via `$parameters>/…/mProperties/…` | ❌ | private UI5 internals, fragile across patches — restructure to a two-way binding or a public parameter instead | apps 474, 530 still rely on it; app 401 was migrated off it — avoid |
+| Controller-read list selection (`getSelectedItems`, FacetFilter/List multi-select) | 🧪 | bind `selected="{FLAG}"` two-way on the items — the flags arrive with every event, and clearing them server-side resets the selection; no event payload needed | app 401 (LIVE-TEST pending) |
 | Opening external URLs (`URLHelper.redirect`) | ✅ | `client->_event_client( client->cs_event-open_new_tab, t_arg = ( url ) )` | app 460 |
 | Client-side-only behaviour with no backend effect | ✅ | `client->_event_client( … )` frontend actions | overview app popup close |

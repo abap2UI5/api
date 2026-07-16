@@ -88,6 +88,14 @@ generator's job. `ui5/` is the generator's local input store; the `api.md`
 **Javascript** column links to the sample's source in the upstream
 [OpenUI5 repository](https://github.com/SAP/openui5), not to this copy (§7).
 
+Archive **everything** the sample's `manifest.json` lists under `sap.ui5 >
+config > sample > files` (resolving `../<OtherSample>/` references), or fidelity
+cannot be verified offline — app 401 was missing its controller and table for a
+while. Shared demo kit mock data (`sap/ui/demo/mock/*.json`) is snapshotted once
+under `ui5/mock/` (see its README for provenance); upstream it lives in the
+[UI5/openui5](https://github.com/UI5/openui5) repository (the SAP/openui5 URLs
+redirect) at `src/sap.ui.documentation/test/sap/ui/documentation/sdk/`.
+
 ---
 
 ## 5. Generation rules
@@ -463,7 +471,20 @@ scripts.**
 ```bash
 OPENUI5_DIR=../openui5 node scripts/generate-coverage.mjs   # README + api.md
 node scripts/generate-overview.mjs                          # the overview app (src only)
+node scripts/generate-meta.mjs                              # meta/<class>.json sidecars
+node scripts/structural-diff.mjs [--strict]                 # port vs original view check
 ```
+
+- **`generate-meta.mjs`** derives one typed sidecar per port (`meta/<class>.json`
+  — status, CHECKED, deviations typed as `IMPROVISED`/`DROPPED_171`/`LIVE_TEST`)
+  from the header ABAP Doc; regenerate after any header change. The headers stay
+  the source of truth; `meta/` sits outside `src/` so abapGit ignores it. See
+  TRAINING.md.
+- **`structural-diff.mjs`** compares each port's builder-emitted view structure
+  (controls + attribute names) against its archived original view.xml and fails
+  (`--strict`) on any difference not covered by a declared deviation — run it
+  (after `generate-meta.mjs`) before committing a new or changed port; every
+  hit means: fix the port or declare the deviation in the header NOTES.
 
 - **Universe of samples** — every `demokit/sample/<Name>` directory in the
   OpenUI5 checkout at `$OPENUI5_DIR` (default `./openui5`).

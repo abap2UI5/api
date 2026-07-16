@@ -1,8 +1,10 @@
 # TRAINING.md — using this repo to train the porting agent
 
-**Status: concept, agreed direction — the metadata format below is a draft, not
-yet implemented.** This file describes how the repo is meant to make the
-generating agent better over time. "Training" here means improving the system
+**Status: partially implemented** — the metadata sidecars
+(`scripts/generate-meta.mjs` → `meta/`) and the structural view diff
+(`scripts/structural-diff.mjs`) exist and run clean; the header→sidecar
+inversion (headers generated *from* meta.json) is still open. This file
+describes how the repo is meant to make the generating agent better over time. "Training" here means improving the system
 around the agent — rules, golden examples, verification loops — not (yet)
 fine-tuning model weights.
 
@@ -42,13 +44,15 @@ references and only they graduate to the curated samples repo.
 | `checked` | manually verified in a running system | today's `"! CHECKED (date):` marker |
 | `golden` | checked + exemplary style, safe to imitate | human judgement |
 
-## Per-port metadata (draft format)
+## Per-port metadata
 
-Today status and caveats live in regex-parsed ABAP Doc headers — fragile, and
-the deviations are prose, not data. Proposal: one sidecar file per port,
-`src/01/z2ui5_cl_api_app_<n>.meta.json`, as the single source of truth from
-which the header block, the overview app and the coverage tables are
-*generated*:
+**Implemented (stage 1):** `scripts/generate-meta.mjs` derives one sidecar per
+port into `meta/<class>.json` — outside `src/`, so abapGit never sees them.
+The ABAP Doc headers remain the source of truth for now; regenerate the
+sidecars after any header change. Stage 2 (open) inverts the direction: the
+header block, overview app and coverage tables get *generated* from the
+sidecar. Manual status promotions (`reviewed`, `golden`) set directly in a
+sidecar survive regeneration. The shape:
 
 ```jsonc
 {
@@ -72,19 +76,21 @@ agent improvise unnecessarily" becomes a query, not an impression. Migration
 path: script converts existing headers → meta.json once, then headers become
 generated output.
 
-## Verification: structural view diff (planned)
+## Verification: structural view diff
 
 abaplint proves syntax, not fidelity — a port can be CI-green and render an
-empty control (it happened: app 454 lost its pre-set tokens). Both sides are
-XML, so a script can compare the original `view.xml` against the XML the ABAP
-builder emits, as control trees (controls, properties, bindings), and match
-every difference against the port's declared `deviations`:
+empty control (it happened: app 454 lost its pre-set tokens).
+**Implemented:** `scripts/structural-diff.mjs` compares the original
+`view.xml` control structure (control multiset + attribute-name sets) against
+the builder calls parsed from the ABAP port, and matches every difference
+against the port's declared deviations in `meta/`:
 
-> deviation found in the tree diff but not declared in meta.json → **fail**.
+> difference found in the diff but not declared → **fail** (`--strict`).
 
-That turns the "declare every caveat" convention from a plea into a checked
-invariant, and it is the single check most likely to catch the bugs the CI
-cannot.
+As of 2026-07-16 all 34 ports run at 0 undeclared differences. Known limits:
+controller-created UI is invisible on the view.xml side (it shows as EXTRA in
+the port), and loop-built view parts (`[dynamic]`) exempt count checks for the
+looped controls. Values are not compared — that stays with review/live checks.
 
 ## Measuring progress
 
@@ -100,9 +106,12 @@ cannot.
 Training signal is only as good as the stored pairs:
 
 - `ui5/<class>/` must archive **everything** `manifest.json` lists under
-  `sample.files` (app 401 is missing its controller and the embedded Table
-  files) **plus** any mock data used (`products.json`, `img.json`), so ports
-  stop silently truncating rows and fidelity stays verifiable offline.
+  `sample.files` **plus** any mock data used — done since 2026-07-16: the
+  missing `Table.view.xml` was fetched and the shared demo kit mock data
+  (`products.json`, `img.json`, `countriesExtendedCollection.json`) is
+  snapshotted under `ui5/mock/` (provenance + verification in its README).
+  Keep it that way for every new port, so ports stop silently truncating rows
+  and fidelity stays verifiable offline.
 - The header/metadata pipeline must never lose labels silently
   (the 2026-07-16 `generate-overview.mjs` parser rewrite fixed two such cases).
 
