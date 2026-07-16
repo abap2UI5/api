@@ -104,10 +104,15 @@ Idiom / style (low):
   position 2+ — the earlier index-1 rule was inverted by decision).
 
 Infrastructure:
-- [ ] **Property-level 1.71 gate**: the scope check is control-level only;
-  UI5's api.json/JSDoc carries `@since` per property — a check that verifies
-  every attribute a port uses against 1.71 would turn the DROPPED_171
-  discipline into a gate (source: UI5/openui5 sparse checkout / api.json).
+- [x] ~~Property-level 1.71 gate~~ — done 2026-07-16:
+  `scripts/generate-properties.mjs` parses per-member `@since` from the
+  OpenUI5 sources into `ui5/properties.json` (refreshed weekly by
+  generate_result); `scripts/property-check.mjs` runs in CI. Policy decision
+  same day: **1:1 beats 1.71-purity** — post-1.71 members are KEPT when the
+  original uses them and must be declared as `POST_171` (the gate enforces
+  the declaration); the previously dropped members were restored. First
+  catch: app 420's Carousel `ariaLabelledBy` (association only since 1.125)
+  had been silently copied without any declaration.
 - [x] ~~generate-coverage.mjs: `FOCUS_LIBS` undocumented; orphan ports vanish
   silently; header-regex fragility~~ — done 2026-07-16: ported set comes from
   `meta/`, the universe from the committed `ui5/universe.json` snapshot

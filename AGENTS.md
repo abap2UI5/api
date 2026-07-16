@@ -144,11 +144,15 @@ source of truth:
   directly in the sidecar; `reviewed`/`golden` are manual promotions too.
 - The abapGit `<DESCRIPT>` follows `<entity> - <demo kit description>`
   (e.g. `sap.m.Switch - Some say it is only a switch...`), truncated to 60 chars.
-- Use **only** controls and properties available since UI5 1.71; never a
-  deprecated one. Samples whose **control** is newer than 1.71 or deprecated
-  are **out of scope** (§1) and never enter a batch. When an in-scope sample
-  merely uses a newer *optional property*, drop it with a `DROPPED_171`
-  deviation.
+- The **control** must exist since UI5 1.71 and not be deprecated — samples
+  whose control is newer or deprecated are **out of scope** (§1) and never
+  enter a batch. **Members (properties/aggregations/associations/events)
+  newer than 1.71 ARE kept when the original uses them — 1:1 fidelity wins**
+  (policy decision 2026-07-16). Every such member must be declared with a
+  `POST_171` deviation naming it (the `property_gate` enforces this via
+  `ui5/properties.json`); the app then needs a UI5 release ≥ that member's
+  version to render it. `DROPPED_171` remains only for the rare member that
+  genuinely cannot be expressed.
 - **Before declaring any sample feature inexpressible, check `CAPABILITIES.md`**
   — the map of what abap2UI5 can express, each entry backed by a port that
   proves it. Never improvise around a feature it marks ✅/🔶 (app 529 replaced a
@@ -474,6 +478,7 @@ A fourth workflow, `checks`, runs three deterministic gates on every PR:
 | `pattern_lint` | `node scripts/pattern-lint.mjs` | a known-bad pattern reappears (each rule encodes a distilled §10 lesson; known open findings live in the script's BASELINE and in STATUS.md) |
 | `structural_diff` | `node scripts/structural-diff.mjs --strict` | a port's rendered view deviates from the original `view.xml` without a declared deviation |
 | `meta_valid` | `validate-meta.mjs` + regenerate the overview, `git diff --exit-code -- src` | an invalid sidecar, or a change forgot to regenerate the overview app |
+| `property_gate` | `node scripts/property-check.mjs` | a port uses a control member introduced after UI5 1.71 (per-member `@since` from `ui5/properties.json`) without declaring it in a `POST_171` deviation |
 
 **When a distilled lesson is greppable, add it as a pattern-lint rule in the
 same change** — that is what makes a lesson unrepeatable rather than advisory.
@@ -485,6 +490,7 @@ npx abaplint ./abaplint.jsonc          # expect 0 issues
 node scripts/validate-meta.mjs         # sidecar schema + referential integrity
 node scripts/pattern-lint.mjs          # expect 0 errors
 node scripts/structural-diff.mjs --strict
+node scripts/property-check.mjs        # no member newer than UI5 1.71
 node scripts/generate-overview.mjs     # then: git diff must stay clean
 ```
 

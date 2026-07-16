@@ -98,7 +98,8 @@ generating or reviewing):
   `ui5/<lib>/<Name>/`, (b) verify UI5-side behavior claims in the control
   sources (e.g. the default group header in `ComboBoxBase`, the
   `EventHandlerResolver` for `$`-args — both verified 2026-07-16),
-  (c) property-level `@since` metadata for a future 1.71 property check.
+  (c) property-level `@since` metadata for the 1.71 property gate
+  (`scripts/generate-properties.mjs` → `ui5/properties.json`).
 
 ## Quality ladder
 
@@ -133,7 +134,7 @@ edited directly in the sidecar. The shape:
   "status":  "generated",              // generated | reviewed | checked | golden
   "checked": { "date": "2026-07-15", "note": "verified in a running system - ..." },
   "deviations": [
-    { "type": "DROPPED_171", "what": "showClearIcon (since UI5 1.94) dropped ..." },
+    { "type": "POST_171",    "what": "showClearIcon (since UI5 1.94) kept for the 1:1 port ..." },
     { "type": "IMPROVISED",  "what": "the controller's addValidator is dropped ..." },
     { "type": "SUBSET_DATA", "what": "16-row subset of the 123-row mock ..." },
     { "type": "LIVE_TEST",   "what": "confirm ... in a running system" }
@@ -141,8 +142,9 @@ edited directly in the sidecar. The shape:
 }
 ```
 
-Deviation types are closed vocabulary (`DROPPED_171`, `IMPROVISED`,
-`SUBSET_DATA`, `LIVE_TEST`, `NOTE`) so they can be counted: "how often does
+Deviation types are closed vocabulary (`IMPROVISED`, `POST_171` — a kept
+member newer than UI5 1.71, `DROPPED_171` — a member that could not be
+expressed, `SUBSET_DATA`, `LIVE_TEST`, `NOTE`) so they can be counted: "how often does
 the agent improvise unnecessarily" becomes a query, not an impression.
 
 ## Verification: structural view diff

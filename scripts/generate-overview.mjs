@@ -36,7 +36,7 @@ function walk(dir, out = []) {
 // collect ported apps: control (entity), module (library), sample name, class,
 // and the repo-relative path of the generated class (for the ABAP GitHub link)
 const apps = [];
-const DEV_LABEL = { IMPROVISED: 'IMPROVISED', LIVE_TEST: 'LIVE-TEST', DROPPED_171: '1.71', SUBSET_DATA: 'SUBSET', NOTE: 'NOTE' };
+const DEV_LABEL = { IMPROVISED: 'IMPROVISED', POST_171: 'POST-1.71', LIVE_TEST: 'LIVE-TEST', DROPPED_171: '1.71', SUBSET_DATA: 'SUBSET', NOTE: 'NOTE' };
 for (const mf of fs.readdirSync(META)) {
   if (!mf.endsWith('.json')) continue;
   const m = JSON.parse(fs.readFileSync(path.join(META, mf), 'utf8'));

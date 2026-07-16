@@ -89,9 +89,10 @@ Rules:
   read it back with get_event_arg( ) - a bare `{COL}` (the attribute
   property-binding form) is NOT resolved there. Transport real event/source
   values this way instead of faking a static placeholder.
-- Use ONLY controls and properties available since UI5 1.71; never use a
-  deprecated control/property. If the sample needs anything newer or
-  deprecated, stop and report the gap instead of porting.
+- The sample's CONTROL must exist since UI5 1.71 and not be deprecated
+  (out-of-scope samples are never ported). Members newer than 1.71 are KEPT
+  1:1 when the original uses them - declare each in the sidecar as a
+  POST_171 deviation naming the member (the property gate checks this).
 - Must pass abaplint for ABAP_STANDARD, ABAP_CLOUD and ABAP_702 (downport).
 - The class carries NO ABAP Doc header. Write the port's sidecar
   meta/z2ui5_cl_api_app_<n>.json instead (sample, entity, file, batch, audit,
@@ -113,8 +114,10 @@ package). Other UI5 libraries are brought back in later.
 
 Every app is ABAP Cloud ready and downportable to 7.02. In detail, every app:
 
-* uses only controls and properties available since **UI5 1.71** (16 Jan 2020),
-  none of them deprecated — so it runs on old UI5 versions too;
+* uses only **controls** available since **UI5 1.71** (16 Jan 2020), none of
+  them deprecated (legacy-free ready). Individual *members* newer than 1.71
+  are kept where the original sample uses them — declared per port
+  (`POST_171`), so those apps need a correspondingly recent UI5;
 * runs on **SAPUI5** and **OpenUI5**, including the **legacy-free** runtime;
 * runs on **ABAP Cloud** and **ABAP Standard**, and downports to **7.02**.
 

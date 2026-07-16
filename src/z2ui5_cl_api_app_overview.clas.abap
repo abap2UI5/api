@@ -242,7 +242,8 @@ CLASS z2ui5_cl_api_app_overview IMPLEMENTATION.
       ( module = `sap.m` control = `sap.m.Carousel`        name = `CarouselWithControls`      class = `z2ui5_cl_api_app_420` path = `src/01/b04/z2ui5_cl_api_app_420.clas.abap`
         checked = `CHECKED (2026-07-15): manually verified in a running system - renders and scrolls like the original (see the note below on the flattened image model).`
         notes = `IMPROVISED: the three carousel images bind to a separate named model in the original (img>/products/pic1..3 from sap/ui/demo/mock/img.json); resolved here to static image URLs, as abap2UI5 serves a` &&
-                 ` single default model. // SUBSET: the bound /ProductCollection shows a 10-row subset of the 123-row mock (ui5/mock/products.json) - a full unroll adds no demo value.` )
+                 ` single default model. // SUBSET: the bound /ProductCollection shows a 10-row subset of the 123-row mock (ui5/mock/products.json) - a full unroll adds no demo value. // 1.71: ariaLabelledBy on the` &&
+                 ` Carousel (the association exists there only since UI5 1.125) is dropped - found by the property gate 2026-07-16.` )
       ( module = `sap.m` control = `sap.m.CheckBox`        name = `CheckBoxTriState`          class = `z2ui5_cl_api_app_421` path = `src/01/b02/z2ui5_cl_api_app_421.clas.abap`
         checked = `CHECKED (2026-07-15): manually verified in a running system - the select-all parent checkbox and its tri-state expression bindings behave like the original.` )
       ( module = `sap.m` control = `sap.m.ColorPalette`    name = `ColorPalette`              class = `z2ui5_cl_api_app_422` path = `src/01/b02/z2ui5_cl_api_app_422.clas.abap` )
