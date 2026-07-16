@@ -13,8 +13,9 @@
 
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-const ROOT = path.join(path.dirname(new URL(import.meta.url).pathname), '..');
+const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = path.join(ROOT, 'src');
 const CLASS = 'z2ui5_cl_api_app_overview';
 const OUT_ABAP = path.join(SRC, `${CLASS}.clas.abap`);
@@ -36,34 +37,44 @@ for (const f of walk(SRC)) {
   if (!f.endsWith('.clas.abap')) continue;
   const cls = path.basename(f, '.clas.abap');
   const content = fs.readFileSync(f, 'utf8');
-  const m = content.match(/entity\/([^/\s]+)\/sample\/(\S+)/);
+  // the header is everything above the CLASS statement; the demo kit URL must
+  // be a header line (anchored), so URLs in the view/body can never match
+  const classAt = content.search(/^CLASS /m);
+  const header = classAt === -1 ? '' : content.slice(0, classAt);
+  const m = header.match(/^"! https:\/\/sdk\.openui5\.org\/entity\/([\w.]+)\/sample\/([\w.]+)/m);
   if (!m) continue;
   const entity = m[1];
   const id = m[2];
   const i = id.indexOf('.sample.');
   if (i === -1) continue;
-  // the optional "! CHECKED (<yyyy-mm-dd>): ... header marker (incl. its plain
-  // "! continuation lines) — set when the port was manually verified in a
-  // running system; shown as a green check in the overview
+  // parse the header as sections, line by line. A section starts at its marker
+  // ("! CHECKED (<yyyy-mm-dd>): manual in-system verification, shown as a green
+  // check; "! NOTES (generation): the port's caveats, shown in the hint popup)
+  // and ends at the next ALL-CAPS "MARKER:" line — so a new header marker (e.g.
+  // API USAGE AUDIT) never leaks into the section before it, and blank lines
+  // before CLASS don't drop anything. Inside NOTES, "! -  starts a bullet and
+  // indented lines continue it; bullets are joined by " // ".
   let checked = '';
-  const cm = content.match(/"! (CHECKED \(\d{4}-\d{2}-\d{2}\):.*\n(?:"! (?!NOTES \(generation\):|- ).*\n)*)/);
-  if (cm) {
-    checked = cm[1].split('\n').filter(Boolean)
-      .map((l) => l.replace(/^"!\s?/, '').trim()).join(' ');
-  }
-  // the header "! NOTES (generation): block, flattened to bullets joined by " // "
-  let notes = '';
-  const nm = content.match(/"! NOTES \(generation\):\n((?:"!.*\n)+?)CLASS /);
-  if (nm) {
-    const bullets = [];
-    for (const raw of nm[1].split('\n')) {
-      if (!raw.startsWith('"!')) continue;
-      const t = raw.replace(/^"!\s?/, '').replace(/\s+$/, '');
+  const bullets = [];
+  let section = null;
+  for (const raw of header.split('\n')) {
+    if (!raw.startsWith('"!')) continue;
+    const t = raw.replace(/^"!\s?/, '').replace(/\s+$/, '');
+    if (/^CHECKED \(\d{4}-\d{2}-\d{2}\):/.test(t)) {
+      section = 'checked';
+      checked = t;
+    } else if (/^NOTES \(generation\):$/.test(t)) {
+      section = 'notes';
+    } else if (/^[A-Z][A-Z0-9 ()/_-]*:/.test(t) && !t.startsWith('- ')) {
+      section = null; // unknown marker line — ends the current section
+    } else if (section === 'checked') {
+      checked += ' ' + t.trim();
+    } else if (section === 'notes') {
       if (t.startsWith('- ')) bullets.push(t.slice(2));
       else if (bullets.length) bullets[bullets.length - 1] += ' ' + t.trim();
     }
-    notes = bullets.join(' // ');
   }
+  const notes = bullets.join(' // ');
   apps.push({
     module: id.slice(0, i),
     control: entity,
@@ -94,10 +105,15 @@ const abapStr = (s) => {
   while (rest.length > 200) {
     let cut = rest.lastIndexOf(' ', 200);
     if (cut < 100) cut = 200;
+    // never split a doubled backtick escape across two literals: if an odd
+    // number of consecutive backticks ends at the cut, shift the cut past the pair
+    let bt = 0;
+    while (bt < cut && rest[cut - 1 - bt] === '`') bt++;
+    if (bt % 2 === 1) cut++;
     parts.push(rest.slice(0, cut));
     rest = rest.slice(cut);
   }
-  parts.push(rest);
+  if (rest) parts.push(rest);
   return parts.map(q).join(' &&\n                 ');
 };
 const rows = apps.map((a) => {
