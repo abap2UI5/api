@@ -13,7 +13,7 @@ CAPABILITIES.md._
 | CI | ABAP_STANDARD, ABAP_CLOUD, ABAP_702 all green |
 | Structural view diff | **0 undeclared differences** across all 34 ports (`node scripts/structural-diff.mjs --strict`) |
 | Pattern lint | **0 errors, 0 warnings, empty baseline** (`node scripts/pattern-lint.mjs`) |
-| Meta sidecars | 34 in `meta/` — status: 30 `generated`, 4 `checked`; deviations: 28 IMPROVISED, 9 DROPPED_171, 3 LIVE_TEST |
+| Meta sidecars | 34 in `meta/` — status: 30 `generated`, 4 `checked`; deviations: 35 IMPROVISED, 11 DROPPED_171, 10 LIVE_TEST |
 | Manually verified in a running system | 420, 421, 526, 530 (`CHECKED`) |
 | Archive | `ui5/` complete incl. shared mock data snapshot (`ui5/mock/`, provenance in its README) |
 
