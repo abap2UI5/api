@@ -1,5 +1,13 @@
 # message_box_display: expose the MessageBox `dependentOn` option
 
+> **Status: implemented upstream.** `z2ui5_if_client=>message_box_display`
+> now carries `dependenton` and `contentwidth` importing parameters; the
+> client resolves `dependenton` (a control id) to its `sap.ui.core.Element`
+> before building the `MessageBox.show` options. See
+> [abap2UI5/abap2UI5](https://github.com/abap2UI5/abap2UI5)
+> (`src/02/z2ui5_if_client.intf.abap`, `src/01/02/z2ui5_cl_core_client`,
+> `app/webapp/core/Messages.js`).
+
 ## Summary
 
 `z2ui5_if_client=>message_box_display` maps most `sap.m.MessageBox` options

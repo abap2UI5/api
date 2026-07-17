@@ -36,7 +36,7 @@ feature this table marks ✅/🔶.
 | UI5 feature | Status | How in abap2UI5 | Evidence |
 |---|---|---|---|
 | Controller-built `sap.m.Dialog` (`new Dialog({...}).open()`) | ✅ | build a `core:FragmentDefinition` → `Dialog` with the same builder, show with `client->popup_display( )`, close via `client->_event_client( client->cs_event-popup_close )` | app 469; app 529 now builds its error Dialog the same way (its earlier toast substitution was a wrong improvisation) |
-| `sap.m.MessageBox` | ✅ | `client->message_box_display` (actions, initialFocus, styleClass supported) | app 447 |
+| `sap.m.MessageBox` | ✅ | `client->message_box_display` (actions, initialFocus, styleClass, and now `dependentOn` + `contentWidth` supported) | app 447 |
 | `sap.m.MessageToast` | ✅ | `client->message_toast_display` | apps 448, 526 |
 
 ## Models & binding
