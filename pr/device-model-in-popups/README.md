@@ -1,5 +1,11 @@
 # Set the `device>` model on popup/popover/nested view slots too
 
+> **Status: implemented upstream.** The shared device model (created once
+> in `Component.js`, never destroyed) is now bound on every view slot at
+> creation — `displayFragment` (popup), `displayPopover` (popover) and
+> `displayNestedView` (nest/nest2) in `View1.controller.js` — so
+> `{device>...}` bindings work everywhere, not just the main view.
+
 ## Summary
 
 The client sets the `device>` named model (a JSONModel over `sap.ui.Device`)
