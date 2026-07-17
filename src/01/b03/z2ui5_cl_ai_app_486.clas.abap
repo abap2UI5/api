@@ -3,7 +3,7 @@ CLASS z2ui5_cl_ai_app_486 DEFINITION PUBLIC.
   PUBLIC SECTION.
     INTERFACES z2ui5_if_app.
 
-    DATA slider_value TYPE string.
+    DATA slider_value TYPE i.
 
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
@@ -30,7 +30,7 @@ CLASS z2ui5_cl_ai_app_486 IMPLEMENTATION.
 
   METHOD model_init.
 
-    slider_value = `100`.
+    slider_value = 100.
 
   ENDMETHOD.
 
