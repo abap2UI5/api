@@ -10,11 +10,11 @@
   "deviations": [
     {
       "type": "IMPROVISED",
-      "what": "the original binds src/mode/height/width to a JSONModel (img>/products, /imageMode, /imageHeight, /imageWidth); the fixed sample values are inlined here as literals (mode Background, the HT-7777 / HT-6100 demo images)."
+      "what": "the original binds src/mode to a JSONModel (img>/products, /imageMode); these fixed sample values are inlined here as literals (mode Background, the HT-7777 / HT-6100 demo images). height/width are restored over the device> model, see below."
     },
     {
-      "type": "IMPROVISED",
-      "what": "image height/width are device dependent in the original (5em on a phone) - fixed to 10em here."
+      "type": "LIVE_TEST",
+      "what": "image height/width are device dependent in the original (imageHeight/imageWidth = 5em on a phone, 10em otherwise); restored as the expression {= ${device>/system/phone} ? '5em' : '10em' } over the framework's device> model (image 4 keeps its fixed 6em width, exactly as the original) - confirm the images shrink on a phone."
     },
     {
       "type": "IMPROVISED",

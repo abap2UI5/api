@@ -284,9 +284,10 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` (source-verified available in main views) - confirm the tab bar collapses on phones. // SUBSET: the bound /ProductCollection shows a 8-row subset of the 123-row mock (ui5/mock/products.json) - a full` &&
                  ` unroll adds no demo value.` )
       ( module = `sap.m` control = `sap.m.Image`           name = `ImageModeBackground`       class = `z2ui5_cl_ai_app_434` path = `src/01/b01/z2ui5_cl_ai_app_434.clas.abap`
-        notes = `IMPROVISED: the original binds src/mode/height/width to a JSONModel (img>/products, /imageMode, /imageHeight, /imageWidth); the fixed sample values are inlined here as literals (mode Background, the` &&
-                 ` HT-7777 / HT-6100 demo images). // IMPROVISED: image height/width are device dependent in the original (5em on a phone) - fixed to 10em here. // IMPROVISED: the custom CSS class imageContainer (light` &&
-                 ` blue background) of the box4 HBox is dropped - its stylesheet is not available in abap2UI5.` )
+        notes = `IMPROVISED: the original binds src/mode to a JSONModel (img>/products, /imageMode); these fixed sample values are inlined here as literals (mode Background, the HT-7777 / HT-6100 demo images).` &&
+                 ` height/width are restored over the device> model, see below. // LIVE-TEST: image height/width are device dependent in the original (imageHeight/imageWidth = 5em on a phone, 10em otherwise); restored` &&
+                 ` as the expression {= ${device>/system/phone} ? '5em' : '10em' } over the framework's device> model (image 4 keeps its fixed 6em width, exactly as the original) - confirm the images shrink on a phone.` &&
+                 ` // IMPROVISED: the custom CSS class imageContainer (light blue background) of the box4 HBox is dropped - its stylesheet is not available in abap2UI5.` )
       ( module = `sap.m` control = `sap.m.Input`           name = `InputValueState`           class = `z2ui5_cl_ai_app_439` path = `src/01/b02/z2ui5_cl_ai_app_439.clas.abap`
         notes = `POST-1.71: showClearIcon (since UI5 1.94) on three inputs is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.94 to render it. // POST-1.71: the two formattedValueStateText` &&
                  ` aggregations (a FormattedText carrying Links, since UI5 1.78) are newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.78 to render them. // NOTE: the Links' press` &&

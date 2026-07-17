@@ -30,6 +30,10 @@ CLASS z2ui5_cl_ai_app_434 IMPLEMENTATION.
     DATA(pic1) = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-7777-large.jpg`.
     DATA(pic3) = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-6100-large.jpg`.
 
+    " image height/width are device dependent in the original (5em on a phone,
+    " 10em otherwise) - expressed client-side over the framework's device> model
+    DATA(size) = `{= ${device>/system/phone} ? '5em' : '10em' }`.
+
     DATA(view) = z2ui5_cl_ai_xml=>factory( ).
 
     view->open( n = `View` ns = `mvc`
@@ -49,12 +53,11 @@ CLASS z2ui5_cl_ai_app_434 IMPLEMENTATION.
                         )->open( `VBox`
                             )->a( n = `alignItems` v = `Center`
 
-                            " image size is device dependent in the original (5em on a phone) - fixed to 10em here
                             )->open( `Image`
                                 )->a( n = `src`    v = pic1
                                 )->a( n = `mode`   v = `Background`
-                                )->a( n = `height` v = `10em`
-                                )->a( n = `width`  v = `10em`
+                                )->a( n = `height` v = size
+                                )->a( n = `width`  v = size
 
                                 )->open( `layoutData`
                                     )->leaf( `FlexItemData`
@@ -73,10 +76,10 @@ CLASS z2ui5_cl_ai_app_434 IMPLEMENTATION.
                             )->open( `Image`
                                 )->a( n = `src`                v = pic1
                                 )->a( n = `mode`               v = `Background`
-                                )->a( n = `height`             v = `10em`
+                                )->a( n = `height`             v = size
                                 )->a( n = `backgroundSize`     v = `5em 5em`
                                 )->a( n = `backgroundPosition` v = `center`
-                                )->a( n = `width`              v = `10em`
+                                )->a( n = `width`              v = size
 
                                 )->open( `layoutData`
                                     )->leaf( `FlexItemData`
@@ -95,10 +98,10 @@ CLASS z2ui5_cl_ai_app_434 IMPLEMENTATION.
                             )->open( `Image`
                                 )->a( n = `src`              v = pic1
                                 )->a( n = `mode`             v = `Background`
-                                )->a( n = `height`           v = `10em`
+                                )->a( n = `height`           v = size
                                 )->a( n = `backgroundSize`   v = `2em 2em`
                                 )->a( n = `backgroundRepeat` v = `repeat`
-                                )->a( n = `width`            v = `10em`
+                                )->a( n = `width`            v = size
 
                                 )->open( `layoutData`
                                     )->leaf( `FlexItemData`
@@ -119,7 +122,7 @@ CLASS z2ui5_cl_ai_app_434 IMPLEMENTATION.
                                 )->leaf( `Image`
                                     )->a( n = `src`                v = pic3
                                     )->a( n = `mode`               v = `Background`
-                                    )->a( n = `height`             v = `10em`
+                                    )->a( n = `height`             v = size
                                     )->a( n = `backgroundSize`     v = `contain`
                                     )->a( n = `backgroundPosition` v = `center center`
                                     )->a( n = `width`              v = `6em`
