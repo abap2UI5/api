@@ -24,19 +24,19 @@ feature this table marks ✅/🔶.
 
 | UI5 feature | Status | How in abap2UI5 | Evidence |
 |---|---|---|---|
-| Any XML view structure (containers, aggregations, namespaces) | ✅ | `z2ui5_cl_api_xml` open/leaf/shut + `a()` | all ports |
+| Any XML view structure (containers, aggregations, namespaces) | ✅ | `z2ui5_cl_ai_xml` open/leaf/shut + `a()` | all ports |
 | Aggregations filled by the controller in `onInit` (e.g. pre-set `tokens` on MultiInput) | ✅ | declare the aggregation in the view: `open( 'tokens' )` → `leaf( 'Token' )` per entry | missed in app 454 — the tokens aggregation is public since 1.16; do not skip these |
 | Custom CSS (`style.css`, `html:style` blocks) | 🔶 | `core:HTML` leaf with the `content` **attribute** carrying `<style>…</style>` — the builder escapes attribute values, no CDATA node needed | apps 404/431 inject their sample `style.css` exactly this way (restored 2026-07-16, LIVE-TEST pending); 404 also uses `content` for `<h2>…</h2>` markup |
 | Composite/array properties (RangeSlider `range="[lo,hi]"`) | 🔶 | split into the scalar sibling properties the control keeps in sync (`value`/`value2`) | app 472 |
 | Literal line breaks inside attribute values (`&#xA;` in the original) | ✅ | write the break as `\n` in a `\|...\|` template — `xml_escape` emits it as `&#xA;`/`&#xD;`/`&#x9;` so it survives XML attribute-value normalization | app 445 (`noDataText`); builder fix 2026-07-16 |
-| Raw text / CDATA child nodes | ❌ | `z2ui5_cl_api_xml` has element+attribute nodes only; for markup/CSS use the `core:HTML` `content` attribute (row above) | app 404 NOTES |
+| Raw text / CDATA child nodes | ❌ | `z2ui5_cl_ai_xml` has element+attribute nodes only; for markup/CSS use the `core:HTML` `content` attribute (row above) | app 404 NOTES |
 
 ## Popups & messages
 
 | UI5 feature | Status | How in abap2UI5 | Evidence |
 |---|---|---|---|
 | Controller-built `sap.m.Dialog` (`new Dialog({...}).open()`) | ✅ | build a `core:FragmentDefinition` → `Dialog` with the same builder, show with `client->popup_display( )`, close via `client->_event_client( client->cs_event-popup_close )` | app 469; app 529 now builds its error Dialog the same way (its earlier toast substitution was a wrong improvisation) |
-| `sap.m.MessageBox` | ✅ | `client->message_box_display` (actions, initialFocus, styleClass supported) | app 447 |
+| `sap.m.MessageBox` | ✅ | `client->message_box_display` (actions, initialFocus, styleClass, and now `dependentOn` + `contentWidth` supported) | app 447 |
 | `sap.m.MessageToast` | ✅ | `client->message_toast_display` | apps 448, 526 |
 
 ## Models & binding
@@ -49,7 +49,7 @@ feature this table marks ✅/🔶.
 | Imperative controller logic that only derives view state (setWidth/setExpanded from a control value) | 🔶 | prefer a pure expression binding over an event round-trip (`{= ${slider} + '%' }`) | app 421 is the pattern; the avoidable round-trips in 486/530 were removed 2026-07-16 (LIVE-TEST pending) |
 | Nested tables / tree binding (`items="{path: '/'}"` over nested `nodes`) | ✅ | nested ABAP table types serialize into nested JSON arrays; two-way delta write-back is nested-aware; the framework even ships a `z2ui5.cc.Tree` control preserving expand state | source-verified: ajson `convert_table` recursion + `delta_apply_nodes` (z2ui5_cl_core_srv_model); app 487 renders it (visual LIVE-TEST pending) |
 | Named JSON models fed from ABAP (`img>`, view models) | ❌ | no second ABAP-fed JSON model — flatten into the default model or resolve statically, with an IMPROVISED deviation. But note what DOES exist: `device>` (row below), named OData models via `cs_event-set_odata_model`, the default model switched to OData with the ABAP model re-attached as `http>` (`view_display( switch_default_model_path = ... )`), and a `template>` preprocessor model for XML templating | source-verified (frontendaction/view1_js); apps 420, 434 flattened correctly |
-| `sap.ui.Device` / device model bindings | 🔶 | the `device>` named model (JSONModel over sap.ui.Device) IS set on the **main** view — `{device>/system/phone}` bindings work there; NOT set on popup/popover fragments; the same data is mirrored server-side in `client->get( )-s_device` | source-verified: view1_js `oView.setModel(..., "device")`; apps 433/473 dropped it unnecessarily — restore + LIVE-TEST |
+| `sap.ui.Device` / device model bindings | ✅ | the `device>` named model (JSONModel over sap.ui.Device) is set on **every** view slot — main, popup, popover and nested views — so `{device>/system/phone}` bindings work everywhere; the same data is also mirrored server-side in `client->get( )-s_device` | source-verified: view1_js binds the one shared model in all slot factories (displayFragment/displayPopover/displayNestedView) plus the main view; apps 433/473 use it in main views (LIVE-TEST pending) |
 | Binding `sorter` (no grouping) | ✅ | keep the original binding-info string: `\|\{ path: '{ client->_bind_edit( val = t path = abap_true ) }', sorter: \{ path: 'COL' \} \}\|` — no ABAP SORT, no deviation needed | apps 423/440/527 converted 2026-07-17; same pass-through as the group-sorter row below |
 | Binding `sorter` with `group: true` + default group headers | ✅ | keep a raw binding-info string `{path: '…', sorter: {path: '…', group: true}}` — get the bare model path via `client->_bind_edit( val = t_products path = abap_true )` (human-taught 2026-07-16); only a *custom* `groupHeaderFactory` is out | source-verified on BOTH sides: abap2UI5 passes attribute values to `XMLView.create` unmangled, and UI5's default group header IS `new SeparatorItem({text: group.text \|\| group.key})` (openui5 `ComboBoxBase.addItemGroup`); app 452 converted 2026-07-16 (LIVE-TEST pending) |
 | Composite binding types / formatters (`sap.ui.model.type.Currency`, `Formatter.js`) | ❌ | preformat the value in ABAP, bind the result; note it | apps 440, 460 |
@@ -82,6 +82,11 @@ browser things: `popup_close`, `popover_close`, `open_new_tab`,
 `display_message_box` / `display_message_toast` (options object 1:1),
 `wizard_set_next_step`, `set_size_limit`, `set_odata_model`, nav-container
 `*_nav_container_to` per view slot, `z2ui5` (call registered custom JS).
+Newest (branch, pending release): the generic **`control_call`** /
+**`control_call_by_id`** — call a *whitelisted* method on a global object
+(MessageToast, MessageBox, BusyIndicator, Theming) or on a control resolved
+by id (`to`, `focus`, `scrollToIndex`, …), client-side after render, without
+adding a dedicated action constant per case.
 Also available: nested view slots (`nest_view_display`), `popover_display(
 by_id )` anchored to any control, app-stack navigation with typed results
 (`nav_app_call/leave` + `get_app_prev`), and bundled custom controls

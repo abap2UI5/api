@@ -16,6 +16,6 @@ README and update CAPABILITIES.md.
 
 | Request | Status |
 |---------|--------|
-| [message-box-dependent-on](message-box-dependent-on/README.md) | open |
+| [message-box-dependent-on](message-box-dependent-on/README.md) | implemented |
 | [named-json-models](named-json-models/README.md) | open |
-| [device-model-in-popups](device-model-in-popups/README.md) | open |
+| [device-model-in-popups](device-model-in-popups/README.md) | implemented |

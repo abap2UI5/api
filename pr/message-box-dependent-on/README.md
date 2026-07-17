@@ -1,5 +1,13 @@
 # message_box_display: expose the MessageBox `dependentOn` option
 
+> **Status: implemented upstream.** `z2ui5_if_client=>message_box_display`
+> now carries `dependenton` and `contentwidth` importing parameters; the
+> client resolves `dependenton` (a control id) to its `sap.ui.core.Element`
+> before building the `MessageBox.show` options. See
+> [abap2UI5/abap2UI5](https://github.com/abap2UI5/abap2UI5)
+> (`src/02/z2ui5_if_client.intf.abap`, `src/01/02/z2ui5_cl_core_client`,
+> `app/webapp/core/Messages.js`).
+
 ## Summary
 
 `z2ui5_if_client=>message_box_display` maps most `sap.m.MessageBox` options
@@ -14,8 +22,8 @@ The official demo kit sample
 [sap.m.sample.MessageBoxInitialFocus](https://sdk.openui5.org/entity/sap.m.MessageBox/sample/sap.m.sample.MessageBoxInitialFocus)
 passes `dependentOn` in both `MessageBox.show/confirm` calls. Its 1:1 rebuild
 in [abap2UI5/api](https://github.com/abap2UI5/api)
-(`z2ui5_cl_api_app_447`) can restore every other option but has to declare
-this one as not expressible (deviation in `meta/z2ui5_cl_api_app_447.json`).
+(`z2ui5_cl_ai_app_447`) can restore every other option but has to declare
+this one as not expressible (deviation in `meta/z2ui5_cl_ai_app_447.json`).
 
 ## Current behavior
 
