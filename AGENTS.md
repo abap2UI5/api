@@ -347,10 +347,11 @@ client->view_display( view->stringify( ) ).
   `CASE client->get( )-event.` … `WHEN \`NAME\`.` … `ENDCASE` — even for a single
   event (never an `IF check_on_event( )`). After changing bound data in an event,
   call `client->view_model_update( )` to push it back (no full redraw).
-- **Event handlers are written inline at each control — never captured in a
-  variable**, even when the same call repeats on many controls (human decision
-  2026-07-17, apps 526/481; pattern-lint blocks `DATA(x) = client->_event(`).
-  Captured **bind** handles for expression bindings (app 421) stay allowed.
+- **Client handle strings (`_event`, `_bind_edit`, `_event_client`, …) are
+  written inline at each control — never captured in a variable**, even when
+  the same call repeats on many controls and even inside expression bindings
+  (human decision 2026-07-17, apps 526/486/421; pattern-lint blocks
+  `DATA(x) = client->_…(`).
 - Read event parameters (declared via `_event( … t_arg = … )`) with
   `client->get_event_arg( )` — the index defaults to 1; **write it only for
   position 2+** (`get_event_arg( 2 )`), never `get_event_arg( 1 )`

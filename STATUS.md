@@ -81,8 +81,12 @@ Two human correction commits so far; every change fed back as a rule:
 
 - `_bind_edit( path = abap_true )` for bare model paths (452) → CAPABILITIES.
 - `t_arg` continuations align under `val` (421/422) → pattern-lint warn rule.
-- Event handlers inline at each control, never captured — even repeated
-  (526, and 481 aligned accordingly) → pattern-lint error rule + AGENTS §5.
+- Client handles (bind AND event) inline at each control, never captured —
+  even repeated, even in expression bindings (526, then 486; 481/421 aligned
+  accordingly) → pattern-lint error rule + AGENTS §5. Process lesson: my
+  first distillation scoped the rule too narrowly (events only, bind handles
+  exempted citing app 421) — the human had to fix the same error class twice.
+  When distilling, prefer the GENERAL principle over the narrowest reading.
 - Derive values from data like the original (530 `t_items[ 1 ]-text`),
   all-or-nothing `VALUE #( )` alignment after renames (440), minimal inline
   comments (452) → AGENTS §8.

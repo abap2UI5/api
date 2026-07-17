@@ -111,10 +111,10 @@ const RULES = [
     find: grepLines(/^"!/),
   },
   {
-    id: 'event-handle-capture',
+    id: 'client-handle-capture',
     level: 'error',
-    doc: 'event handlers are written inline at each control, never captured in a variable - even when repeated (human decision 2026-07-17, app 526; bind handles for expression bindings stay allowed)',
-    find: grepLines(/DATA\(\w+\)\s*=\s*client->_event\(/),
+    doc: 'client handle strings (_event, _bind_edit, _event_client, ...) are written inline at each control, never captured in a variable - even when repeated, even in expression bindings (human decision 2026-07-17, apps 526/486/421)',
+    find: grepLines(/DATA\(\w+\)\s*=\s*client->_\w+\(/),
   },
   {
     id: 'param-continuation-align',
