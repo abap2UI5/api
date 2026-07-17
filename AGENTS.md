@@ -680,3 +680,18 @@ How to record it:
   sidecar, never write `"!` lines into a port (pattern-lint blocks them, and
   `validate-meta.mjs` checks the sidecars). The old header-marker parsing in
   `generate-overview.mjs` is gone — the overview and the coverage read `meta/`.
+- **UI5 2.x validates control property types strictly** — a bound value that
+  serializes as a JSON string is rejected when the property is a number/boolean
+  (`"100" is of type string, expected float` on `sap.m.Slider.value`, app 486).
+  Type the bound ABAP field numerically (`i`/packed) or as `abap_bool`, never
+  as `string`, so the model carries a real JSON number/boolean.
+- **Device APIs need a secure context (HTTPS)** — geolocation and the camera
+  (`z2ui5.cc.Geolocation` / `CameraPicture`) silently do nothing over plain
+  HTTP; `getCurrentPosition` / `getUserMedia` fail with a secure-origin error
+  (logged via `Lib.logError`). Test over HTTPS or `localhost`, not `http://`.
+- **Prefer a bindable property over a frontend action / round-trip** — if a
+  control exposes its state as a property (`IconTabBar.selectedKey`,
+  `visible="{= … }"`, the `device>` model), bind it (two-way) instead of
+  driving it imperatively. Only methods with no bindable equivalent
+  (`NavContainer.to`, `focus`, `scrollToIndex`) need a frontend action.
+  Compare app 088 (NavContainer + action) with the IconTabBar samples.

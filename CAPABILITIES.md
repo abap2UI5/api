@@ -82,6 +82,11 @@ browser things: `popup_close`, `popover_close`, `open_new_tab`,
 `display_message_box` / `display_message_toast` (options object 1:1),
 `wizard_set_next_step`, `set_size_limit`, `set_odata_model`, nav-container
 `*_nav_container_to` per view slot, `z2ui5` (call registered custom JS).
+Newest (branch, pending release): the generic **`control_call`** /
+**`control_call_by_id`** — call a *whitelisted* method on a global object
+(MessageToast, MessageBox, BusyIndicator, Theming) or on a control resolved
+by id (`to`, `focus`, `scrollToIndex`, …), client-side after render, without
+adding a dedicated action constant per case.
 Also available: nested view slots (`nest_view_display`), `popover_display(
 by_id )` anchored to any control, app-stack navigation with typed results
 (`nav_app_call/leave` + `get_app_prev`), and bundled custom controls
