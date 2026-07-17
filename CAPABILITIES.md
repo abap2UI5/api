@@ -37,7 +37,7 @@ feature this table marks ✅/🔶.
 |---|---|---|---|
 | Controller-built `sap.m.Dialog` (`new Dialog({...}).open()`) | ✅ | build a `core:FragmentDefinition` → `Dialog` with the same builder, show with `client->popup_display( )`, close via `client->_event_client( client->cs_event-popup_close )` | app 469; app 529 now builds its error Dialog the same way (its earlier toast substitution was a wrong improvisation) |
 | `sap.m.MessageBox` | ✅ | `client->message_box_display` (actions, initialFocus, styleClass, and now `dependentOn` + `contentWidth` supported) | app 447 |
-| `sap.m.MessageToast` | ✅ | `client->message_toast_display` | apps 448, 526 |
+| `sap.m.MessageToast` (incl. the options object: `my`/`at`/`of`/`offset`/`collision` docking, `duration`, `width`, `class`) | ✅ | `client->message_toast_display( text = … my = 'center center' at = 'center center' … )` — the client method exposes the full MessageToast options object; dock strings ("center center", "begin top", …) are resolved in `Messages.js` | apps 448, 526; docking proven by app 439 (source-verified in `app/webapp/core/Messages.js`) |
 
 ## Models & binding
 

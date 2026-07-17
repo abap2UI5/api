@@ -13,7 +13,7 @@ CAPABILITIES.md._
 | CI | ABAP_STANDARD, ABAP_CLOUD, ABAP_702 all green |
 | Structural view diff | **0 undeclared differences** across all 34 ports (`node scripts/structural-diff.mjs --strict`) |
 | Pattern lint | **0 errors, 0 warnings, empty baseline** (`node scripts/pattern-lint.mjs`) |
-| Meta sidecars | 34 in `meta/` — status: 30 `generated`, 4 `checked`; deviations: 20 IMPROVISED, 13 POST_171, 13 LIVE_TEST, 7 SUBSET_DATA, 4 NOTE — DROPPED_171 is empty since the 1:1 restoration |
+| Meta sidecars | 34 in `meta/` — status: 30 `generated`, 4 `checked`; deviations: 16 IMPROVISED, 13 POST_171, 14 LIVE_TEST, 7 SUBSET_DATA, 7 NOTE — DROPPED_171 is empty since the 1:1 restoration |
 | Manually verified in a running system | 420, 421, 526, 530 (`CHECKED`) |
 | Archive | `ui5/sap.m/<SampleName>/` — full originals for the 34 ported samples (+2 cross-referenced: `FacetFilterSimple`, `Table`); mock snapshot in `ui5/mock/`. Unported samples are copied over batch by batch. |
 
@@ -120,16 +120,26 @@ be generated differently. Fixed in this change:
   `NOTE`: `message_box_display` (447) and the default group header (452) are
   the documented 1:1 paths in CAPABILITIES.md, not workarounds.
 
-Still open from the audit (need judgement or a live check, not done here):
-- [ ] **434** — drops the trivial `imageContainer` background-color CSS as "not
-  expressible" although `core:HTML` can carry it (the exact anti-pattern
-  CAPABILITIES warns about; sibling 431 already injects its `style.css`).
-- [ ] **401** — the hand-unrolled two `FacetFilterList`s could become a bound
-  template over a nested table now that nested binding is ✅.
-- [ ] **454** — `suggestionItems` still uses an undeclared ABAP `SORT` instead
-  of the raw `sorter` binding-info string (missed in the 2026-07-17 conversion).
-- [ ] **439** — the CenterCenter-docked toast may be expressible via the
-  `display_message_toast` options object rather than declared inexpressible.
+Second pass — the four remaining audit items worked off (2026-07-17):
+- [x] **434** — the `imageContainer` background-color CSS is kept and the
+  sample's `styles.css` injected via a `core:HTML` `content` attribute (as
+  431/404); deviation IMPROVISED→LIVE_TEST. Structural diff still 0 (the EXTRA
+  `core:HTML` is matched by the declaration).
+- [x] **454** — `suggestionItems` converted to the raw `sorter` binding-info
+  string (`{ path: '…', sorter: {path: 'NAME'} }`), the ABAP `SORT` dropped;
+  the pre-set-tokens deviation IMPROVISED→NOTE (a ✅ capability, not a
+  workaround).
+- [x] **439** — the CenterCenter toast is now docked 1:1 via
+  `message_toast_display( my = 'center center' at = 'center center' )` — the
+  client method exposes the full MessageToast options object (source-verified
+  in `Messages.js`). New CAPABILITIES row; the "not expressible" NOTE corrected.
+- [x] **401** — reclassified the two mislabeled IMPROVISED deviations to NOTE
+  (the two-way FacetFilter multi-select is CAPABILITIES ✅ with 401 as its own
+  evidence port; the two static lists are a faithful equivalent). The
+  structural rewrite into a doubly-nested `lists` aggregation-template was
+  **deliberately not done**: no port proves that aggregation-of-aggregation
+  shape and it cannot be live-tested here — recorded as a LIVE_TEST option, not
+  shipped blind on a working source-verified port.
 
 ## Open findings (backlog)
 
