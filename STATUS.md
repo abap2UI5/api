@@ -13,7 +13,7 @@ CAPABILITIES.md._
 | CI | ABAP_STANDARD, ABAP_CLOUD, ABAP_702 all green |
 | Structural view diff | **0 undeclared differences** across all 34 ports (`node scripts/structural-diff.mjs --strict`) |
 | Pattern lint | **0 errors, 0 warnings, empty baseline** (`node scripts/pattern-lint.mjs`) |
-| Meta sidecars | 34 in `meta/` — status: 30 `generated`, 4 `checked`; deviations: 15 IMPROVISED, 13 POST_171, 15 LIVE_TEST, 7 SUBSET_DATA, 7 NOTE — DROPPED_171 is empty since the 1:1 restoration |
+| Meta sidecars | 34 in `meta/` — status: 30 `generated`, 4 `checked`; deviations: 14 IMPROVISED, 13 POST_171, 15 LIVE_TEST, 7 SUBSET_DATA, 8 NOTE — DROPPED_171 is empty since the 1:1 restoration |
 | Manually verified in a running system | 420, 421, 526, 530 (`CHECKED`) |
 | Archive | `ui5/sap.m/<SampleName>/` — full originals for the 34 ported samples (+2 cross-referenced: `FacetFilterSimple`, `Table`); mock snapshot in `ui5/mock/`. Unported samples are copied over batch by batch. |
 
@@ -163,6 +163,21 @@ Two ideas the audit surfaced, handled per their true nature:
   original Currency binding 1:1 over a numeric `PRICE` (`TYPE p`) field —
   IMPROVISED dropped, LIVE_TEST added. App 460 keeps its static single-record
   resolution (an unrelated deviation), not blocked by the type.
+- **MultiInput `addValidator` — NOT a framework gap either** — the bundled
+  custom control `z2ui5.cc.MultiInputExt` installs exactly the sample's
+  free-text→token validator (`addValidator(({text}) => new Token({key:text,
+  text}))`, source-verified in `app/webapp/cc/MultiInputExt.js`) and mirrors
+  token changes back via `addedTokens`/`removedTokens` + `change`. CAPABILITIES
+  row added (🔶) and the app-454 deviation corrected IMPROVISED→NOTE. The code
+  is not rewritten: wiring `z2ui5.cc.MultiInputExt` through the generic builder
+  would be the first cc-control usage in these ports and needs a live check —
+  left as a LIVE_TEST follow-up rather than shipped blind.
+
+**Pattern worth noting:** of the four framework ideas the audit raised, only
+one (`control_call` whitelist) is a real gap; the composite `Currency` type
+and the MultiInput validator were both already in the framework — the map/ports
+had wrongly treated them as ❌. Exactly the "declared impossible although it
+already works" failure mode CAPABILITIES.md opens by warning against.
 
 ## Open findings (backlog)
 
