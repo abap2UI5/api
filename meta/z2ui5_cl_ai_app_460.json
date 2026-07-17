@@ -10,7 +10,7 @@
   "deviations": [
     {
       "type": "IMPROVISED",
-      "what": "the sample binds the ObjectHeader to {/ProductCollection/0} and its title/number/attributes to model fields (with a Currency type formatter on number). The port carries no model, so those bindings are resolved to the static values of the first ProductCollection product (Notebook Basic 15)."
+      "what": "the sample binds the ObjectHeader to {/ProductCollection/0} and its title/number/attributes to model fields (with a Currency type formatter on number). The port carries no model, so those bindings are resolved to the static values of the first ProductCollection product (Notebook Basic 15) - incl. the ObjectAttribute texts ({Description}, weight, dimensions, www.sap.com) and the numberUnit {CurrencyCode}."
     }
   ]
 }
