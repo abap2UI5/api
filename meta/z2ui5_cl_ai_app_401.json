@@ -6,7 +6,8 @@
   "batch": "b04",
   "audit": {
     "frontend_action": false,
-    "event_t_arg": false
+    "event_t_arg": false,
+    "note": "client->register_formatter ships the weightState body; no _event_client usage"
   },
   "status": "generated",
   "checked": null,
@@ -25,7 +26,15 @@
     },
     {
       "type": "IMPROVISED",
-      "what": "the original controller appends the sap.m.sample.Table component's table with its first cell swapped for an ObjectIdentifier {Name}/{Category}; that table is rebuilt inline. The price column keeps the original sap.ui.model.type.Currency composite binding 1:1 (raw binding-info string over a numeric PRICE field); only the custom Formatter.js weightState (a client-side JS formatter function, genuinely not expressible) is precomputed in WEIGHT_STATE."
+      "what": "the original controller appends the sap.m.sample.Table component's table with its first cell swapped for an ObjectIdentifier {Name}/{Category}; that table is rebuilt inline. The price column keeps the original sap.ui.model.type.Currency composite binding 1:1 (raw binding-info string over a numeric PRICE field)."
+    },
+    {
+      "type": "NOTE",
+      "what": "the weight column's custom Formatter.js weightState is restored 1:1 since register_formatter landed upstream (2026-07-18, see pr/formatter-registry): the function body is registered via client->register_formatter and the ObjectNumber state keeps the original parts binding with formatter: 'z2ui5.fmt.weightState' - the earlier precomputed WEIGHT_STATE column is gone (the ValueState enum values are inlined as their string literals, the only textual difference to the original body)."
+    },
+    {
+      "type": "LIVE_TEST",
+      "what": "confirm the weight states render Success/Warning/Error per row via the registered z2ui5.fmt.weightState (first port using register_formatter; requires a CSP allowing unsafe-eval, otherwise the state falls back unformatted)."
     },
     {
       "type": "IMPROVISED",

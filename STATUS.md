@@ -243,12 +243,24 @@ specs extended). Follow-through in this repo, same change:
   The view now matches the original `view.xml` exactly; IMPROVISED dropped.
 - CAPABILITIES.md: new rows for popup-mode controls in `mvc:dependents` and
   for imperative one-shot control methods; frontend-action catalog updated.
-- **`pr/formatter-registry`** (new, open) — the next-most-common remaining ❌
-  category written up as a forwardable request: app-supplied client-side
-  formatter functions via a `z2ui5.fmt.*` registry (the framework already
-  publishes `z2ui5.Util` for exactly this use and already executes
-  server-shipped custom JS; only the app-facing registration is missing).
-  Evidence: 401 (`weightState`), 452 (`groupHeaderFactory`), 481 (factories).
+- **`pr/formatter-registry`** (new; **implemented upstream 2026-07-18**, same
+  day) — the next-most-common remaining ❌ category: app-supplied client-side
+  formatter functions. Upstream now ships
+  `client->register_formatter( name js )`: the bodies travel as their own
+  `T_FORMATTER` response field and the new `core/Formatters.js` compiles them
+  BEFORE view creation, published as the `z2ui5.fmt` global (mirroring
+  `z2ui5.Util`). Deliberately NOT routed through the follow-up custom-JS
+  path (`_runCustomJs`) — that runs after render and is deprecated.
+  Follow-through here:
+  - **401** — the appended table's `Formatter.js` `weightState` is restored
+    1:1: the body is registered via `register_formatter`, the ObjectNumber
+    keeps the original `parts` + `formatter: 'z2ui5.fmt.weightState'`
+    binding, and the precomputed `WEIGHT_STATE` column is gone.
+  - render-smoke harness mirrors the new contract with an identity-function
+    `z2ui5.fmt` proxy, so formatter bindings parse in the gate without
+    executing app JS.
+  - Scope note: value formatters only — `groupHeaderFactory`/item factories
+    (452, 481) return controls and stay ❌.
 
 ## Open findings (backlog)
 
@@ -257,6 +269,9 @@ Live tests pending (in-system) — the 2026-07-16 framework source pass
 is visual/UX confirmation:
 - [ ] **401** — Reset unchecks the facet popover checkboxes (mechanics
   source-verified: model applied before on_event).
+- [ ] **401** — the weight states render Success/Warning/Error via the
+  registered `z2ui5.fmt.weightState` (first `register_formatter` port,
+  converted 2026-07-18; needs a CSP allowing unsafe-eval).
 - [ ] **469** — the popup-mode PDFViewer opens via the whitelisted
   `control_call_by_id( 'open' )` and shows the clicked PDF (converted
   2026-07-18; the earlier Dialog check is obsolete).

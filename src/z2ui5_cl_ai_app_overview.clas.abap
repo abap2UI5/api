@@ -266,9 +266,12 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` This is the documented 1:1 path (CAPABILITIES.md marks controller-read FacetFilter/List multi-select as expressible with app 401 as its evidence port), not a workaround; the model is applied before` &&
                  ` on_event runs. // LIVE-TEST: confirm in a running system that clearing the bound selected flags on Reset also unchecks the facet popover checkboxes (FacetFilterList caches its selection client-side).` &&
                  ` // IMPROVISED: the original controller appends the sap.m.sample.Table component's table with its first cell swapped for an ObjectIdentifier {Name}/{Category}; that table is rebuilt inline. The price` &&
-                 ` column keeps the original sap.ui.model.type.Currency composite binding 1:1 (raw binding-info string over a numeric PRICE field); only the custom Formatter.js weightState (a client-side JS formatter` &&
-                 ` function, genuinely not expressible) is precomputed in WEIGHT_STATE. // IMPROVISED: the appended table's header toolbar keeps only Title and ToolbarSpacer - the sample's popin-layout ComboBox (with` &&
-                 ` core:Item entries), the sticky CheckBoxes with their Label and the Hide/Show ToggleButton drive client-side table APIs (setSticky, popin layout) with no abap2UI5 equivalent; the infoToolbar (an` &&
+                 ` column keeps the original sap.ui.model.type.Currency composite binding 1:1 (raw binding-info string over a numeric PRICE field). // NOTE: the weight column's custom Formatter.js weightState is` &&
+                 ` restored 1:1 since register_formatter landed upstream (2026-07-18, see pr/formatter-registry): the function body is registered via client->register_formatter and the ObjectNumber state keeps the` &&
+                 ` original parts binding with formatter: 'z2ui5.fmt.weightState' - the earlier precomputed WEIGHT_STATE column is gone (the ValueState enum values are inlined as their string literals, the only textual` &&
+                 ` difference to the original body). // LIVE-TEST: confirm the weight states render Success/Warning/Error per row via the registered z2ui5.fmt.weightState (first port using register_formatter; requires` &&
+                 ` a CSP allowing unsafe-eval, otherwise the state falls back unformatted). // IMPROVISED: the appended table's header toolbar keeps only Title and ToolbarSpacer - the sample's popin-layout ComboBox` &&
+                 ` (with core:Item entries), the sticky CheckBoxes with their Label and the Hide/Show ToggleButton drive client-side table APIs (setSticky, popin layout) with no abap2UI5 equivalent; the infoToolbar (an` &&
                  ` OverflowToolbar with a Label) and the p:ColumnAIAction column plugin (newer than UI5 1.71) are dropped as well. // SUBSET: data is a 10-row subset of the mock /ProductCollection` &&
                  ` (ui5/mock/products.json), facet counters recomputed for the subset.` )
       ( module = `sap.m` control = `sap.m.FlexBox`         name = `FlexBoxNested`             class = `z2ui5_cl_ai_app_404` path = `src/01/b04/z2ui5_cl_ai_app_404.clas.abap`

@@ -1,76 +1,86 @@
 # App-supplied client-side formatter functions (`z2ui5.fmt.*` registry)
 
+> **Status: implemented upstream (2026-07-18).** `z2ui5_if_client` now
+> carries `register_formatter( name js )`; the registrations travel as
+> their own `T_FORMATTER` response field (new `ty_t_formatter` in
+> `z2ui5_if_core_types`) and the new `app/webapp/core/Formatters.js`
+> compiles them BEFORE any view of the same response is created.
+> `Component.js` publishes the registry as the `z2ui5.fmt` global,
+> mirroring `z2ui5.Util`. Deliberately NOT routed through the follow-up
+> custom-JS path (`_runCustomJs`), which runs after render and is
+> deprecated. Port 401 was converted in the same change and binds the
+> original `weightState` formatter 1:1; CAPABILITIES.md is updated.
+
 ## Summary
 
 Demo kit samples routinely bind with **custom JS formatter functions**
 (`Formatter.js` modules, `formatter: '.fn'` controller methods,
-`groupHeaderFactory`, list-item factories). abap2UI5 has no way for an app to
-supply such a function, so CAPABILITIES.md marks the category ❌ and ports must
-preformat values in ABAP - which freezes them to render time and breaks 1:1
+`groupHeaderFactory`, list-item factories). abap2UI5 had no way for an app to
+supply such a function, so CAPABILITIES.md marked the category ❌ and ports had
+to preformat values in ABAP - which freezes them to render time and breaks 1:1
 bindings that reformat client-side.
 
 ## Motivation
 
-Ports in this repo that carry a deviation only because a client-side function
-cannot be supplied:
+Ports in this repo that carried a deviation only because a client-side function
+could not be supplied:
 
 - **[Table](https://sdk.openui5.org/entity/sap.m.Table/sample/sap.m.sample.Table)**
-  (`z2ui5_cl_ai_app_401`) - `Formatter.js` `weightState` maps a numeric weight
-  to a `State` (`Success/Warning/Error`); the port preformats the state into an
-  extra ABAP column.
+  (as appended by `z2ui5_cl_ai_app_401`) - `Formatter.js` `weightState` maps a
+  numeric weight to a `State` (`Success/Warning/Error`); the port precomputed
+  the state into an extra ABAP column. **Converted** - it now registers the
+  original body and keeps the original parts binding.
 - **[MultiComboBoxGrouping](https://sdk.openui5.org/entity/sap.m.MultiComboBox/sample/sap.m.sample.MultiComboBoxGrouping)**
   (`z2ui5_cl_ai_app_452`) - the custom `groupHeaderFactory '.getGroupHeader'`
   happens to match UI5's default headers, so the port survives; any factory
-  that does more would not.
-- **[Text](https://sdk.openui5.org/entity/sap.m.Text/sample/sap.m.sample.TextMaxLines)**-style
-  samples with per-row factories (`z2ui5_cl_ai_app_481`) - rows are unrolled
-  statically because a factory function cannot be expressed.
+  that does more would not (factories return controls, not values - out of
+  scope here, see Notes).
+- Per-row list-item factories (`z2ui5_cl_ai_app_481`) - rows are unrolled
+  statically because a factory function cannot be expressed (same "returns
+  controls" caveat).
 
-## Current behavior
+## Implemented design
 
-The framework already has BOTH halves of the mechanism - they are just not
-connected for apps:
-
-- `app/webapp/Util.js` is published as the **`z2ui5.Util` global exactly so XML
-  view formatter strings can reference it** (`Component.js`: "z2ui5.Util global
-  (XML view formatter strings) or via core:require"). Framework-shipped
-  formatters work today; app-shipped ones do not exist.
-- The backend can already ship JS to the client: `S_FOLLOW_UP_ACTION.CUSTOM_JS`
-  snippets are executed after render (`Server.js` `_runCustomJs`), including
-  raw-expression Format A (under a CSP that allows `unsafe-eval`).
-
-## Proposed change (sketch)
-
-A small named-formatter registry on the client plus one client API to fill it:
+ABAP side - one method, no new trust surface (the server is trusted, exactly
+as it already is for the XML views and models it ships):
 
 ```abap
-" once, at view_display time - the body is compiled once and cached
 client->register_formatter(
   name = `weightState`
-  js   = `(weight) => weight < 1000 ? 'Success' : weight < 2000 ? 'Warning' : 'Error'` ).
+  js   = `(fMeasure, sUnit) => { ... }` ).   " a single function expression
 ```
 
-Client side: `z2ui5.fmt = {}`; `register_formatter` compiles the body once
-(`Function` - same CSP condition as custom-JS Format A) and stores it as
-`z2ui5.fmt.weightState`. Views then bind the original structure 1:1:
+- `z2ui5_cl_core_client` appends `name`/`js` to
+  `ms_next-s_set-t_formatter`; re-registering a name replaces its entry.
+- The generic upper-case ajson mapping serializes it as
+  `PARAMS.T_FORMATTER: [{NAME, JS}]` - no bespoke wire code.
+- App navigation clears pending registrations together with messages and
+  follow-up actions (`z2ui5_cl_core_action`), so nothing leaks into the next
+  app.
+
+Client side - `app/webapp/core/Formatters.js`:
+
+- `Server.responseSuccess` calls `Formatters.registerAll(PARAMS.T_FORMATTER)`
+  **before** view creation - the timing that makes binding strings resolve;
+  the deprecated follow-up custom-JS path runs after render and is not
+  involved.
+- Each body is compiled once per name+source (`Function`, cached) and stored
+  on the `z2ui5.fmt` global. A body that does not compile to a function is
+  logged and skipped; under a CSP without `unsafe-eval` every entry degrades
+  that way and the binding falls back to its unformatted value.
+
+View usage, 1:1 with the demo kit original:
 
 ```abap
-)->a( n = `state` v = `{ path: 'WEIGHT', formatter: 'z2ui5.fmt.weightState' }`
+)->a( n = `state` v = |\{ parts:[\{path:'WEIGHT_MEASURE'\},\{path:'WEIGHT_UNIT'\}], formatter: 'z2ui5.fmt.weightState' \}|
 ```
 
-Notes on scope:
+## Notes
 
-- Registration is an explicit act of the ABAP app (same trust model as the
-  existing `CUSTOM_JS` follow-up actions and the registered-custom-JS `z2ui5`
-  action - the server is trusted, this adds no new surface).
-- Under a strict CSP without `unsafe-eval` the registry degrades exactly like
-  custom-JS Format A does today: log + no-op. Worth stating in the docs.
-- A `groupHeaderFactory`/factory variant (functions returning controls) could
-  build on the same registry later; the formatter case alone already covers
-  the most common demo kit pattern.
-
-## Workaround today
-
-Preformat in ABAP and bind the result (extra model field, value frozen per
-round-trip), or unroll rows statically; both documented as deviations
-(CAPABILITIES.md "Custom JS formatter functions" ❌).
+- **Scope: value formatters only.** `groupHeaderFactory` and list-item
+  factories return *controls*; supporting them would mean building UI5
+  elements from registered code and wiring aggregation lifecycles - a
+  separate request if a port ever genuinely needs it.
+- The render-smoke harness mirrors the contract with an identity-function
+  `z2ui5.fmt` proxy, so ports using registered formatters stay smoke-testable
+  without executing app JS.

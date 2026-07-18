@@ -11,7 +11,6 @@ CLASS z2ui5_cl_ai_app_401 DEFINITION PUBLIC.
         dimensions     TYPE string,
         weight_measure TYPE string,
         weight_unit    TYPE string,
-        weight_state   TYPE string,
         price          TYPE p LENGTH 14 DECIMALS 2,
         currency_code  TYPE string,
       END OF ty_s_product.
@@ -60,16 +59,16 @@ CLASS z2ui5_cl_ai_app_401 IMPLEMENTATION.
 
     " Data taken from the shared mock data sap/ui/demo/mock/products.json of the original sample
     t_products = VALUE #(
-        ( name = `Comfort Easy` category = `Accessories` supplier_name = `Technocom` dimensions = `84 x 1.5 x 14 cm` weight_measure = `0.2` weight_unit = `KG` weight_state = `Success` price = `1679.00` currency_code = `EUR` )
-        ( name = `Comfort Senior` category = `Accessories` supplier_name = `Technocom` dimensions = `80 x 1.6 x 13 cm` weight_measure = `0.8` weight_unit = `KG` weight_state = `Success` price = `512.00` currency_code = `EUR` )
-        ( name = `Ergo Screen E-I` category = `Flat Screen Monitors` supplier_name = `Very Best Screens` dimensions = `37 x 12 x 36 cm` weight_measure = `21` weight_unit = `KG` weight_state = `Error` price = `230.00` currency_code = `EUR` )
-        ( name = `ITelO Vault` category = `Accessories` supplier_name = `Technocom` dimensions = `32 x 22 x 3 cm` weight_measure = `0.2` weight_unit = `KG` weight_state = `Success` price = `299.00` currency_code = `EUR` )
-        ( name = `ITelO Vault Net` category = `Accessories` supplier_name = `Technocom` dimensions = `10 x 1.8 x 17 cm` weight_measure = `0.16` weight_unit = `KG` weight_state = `Success` price = `459.00` currency_code = `EUR` )
-        ( name = `ITelO Vault SAT` category = `Accessories` supplier_name = `Technocom` dimensions = `11 x 1.7 x 18 cm` weight_measure = `0.18` weight_unit = `KG` weight_state = `Success` price = `149.00` currency_code = `EUR` )
-        ( name = `Notebook Basic 15` category = `Laptops` supplier_name = `Very Best Screens` dimensions = `30 x 18 x 3 cm` weight_measure = `4.2` weight_unit = `KG` weight_state = `Warning` price = `956.00` currency_code = `EUR` )
-        ( name = `Notebook Basic 17` category = `Laptops` supplier_name = `Very Best Screens` dimensions = `29 x 17 x 3.1 cm` weight_measure = `4.5` weight_unit = `KG` weight_state = `Warning` price = `1249.00` currency_code = `EUR` )
-        ( name = `Notebook Basic 19` category = `Laptops` supplier_name = `Smartcards` dimensions = `32 x 21 x 4 cm` weight_measure = `4.2` weight_unit = `KG` weight_state = `Warning` price = `1650.00` currency_code = `EUR` )
-        ( name = `Notebook Professional 15` category = `Accessories` supplier_name = `Very Best Screens` dimensions = `33 x 20 x 3 cm` weight_measure = `4.3` weight_unit = `KG` weight_state = `Warning` price = `1999.00` currency_code = `EUR` ) ).
+        ( name = `Comfort Easy` category = `Accessories` supplier_name = `Technocom` dimensions = `84 x 1.5 x 14 cm` weight_measure = `0.2` weight_unit = `KG` price = `1679.00` currency_code = `EUR` )
+        ( name = `Comfort Senior` category = `Accessories` supplier_name = `Technocom` dimensions = `80 x 1.6 x 13 cm` weight_measure = `0.8` weight_unit = `KG` price = `512.00` currency_code = `EUR` )
+        ( name = `Ergo Screen E-I` category = `Flat Screen Monitors` supplier_name = `Very Best Screens` dimensions = `37 x 12 x 36 cm` weight_measure = `21` weight_unit = `KG` price = `230.00` currency_code = `EUR` )
+        ( name = `ITelO Vault` category = `Accessories` supplier_name = `Technocom` dimensions = `32 x 22 x 3 cm` weight_measure = `0.2` weight_unit = `KG` price = `299.00` currency_code = `EUR` )
+        ( name = `ITelO Vault Net` category = `Accessories` supplier_name = `Technocom` dimensions = `10 x 1.8 x 17 cm` weight_measure = `0.16` weight_unit = `KG` price = `459.00` currency_code = `EUR` )
+        ( name = `ITelO Vault SAT` category = `Accessories` supplier_name = `Technocom` dimensions = `11 x 1.7 x 18 cm` weight_measure = `0.18` weight_unit = `KG` price = `149.00` currency_code = `EUR` )
+        ( name = `Notebook Basic 15` category = `Laptops` supplier_name = `Very Best Screens` dimensions = `30 x 18 x 3 cm` weight_measure = `4.2` weight_unit = `KG` price = `956.00` currency_code = `EUR` )
+        ( name = `Notebook Basic 17` category = `Laptops` supplier_name = `Very Best Screens` dimensions = `29 x 17 x 3.1 cm` weight_measure = `4.5` weight_unit = `KG` price = `1249.00` currency_code = `EUR` )
+        ( name = `Notebook Basic 19` category = `Laptops` supplier_name = `Smartcards` dimensions = `32 x 21 x 4 cm` weight_measure = `4.2` weight_unit = `KG` price = `1650.00` currency_code = `EUR` )
+        ( name = `Notebook Professional 15` category = `Accessories` supplier_name = `Very Best Screens` dimensions = `33 x 20 x 3 cm` weight_measure = `4.3` weight_unit = `KG` price = `1999.00` currency_code = `EUR` ) ).
 
     SORT t_products BY name.
     t_products_all = t_products.
@@ -89,6 +88,21 @@ CLASS z2ui5_cl_ai_app_401 IMPLEMENTATION.
 
 
   METHOD view_display.
+
+    " the appended table's Formatter.js weightState, registered 1:1 as a
+    " client-side function (compiled before the view is created, referenced
+    " below as formatter: 'z2ui5.fmt.weightState'); the ValueState enum of
+    " the original resolves to its string literals
+    client->register_formatter(
+        name = `weightState`
+        js   = `(fMeasure, sUnit) => {`                                      &&
+               ` var fAdjustedMeasure = parseFloat(fMeasure);`               &&
+               ` if (isNaN(fAdjustedMeasure)) { return "None"; }`            &&
+               ` if (sUnit === "G") { fAdjustedMeasure = fMeasure / 1000; }` &&
+               ` if (fAdjustedMeasure < 0) { return "None"; }`               &&
+               ` if (fAdjustedMeasure < 1) { return "Success"; }`            &&
+               ` if (fAdjustedMeasure < 5) { return "Warning"; }`            &&
+               ` return "Error"; }` ).
 
     " The bound lists collection of the original is unrolled into two static facet filter lists;
     " the original controller appends the demo table of sap.m.sample.Table with an adjusted first column.
@@ -210,7 +224,7 @@ CLASS z2ui5_cl_ai_app_401 IMPLEMENTATION.
                             )->leaf( `ObjectNumber`
                                 )->a( n = `number` v = `{WEIGHT_MEASURE}`
                                 )->a( n = `unit`   v = `{WEIGHT_UNIT}`
-                                )->a( n = `state`  v = `{WEIGHT_STATE}`
+                                )->a( n = `state`  v = |\{ parts:[\{path:'WEIGHT_MEASURE'\},\{path:'WEIGHT_UNIT'\}], formatter: 'z2ui5.fmt.weightState' \}|
                             )->leaf( `ObjectNumber`
                                 )->a( n = `number` v = |\{ parts:[\{path:'PRICE'\},\{path:'CURRENCY_CODE'\}], type:'sap.ui.model.type.Currency', formatOptions:\{showMeasure:false\} \}|
                                 )->a( n = `unit`   v = `{CURRENCY_CODE}` ).
