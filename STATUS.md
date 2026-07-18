@@ -294,6 +294,31 @@ specs extended). Follow-through in this repo, same change:
     expression binding for app-specific one-offs, ABAP preformatting as the
     fallback; factories returning controls stay ❌.
 
+## Formatter pack + binding_call implemented (2026-07-18)
+
+A demo kit census (all 446 sap.m samples: ~45 use formatters, 35 in scope,
+three different `weightState` variants under one name; 61 controllers call
+`getBinding(...)`) led to two framework additions, both implemented upstream
+the same day and demoed by beta samples in abap2UI5/samples `src/00/08`:
+
+- **pr/formatter-demokit-pack** — six curated functions in
+  `z2ui5/model/formatter` (`weightStateByValue`, `stockStatusState`/`-Icon`,
+  `round2DP`, `dimensions`, `deliveryStatusState`); with the existing
+  `weightState` every unported in-scope sample with a dedicated formatter
+  file now ports with its original `formatter:` binding structure (renamed
+  references need a `NOTE` deviation). Beta sample 453.
+- **pr/binding-call** — declarative filter/sort on an aggregation binding
+  (`binding_call_by_id` after a backend event, or roundtrip-free via
+  `_event_client` + `cs_event-binding_call` with `${$parameters>/…}` args);
+  closes the `oBinding.filter(...)` controller pattern 1:1, model untouched.
+  Beta samples 454 (backend) / 455 (live, no roundtrip). Unlocks the
+  SearchField/SelectDialog/ViewSettingsDialog/ListSelectionSearch families
+  (~15–20 backlog samples) without IMPROVISED model filtering.
+
+CAPABILITIES rows added/extended; live checks of 453/454/455 are the next
+LIVE_TEST candidates (sample 455 is the first `_event_client` + `$`-arg
+resolution proof).
+
 ## Open findings (backlog)
 
 Live tests pending (in-system) — the 2026-07-16 framework source pass

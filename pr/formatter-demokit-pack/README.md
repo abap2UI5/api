@@ -1,5 +1,14 @@
 # Demo kit pack for the curated formatter module
 
+**Status: implemented upstream 2026-07-18** in
+[abap2UI5/abap2UI5](https://github.com/abap2UI5/abap2UI5)
+(`app/webapp/model/formatter.js`): Option A shipped — flat module, suffixed
+names (`weightStateByValue`, `stockStatusState`, `stockStatusIcon`,
+`round2DP`, `dimensions`, `deliveryStatusState`), unit specs extended.
+Demoed by the beta sample `z2ui5_cl_demo_app_453` in abap2UI5/samples
+(`src/00/08`). Ports referencing a renamed function declare a `NOTE`
+deviation for the changed reference string (see "Naming" below).
+
 ## Summary
 
 Extend the curated formatter module (`app/webapp/model/formatter.js`,
