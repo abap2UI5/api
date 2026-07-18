@@ -348,14 +348,19 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         post171 = `the ObjectStatus state values Indication06-Indication08 (since UI5 1.75) and Indication09-Indication20 (since UI5 1.120) are newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >=` &&
                  ` 1.120 to render them all (>= 1.75 for Indication06-Indication08).` )
       ( module = `sap.m` control = `sap.m.Panel`           name = `PanelExpanded`             class = `z2ui5_cl_ai_app_471` path = `src/01/b04/z2ui5_cl_ai_app_471.clas.abap`
-        notes = `IMPROVISED: the original controller toggles the third panel imperatively (onOverflowToolbarPress -> oPanel.setExpanded(!oPanel.getExpanded())). It is reproduced with a two-way bound ``expanded``` &&
-                 ` property plus a TOOLBAR_PRESSED event that flips it - the view therefore carries an ``expanded`` binding and a ``press`` the original view.xml does not have.` )
+        notes = `NOTE: the original controller toggles the third panel imperatively (onOverflowToolbarPress -> oPanel.setExpanded(!oPanel.getExpanded())). Reproduced 1:1 since the whitelist extension (2026-07-18, see` &&
+                 ` pr/control-call-whitelist): the TOOLBAR_PRESSED handler inverts a server-side mirror of the state and calls client->control_call_by_id( method = setExpanded ) on the panel - the view no longer` &&
+                 ` carries the improvised two-way ``expanded`` binding, matching the original view.xml exactly. // LIVE-TEST: confirm the third panel expands/collapses on each toolbar press (the follow-up setExpanded` &&
+                 ` runs after the round-trip) - together with app 469 the first ports using the extended control_call_by_id whitelist.` )
       ( module = `sap.m` control = `sap.m.PDFViewer`       name = `PDFViewerPopup`            class = `z2ui5_cl_ai_app_469` path = `src/01/b03/z2ui5_cl_ai_app_469.clas.abap`
-        notes = `IMPROVISED: the sample's onInit gives each Image its own JSONModel and onPress opens a controller-created sap.m.PDFViewer in popup mode via JavaScript. Here the per-image Source/Preview URLs are` &&
-                 ` resolved statically and the PDFViewer is embedded into a sap.m.Dialog opened on the press event instead, closed by an added OK Button (the popup-mode PDFViewer brings its own close button). //` &&
-                 ` POST-1.71: the PDFViewer property isTrustedSource (since UI5 1.121, backported to maintenance patches down to 1.71.63; the original controller passes isTrustedSource: true) is newer than 1.71 but` &&
-                 ` kept for the 1:1 port - the app needs a UI5 release >= 1.121 (or a patched maintenance release) to render it. // LIVE-TEST: confirm the PDFViewer renders inside the dialog at height 100% in a running` &&
-                 ` system.`
+        notes = `NOTE: the original onInit creates a popup-mode sap.m.PDFViewer and adds it as a view dependent; it is declared 1:1 in the view's mvc:dependents aggregation (an extra PDFViewer element vs the original` &&
+                 ` view.xml, which never carries it - there it lives in the controller). onPress' setSource/setTitle/open() becomes a bound source updated per click, the constant title declared in the view, and the` &&
+                 ` whitelisted open via client->control_call_by_id after render - popup mode 1:1, the earlier Dialog embedding workaround is gone (whitelist extended upstream 2026-07-18, see pr/control-call-whitelist).` &&
+                 ` // IMPROVISED: the per-image JSONModels of onInit (a Source/Preview URL pair per Image) have no server-side equivalent; the Image src (original {/Preview}) is resolved to static absolute` &&
+                 ` sdk.openui5.org URLs and the Source travels through the one bound pdf_source field - same family as pr/named-json-models. // POST-1.71: the PDFViewer property isTrustedSource (since UI5 1.121,` &&
+                 ` backported to maintenance patches down to 1.71.63; the original controller passes isTrustedSource: true) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.121 (or a` &&
+                 ` patched maintenance release) to render it. // LIVE-TEST: confirm the popup-mode PDFViewer opens after the SHOW_PDF round-trip (view_model_update applies the new source before the follow-up open runs)` &&
+                 ` and shows the clicked PDF in a running system - first port using the extended control_call_by_id whitelist.`
         post171 = `the PDFViewer property isTrustedSource (since UI5 1.121, backported to maintenance patches down to 1.71.63; the original controller passes isTrustedSource: true) is newer than 1.71 but kept for the` &&
                  ` 1:1 port - the app needs a UI5 release >= 1.121 (or a patched maintenance release) to render it.` )
       ( module = `sap.m` control = `sap.m.RangeSlider`     name = `RangeSlider`               class = `z2ui5_cl_ai_app_472` path = `src/01/b02/z2ui5_cl_ai_app_472.clas.abap`

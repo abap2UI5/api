@@ -36,7 +36,8 @@ feature this table marks ✅/🔶.
 
 | UI5 feature | Status | How in abap2UI5 | Evidence |
 |---|---|---|---|
-| Controller-built `sap.m.Dialog` (`new Dialog({...}).open()`) | ✅ | build a `core:FragmentDefinition` → `Dialog` with the same builder, show with `client->popup_display( )`, close via `client->_event_client( client->cs_event-popup_close )` | app 469; app 529 now builds its error Dialog the same way (its earlier toast substitution was a wrong improvisation) |
+| Controller-built `sap.m.Dialog` (`new Dialog({...}).open()`) | ✅ | build a `core:FragmentDefinition` → `Dialog` with the same builder, show with `client->popup_display( )`, close via `client->_event_client( client->cs_event-popup_close )` | app 529 builds its error Dialog this way (its earlier toast substitution was a wrong improvisation); app 469 used the pattern as a workaround until 2026-07-18, now 1:1 via the popup-mode PDFViewer (row below) |
+| Controller-created popup-mode control opened imperatively (`new PDFViewer(...)` + `.open()` on a view dependent) | ✅ | declare the control in the view's `mvc:dependents` aggregation (the `addDependent` equivalent), bind its inputs, open it with `client->control_call_by_id( id = … method = 'open' )` after the round-trip - `open`/`close` are whitelisted since 2026-07-18 (pr/control-call-whitelist) | app 469 (LIVE-TEST pending); source-verified in `app/webapp/core/FrontendAction.js` `CONTROL_METHODS` |
 | `sap.m.MessageBox` | ✅ | `client->message_box_display` (actions, initialFocus, styleClass, and now `dependentOn` + `contentWidth` supported) | app 447 |
 | `sap.m.MessageToast` (incl. the options object: `my`/`at`/`of`/`offset`/`collision` docking, `duration`, `width`, `class`) | ✅ | `client->message_toast_display( text = … my = 'center center' at = 'center center' … )` — the client method exposes the full MessageToast options object; dock strings ("center center", "begin top", …) are resolved in `Messages.js` | apps 448, 526; docking proven by app 439 (source-verified in `app/webapp/core/Messages.js`) |
 
@@ -45,7 +46,7 @@ feature this table marks ✅/🔶.
 | UI5 feature | Status | How in abap2UI5 | Evidence |
 |---|---|---|---|
 | JSON model data | ✅ | ABAP `VALUE #( … )` + `client->_bind_edit` (never `_bind`) — keep the data verbatim, full row set | AGENTS §5; silent row subsets bit apps 433/440/441 |
-| Two-way property binding incl. live client-side updates | ✅ | shared `_bind_edit` path on both controls — no event round-trip needed | app 527 (Switch↔Select), app 471 |
+| Two-way property binding incl. live client-side updates | ✅ | shared `_bind_edit` path on both controls — no event round-trip needed | app 527 (Switch↔Select), app 530 (Breadcrumbs separatorStyle↔Select) |
 | Expression bindings (`{= … }`) over bound paths | ✅ | inline `client->_bind_edit( var )` calls composed into the expression string template — never captured in a variable | app 421 (the AGENTS §5 worked example) |
 | Imperative controller logic that only derives view state (setWidth/setExpanded from a control value) | 🔶 | prefer a pure expression binding over an event round-trip (`{= ${slider} + '%' }`) | app 421 is the pattern; the avoidable round-trips in 486/530 were removed 2026-07-16 (LIVE-TEST pending) |
 | Nested tables / tree binding (`items="{path: '/'}"` over nested `nodes`) | ✅ | nested ABAP table types serialize into nested JSON arrays; two-way delta write-back is nested-aware; the framework even ships a `z2ui5.cc.Tree` control preserving expand state | source-verified: ajson `convert_table` recursion + `delta_apply_nodes` (z2ui5_cl_core_srv_model); app 487 renders it (visual LIVE-TEST pending) |
@@ -54,7 +55,7 @@ feature this table marks ✅/🔶.
 | Binding `sorter` (no grouping) | ✅ | keep the original binding-info string: `\|\{ path: '{ client->_bind_edit( val = t path = abap_true ) }', sorter: \{ path: 'COL' \} \}\|` — no ABAP SORT, no deviation needed | apps 423/440/527 converted 2026-07-17; same pass-through as the group-sorter row below |
 | Binding `sorter` with `group: true` + default group headers | ✅ | keep a raw binding-info string `{path: '…', sorter: {path: '…', group: true}}` — get the bare model path via `client->_bind_edit( val = t_products path = abap_true )` (human-taught 2026-07-16); only a *custom* `groupHeaderFactory` is out | source-verified on BOTH sides: abap2UI5 passes attribute values to `XMLView.create` unmangled, and UI5's default group header IS `new SeparatorItem({text: group.text \|\| group.key})` (openui5 `ComboBoxBase.addItemGroup`); app 452 converted 2026-07-16 (LIVE-TEST pending) |
 | Standard composite binding **types** (`sap.ui.model.type.Currency`, Date/Number types) | ✅ | keep the original binding-info string 1:1 — `\|\{ parts:[\{path:'PRICE'\},\{path:'CURRENCY_CODE'\}], type:'sap.ui.model.type.Currency', formatOptions:\{showMeasure:false\} \}\|` — over a numeric ABAP field (`price TYPE p`); the type is a client-side standard resolved on the frontend, and abap2UI5 passes the attribute value to `XMLView.create` unmangled (the same pass-through as the sorter rows) | apps 440/401 converted 2026-07-17 (LIVE-TEST pending); same idiom as curated samples `z2ui5_cl_demo_app_369` / `_172`. App 460 keeps a static single-record resolution for an unrelated reason ({/ProductCollection/0}), not because the type is inexpressible |
-| Custom JS formatter **functions** (`Formatter.js`, a `formatter: '.fn'` controller method) | ❌ | preformat the value in ABAP, bind the result; note it | app 401 `Formatter.js` weightState (a client-side JS function, no server equivalent) |
+| Custom JS formatter **functions** (`Formatter.js`, a `formatter: '.fn'` controller method) | ❌ | preformat the value in ABAP, bind the result; note it. Requested upstream as a `z2ui5.fmt.*` registry: pr/formatter-registry | app 401 `Formatter.js` weightState (a client-side JS function, no server equivalent) |
 | MessageManager / `message>` model | ❌ | bind an equivalent hardcoded table | app 449 |
 
 ## Events
@@ -69,6 +70,7 @@ feature this table marks ✅/🔶.
 | Opening external URLs (`URLHelper.redirect`) | ✅ | `client->_event_client( client->cs_event-open_new_tab, t_arg = ( url ) )` | app 460 |
 | Client-side-only behaviour with no backend effect | ✅ | `client->_event_client( … )` frontend actions | overview app popup close |
 | Post-render actions (focus, scroll, …) | ✅ | `client->follow_up_action( val = client->cs_event-… )` — queued to run AFTER the response is rendered, so the DOM exists | source-verified (z2ui5_cl_core_client:43-55) |
+| Imperative one-shot control methods with no binding equivalent (`open`, `close`, `setExpanded`, `scrollToIndex`, `scrollTo`, `focus`, NavContainer `to`/`back`) | ✅ | `client->control_call_by_id( id = … method = … params = … )` — whitelisted per method with arg-kind casting (`bool` takes the ABAP `X`/space), runs client-side after render; `open`/`close`/`setExpanded` added 2026-07-18 (pr/control-call-whitelist) | apps 469 (`open`) and 471 (`setExpanded`), LIVE-TEST pending; source-verified in `app/webapp/core/FrontendAction.js` `CONTROL_METHODS` |
 | Timers / polling | ✅ | `cs_event-start_timer` (callbackEvent, delayMs) + `_event( s_ctrl = VALUE #( check_allow_multi_req = abap_true ) )` for events during a running round-trip | source-verified (frontendaction:348-362) |
 | Rich event payloads beyond strings | ✅ | `_event( r_data = ref )` snapshots ABAP data at render time; read back via `client->get( )-r_event_data` | source-verified (core_client:404-414) |
 
@@ -87,8 +89,9 @@ browser things: `popup_close`, `popover_close`, `open_new_tab`,
 Newest (branch, pending release): the generic **`control_call`** /
 **`control_call_by_id`** — call a *whitelisted* method on a global object
 (MessageToast, MessageBox, BusyIndicator, Theming) or on a control resolved
-by id (`to`, `focus`, `scrollToIndex`, …), client-side after render, without
-adding a dedicated action constant per case.
+by id (`to`, `back`, `focus`, `scrollToIndex`, `scrollTo`, and since
+2026-07-18 also `open`, `close`, `setExpanded` — pr/control-call-whitelist),
+client-side after render, without adding a dedicated action constant per case.
 Also available: nested view slots (`nest_view_display`), `popover_display(
 by_id )` anchored to any control, app-stack navigation with typed results
 (`nav_app_call/leave` + `get_app_prev`), and bundled custom controls

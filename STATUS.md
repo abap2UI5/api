@@ -146,7 +146,8 @@ Second pass — the four remaining audit items worked off (2026-07-17):
 
 Two ideas the audit surfaced, handled per their true nature:
 
-- **`pr/control-call-whitelist`** (new, open) — a genuine framework gap: the
+- **`pr/control-call-whitelist`** (new; **implemented upstream 2026-07-18**,
+  see the section below) — a genuine framework gap: the
   `control_call_by_id` whitelist (`to/back/focus/scrollToIndex/scrollTo`) does
   not include the imperative methods two 1:1 ports need — `PDFViewer.open()`
   (469) and `Panel.setExpanded()` (471). Written up as a forwardable request to
@@ -222,6 +223,33 @@ A hardening pass over the pipeline itself (builder, gates, planning):
 - **Sidecar `audit` structured** — `{ frontend_action, event_t_arg, note? }`,
   enforced by validate-meta.
 
+## Whitelist request implemented + ports converted (2026-07-18)
+
+The `pr/control-call-whitelist` request was implemented upstream in
+[abap2UI5/abap2UI5](https://github.com/abap2UI5/abap2UI5): `CONTROL_METHODS`
+in `app/webapp/core/FrontendAction.js` now also whitelists `open: []`,
+`close: []` and `setExpanded: ["bool"]` (embedded frontend regenerated, unit
+specs extended). Follow-through in this repo, same change:
+
+- **469** — converted from the Dialog-embedding workaround to the original's
+  popup mode: the `PDFViewer` is declared in the view's `mvc:dependents`
+  aggregation (the `addDependent` equivalent), `source` is bound, and
+  `SHOW_PDF` runs `view_model_update` + `control_call_by_id( method = 'open' )`.
+  IMPROVISED narrowed to the per-image JSONModel flattening (named-models
+  family); the Dialog deviation is gone.
+- **471** — converted from the two-way bound `expanded` + `view_model_update`
+  workaround to the original's imperative toggle: `TOOLBAR_PRESSED` inverts a
+  server-side mirror and calls `control_call_by_id( method = 'setExpanded' )`.
+  The view now matches the original `view.xml` exactly; IMPROVISED dropped.
+- CAPABILITIES.md: new rows for popup-mode controls in `mvc:dependents` and
+  for imperative one-shot control methods; frontend-action catalog updated.
+- **`pr/formatter-registry`** (new, open) — the next-most-common remaining ❌
+  category written up as a forwardable request: app-supplied client-side
+  formatter functions via a `z2ui5.fmt.*` registry (the framework already
+  publishes `z2ui5.Util` for exactly this use and already executes
+  server-shipped custom JS; only the app-facing registration is missing).
+  Evidence: 401 (`weightState`), 452 (`groupHeaderFactory`), 481 (factories).
+
 ## Open findings (backlog)
 
 Live tests pending (in-system) — the 2026-07-16 framework source pass
@@ -229,7 +257,12 @@ Live tests pending (in-system) — the 2026-07-16 framework source pass
 is visual/UX confirmation:
 - [ ] **401** — Reset unchecks the facet popover checkboxes (mechanics
   source-verified: model applied before on_event).
-- [ ] **469** — PDFViewer renders inside the Dialog at height 100%.
+- [ ] **469** — the popup-mode PDFViewer opens via the whitelisted
+  `control_call_by_id( 'open' )` and shows the clicked PDF (converted
+  2026-07-18; the earlier Dialog check is obsolete).
+- [ ] **471** — the third panel toggles via the whitelisted
+  `control_call_by_id( 'setExpanded' )` on each toolbar press (converted
+  2026-07-18).
 - [ ] **487** — nested tree binding renders expandable levels (serialization
   source-verified; framework ships z2ui5.cc.Tree).
 - [ ] **529** — the press Dialog opens/closes (popup_display).
