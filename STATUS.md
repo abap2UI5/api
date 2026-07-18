@@ -256,17 +256,23 @@ specs extended). Follow-through in this repo, same change:
   argument ("the server ships all frontend code anyway") does not justify the
   *mechanism class*. The shipped design instead mirrors an original UI5 app's
   **formatter file** (human direction 2026-07-18): abap2UI5 now serves a
-  curated `z2ui5/Formatter` module — a real script resource, published as
-  the `z2ui5.Formatter` global, no ABAP API change, growth via framework PRs
-  only (the `control_call_by_id` whitelist model). It re-exports the
-  `z2ui5.Util` date helpers so Util can fold in over time. Outcome:
+  curated formatter module in the standard app layout —
+  `app/webapp/model/formatter.js`, next to `model/models.js` — a real script
+  resource, no ABAP API change, growth via framework PRs only (the
+  `control_call_by_id` whitelist model). Views wire it via
+  `core:require="{Formatter: 'z2ui5/model/formatter'}"` (UI5 ≥ 1.74,
+  POST_171 in ports; the published `z2ui5.Formatter` global covers older
+  releases). It re-exports the `z2ui5.Util` date helpers so Util can fold in
+  over time. Outcome:
   - **401** — the appended table's weight state keeps the original
-    parts+formatter binding via `z2ui5.Formatter.weightState`; only the
-    reference name differs from the app-local `.formatter.weightState`. The
-    interim expression-binding version and the precomputed `WEIGHT_STATE`
-    column are both gone.
+    parts+formatter binding: the view requires the module like the original
+    controller requires `./Formatter`, and binds
+    `formatter: 'Formatter.weightState'` — the alias reference mirrors the
+    original's `.formatter.weightState`. The interim expression-binding
+    version and the precomputed `WEIGHT_STATE` column are both gone.
   - render-smoke harness mirrors the module's fixed contract (faithful
-    `weightState`, kept in sync with `app/webapp/Formatter.js`).
+    `weightState` registered as the named module `z2ui5/model/formatter`,
+    kept in sync with abap2UI5).
   - CAPABILITIES.md formatter row is 🔶: curated-module reference first,
     expression binding for app-specific one-offs, ABAP preformatting as the
     fallback; factories returning controls stay ❌.
@@ -278,9 +284,9 @@ Live tests pending (in-system) — the 2026-07-16 framework source pass
 is visual/UX confirmation:
 - [ ] **401** — Reset unchecks the facet popover checkboxes (mechanics
   source-verified: model applied before on_event).
-- [ ] **401** — the weight states render Success/Warning/Error via
-  `z2ui5.Formatter.weightState` (first port referencing the curated
-  formatter module, converted 2026-07-18).
+- [ ] **401** — the weight states render Success/Warning/Error via the
+  core:require'd `Formatter.weightState` (first port referencing the
+  curated formatter module, converted 2026-07-18).
 - [ ] **469** — the popup-mode PDFViewer opens via the whitelisted
   `control_call_by_id( 'open' )` and shows the clicked PDF (converted
   2026-07-18; the earlier Dialog check is obsolete).

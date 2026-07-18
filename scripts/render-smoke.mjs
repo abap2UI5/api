@@ -456,11 +456,13 @@ const HARNESS = `<!DOCTYPE html>
 <script>
   window.uiErrors = [];
   window.addEventListener('error', function (e) { window.uiErrors.push('PAGEERROR: ' + e.message); });
-  // Mirror of the framework's curated z2ui5/Formatter module (published as
-  // the z2ui5.Formatter global; a real served script upstream, CSP-clean).
-  // The functions are a fixed public contract, so mirroring them faithfully
-  // here is legitimate - like the device model the harness also provides.
-  // Keep in sync with abap2UI5 app/webapp/Formatter.js.
+  // Mirror of the framework's curated formatter module (standard app layout
+  // model/formatter.js; served as a real script upstream, CSP-clean). The
+  // functions are a fixed public contract, so mirroring them faithfully here
+  // is legitimate - like the device model the harness also provides. Keep in
+  // sync with abap2UI5 app/webapp/model/formatter.js. Registered as the
+  // named module z2ui5/model/formatter in boot() below (for core:require)
+  // and published as the z2ui5.Formatter global (the pre-1.74 reference).
   window.z2ui5 = window.z2ui5 || {};
   window.z2ui5.Formatter = {
     weightState: function (measure, unit) {
@@ -482,6 +484,10 @@ const HARNESS = `<!DOCTYPE html>
 <script>
   window.uiReady = new Promise(function (resolve) {
     function boot() {
+      // core:require="{Formatter: 'z2ui5/model/formatter'}" must resolve
+      // without the framework being served - register the mirror above as
+      // the named module before any view is created.
+      sap.ui.define('z2ui5/model/formatter', [], function () { return window.z2ui5.Formatter; });
       sap.ui.require(['sap/ui/core/Core', 'sap/base/Log'], function (Core, Log) {
         Log.addLogListener({ onLogEntry: function (e) {
           if (e.level <= Log.Level.ERROR) window.uiErrors.push('LOG: ' + e.message);

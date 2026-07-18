@@ -94,8 +94,13 @@ CLASS z2ui5_cl_ai_app_401 IMPLEMENTATION.
     DATA(view) = z2ui5_cl_ai_xml=>factory( ).
 
     view->open( n = `View` ns = `mvc`
-        )->a( n = `xmlns`     v = `sap.m`
-        )->a( n = `xmlns:mvc` v = `sap.ui.core.mvc`
+        )->a( n = `xmlns`      v = `sap.m`
+        )->a( n = `xmlns:mvc`  v = `sap.ui.core.mvc`
+        )->a( n = `xmlns:core` v = `sap.ui.core`
+        " the framework's formatter module (standard app layout model/formatter.js),
+        " wired like an original UI5 app wires its formatter: required into the
+        " view and referenced by alias below (core:require needs UI5 >= 1.74)
+        )->a( n = `core:require` v = `{Formatter: 'z2ui5/model/formatter'}`
 
         )->open( `VBox`
             )->a( n = `id` v = `idVBox`
@@ -206,15 +211,14 @@ CLASS z2ui5_cl_ai_app_401 IMPLEMENTATION.
                                 )->a( n = `text` v = `{SUPPLIER_NAME}`
                             )->leaf( `Text`
                                 )->a( n = `text` v = `{DIMENSIONS}`
-                            " the original binds state over its app-local Formatter.js
-                            " weightState; the framework's curated z2ui5/Formatter module
-                            " ships the same function (a served script, CSP-clean), so the
-                            " parts+formatter binding survives 1:1 - only the reference
-                            " changes from '.formatter.weightState' to the shared global
+                            " the original requires './Formatter' in the controller and binds
+                            " '.formatter.weightState'; here the framework's curated formatter
+                            " module is required into the view (core:require above) and the
+                            " parts+formatter binding survives 1:1 under the same alias idea
                             )->leaf( `ObjectNumber`
                                 )->a( n = `number` v = `{WEIGHT_MEASURE}`
                                 )->a( n = `unit`   v = `{WEIGHT_UNIT}`
-                                )->a( n = `state`  v = |\{ parts: [\{path: 'WEIGHT_MEASURE'\}, \{path: 'WEIGHT_UNIT'\}], formatter: 'z2ui5.Formatter.weightState' \}|
+                                )->a( n = `state`  v = |\{ parts: [\{path: 'WEIGHT_MEASURE'\}, \{path: 'WEIGHT_UNIT'\}], formatter: 'Formatter.weightState' \}|
                             )->leaf( `ObjectNumber`
                                 )->a( n = `number` v = |\{ parts:[\{path:'PRICE'\},\{path:'CURRENCY_CODE'\}], type:'sap.ui.model.type.Currency', formatOptions:\{showMeasure:false\} \}|
                                 )->a( n = `unit`   v = `{CURRENCY_CODE}` ).

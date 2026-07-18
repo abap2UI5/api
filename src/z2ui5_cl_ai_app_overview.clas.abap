@@ -267,13 +267,17 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` on_event runs. // LIVE-TEST: confirm in a running system that clearing the bound selected flags on Reset also unchecks the facet popover checkboxes (FacetFilterList caches its selection client-side).` &&
                  ` // IMPROVISED: the original controller appends the sap.m.sample.Table component's table with its first cell swapped for an ObjectIdentifier {Name}/{Category}; that table is rebuilt inline. The price` &&
                  ` column keeps the original sap.ui.model.type.Currency composite binding 1:1 (raw binding-info string over a numeric PRICE field). // NOTE: the weight column keeps the original parts+formatter binding` &&
-                 ` 1:1: the framework's curated z2ui5/Formatter module (a served script, CSP-clean - see pr/formatter-registry, implemented 2026-07-18 after an eval-based register_formatter was rejected for security)` &&
-                 ` ships the sample's weightState, so state binds { parts: [WEIGHT_MEASURE, WEIGHT_UNIT], formatter: 'z2ui5.Formatter.weightState' }. Only the reference name differs from the original's app-local` &&
-                 ` '.formatter.weightState'. The earlier precomputed WEIGHT_STATE column stays gone. // LIVE-TEST: confirm the weight states render Success/Warning/Error per row via z2ui5.Formatter.weightState (first` &&
-                 ` port referencing the curated formatter module, converted 2026-07-18). // IMPROVISED: the appended table's header toolbar keeps only Title and ToolbarSpacer - the sample's popin-layout ComboBox (with` &&
-                 ` core:Item entries), the sticky CheckBoxes with their Label and the Hide/Show ToggleButton drive client-side table APIs (setSticky, popin layout) with no abap2UI5 equivalent; the infoToolbar (an` &&
-                 ` OverflowToolbar with a Label) and the p:ColumnAIAction column plugin (newer than UI5 1.71) are dropped as well. // SUBSET: data is a 10-row subset of the mock /ProductCollection` &&
-                 ` (ui5/mock/products.json), facet counters recomputed for the subset.` )
+                 ` 1:1: the framework ships the sample's weightState in its curated formatter module (standard app layout model/formatter.js, a served script, CSP-clean - see pr/formatter-registry, implemented` &&
+                 ` 2026-07-18 after an eval-based register_formatter was rejected for security). The view requires it like the original controller requires './Formatter': core:require="{Formatter:` &&
+                 ` 'z2ui5/model/formatter'}" on the view root, state binds { parts: [WEIGHT_MEASURE, WEIGHT_UNIT], formatter: 'Formatter.weightState' } - the alias reference mirrors the original's` &&
+                 ` '.formatter.weightState'. The earlier precomputed WEIGHT_STATE column stays gone. // POST-1.71: core:require on the view root (since UI5 1.74) is newer than 1.71 but used for the formatter wiring -` &&
+                 ` the app needs a UI5 release >= 1.74; on older releases reference the published global instead (formatter: 'z2ui5.Formatter.weightState'). // LIVE-TEST: confirm the weight states render` &&
+                 ` Success/Warning/Error per row via the core:require'd Formatter.weightState (first port referencing the curated formatter module, converted 2026-07-18). // IMPROVISED: the appended table's header` &&
+                 ` toolbar keeps only Title and ToolbarSpacer - the sample's popin-layout ComboBox (with core:Item entries), the sticky CheckBoxes with their Label and the Hide/Show ToggleButton drive client-side table` &&
+                 ` APIs (setSticky, popin layout) with no abap2UI5 equivalent; the infoToolbar (an OverflowToolbar with a Label) and the p:ColumnAIAction column plugin (newer than UI5 1.71) are dropped as well. //` &&
+                 ` SUBSET: data is a 10-row subset of the mock /ProductCollection (ui5/mock/products.json), facet counters recomputed for the subset.`
+        post171 = `core:require on the view root (since UI5 1.74) is newer than 1.71 but used for the formatter wiring - the app needs a UI5 release >= 1.74; on older releases reference the published global instead` &&
+                 ` (formatter: 'z2ui5.Formatter.weightState').` )
       ( module = `sap.m` control = `sap.m.FlexBox`         name = `FlexBoxNested`             class = `z2ui5_cl_ai_app_404` path = `src/01/b04/z2ui5_cl_ai_app_404.clas.abap`
         notes = `LIVE-TEST: the original colours .item1..item6 and the h2 headings via a separate style.css; here it is injected as a core:HTML content attribute (a style tag, minified - see CAPABILITIES.md). Confirm` &&
                  ` the flex items render with their background colours in a running system.` )
