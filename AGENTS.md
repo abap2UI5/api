@@ -500,8 +500,9 @@ A fourth workflow, `checks`, runs three deterministic gates on every PR:
 | Job | Command | Fails when |
 |-----|---------|------------|
 | `pattern_lint` | `node scripts/pattern-lint.mjs` | a known-bad pattern reappears (each rule encodes a distilled §10 lesson; known open findings live in the script's BASELINE and in STATUS.md) |
-| `structural_diff` | `node scripts/structural-diff.mjs --strict` | a port's rendered view deviates from the original `view.xml` without a declared deviation |
-| `meta_valid` | `validate-meta.mjs` + regenerate the overview, `git diff --exit-code -- src` | an invalid sidecar, or a change forgot to regenerate the overview app |
+| `structural_diff` | `node scripts/structural-diff.mjs --strict` | a port's rendered view deviates from the original `view.xml` — control multiset, attribute names or simple **binding values** — without a declared deviation |
+| `render_smoke` | `node scripts/render-smoke.mjs --strict` (`npm run smoke`) | a port's reconstructed view fails a real headless `XMLView.create` against the OpenUI5 runtime (invalid XML, unknown control/property, strict property-type violation, broken expression binding); helper-method-built views are SKIPped loudly |
+| `meta_valid` | `validate-meta.mjs` + regenerate overview & coverage, `git diff --exit-code -- src README.md api.md` | an invalid sidecar, or a change forgot to regenerate the overview app / coverage docs |
 | `property_gate` | `node scripts/property-check.mjs` | a port uses a control member introduced after UI5 1.71 (per-member `@since` from `ui5/properties.json`) without declaring it in a `POST_171` deviation |
 
 **When a distilled lesson is greppable, add it as a pattern-lint rule in the
@@ -514,8 +515,10 @@ npx abaplint ./abaplint.jsonc          # expect 0 issues
 node scripts/validate-meta.mjs         # sidecar schema + referential integrity
 node scripts/pattern-lint.mjs          # expect 0 errors
 node scripts/structural-diff.mjs --strict
+node scripts/render-smoke.mjs --strict # headless XMLView.create per port
 node scripts/property-check.mjs        # no member newer than UI5 1.71
 node scripts/generate-overview.mjs     # then: git diff must stay clean
+node scripts/generate-coverage.mjs     # (README/api.md must stay clean too)
 ```
 
 ### abapGit file format (all serialized files)
@@ -675,6 +678,11 @@ How to record it:
   throwaway `git worktree` (or copy) and check `abap_702.jsonc` there. If you did
   run it in place, `git checkout -- .` to restore before committing.
 - **ABAP Doc (`"!`) is HTML** — no raw `<tag>` (e.g. `<mvc:View>`); see §8.
+- **Literal braces in attribute values are read as a BINDING by the XMLView
+  parser** — CSS/JS braces inside a `core:HTML` `content` (or any literal
+  attribute value) must be escaped `\{ … \}` or view creation crashes.
+  Found by render-smoke on app 431 (2026-07-18); pattern-lint rule
+  `unescaped-brace-in-style-content` gates the `<style>` case.
 - **Event args need the `$`-prefixed form** (`${COL}`, `$event.oSource.sId`), not
   a bare `{COL}` — see §5 "Data binding & events".
 - **abap2UI5 has only one default model** — flatten any named-model binding into
