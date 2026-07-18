@@ -43,6 +43,7 @@ Reviewed, curated samples graduate to the hand-maintained
 <details>
 <summary><b>Generation prompt</b> (UI5 sample → abap2UI5 app)</summary>
 
+<!-- prompt:start -->
 ```
 You are porting one official UI5 demo kit sample to abap2UI5.
 
@@ -103,6 +104,7 @@ Rules:
 - Set the abapGit <DESCRIPT> to `<entity> - <demo kit description>`.
 - Follow all ABAP conventions in AGENTS.md.
 ```
+<!-- prompt:end -->
 
 </details>
 
@@ -128,7 +130,7 @@ CI enforces this on every change:
 | `ABAP_STANDARD`  | `abaplint ./abaplint.jsonc` (syntax `v750`)                    |
 | `ABAP_CLOUD`     | `abaplint .github/abaplint/abap_cloud.jsonc` (syntax `Cloud`)  |
 | `ABAP_702`       | `npm run downport` → `abaplint .github/abaplint/abap_702.jsonc` |
-| `checks`         | `pattern-lint` (distilled lessons), `structural-diff --strict` (port vs original view, undeclared deviations fail), `validate-meta` + overview sync |
+| `checks`         | `pattern-lint` (distilled lessons), `structural-diff --strict` (port vs original view incl. binding values, undeclared deviations fail), `render-smoke` (headless `XMLView.create` per port), `validate-meta` + overview/coverage sync |
 
 Every port also carries a machine-readable sidecar `meta/<class>.json`
 (sample, status, declared deviations) — the source of truth the overview app,

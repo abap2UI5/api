@@ -8,12 +8,22 @@
  *   node scripts/structural-diff.mjs            advisory report
  *   node scripts/structural-diff.mjs --strict   exit 1 on undeclared diffs
  *
- * What it compares (name-level, not values):
+ * What it compares:
  *  - the multiset of CONTROLS used (UpperCamelCase elements; lowercase
  *    aggregation elements are ignored on both sides, they are optional in XML)
  *  - per control, the set of attribute/property NAMES used
- * A difference is "declared" when the control/attribute name appears in one
- * of the port's deviation texts or its CHECKED note.
+ *  - per control+attribute, simple BINDING VALUES (`{path}`): when the
+ *    original attribute is a plain property binding and the port writes a
+ *    literal value for the same attribute, the binding tokens must match
+ *    (normalized: case-insensitive, underscores stripped, flattened paths
+ *    match on their last segment — `{/products/0/name}` ~ `{NAME}`). This is
+ *    the {COL}-vs-static-placeholder / lost-binding failure class that
+ *    name-level checks cannot see. Port values that are ABAP expressions
+ *    (client->_bind_edit, |...| templates) are not statically comparable and
+ *    stay with review/live checks.
+ * A difference is "declared" when the control/attribute name (or, for binding
+ * values, the binding's last path segment) appears in one of the port's
+ * deviation texts or its CHECKED note.
  *
  * Known limits (advisory by design):
  *  - controller-created UI (setTokens, controller-built dialogs) is invisible
@@ -40,6 +50,7 @@ const simpleName = (qname) => qname.split(':').pop();
 function parseXml(xml) {
   const controls = new Map();          // qname -> count
   const attrs = new Map();             // simple control name -> Set(attr names)
+  const values = new Map();            // simple control name -> Map(attr -> Set(values))
   const clean = xml.replace(/<!--[\s\S]*?-->/g, '');
   const tagRe = /<([A-Za-z_][\w.:-]*)((?:[^>"]|"[^"]*")*?)\/?>/g;
   let m;
@@ -48,21 +59,27 @@ function parseXml(xml) {
     if (!isControl(qname)) continue;
     controls.set(qname, (controls.get(qname) || 0) + 1);
     const set = attrs.get(simpleName(qname)) || new Set();
-    const attrRe = /([\w.:-]+)\s*=\s*"[^"]*"/g;
+    const vmap = values.get(simpleName(qname)) || new Map();
+    const attrRe = /([\w.:-]+)\s*=\s*"([^"]*)"/g;
     let a;
     while ((a = attrRe.exec(m[2])) !== null) {
       if (a[1].startsWith('xmlns') || IGNORED_ATTRS.has(a[1])) continue;
       set.add(a[1]);
+      const vset = vmap.get(a[1]) || new Set();
+      vset.add(a[2]);
+      vmap.set(a[1], vset);
     }
     attrs.set(simpleName(qname), set);
+    values.set(simpleName(qname), vmap);
   }
-  return { controls, attrs };
+  return { controls, attrs, values };
 }
 
 // ---------- port side: parse the builder calls out of the ABAP ----------
 function parseAbap(abap) {
   const controls = new Map();
   const attrs = new Map();
+  const values = new Map();   // simple control name -> Map(attr -> Set(LITERAL values))
   // one pass over element creations; attributes are associated with the
   // element created last (that is exactly the builder's a() contract)
   const elemRe = /->\s*(open|leaf)\(\s*(?:n\s*=\s*)?`([\w:.-]+)`(?:\s+ns\s*=\s*`(\w+)`)?/g;
@@ -78,15 +95,26 @@ function parseAbap(abap) {
     controls.set(qname, (controls.get(qname) || 0) + 1);
     const slice = abap.slice(marks[i].at, i + 1 < marks.length ? marks[i + 1].at : undefined);
     const set = attrs.get(simpleName(qname)) || new Set();
+    const vmap = values.get(simpleName(qname)) || new Map();
+    const addVal = (attr, val) => {
+      const vset = vmap.get(attr) || new Set();
+      vset.add(val);
+      vmap.set(attr, vset);
+    };
     // chained form: )->a( n = `key` v = ... )
-    for (const a of slice.matchAll(/->\s*a\(\s*n\s*=\s*`([\w.:-]+)`/g)) {
-      if (!a[1].startsWith('xmlns') && !IGNORED_ATTRS.has(a[1])) set.add(a[1]);
+    for (const a of slice.matchAll(/->\s*a\(\s*n\s*=\s*`([\w.:-]+)`(?:\s+v\s*=\s*`([^`\n]*)`\s*(?=[\r\n)]))?/g)) {
+      if (a[1].startsWith('xmlns') || IGNORED_ATTRS.has(a[1])) continue;
+      set.add(a[1]);
+      if (a[2] !== undefined) addVal(a[1], a[2]);   // plain backtick literal only
     }
     // up-front table form: a = VALUE #( ( `key=value` ) ... )
-    for (const a of slice.matchAll(/\(\s*`([\w.:-]+)=/g)) {
-      if (!a[1].startsWith('xmlns') && !IGNORED_ATTRS.has(a[1])) set.add(a[1]);
+    for (const a of slice.matchAll(/\(\s*`([\w.:-]+)=([^`]*)`/g)) {
+      if (a[1].startsWith('xmlns') || IGNORED_ATTRS.has(a[1])) continue;
+      set.add(a[1]);
+      addVal(a[1], a[2]);
     }
     attrs.set(simpleName(qname), set);
+    values.set(simpleName(qname), vmap);
   }
   // dynamic only when a loop actually builds view elements — a LOOP in event
   // handling must not exempt the whole app from count checks
@@ -94,8 +122,17 @@ function parseAbap(abap) {
   for (const block of abap.matchAll(/\b(?:LOOP AT|DO\b|WHILE\b)[\s\S]*?\b(?:ENDLOOP|ENDDO|ENDWHILE)\b/g)) {
     if (/->\s*(?:open|leaf)\(/.test(block[0])) { dynamic = true; break; }
   }
-  return { controls, attrs, dynamic };
+  return { controls, attrs, values, dynamic };
 }
+
+// ---------- binding-value comparison helpers ----------
+// a simple property binding: {name}, {/path/0/name}, {model>/path}
+const SIMPLE_BIND = /^\{[\w.$>/]+\}$/;
+// normalized full token: case-insensitive, underscores stripped (ABAP
+// upper-cases and snake_cases the JSON keys: {ProductId} ~ {PRODUCT_ID})
+const normBind = (t) => t.toLowerCase().replace(/_/g, '');
+// last path segment — flattened ports bind the leaf field: {/products/0/name} ~ {NAME}
+const lastSeg = (t) => normBind(t).replace(/[{}]/g, '').split(/[/>]/).pop();
 
 // ---------- per-port original views: everything the manifest lists ----------
 // join key: the sample name (ui5/sap.m/<SampleName>/), derived from meta.sample
@@ -140,7 +177,7 @@ for (const metaFile of fs.readdirSync(META).sort()) {
     lines.push(`${meta.class} (${meta.sample}): no original view.xml archived — SKIPPED`);
     continue;
   }
-  const orig = { controls: new Map(), attrs: new Map() };
+  const orig = { controls: new Map(), attrs: new Map(), values: new Map() };
   for (const v of views) {
     const p = parseXml(fs.readFileSync(v, 'utf8'));
     for (const [k, n] of p.controls) orig.controls.set(k, (orig.controls.get(k) || 0) + n);
@@ -148,6 +185,15 @@ for (const metaFile of fs.readdirSync(META).sort()) {
       const set = orig.attrs.get(k) || new Set();
       for (const a of s) set.add(a);
       orig.attrs.set(k, set);
+    }
+    for (const [k, vmap] of p.values) {
+      const dst = orig.values.get(k) || new Map();
+      for (const [attr, vset] of vmap) {
+        const merged = dst.get(attr) || new Set();
+        for (const val of vset) merged.add(val);
+        dst.set(attr, merged);
+      }
+      orig.values.set(k, dst);
     }
   }
   const port = parseAbap(fs.readFileSync(abapPath, 'utf8'));
@@ -170,12 +216,37 @@ for (const metaFile of fs.readdirSync(META).sort()) {
     if (!pSet) continue; // control diff already reported
     for (const a of oSet) if (!pSet.has(a)) diffs.push({ kind: 'attr missing', name: a, detail: `${ctrl}.${a}` });
   }
+  // binding values: original {path} vs the port's literal value for the same
+  // control+attribute — only where both sides are statically comparable
+  for (const [ctrl, oVmap] of orig.values) {
+    const pVmap = port.values.get(ctrl);
+    if (!pVmap) continue;
+    for (const [attr, oVset] of oVmap) {
+      const oBinds = [...oVset].filter((v) => SIMPLE_BIND.test(v));
+      if (!oBinds.length) continue;                    // no plain binding in the original
+      const pVset = pVmap.get(attr);
+      if (!pVset || !pVset.size) continue;             // port value is an ABAP expression — not comparable
+      const pBinds = [...pVset].filter((v) => SIMPLE_BIND.test(v));
+      for (const ov of oBinds) {
+        const ok = pBinds.some((pv) => normBind(pv) === normBind(ov) || lastSeg(pv) === lastSeg(ov));
+        if (!ok) {
+          // declared when the attribute, the original binding's last path
+          // segment OR the control itself is named in a deviation (a declared
+          // static unroll / flattening covers every binding it resolves)
+          diffs.push({
+            kind: 'binding value', name: attr, altNames: [lastSeg(ov), ctrl],
+            detail: `${ctrl}.${attr}: original ${ov} vs port ${[...pVset].map((v) => `\`${v}\``).join(' ')}`,
+          });
+        }
+      }
+    }
+  }
 
   if (diffs.length) {
     appsWithDiffs++;
     lines.push(`${meta.class} (${meta.sample})${port.dynamic ? ' [dynamic]' : ''}:`);
     for (const d of diffs) {
-      const ok = declared(d.name);
+      const ok = declared(d.name) || (d.altNames || []).some(declared);
       if (!ok) undeclaredTotal++;
       lines.push(`  ${ok ? '  declared' : '! UNDECLARED'}  ${d.kind}  ${d.detail}`);
     }

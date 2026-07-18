@@ -4,7 +4,10 @@
   "entity": "sap.m.Breadcrumbs",
   "file": "src/01/b01/z2ui5_cl_ai_app_530.clas.abap",
   "batch": "b01",
-  "audit": "(a) frontend_action (_event_client): NO | (b) event t_arg: YES",
+  "audit": {
+    "frontend_action": false,
+    "event_t_arg": true
+  },
   "status": "checked",
   "checked": {
     "date": "2026-07-15",

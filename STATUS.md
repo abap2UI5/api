@@ -1,6 +1,6 @@
 # STATUS.md — current state & open findings
 
-_Point-in-time summary, last updated **2026-07-16**. Update this file whenever
+_Point-in-time summary, last updated **2026-07-18**. Update this file whenever
 findings are fixed or new ones land (same-change discipline as AGENTS.md §10).
 For the process itself see TRAINING.md; for what abap2UI5 can express see
 CAPABILITIES.md._
@@ -11,9 +11,10 @@ CAPABILITIES.md._
 |---|---|
 | Ports | 34 / **403 in-scope** `sap.m` samples (8.4 %) — in scope = control exists since UI5 1.71 and is not deprecated; 43 of 446 samples are out of scope (16 deprecated, 21 newer, 6 without control metadata) |
 | CI | ABAP_STANDARD, ABAP_CLOUD, ABAP_702 all green |
-| Structural view diff | **0 undeclared differences** across all 34 ports (`node scripts/structural-diff.mjs --strict`) |
+| Structural view diff | **0 undeclared differences** across all 34 ports (`node scripts/structural-diff.mjs --strict`) — now including simple **binding values**, not just names |
+| Render smoke | **0 failing / 1 skipped** (`npm run smoke`): every reconstructable port's view loads in a real headless `XMLView.create` (app 481 skipped — helper-method view building is not statically reconstructable) |
 | Pattern lint | **0 errors, 0 warnings, empty baseline** (`node scripts/pattern-lint.mjs`) |
-| Meta sidecars | 34 in `meta/` — status: 30 `generated`, 4 `checked`; deviations: 14 IMPROVISED, 13 POST_171, 15 LIVE_TEST, 7 SUBSET_DATA, 8 NOTE — DROPPED_171 is empty since the 1:1 restoration |
+| Meta sidecars | 34 in `meta/` — status: 30 `generated`, 4 `checked`; deviations: 14 IMPROVISED, 13 POST_171, 15 LIVE_TEST, 7 SUBSET_DATA, 8 NOTE — DROPPED_171 is empty since the 1:1 restoration. `audit` is a structured object since 2026-07-18 |
 | Manually verified in a running system | 420, 421, 526, 530 (`CHECKED`) |
 | Archive | `ui5/sap.m/<SampleName>/` — full originals for the 34 ported samples (+2 cross-referenced: `FacetFilterSimple`, `Table`); mock snapshot in `ui5/mock/`. Unported samples are copied over batch by batch. |
 
@@ -179,6 +180,48 @@ and the MultiInput validator were both already in the framework — the map/port
 had wrongly treated them as ❌. Exactly the "declared impossible although it
 already works" failure mode CAPABILITIES.md opens by warning against.
 
+## Verification & process upgrades (2026-07-18)
+
+A hardening pass over the pipeline itself (builder, gates, planning):
+
+- **Render-smoke gate** (`scripts/render-smoke.mjs`, CI job `render_smoke`,
+  `npm run smoke`) — every port's view XML is reconstructed from the builder
+  calls, fed a typed mock model derived from its TYPES/DATA/model_init, and
+  loaded with a real `XMLView.create` in headless Chromium against the
+  OpenUI5 runtime from the `@openui5/*` npm packages (offline). The first run
+  caught and led to fixing:
+  - **431/404/434** — literal CSS braces in a `core:HTML` `content` attribute
+    are parsed as a **binding** by the XMLView parser and crash view creation;
+    the CSS-injection technique only works with `\{ … \}` escapes. Braces
+    escaped in all three ports, CAPABILITIES.md row updated, new pattern-lint
+    rule `unescaped-brace-in-style-content`. (404/434 had hidden it because
+    the value sat in a helper variable the first parser version dropped.)
+  - **433** — `quantity TYPE string` bound to the int property
+    `StandardListItem.counter` → strict-type rejection; retyped `TYPE i`.
+    Same class as 472/486, but on a **table field**, which the scalar
+    pattern-lint rule cannot see — the smoke gate covers this class now.
+- **Structural diff compares binding values** — where the original attribute
+  is a plain `{path}` binding and the port writes a literal, the tokens must
+  match (case/underscore-normalized, flattened paths on the last segment).
+  First run flagged the app-401 `ObjectIdentifier` `{Category}` cell —
+  verified correct against the original controller (it swaps that cell), and
+  the app-460 sidecar now names its statically resolved bindings precisely.
+- **Builder hardened + unit-tested** — `a()` on the empty root, `shut()`
+  past the root and duplicate attribute names now ASSERT instead of silently
+  producing wrong XML; `z2ui5_cl_ai_xml` carries a local test class
+  (nesting, attr targeting, escaping, `as_bool`).
+- **Breadth-first batch planning** — `--backlog` sorts samples on uncovered
+  controls (`NEW-CONTROL`) first; one port per control before depth
+  (AGENTS §1). 190 of 369 backlog samples sit on uncovered controls.
+- **Hold-out set defined** — `ui5/holdout.json`, 25 samples across control
+  families; marked `HOLDOUT` in `--backlog`, never prompt references, never
+  `golden`. First regeneration probe is due **before batch b05**.
+- **Generation prompt single-sourced** — `scripts/generation-prompt.txt`,
+  spliced into README by `generate-coverage.mjs`; the `meta_valid` job also
+  regenerates coverage so README/api.md cannot drift.
+- **Sidecar `audit` structured** — `{ frontend_action, event_t_arg, note? }`,
+  enforced by validate-meta.
+
 ## Open findings (backlog)
 
 Live tests pending (in-system) — the 2026-07-16 framework source pass
@@ -223,8 +266,19 @@ Infrastructure:
   (refreshed by generate_result from the checkout), orphan ports are warned
   about, `FOCUS_LIBS` documented in AGENTS §7; api.md is one flat table with
   the deprecation info inline.
-- [ ] Builder hardening: `a()` on the empty root is silently dropped; `shut()`
-  past the root null-refs; duplicate attribute names render invalid XML.
+- [x] ~~Builder hardening: `a()` on the empty root is silently dropped; `shut()`
+  past the root null-refs; duplicate attribute names render invalid XML~~ —
+  done 2026-07-18: all three ASSERT (fail fast at the call site), plus a local
+  unit test class on `z2ui5_cl_ai_xml`.
+- [ ] pattern-lint stays regex-based **by decision** (2026-07-18): the rule
+  set is green and each rule is small; a rewrite on the abaplint AST API only
+  pays once regex rules start producing false positives/negatives in
+  practice. Revisit when a rule needs real syntax awareness (first candidate:
+  anything that must distinguish strings from code).
+- [ ] render-smoke: app 481 is SKIPped (view built via `render_item` helper
+  methods — not statically reconstructable). Either teach the reconstructor
+  simple single-level helper inlining, or accept the skip; never let skips
+  grow silently (the run prints them).
 - [x] ~~TRAINING.md stage 2: generate the header block from `meta/`
   (inversion)~~ — done 2026-07-16, stricter than planned: port classes carry
   no header at all; `meta/` is the source of truth (validate-meta in CI,

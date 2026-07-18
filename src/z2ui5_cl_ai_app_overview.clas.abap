@@ -339,7 +339,8 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         post171 = `showClearIcon (since UI5 1.94) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.94 to render it.` )
       ( module = `sap.m` control = `sap.m.ObjectHeader`    name = `ObjectHeader`              class = `z2ui5_cl_ai_app_460` path = `src/01/b01/z2ui5_cl_ai_app_460.clas.abap`
         notes = `IMPROVISED: the sample binds the ObjectHeader to {/ProductCollection/0} and its title/number/attributes to model fields (with a Currency type formatter on number). The port carries no model, so those` &&
-                 ` bindings are resolved to the static values of the first ProductCollection product (Notebook Basic 15).` )
+                 ` bindings are resolved to the static values of the first ProductCollection product (Notebook Basic 15) - incl. the ObjectAttribute texts ({Description}, weight, dimensions, www.sap.com) and the` &&
+                 ` numberUnit {CurrencyCode}.` )
       ( module = `sap.m` control = `sap.m.ObjectStatus`    name = `ObjectStatus`              class = `z2ui5_cl_ai_app_529` path = `src/01/b01/z2ui5_cl_ai_app_529.clas.abap`
         notes = `POST-1.71: the ObjectStatus state values Indication06-Indication08 (since UI5 1.75) and Indication09-Indication20 (since UI5 1.120) are newer than 1.71 but kept for the 1:1 port - the app needs a UI5` &&
                  ` release >= 1.120 to render them all (>= 1.75 for Indication06-Indication08). // LIVE-TEST: the active status press opens the controller-built Dialog 1:1 (core:FragmentDefinition + popup_display, per` &&
