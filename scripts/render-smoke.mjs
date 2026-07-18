@@ -456,6 +456,23 @@ const HARNESS = `<!DOCTYPE html>
 <script>
   window.uiErrors = [];
   window.addEventListener('error', function (e) { window.uiErrors.push('PAGEERROR: ' + e.message); });
+  // Mirror of the framework's curated z2ui5/Formatter module (published as
+  // the z2ui5.Formatter global; a real served script upstream, CSP-clean).
+  // The functions are a fixed public contract, so mirroring them faithfully
+  // here is legitimate - like the device model the harness also provides.
+  // Keep in sync with abap2UI5 app/webapp/Formatter.js.
+  window.z2ui5 = window.z2ui5 || {};
+  window.z2ui5.Formatter = {
+    weightState: function (measure, unit) {
+      var adjusted = parseFloat(measure);
+      if (isNaN(adjusted)) return 'None';
+      if (unit === 'G') adjusted = measure / 1000;
+      if (adjusted < 0) return 'None';
+      if (adjusted < 1) return 'Success';
+      if (adjusted < 5) return 'Warning';
+      return 'Error';
+    },
+  };
 </script>
 <script id="sap-ui-bootstrap" src="/resources/sap-ui-core.js"
   data-sap-ui-libs="sap.m,sap.ui.layout"

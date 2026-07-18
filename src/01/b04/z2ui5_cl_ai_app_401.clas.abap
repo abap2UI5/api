@@ -206,17 +206,15 @@ CLASS z2ui5_cl_ai_app_401 IMPLEMENTATION.
                                 )->a( n = `text` v = `{SUPPLIER_NAME}`
                             )->leaf( `Text`
                                 )->a( n = `text` v = `{DIMENSIONS}`
-                            " the original binds state over Formatter.js weightState; the same
-                            " thresholds (NaN/negative -> None, G -> /1000, <1 Success, <5
-                            " Warning, else Error) as a CSP-safe expression binding - the
-                            " expression parser whitelists parseFloat/isNaN, no eval involved
+                            " the original binds state over its app-local Formatter.js
+                            " weightState; the framework's curated z2ui5/Formatter module
+                            " ships the same function (a served script, CSP-clean), so the
+                            " parts+formatter binding survives 1:1 - only the reference
+                            " changes from '.formatter.weightState' to the shared global
                             )->leaf( `ObjectNumber`
                                 )->a( n = `number` v = `{WEIGHT_MEASURE}`
                                 )->a( n = `unit`   v = `{WEIGHT_UNIT}`
-                                )->a( n = `state`  v = `{= isNaN(parseFloat(${WEIGHT_MEASURE})) ? 'None' :`                                                       &&
-                                                       ` (${WEIGHT_UNIT} === 'G' ? parseFloat(${WEIGHT_MEASURE}) / 1000 : parseFloat(${WEIGHT_MEASURE})) < 0 ? 'None' :`    &&
-                                                       ` (${WEIGHT_UNIT} === 'G' ? parseFloat(${WEIGHT_MEASURE}) / 1000 : parseFloat(${WEIGHT_MEASURE})) < 1 ? 'Success' :` &&
-                                                       ` (${WEIGHT_UNIT} === 'G' ? parseFloat(${WEIGHT_MEASURE}) / 1000 : parseFloat(${WEIGHT_MEASURE})) < 5 ? 'Warning' : 'Error' }`
+                                )->a( n = `state`  v = |\{ parts: [\{path: 'WEIGHT_MEASURE'\}, \{path: 'WEIGHT_UNIT'\}], formatter: 'z2ui5.Formatter.weightState' \}|
                             )->leaf( `ObjectNumber`
                                 )->a( n = `number` v = |\{ parts:[\{path:'PRICE'\},\{path:'CURRENCY_CODE'\}], type:'sap.ui.model.type.Currency', formatOptions:\{showMeasure:false\} \}|
                                 )->a( n = `unit`   v = `{CURRENCY_CODE}` ).

@@ -243,7 +243,8 @@ specs extended). Follow-through in this repo, same change:
   The view now matches the original `view.xml` exactly; IMPROVISED dropped.
 - CAPABILITIES.md: new rows for popup-mode controls in `mvc:dependents` and
   for imperative one-shot control methods; frontend-action catalog updated.
-- **`pr/formatter-registry`** (new, open — with a lesson): app-supplied
+- **`pr/formatter-registry`** (new; **implemented 2026-07-18 as a curated
+  module — after a security detour worth recording**): app-supplied
   client-side formatter functions, the next-most-common remaining gap. An
   eval-based first design (`register_formatter` shipping JS strings, compiled
   client-side with the `Function` constructor before view creation) was
@@ -253,18 +254,22 @@ specs extended). Follow-through in this repo, same change:
   deprecation) — and an official register-a-JS-string API invites building
   formatter bodies from data, a server-mediated XSS foot-gun. The trust-model
   argument ("the server ships all frontend code anyway") does not justify the
-  *mechanism class*. Outcome:
-  - **401** — the appended table's `Formatter.js` `weightState` is reproduced
-    behavior-identically as a **CSP-safe expression binding** (the expression
-    parser whitelists `parseFloat`/`isNaN`; same thresholds, no eval); the
-    precomputed `WEIGHT_STATE` column is gone. No framework change needed.
-  - CAPABILITIES.md formatter row is now 🔶: expression binding where the
-    whitelist suffices, ABAP preformatting otherwise; factories returning
-    controls stay ❌.
-  - The request write-up stays open, now with an explicit design constraint:
-    no runtime code generation — a future implementation should serve real
-    formatter modules as same-origin script resources (preload mechanics,
-    like `z2ui5.Util`), registration at deployment/bootstrap time.
+  *mechanism class*. The shipped design instead mirrors an original UI5 app's
+  **formatter file** (human direction 2026-07-18): abap2UI5 now serves a
+  curated `z2ui5/Formatter` module — a real script resource, published as
+  the `z2ui5.Formatter` global, no ABAP API change, growth via framework PRs
+  only (the `control_call_by_id` whitelist model). It re-exports the
+  `z2ui5.Util` date helpers so Util can fold in over time. Outcome:
+  - **401** — the appended table's weight state keeps the original
+    parts+formatter binding via `z2ui5.Formatter.weightState`; only the
+    reference name differs from the app-local `.formatter.weightState`. The
+    interim expression-binding version and the precomputed `WEIGHT_STATE`
+    column are both gone.
+  - render-smoke harness mirrors the module's fixed contract (faithful
+    `weightState`, kept in sync with `app/webapp/Formatter.js`).
+  - CAPABILITIES.md formatter row is 🔶: curated-module reference first,
+    expression binding for app-specific one-offs, ABAP preformatting as the
+    fallback; factories returning controls stay ❌.
 
 ## Open findings (backlog)
 
@@ -273,9 +278,9 @@ Live tests pending (in-system) — the 2026-07-16 framework source pass
 is visual/UX confirmation:
 - [ ] **401** — Reset unchecks the facet popover checkboxes (mechanics
   source-verified: model applied before on_event).
-- [ ] **401** — the weight states render Success/Warning/Error via the
-  CSP-safe expression binding (converted from the precomputed column
-  2026-07-18).
+- [ ] **401** — the weight states render Success/Warning/Error via
+  `z2ui5.Formatter.weightState` (first port referencing the curated
+  formatter module, converted 2026-07-18).
 - [ ] **469** — the popup-mode PDFViewer opens via the whitelisted
   `control_call_by_id( 'open' )` and shows the clicked PDF (converted
   2026-07-18; the earlier Dialog check is obsolete).
