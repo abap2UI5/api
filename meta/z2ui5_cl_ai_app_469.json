@@ -4,7 +4,10 @@
   "entity": "sap.m.PDFViewer",
   "file": "src/01/b03/z2ui5_cl_ai_app_469.clas.abap",
   "batch": "b03",
-  "audit": "(a) frontend_action (_event_client): YES | (b) event t_arg: YES",
+  "audit": {
+    "frontend_action": true,
+    "event_t_arg": true
+  },
   "status": "generated",
   "checked": null,
   "deviations": [

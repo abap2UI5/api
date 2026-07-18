@@ -140,7 +140,8 @@ source of truth:
   "entity":  "sap.m.CheckBox",
   "file":    "src/01/b02/z2ui5_cl_ai_app_421.clas.abap",
   "batch":   "b02",
-  "audit":   "(a) frontend_action (_event_client): NO | (b) event t_arg: YES",
+  "audit":   { "frontend_action": false,        // uses _event_client? (note: which)
+               "event_t_arg": true },           // passes event args via t_arg?
   "status":  "generated",                       // generated|reviewed|checked|golden
   "checked": { "date": "2026-07-15", "note": "verified in a running system - ..." },
   "deviations": [ { "type": "IMPROVISED", "what": "..." } ]

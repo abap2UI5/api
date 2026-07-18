@@ -134,7 +134,7 @@ edited directly in the sidecar. The shape:
   "entity":  "sap.m.MultiInput",
   "file":    "src/01/b02/z2ui5_cl_ai_app_454.clas.abap",
   "batch":   "b02",
-  "audit":   "(a) frontend_action (_event_client): NO | (b) event t_arg: NO",
+  "audit":   { "frontend_action": false, "event_t_arg": false },
   "status":  "generated",              // generated | reviewed | checked | golden
   "checked": { "date": "2026-07-15", "note": "verified in a running system - ..." },
   "deviations": [

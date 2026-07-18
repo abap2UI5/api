@@ -4,7 +4,10 @@
   "entity": "sap.m.Panel",
   "file": "src/01/b04/z2ui5_cl_ai_app_471.clas.abap",
   "batch": "b04",
-  "audit": "(a) frontend_action (_event_client): NO | (b) event t_arg: NO",
+  "audit": {
+    "frontend_action": false,
+    "event_t_arg": false
+  },
   "status": "generated",
   "checked": null,
   "deviations": [

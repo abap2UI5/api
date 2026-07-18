@@ -4,7 +4,11 @@
   "entity": "sap.m.ObjectStatus",
   "file": "src/01/b01/z2ui5_cl_ai_app_529.clas.abap",
   "batch": "b01",
-  "audit": "(a) frontend_action (_event_client): YES - popup_close | (b) event t_arg: NO",
+  "audit": {
+    "frontend_action": true,
+    "event_t_arg": false,
+    "note": "popup_close"
+  },
   "status": "generated",
   "checked": null,
   "deviations": [

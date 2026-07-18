@@ -54,8 +54,24 @@ for (const sf of sidecars.sort()) {
   try { m = JSON.parse(fs.readFileSync(path.join(META, sf), 'utf8')); }
   catch (e) { err(`${sf}: invalid JSON — ${e.message}`); continue; }
 
-  for (const k of ['class', 'sample', 'entity', 'file', 'batch', 'status', 'deviations']) {
+  for (const k of ['class', 'sample', 'entity', 'file', 'batch', 'audit', 'status', 'deviations']) {
     if (m[k] === undefined) err(`${sf}: missing field "${k}"`);
+  }
+  // audit is a structured object so its facts stay queryable (like deviations)
+  if (m.audit !== undefined) {
+    if (typeof m.audit !== 'object' || m.audit === null || Array.isArray(m.audit)) {
+      err(`${sf}: audit must be an object { frontend_action, event_t_arg, note? }`);
+    } else {
+      for (const k of ['frontend_action', 'event_t_arg']) {
+        if (typeof m.audit[k] !== 'boolean') err(`${sf}: audit.${k} must be a boolean`);
+      }
+      for (const k of Object.keys(m.audit)) {
+        if (!['frontend_action', 'event_t_arg', 'note'].includes(k)) err(`${sf}: unknown audit field "${k}"`);
+      }
+      if (m.audit.note !== undefined && typeof m.audit.note !== 'string') {
+        err(`${sf}: audit.note must be a string`);
+      }
+    }
   }
   if (m.class && m.class !== name) err(`${sf}: class "${m.class}" does not match filename`);
   if (m.status && !STATUS.includes(m.status)) err(`${sf}: unknown status "${m.status}"`);
