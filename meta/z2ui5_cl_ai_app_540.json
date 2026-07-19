@@ -1,0 +1,31 @@
+{
+  "class": "z2ui5_cl_ai_app_540",
+  "sample": "sap.m.sample.DatePickerHidden",
+  "entity": "sap.m.DatePicker",
+  "file": "src/01/b05/z2ui5_cl_ai_app_540.clas.abap",
+  "batch": "b05",
+  "audit": {
+    "frontend_action": true,
+    "event_t_arg": true
+  },
+  "status": "generated",
+  "checked": null,
+  "deviations": [
+    {
+      "type": "IMPROVISED",
+      "what": "the controller's openDatePicker calls byId('HiddenDP').openBy(oEvent.getSource().getDomRef()) - openBy is NOT in the CONTROL_METHODS whitelist (source-verified in abap2UI5 app/webapp/core/FrontendAction.js, 2026-07-19), so the sample's central interaction is not executable today: the port keeps the 1:1 wiring (press -> backend event carrying the anchor id via $event.oSource.sId, then follow_up_action control_by_id HiddenDP//openBy/<anchorId>), but the frontend rejects the unlisted method with a logged error and the date picker does not open; consequently the change handler's toast (Date selected: ...) cannot fire either. Needs a pr/ request extending CONTROL_METHODS with openBy (an arg kind resolving a control id to its DOM ref) - flagged to the batch coordinator, not filed here because this batch generation writes only the three port files."
+    },
+    {
+      "type": "POST_171",
+      "what": "Button.ariaHasPopup (since UI5 1.84) is newer than 1.71 but kept for the 1:1 port on both Buttons - the app needs a UI5 release >= 1.84 to render it."
+    },
+    {
+      "type": "POST_171",
+      "what": "Link.ariaHasPopup (since UI5 1.86) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.86 to render it."
+    },
+    {
+      "type": "POST_171",
+      "what": "DatePicker.hideInput (since UI5 1.97) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.97 to render it (the matching openBy method is since 1.97 too)."
+    }
+  ]
+}

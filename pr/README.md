@@ -20,6 +20,7 @@ on the details live upstream and in CAPABILITIES.md/STATUS.md.
 | Request | Motivation |
 |---------|------------|
 | [binding-call-compound-filters](binding-call-compound-filters/README.md) | the `BINDING_CALL` filter builds exactly one path/operator/value `Filter`; the standard multi-facet AND-of-ORs pattern (FacetFilter, ViewSettingsDialog) is not expressible, so port 401 falls back to ABAP-side model filtering |
+| [control-methods-openby-setactivepage](control-methods-openby-setactivepage/README.md) | `DatePicker.openBy` (needs a new DOM-ref-resolving arg kind; blocks the DatePickerHidden port's core feature) and `Carousel.setActivePage` are not in `CONTROL_METHODS` (found by batch b05, apps 540/536) |
 
 ## Declined / deferred (folder removed 2026-07-19)
 

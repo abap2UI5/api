@@ -20,6 +20,7 @@
   "homepage": "https://github.com/abap2UI5/api#readme",
   "devDependencies": {
     "@abaplint/cli": "^2.120.3",
+    "@openui5/sap.f": "^1.150.0",
     "@openui5/sap.m": "^1.150.0",
     "@openui5/sap.ui.core": "^1.150.0",
     "@openui5/sap.ui.layout": "^1.150.0",

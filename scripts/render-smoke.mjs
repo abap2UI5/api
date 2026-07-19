@@ -408,7 +408,12 @@ function buildModel(content, boundVars, types, vars, notes) {
         ? decl.type : (types.tables.get(decl.type) || decl.type);
       model[up(v)] = tableSeed.has(v)
         ? parseRows(tableSeed.get(v), rowType, types)
-        : [Object.fromEntries((types.structs.get(rowType) || []).map((f) => [up(f.name), scalarDefault(f.type)]))];
+        : types.structs.has(rowType)
+          ? [Object.fromEntries(types.structs.get(rowType).map((f) => [up(f.name), scalarDefault(f.type)]))]
+          // scalar-row table (TYPE STANDARD TABLE OF string, bound to an
+          // array property like Table.sticky): an empty array — a {} row
+          // would fail strict property validation (b05 app 534)
+          : [];
     } else {
       const t = decl.type;
       if (scalarSeed.has(v)) {
@@ -451,7 +456,7 @@ function preparePort(meta) {
 // ---------------------------------------------------------------------------
 // 6. Local OpenUI5 server (from the @openui5/* npm source packages)
 // ---------------------------------------------------------------------------
-const LIB_ROOTS = ['sap.ui.core', 'sap.m', 'sap.ui.layout', 'sap.ui.unified', 'themelib_sap_horizon']
+const LIB_ROOTS = ['sap.ui.core', 'sap.m', 'sap.ui.layout', 'sap.ui.unified', 'sap.f', 'themelib_sap_horizon']
   .map((p) => path.join(ROOT, 'node_modules', '@openui5', p, 'src'))
   .filter((p) => fs.existsSync(p));
 
@@ -536,7 +541,7 @@ const HARNESS = `<!DOCTYPE html>
   })();
 </script>
 <script id="sap-ui-bootstrap" src="/resources/sap-ui-core.js"
-  data-sap-ui-libs="sap.m,sap.ui.layout"
+  data-sap-ui-libs="sap.m,sap.ui.layout,sap.f"
   data-sap-ui-theme="sap_hcb"
   data-sap-ui-async="true"
   data-sap-ui-compatversion="edge"></script>
