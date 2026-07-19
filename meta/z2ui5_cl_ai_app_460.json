@@ -8,8 +8,11 @@
     "frontend_action": true,
     "event_t_arg": true
   },
-  "status": "generated",
-  "checked": null,
+  "status": "checked",
+  "checked": {
+    "date": "2026-07-19",
+    "note": "verified in a running system - human visual pass 2026-07-19 over all apps: the element binding {/S_PRODUCT} resolves all relative field bindings incl. the Currency number - the ObjectHeader renders fully populated."
+  },
   "deviations": [
     {
       "type": "NOTE",
@@ -18,10 +21,6 @@
     {
       "type": "SUBSET_DATA",
       "what": "the model holds exactly the bound record /ProductCollection/0 (Notebook Basic 15) of ui5/mock/products.json, verbatim."
-    },
-    {
-      "type": "LIVE_TEST",
-      "what": "confirm in a running system that the element binding (binding=\"{/S_PRODUCT}\") resolves the relative field bindings against the default model - first port using a binding= context; source-plausible via the attribute pass-through, converted from full static resolution 2026-07-19."
     }
   ]
 }

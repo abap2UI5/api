@@ -14,8 +14,8 @@ CAPABILITIES.md._
 | Structural view diff | **0 undeclared differences** across all 34 ports (`node scripts/structural-diff.mjs --strict`) — including simple **binding values** and, since 2026-07-19, **`id` attributes** (name-level per control type; dropped original ids must be restored or declared) |
 | Render smoke | **0 failing / 1 skipped** (`npm run smoke`): every reconstructable port's view loads in a real headless `XMLView.create` (app 481 skipped — helper-method view building is not statically reconstructable) |
 | Pattern lint | **0 errors, 0 warnings, empty baseline** (`node scripts/pattern-lint.mjs`) |
-| Meta sidecars | 34 in `meta/` — status: 31 `generated`, 3 `checked` (530 reset 2026-07-19 per the checked-invalidation rule); deviations: 9 IMPROVISED, 14 POST_171, 20 LIVE_TEST, 8 SUBSET_DATA, 17 NOTE, 1 DROPPED_171 (app 401's `p:ColumnAIAction` plugin — a whole control newer than 1.71, unlike the restorable members). `audit` is a structured object since 2026-07-18 |
-| Manually verified in a running system | 420, 421, 526 (`CHECKED`); 530's 07-15 check was invalidated by its 07-16 rework — restamp pending |
+| Meta sidecars | 34 in `meta/` — status: 26 `generated`, 8 `checked` (530 reset 2026-07-19 per the checked-invalidation rule); deviations: 9 IMPROVISED, 14 POST_171, 14 LIVE_TEST, 8 SUBSET_DATA, 20 NOTE (the three confirmed CSS-injection LIVE_TESTs became NOTEs — they still declare the EXTRA `core:HTML`), 1 DROPPED_171 (app 401's `p:ColumnAIAction` plugin — a whole control newer than 1.71, unlike the restorable members). `audit` is a structured object since 2026-07-18 |
+| Manually verified in a running system | 420, 421, 526 (`CHECKED` interactively); 404, 431, 440, 460, 487 (`CHECKED` via the human visual pass 2026-07-19 — their only pending questions were visual); 530's 07-15 check was invalidated by its 07-16 rework — restamp pending |
 | Archive | `ui5/sap.m/<SampleName>/` — full originals for the 34 ported samples (+2 cross-referenced: `FacetFilterSimple`, `Table`); mock snapshot in `ui5/mock/`. Unported samples are copied over batch by batch. |
 
 ## Batches
@@ -26,10 +26,10 @@ The 34 existing ports are retro-grouped into review batches — one subpackage
 
 | Batch | Theme | Apps | Live-checked |
 |---|---|---|---|
-| `b01` | Display & navigation | 408, 409, 431, 434, 440, 460, 529, 530 | — (530 restamp pending) |
+| `b01` | Display & navigation | 408, 409, 431, 434, 440, 460, 529, 530 | 431, 440, 460 (530 restamp pending) |
 | `b02` | Selection & input | 421, 422, 423, 439, 452, 454, 472, 481, 527, 528 | 421 |
 | `b03` | Actions, toolbars & popups | 447, 448, 449, 469, 474, 486, 526 | 526 |
-| `b04` | Layout, lists & data | 401, 404, 420, 433, 441, 445, 471, 473, 487 | 420 |
+| `b04` | Layout, lists & data | 401, 404, 420, 433, 441, 445, 471, 473, 487 | 404, 420, 487 |
 
 New generation batches continue as `b05`, `b06`, … per the process in
 TRAINING.md.
@@ -431,7 +431,10 @@ produce; two were regenerated, plus hygiene. All changes in this pass:
 
 Live tests pending (in-system) — the 2026-07-16 framework source pass
 (CAPABILITIES.md) already confirmed the *mechanics* of several; what remains
-is visual/UX confirmation:
+is visual/UX confirmation. **A human visual pass over all 34 apps ran
+2026-07-19** (apps opened and looked at, interactions NOT exercised): it
+closed every purely visual item below (struck through, sidecars promoted to
+`checked`); the interaction items stay open for an interactive session:
 - [ ] **401** — Reset unchecks the facet popover checkboxes (mechanics
   source-verified: model applied before on_event).
 - [ ] **401** — the weight states render Success/Warning/Error via the
@@ -444,10 +447,11 @@ is visual/UX confirmation:
 - [ ] **471** — the third panel toggles via the whitelisted CONTROL_BY_ID
   `setExpanded` (`follow_up_action( cs_event-control_by_id )`) on each
   toolbar press (converted 2026-07-18).
-- [ ] **487** — nested tree binding renders expandable levels (serialization
-  source-verified; framework ships z2ui5.cc.Tree).
+- [x] ~~**487** — nested tree binding renders expandable levels~~ — visual
+  pass 2026-07-19; sidecar `checked`.
 - [ ] **529** — the press Dialog opens/closes (popup_display).
-- [ ] **404/431** — injected CSS styles the flex items / floats the tiles.
+- [x] ~~**404/431** — injected CSS styles the flex items / floats the
+  tiles~~ — visual pass 2026-07-19; sidecars `checked`.
 - [ ] **486** — expression-bound toolbar widths follow the slider.
 - [ ] **474** — toast shows the newly selected item (timing source-verified).
 - [ ] **454** — free text + Enter creates a token on both multiInput1 and
@@ -458,16 +462,20 @@ is visual/UX confirmation:
   headers.
 - [ ] **433/473** — the `{device>/…}` bindings are restored in code
   (433 `expanded`, 473 `width` expressions); what remains is the LIVE-TEST.
-- [ ] **434** — injected CSS colors the imageContainer background AND the
-  device-dependent image size expression follows phone/desktop.
-- [ ] **440** — the Currency composite binding renders the formatted price
-  (raw binding-info string over `price TYPE p`, converted 2026-07-17).
+- [ ] **434** — ~~injected CSS colors the imageContainer background~~ (visual
+  pass 2026-07-19) — REMAINS: the device-dependent image size expression
+  follows phone/desktop (needs a phone/emulated-phone check; sidecar stays
+  `generated`).
+- [x] ~~**440** — the Currency composite binding renders the formatted price
+  (raw binding-info string over `price TYPE p`)~~ — visual pass 2026-07-19;
+  sidecar `checked`.
 - [ ] **401** — the popin layout switches via the two-way ComboBox
   selectedKey and the ToggleButton hides/shows the restored infoToolbar via
   the visible expression binding (restored 2026-07-19).
-- [ ] **460** — the element binding (`binding="{/S_PRODUCT}"`) resolves the
+- [x] ~~**460** — the element binding (`binding="{/S_PRODUCT}"`) resolves the
   relative field bindings incl. the Currency number (first `binding=`
-  context port, converted from full static resolution 2026-07-19).
+  context port)~~ — visual pass 2026-07-19 (ObjectHeader renders fully
+  populated); sidecar `checked`.
 - [ ] **530** — RESTAMP: the 07-15 live check predates the 07-16 rework and
   was reset 2026-07-19; re-verify the clicked-link toast and the instant
   separator switch, then set `checked` again.
