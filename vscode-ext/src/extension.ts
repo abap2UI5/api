@@ -1,57 +1,26 @@
 import * as vscode from "vscode";
 import * as path from "path";
+import { URL } from "url";
+import { SapProxy } from "./proxy";
 
 const CONFIG_SECTION = "abap2ui5";
 const TEMPLATE_KEY = "launchUrlTemplate";
 const OPEN_MODE_KEY = "openMode";
+
+const SECRET_USER = "abap2ui5.user";
+const SECRET_PASS = "abap2ui5.pass";
+
+/** Muss in der Klasse vorkommen, damit F9 die App startet. */
+const APP_INTERFACE_RE = /interfaces\s+z2ui5_if_app/i;
 
 /** Kollabiert doppelte Slashes im Pfad, lässt aber `://` im Protokoll intakt. */
 function normalizeUrl(url: string): string {
   return url.replace(/(?<!:)\/{2,}/g, "/");
 }
 
-/** Muss in der Klasse vorkommen, damit F9 die App startet. */
-const APP_INTERFACE_RE = /interfaces\s+z2ui5_if_app/i;
-
-/**
- * Panel-View (unten, neben Terminal/Output), der die abap2UI5-App in einem
- * iframe anzeigt. Fällt der iframe (X-Frame-Options / Zertifikat) aus, gibt es
- * einen "Extern öffnen"-Button als Fallback.
- */
-class PreviewViewProvider implements vscode.WebviewViewProvider {
-  public static readonly viewId = "abap2ui5.preview";
-
-  private view?: vscode.WebviewView;
-  private currentUrl?: string;
-
-  resolveWebviewView(view: vscode.WebviewView): void {
-    this.view = view;
-    view.webview.options = { enableScripts: true };
-    view.webview.onDidReceiveMessage((msg) => {
-      if (msg?.type === "openExternal" && this.currentUrl) {
-        vscode.env.openExternal(vscode.Uri.parse(this.currentUrl));
-      }
-    });
-    this.render();
-  }
-
-  /** Zeigt eine URL im Panel an und holt den View in den Vordergrund. */
-  async show(url: string): Promise<void> {
-    this.currentUrl = url;
-    // Öffnet/fokussiert den Panel-View (Command wird automatisch generiert).
-    await vscode.commands.executeCommand(`${PreviewViewProvider.viewId}.focus`);
-    this.render();
-  }
-
-  private render(): void {
-    if (!this.view) {
-      return;
-    }
-    this.view.webview.html = this.currentUrl
-      ? htmlForUrl(this.currentUrl)
-      : placeholderHtml();
-  }
-}
+// ---------------------------------------------------------------------------
+// Webview-HTML
+// ---------------------------------------------------------------------------
 
 function escapeHtml(value: string): string {
   return value
@@ -74,8 +43,13 @@ function placeholderHtml(): string {
 </body></html>`;
 }
 
-function htmlForUrl(url: string): string {
-  const safeUrl = escapeHtml(url);
+/**
+ * @param frameUrl    URL, die im iframe geladen wird (i. d. R. der Proxy).
+ * @param externalUrl echte SAP-URL für den "Extern öffnen"-Button.
+ */
+function htmlForUrl(frameUrl: string, externalUrl: string): string {
+  const safeFrame = escapeHtml(frameUrl);
+  const safeExternal = escapeHtml(externalUrl);
   return `<!DOCTYPE html>
 <html lang="de"><head><meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy"
@@ -98,11 +72,11 @@ function htmlForUrl(url: string): string {
 </style></head>
 <body>
   <div class="bar">
-    <span class="url" title="${safeUrl}">${safeUrl}</span>
+    <span class="url" title="${safeExternal}">${safeExternal}</span>
     <button onclick="openExt()">Extern öffnen</button>
   </div>
   <div class="frame-wrap">
-    <iframe src="${safeUrl}"
+    <iframe src="${safeFrame}"
             sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-modals allow-downloads"></iframe>
   </div>
   <script>
@@ -112,7 +86,82 @@ function htmlForUrl(url: string): string {
 </body></html>`;
 }
 
-/** Ermittelt den globalen Klassennamen (GROSS) aus dem Dokument. */
+// ---------------------------------------------------------------------------
+// Panel-View (unten)
+// ---------------------------------------------------------------------------
+
+class PreviewViewProvider implements vscode.WebviewViewProvider {
+  public static readonly viewId = "abap2ui5.preview";
+
+  private view?: vscode.WebviewView;
+  private frameUrl?: string;
+  private externalUrl?: string;
+
+  resolveWebviewView(view: vscode.WebviewView): void {
+    this.view = view;
+    view.webview.options = { enableScripts: true };
+    view.webview.onDidReceiveMessage((msg) => {
+      if (msg?.type === "openExternal" && this.externalUrl) {
+        vscode.env.openExternal(vscode.Uri.parse(this.externalUrl));
+      }
+    });
+    this.render();
+  }
+
+  async show(frameUrl: string, externalUrl: string): Promise<void> {
+    this.frameUrl = frameUrl;
+    this.externalUrl = externalUrl;
+    await vscode.commands.executeCommand(`${PreviewViewProvider.viewId}.focus`);
+    this.render();
+  }
+
+  private render(): void {
+    if (!this.view) {
+      return;
+    }
+    this.view.webview.html =
+      this.frameUrl && this.externalUrl
+        ? htmlForUrl(this.frameUrl, this.externalUrl)
+        : placeholderHtml();
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Tab (Editor-Bereich)
+// ---------------------------------------------------------------------------
+
+let appPanel: vscode.WebviewPanel | undefined;
+let appPanelExternalUrl: string | undefined;
+
+function showInTab(frameUrl: string, externalUrl: string, title: string): void {
+  appPanelExternalUrl = externalUrl;
+  if (appPanel) {
+    appPanel.title = title;
+    appPanel.webview.html = htmlForUrl(frameUrl, externalUrl);
+    appPanel.reveal(vscode.ViewColumn.Beside, true);
+    return;
+  }
+  appPanel = vscode.window.createWebviewPanel(
+    "abap2ui5.app",
+    title,
+    { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
+    { enableScripts: true, retainContextWhenHidden: true }
+  );
+  appPanel.onDidDispose(() => {
+    appPanel = undefined;
+  });
+  appPanel.webview.onDidReceiveMessage((msg) => {
+    if (msg?.type === "openExternal" && appPanelExternalUrl) {
+      vscode.env.openExternal(vscode.Uri.parse(appPanelExternalUrl));
+    }
+  });
+  appPanel.webview.html = htmlForUrl(frameUrl, externalUrl);
+}
+
+// ---------------------------------------------------------------------------
+// Helper
+// ---------------------------------------------------------------------------
+
 function resolveClassName(doc: vscode.TextDocument): string {
   const match = doc.getText().match(/class\s+(\S+)\s+definition/i);
   const raw = match
@@ -124,7 +173,6 @@ function resolveClassName(doc: vscode.TextDocument): string {
   return raw.toUpperCase();
 }
 
-/** Holt die URL-Vorlage aus den Settings oder fragt sie einmalig ab. */
 async function ensureTemplate(): Promise<string | undefined> {
   const cfg = vscode.workspace.getConfiguration(CONFIG_SECTION);
   let tpl = cfg.get<string>(TEMPLATE_KEY, "").trim();
@@ -145,7 +193,50 @@ async function ensureTemplate(): Promise<string | undefined> {
   return tpl || undefined;
 }
 
-async function runApp(provider: PreviewViewProvider): Promise<void> {
+async function ensureCredentials(
+  context: vscode.ExtensionContext
+): Promise<{ user: string; pass: string } | undefined> {
+  const secrets = context.secrets;
+  let user = await secrets.get(SECRET_USER);
+  let pass = await secrets.get(SECRET_PASS);
+
+  if (!user) {
+    user = await vscode.window.showInputBox({
+      title: "abap2UI5: SAP-Benutzer",
+      prompt: "Benutzer für die Anmeldung am SAP-System (wie in ADT)",
+      ignoreFocusOut: true,
+    });
+    if (!user) {
+      return undefined;
+    }
+    await secrets.store(SECRET_USER, user);
+  }
+
+  if (!pass) {
+    pass = await vscode.window.showInputBox({
+      title: "abap2UI5: SAP-Passwort",
+      prompt: "Passwort (wird sicher im VS Code SecretStorage abgelegt)",
+      password: true,
+      ignoreFocusOut: true,
+    });
+    if (!pass) {
+      return undefined;
+    }
+    await secrets.store(SECRET_PASS, pass);
+  }
+
+  return { user, pass };
+}
+
+// ---------------------------------------------------------------------------
+// Kommando
+// ---------------------------------------------------------------------------
+
+async function runApp(
+  context: vscode.ExtensionContext,
+  proxy: SapProxy,
+  provider: PreviewViewProvider
+): Promise<void> {
   const editor = vscode.window.activeTextEditor;
 
   // Kein ABAP-Editor oder keine z2ui5-App: normales F9-Verhalten beibehalten.
@@ -164,30 +255,69 @@ async function runApp(provider: PreviewViewProvider): Promise<void> {
     return;
   }
 
-  const url = normalizeUrl(
+  const externalUrl = normalizeUrl(
     template.replace(/\{class\}/gi, encodeURIComponent(className))
   );
 
   const openMode = vscode.workspace
     .getConfiguration(CONFIG_SECTION)
-    .get<string>(OPEN_MODE_KEY, "external");
+    .get<string>(OPEN_MODE_KEY, "tab");
+
+  if (openMode === "external") {
+    await vscode.env.openExternal(vscode.Uri.parse(externalUrl));
+    return;
+  }
+
+  // tab / panel: über den Auth-Proxy laden, damit die Anmeldung greift.
+  const creds = await ensureCredentials(context);
+  if (!creds) {
+    return;
+  }
+
+  let frameUrl: string;
+  try {
+    const origin = new URL(externalUrl).origin;
+    await proxy.start(origin, creds.user, creds.pass);
+    frameUrl = externalUrl.replace(origin, proxy.origin);
+  } catch (err) {
+    vscode.window.showErrorMessage(
+      "abap2UI5: Proxy konnte nicht gestartet werden – " +
+        (err instanceof Error ? err.message : String(err))
+    );
+    return;
+  }
 
   if (openMode === "panel") {
-    await provider.show(url);
+    await provider.show(frameUrl, externalUrl);
   } else {
-    await vscode.env.openExternal(vscode.Uri.parse(url));
+    showInTab(frameUrl, externalUrl, `abap2UI5: ${className}`);
   }
 }
 
+// ---------------------------------------------------------------------------
+// Aktivierung
+// ---------------------------------------------------------------------------
+
 export function activate(context: vscode.ExtensionContext): void {
   const provider = new PreviewViewProvider();
+  const proxy = new SapProxy();
 
   context.subscriptions.push(
+    { dispose: () => proxy.dispose() },
     vscode.window.registerWebviewViewProvider(
       PreviewViewProvider.viewId,
       provider
     ),
-    vscode.commands.registerCommand("abap2ui5.run", () => runApp(provider)),
+    vscode.commands.registerCommand("abap2ui5.run", () =>
+      runApp(context, proxy, provider)
+    ),
+    vscode.commands.registerCommand("abap2ui5.resetCredentials", async () => {
+      await context.secrets.delete(SECRET_USER);
+      await context.secrets.delete(SECRET_PASS);
+      vscode.window.showInformationMessage(
+        "abap2UI5: gespeicherte SAP-Zugangsdaten gelöscht."
+      );
+    }),
     vscode.commands.registerCommand("abap2ui5-demokit.newApp", newApp),
     vscode.commands.registerCommand("abap2ui5-demokit.openDemokit", () =>
       vscode.env.openExternal(
@@ -216,14 +346,12 @@ ENDCLASS.
 async function newApp(): Promise<void> {
   const editor = vscode.window.activeTextEditor;
   if (!editor) {
-    vscode.window.showWarningMessage(
-      "Bitte zuerst eine ABAP-Datei öffnen."
-    );
+    vscode.window.showWarningMessage("Bitte zuerst eine ABAP-Datei öffnen.");
     return;
   }
   await editor.edit((b) => b.insert(editor.selection.active, APP_TEMPLATE));
 }
 
 export function deactivate(): void {
-  // nichts aufzuräumen
+  // Proxy wird über context.subscriptions disposed
 }

@@ -28,18 +28,32 @@ https://host:44300/sap/bc/z2ui5?app_start={class}&sap-client=100
 Die URL wird gespeichert und lässt sich jederzeit ändern:
 Settings → `abap2ui5.launchUrlTemplate` (oder in `settings.json`).
 
-## Öffnen: Browser vs. Panel (`abap2ui5.openMode`)
+## Öffnen-Modus (`abap2ui5.openMode`)
 
-- **`external`** (Standard): F9 öffnet die App im normalen Browser. Nutzt deine
-  bestehende SAP-Anmeldung/SSO – funktioniert zuverlässig.
-- **`panel`**: F9 zeigt die App eingebettet unten im VS-Code-Panel.
+- **`tab`** (Standard): App eingebettet in einem Editor-Tab.
+- **`panel`**: App eingebettet unten im Panel-Bereich.
+- **`external`**: App im normalen Browser (nutzt deine bestehende SAP-Session).
 
-> **Warum nicht immer Panel?** Der eingebettete iframe hat **keine** SAP-Session.
-> Verlangt der Server eine Anmeldung, erscheint dort **401 Not authorized** (der
-> Basic-Auth-Dialog wird in eingebetteten Views unterdrückt). `panel` klappt nur,
-> wenn der Aufruf ohne interaktives Login funktioniert – z. B. via SICF-Anonym-Logon
-> auf dem `/sap/bc/z2ui5`-Knoten. Für den Normalfall ist `external` richtig.
-> (Der Panel-View hat oben zusätzlich einen **"Extern öffnen"**-Button.)
+### Wie die Anmeldung im Tab/Panel funktioniert (Auth-Proxy)
+
+Ein eingebetteter iframe hat **keine** SAP-Session – ein direkter Aufruf würde
+mit **401 Not authorized** enden. Deshalb startet die Extension bei `tab`/`panel`
+einen **lokalen Auth-Proxy** auf `127.0.0.1`:
+
+1. Beim ersten Start fragt sie **einmalig** deinen SAP-Benutzer + Passwort ab
+   (dieselben wie in ADT). Die Daten liegen sicher im VS Code **SecretStorage**.
+2. Der Proxy hängt bei **jedem** Request `Authorization: Basic …` an und leitet
+   ihn an dein SAP-System weiter (inkl. UI5-Ressourcen, Cookies, CSRF, Redirects).
+3. Der iframe lädt `http://127.0.0.1:<port>/…` – die App läuft eingebettet, ohne 401.
+
+> Zugangsdaten ändern/löschen: Command **"abap2UI5: Gespeicherte SAP-Zugangsdaten
+> löschen"** (Command Palette), danach wird beim nächsten F9 neu gefragt.
+>
+> Voraussetzung: Das System akzeptiert **Basic Auth** (User/Passwort). Reine
+> SSO/SAML-Anmeldung ohne Basic-Auth-Fallback wird nicht unterstützt – dann
+> `external` verwenden.
+>
+> Selbst-signierte Zertifikate (HTTPS) werden vom Proxy akzeptiert.
 
 ---
 

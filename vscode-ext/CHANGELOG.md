@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0
+
+- **Eingebettete App mit Anmeldung** über einen lokalen Auth-Proxy:
+  F9 zeigt die App im Editor-Tab (oder Panel), der Proxy injiziert die
+  SAP-Zugangsdaten – kein 401 mehr.
+- `abap2ui5.openMode` erweitert: `tab` (neuer Default), `panel`, `external`
+- Zugangsdaten werden einmalig abgefragt und im SecretStorage gespeichert
+- Neuer Command: "abap2UI5: Gespeicherte SAP-Zugangsdaten löschen"
+- Proxy leitet UI5-Ressourcen, Cookies, CSRF und Redirects transparent weiter;
+  selbst-signierte HTTPS-Zertifikate werden akzeptiert
+
 ## 0.2.0
 
 - Neue Einstellung `abap2ui5.openMode` (`external` | `panel`), Default `external`

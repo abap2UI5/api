@@ -2,7 +2,7 @@
   "name": "abap2ui5-demokit",
   "displayName": "abap2UI5 Demokit Helper",
   "description": "Helfer-Extension rund um abap2UI5: F9 startet eine z2ui5_if_app-Klasse im eingebetteten Browser-Panel, plus Snippets.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "publisher": "abap2ui5-local",
   "license": "MIT",
   "private": true,
@@ -24,6 +24,10 @@
       {
         "command": "abap2ui5.run",
         "title": "abap2UI5: App starten (F9)"
+      },
+      {
+        "command": "abap2ui5.resetCredentials",
+        "title": "abap2UI5: Gespeicherte SAP-Zugangsdaten löschen"
       },
       {
         "command": "abap2ui5-demokit.newApp",
@@ -69,13 +73,14 @@
         },
         "abap2ui5.openMode": {
           "type": "string",
-          "enum": ["external", "panel"],
+          "enum": ["tab", "panel", "external"],
           "enumDescriptions": [
-            "Im Standard-Browser öffnen (nutzt deine SAP-Session/SSO – zuverlässig).",
-            "Eingebettet im Panel unten anzeigen (benötigt eine Anmeldung ohne Popup, z. B. SICF-Anonym-Logon – sonst 401)."
+            "Eingebettet in einem Editor-Tab, über den lokalen Auth-Proxy (mit Login).",
+            "Eingebettet unten im Panel, über den lokalen Auth-Proxy (mit Login).",
+            "Im Standard-Browser öffnen (nutzt deine bestehende SAP-Session/SSO)."
           ],
-          "default": "external",
-          "markdownDescription": "Wie F9 die App öffnet.\n\n- `external`: im normalen Browser (empfohlen, funktioniert mit deiner Anmeldung).\n- `panel`: eingebettet unten im VS-Code-Panel. Funktioniert nur, wenn der SAP-Server keine interaktive Anmeldung verlangt (sonst **401 Not authorized**)."
+          "default": "tab",
+          "markdownDescription": "Wie F9 die App öffnet.\n\n- `tab`: eingebettet in einem Editor-Tab. Läuft über einen **lokalen Auth-Proxy**, der deine (einmalig abgefragten) SAP-Zugangsdaten injiziert – kein 401.\n- `panel`: dasselbe, aber unten im Panel-Bereich.\n- `external`: im normalen Browser (nutzt deine bestehende Anmeldung, kein Proxy nötig).\n\nZugangsdaten zurücksetzen: Command **\"abap2UI5: Gespeicherte SAP-Zugangsdaten löschen\"**."
         }
       }
     },
