@@ -9,13 +9,13 @@ CAPABILITIES.md._
 
 | Aspect | State |
 |---|---|
-| Ports | 34 / **403 in-scope** `sap.m` samples (8.4 %) — in scope = control exists since UI5 1.71 and is not deprecated; 43 of 446 samples are out of scope (16 deprecated, 21 newer, 6 without control metadata) |
+| Ports | 44 / **403 in-scope** `sap.m` samples (10.9 %) — in scope = control exists since UI5 1.71 and is not deprecated; 43 of 446 samples are out of scope (16 deprecated, 21 newer, 6 without control metadata) |
 | CI | ABAP_STANDARD, ABAP_CLOUD, ABAP_702 all green |
-| Structural view diff | **0 undeclared differences** across all 34 ports (`node scripts/structural-diff.mjs --strict`) — including simple **binding values** and, since 2026-07-19, **`id` attributes** (name-level per control type; dropped original ids must be restored or declared) |
-| Render smoke | **0 failing / 1 skipped** (`npm run smoke`): every reconstructable port's view loads in a real headless `XMLView.create` (app 481 skipped — helper-method view building is not statically reconstructable) |
+| Structural view diff | **0 undeclared differences** across all 44 ports (`node scripts/structural-diff.mjs --strict`) — including simple **binding values** and, since 2026-07-19, **`id` attributes** (name-level per control type; dropped original ids must be restored or declared) |
+| Render smoke | **0 failing / 1 skipped** (`npm run smoke`): every reconstructable port's view loads in a real headless `XMLView.create` (app 481 skipped — helper-method view building is not statically reconstructable); harness carries `sap.f` and mocks scalar-row tables as empty arrays since b05 |
 | Pattern lint | **0 errors, 0 warnings, empty baseline** (`node scripts/pattern-lint.mjs`) |
-| Meta sidecars | 34 in `meta/` — status: 31 `generated`, 3 `checked` (530 reset 2026-07-19 per the checked-invalidation rule); deviations: 9 IMPROVISED, 14 POST_171, 20 LIVE_TEST, 8 SUBSET_DATA, 17 NOTE, 1 DROPPED_171 (app 401's `p:ColumnAIAction` plugin — a whole control newer than 1.71, unlike the restorable members). `audit` is a structured object since 2026-07-18 |
-| Manually verified in a running system | 420, 421, 526 (`CHECKED`); 530's 07-15 check was invalidated by its 07-16 rework — restamp pending |
+| Meta sidecars | 44 in `meta/` — status: 36 `generated`, 8 `checked` (530 reset 2026-07-19 per the checked-invalidation rule); deviations: 26 IMPROVISED, 19 POST_171, 20 LIVE_TEST, 9 SUBSET_DATA, 36 NOTE, 2 DROPPED_171 (the `p:ColumnAIAction` plugin in apps 401 and 534 — a whole control newer than 1.71, unlike the restorable members). `audit` is a structured object since 2026-07-18 |
+| Manually verified in a running system | 420, 421, 526 (`CHECKED` interactively); 404, 431, 440, 460, 487 (`CHECKED` via the human visual pass 2026-07-19 — their only pending questions were visual); 530's 07-15 check was invalidated by its 07-16 rework — restamp pending |
 | Archive | `ui5/sap.m/<SampleName>/` — full originals for the 34 ported samples (+2 cross-referenced: `FacetFilterSimple`, `Table`); mock snapshot in `ui5/mock/`. Unported samples are copied over batch by batch. |
 
 ## Batches
@@ -26,13 +26,51 @@ The 34 existing ports are retro-grouped into review batches — one subpackage
 
 | Batch | Theme | Apps | Live-checked |
 |---|---|---|---|
-| `b01` | Display & navigation | 408, 409, 431, 434, 440, 460, 529, 530 | — (530 restamp pending) |
+| `b01` | Display & navigation | 408, 409, 431, 434, 440, 460, 529, 530 | 431, 440, 460 (530 restamp pending) |
 | `b02` | Selection & input | 421, 422, 423, 439, 452, 454, 472, 481, 527, 528 | 421 |
 | `b03` | Actions, toolbars & popups | 447, 448, 449, 469, 474, 486, 526 | 526 |
-| `b04` | Layout, lists & data | 401, 404, 420, 433, 441, 445, 471, 473, 487 | 420 |
+| `b04` | Layout, lists & data | 401, 404, 420, 433, 441, 445, 471, 473, 487 | 404, 420, 487 |
+| `b05` | Backlog top: bars, tables, custom items & patterns | 531, 532, 533, 534, 535, 536, 537, 538, 539, 540 | — (generated 2026-07-19) |
 
-New generation batches continue as `b05`, `b06`, … per the process in
+New generation batches continue as `b06`, `b07`, … per the process in
 TRAINING.md.
+
+## Batch b05 generated (2026-07-19) — first post-probe batch
+
+The first 10 backlog-top NEW-CONTROL samples (breadth-first per AGENTS §1),
+generated with the probe-hardened rule set, machine-verified to green
+(abaplint ×3, validate-meta, pattern-lint, structural-diff --strict,
+render-smoke --strict, property-check) and adversarially AI-reviewed
+(2 reviewers × 5 apps): **7 CLEAN, 3 MINOR, 0 MAJOR, no BUG-class
+findings** — none of the probe's three MAJOR root causes recurred. Review
+findings fixed in-place: ComparisonPattern archive completed
+(formatter.js/manifest.json beyond the sample's own incomplete `files`
+list), 536/540 sidecar prose now references the filed pr, 534's four
+numeric mock fields retyped packed (batch-consistent with 535), 535's
+popinLayout round-trip converted to the 534 expression-binding form, and
+535's sidecar corrected on the local-vs-shared products.json difference
+(HT-9995 differs in content). Highlights:
+
+- The probe's distilled rules visibly held: no `popover_display( val = )`
+  recurrence, flattening declared everywhere, app 539 explicitly reasoned
+  the empty-string/enum rule, app 535 seeded `popinLayout` non-empty.
+- **App 534** re-applies the app-401 `DROPPED_171` decision for
+  `p:ColumnAIAction` (plugin class newer than 1.71 — dropped, not POST_171).
+- **Two new framework gaps** → pr/control-methods-openby-setactivepage,
+  **implemented upstream 2026-07-20** (new `domRef` arg kind, `openBy`,
+  `setActivePage`; folder archived in pr/README Implemented): app 540's
+  hidden-DatePicker wiring is now valid (IMPROVISED→LIVE_TEST). App 536's
+  Carousel re-sync stays dropped — aggregation-template clone ids are not
+  backend-addressable (recorded in the sidecar + CAPABILITIES; an
+  index-based page resolution would be a new request if more samples need
+  it).
+- Render-smoke harness extended for b05: `sap.f` library loaded
+  (DynamicPage/GridList/Card in 536/537) and scalar-row tables
+  (`TABLE OF string` bound to array properties like `Table.sticky`, app
+  534) mocked as empty arrays instead of `{}` rows.
+- New LIVE_TESTs are tracked in the b05 sidecars (popup/timer cycle 533,
+  image dialog 538, `$source>/selectedKey` arg 535, sticky round-trip 534,
+  binding_call-on-init + `to` navigation 536, popup focus flow 537).
 
 ## Verified fixed (2026-07-16)
 
@@ -427,11 +465,41 @@ produce; two were regenerated, plus hygiene. All changes in this pass:
   `control_by_id` empty-view wording corrected to the framework behavior
   (global lookup, not "keeps the slot").
 
+## Hold-out regeneration probe #1 (2026-07-19) — baseline set
+
+The first TRAINING.md regeneration probe ran: all 25 hold-out samples
+generated from scratch, first-try, scored by every gate plus a 5-reviewer
+adversarial pass. Full protocol and per-app numbers:
+**`probes/holdout-2026-07-19.md`**. Headlines: 21/25 CI-green on first try,
+23/25 structural-diff-clean, 0 genuine render failures, review 14 CLEAN /
+5 MINOR / 6 MAJOR with only **three root causes** behind all MAJORs —
+each distilled in the same change:
+
+- `popover_display( val = )` guessed by analogy (3 apps, does not compile)
+  → exact signature in CAPABILITIES, pattern-lint rule
+  `popover-display-val`, prompt updated.
+- `CONTROL_METHODS` arg-kinds ignored (2 apps: `to` transition /
+  ViewSettingsDialog `open` page silently dropped, mis-filed as LIVE_TEST)
+  → AGENTS §10 gotcha + CAPABILITIES row warning + pr/control-method-args
+  (**implemented upstream same day**: `to [transitionName]`,
+  `open [pageKey]`, `goToStep [controlId, bool]`; `castArgs` no longer pads
+  missing trailing args — folder removed, see pr/README Implemented).
+- Empty-string flattening breaks enum properties / overrides defaults
+  (1 app, QuickView) → AGENTS §5 model rule, prompt updated.
+
+Probe-found infrastructure fixes (landed 2026-07-19): render-smoke
+formatter mirror synced to the full upstream contract; `resolveExpr` now
+resolves `&&`-chained templates. The probe ports themselves are never
+merged (hold-out discipline); the worktree snapshot exists only locally.
+
 ## Open findings (backlog)
 
 Live tests pending (in-system) — the 2026-07-16 framework source pass
 (CAPABILITIES.md) already confirmed the *mechanics* of several; what remains
-is visual/UX confirmation:
+is visual/UX confirmation. **A human visual pass over all 34 apps ran
+2026-07-19** (apps opened and looked at, interactions NOT exercised): it
+closed every purely visual item below (struck through, sidecars promoted to
+`checked`); the interaction items stay open for an interactive session:
 - [ ] **401** — Reset unchecks the facet popover checkboxes (mechanics
   source-verified: model applied before on_event).
 - [ ] **401** — the weight states render Success/Warning/Error via the
@@ -444,10 +512,11 @@ is visual/UX confirmation:
 - [ ] **471** — the third panel toggles via the whitelisted CONTROL_BY_ID
   `setExpanded` (`follow_up_action( cs_event-control_by_id )`) on each
   toolbar press (converted 2026-07-18).
-- [ ] **487** — nested tree binding renders expandable levels (serialization
-  source-verified; framework ships z2ui5.cc.Tree).
+- [x] ~~**487** — nested tree binding renders expandable levels~~ — visual
+  pass 2026-07-19; sidecar `checked`.
 - [ ] **529** — the press Dialog opens/closes (popup_display).
-- [ ] **404/431** — injected CSS styles the flex items / floats the tiles.
+- [x] ~~**404/431** — injected CSS styles the flex items / floats the
+  tiles~~ — visual pass 2026-07-19; sidecars `checked`.
 - [ ] **486** — expression-bound toolbar widths follow the slider.
 - [ ] **474** — toast shows the newly selected item (timing source-verified).
 - [ ] **454** — free text + Enter creates a token on both multiInput1 and
@@ -458,16 +527,20 @@ is visual/UX confirmation:
   headers.
 - [ ] **433/473** — the `{device>/…}` bindings are restored in code
   (433 `expanded`, 473 `width` expressions); what remains is the LIVE-TEST.
-- [ ] **434** — injected CSS colors the imageContainer background AND the
-  device-dependent image size expression follows phone/desktop.
-- [ ] **440** — the Currency composite binding renders the formatted price
-  (raw binding-info string over `price TYPE p`, converted 2026-07-17).
+- [ ] **434** — ~~injected CSS colors the imageContainer background~~ (visual
+  pass 2026-07-19) — REMAINS: the device-dependent image size expression
+  follows phone/desktop (needs a phone/emulated-phone check; sidecar stays
+  `generated`).
+- [x] ~~**440** — the Currency composite binding renders the formatted price
+  (raw binding-info string over `price TYPE p`)~~ — visual pass 2026-07-19;
+  sidecar `checked`.
 - [ ] **401** — the popin layout switches via the two-way ComboBox
   selectedKey and the ToggleButton hides/shows the restored infoToolbar via
   the visible expression binding (restored 2026-07-19).
-- [ ] **460** — the element binding (`binding="{/S_PRODUCT}"`) resolves the
+- [x] ~~**460** — the element binding (`binding="{/S_PRODUCT}"`) resolves the
   relative field bindings incl. the Currency number (first `binding=`
-  context port, converted from full static resolution 2026-07-19).
+  context port)~~ — visual pass 2026-07-19 (ObjectHeader renders fully
+  populated); sidecar `checked`.
 - [ ] **530** — RESTAMP: the 07-15 live check predates the 07-16 rework and
   was reset 2026-07-19; re-verify the clicked-link toast and the instant
   separator switch, then set `checked` again.
@@ -499,6 +572,12 @@ Infrastructure:
   past the root null-refs; duplicate attribute names render invalid XML~~ —
   done 2026-07-18: all three ASSERT (fail fast at the call site), plus a local
   unit test class on `z2ui5_cl_ai_xml`.
+- [ ] property-check blind spot (hold-out probe 2026-07-19): the gate only
+  scans `a( n = … )` attributes, so a post-1.71 **event parameter** read via
+  `${$parameters>/…}` in a `t_arg` slips through undeclared (probe app 618,
+  SearchField `searchButtonPressed` since 1.114). Teach the gate to match
+  `$parameters>/<name>` against the entity's member list, or accept and
+  keep the AGENTS §10 rule as the only guard.
 - [ ] pattern-lint stays regex-based **by decision** (2026-07-18): the rule
   set is green and each rule is small; a rewrite on the abaplint AST API only
   pays once regex rules start producing false positives/negatives in
@@ -508,6 +587,14 @@ Infrastructure:
   methods — not statically reconstructable). Either teach the reconstructor
   simple single-level helper inlining, or accept the skip; never let skips
   grow silently (the run prints them).
+- [x] ~~render-smoke harness gaps found by the 2026-07-19 hold-out probe~~ —
+  fixed same day: (a) the inline formatter mirror had only `weightState`
+  while upstream `model/formatter.js` had grown the date helpers + demo kit
+  pack — now mirrors the full curated contract; (b) `resolveExpr` treated a
+  value starting with `|` as ONE template, so a template continued with `&&`
+  leaked literal `| &&` into the attribute — now the (template-aware) `&&`
+  split runs first and each piece resolves independently. Existing 34 ports
+  unaffected (0 failing / 1 skipped before and after).
 - [x] ~~TRAINING.md stage 2: generate the header block from `meta/`
   (inversion)~~ — done 2026-07-16, stricter than planned: port classes carry
   no header at all; `meta/` is the source of truth (validate-meta in CI,

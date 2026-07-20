@@ -8,8 +8,11 @@
     "frontend_action": false,
     "event_t_arg": false
   },
-  "status": "generated",
-  "checked": null,
+  "status": "checked",
+  "checked": {
+    "date": "2026-07-19",
+    "note": "verified in a running system - human visual pass 2026-07-19 over all apps: the KPI tiles float left via the injected tileLayout CSS and render like the original."
+  },
   "deviations": [
     {
       "type": "POST_171",
@@ -24,12 +27,12 @@
       "what": "url on the link tiles (since UI5 1.76) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.76 to render it."
     },
     {
-      "type": "LIVE_TEST",
-      "what": "the custom CSS class tileLayout (float: left) is kept and its style.css injected via a core:HTML content attribute (see CAPABILITIES.md) - confirm the float layout in a running system."
-    },
-    {
       "type": "IMPROVISED",
       "what": "the relative test-resources image and backgroundImage paths are resolved to absolute sdk.openui5.org URLs so the tile images load standalone."
+    },
+    {
+      "type": "NOTE",
+      "what": "the custom CSS class tileLayout (float: left) is kept and its style.css injected via a core:HTML content attribute (see CAPABILITIES.md; the EXTRA core:HTML control vs the original view). Confirmed rendering via the human visual pass 2026-07-19."
     }
   ]
 }

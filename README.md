@@ -83,7 +83,16 @@ Rules:
   default - get_event_arg( ) not get_event_arg( 1 ) (index only for 2+).
 - Move the sample's JSON model data into ABAP (VALUE #( ... )) and bind it
   with client->_bind (two-way; the former _bind_edit is obsolete - always use
-  _bind).
+  _bind). Absent JSON properties must not serialize as empty strings: `""`
+  crashes enum-typed properties and overrides property defaults where the
+  original's undefined picked the default - fill the UI5 default explicitly
+  or split the aggregation into per-shape templates.
+- Frontend actions: a whitelisted control method (CONTROL_METHODS in
+  FrontendAction.js) silently drops every argument beyond its declared arg
+  kinds - verify the kinds in the framework source before wiring a
+  parametrized call; a needed-but-unlisted argument is a declared deviation
+  plus a pr/ request, never a LIVE_TEST hope. popover_display imports
+  xml + by_id (the XML parameter is `xml`, not `val`).
 - Map controller event handlers to check_on_event( ) branches. To pass a value
   into an event, use the `$`-prefixed form in t_arg (a model column as
   `${COL}`, the event object as `$event.oSource.sId` / `${$source>/text}`) and
@@ -155,15 +164,15 @@ have an abap2UI5 port.
 
 <!-- coverage:start -->
 
-Overall **34 / 403** in-scope demo kit samples ported (8.4 %).
+Overall **44 / 403** in-scope demo kit samples ported (10.9 %).
 **In scope**: samples whose control exists since **UI5 1.71** and is **not deprecated** (legacy-free ready).
 Out of scope: 43 of 446 samples — 16 on deprecated controls, 21 on controls newer than 1.71, 6 without control metadata.
 Control metadata from OpenUI5 **1.151.0**.
 
 | Module | Samples | In scope | Ported | Coverage | |
 |--------|--------:|---------:|-------:|---------:|---|
-| `sap.m` | 446 | 403 | 34 | 8.4 % | █░░░░░░░░░ |
-| **Total** | **446** | **403** | **34** | **8.4 %** | █░░░░░░░░░ |
+| `sap.m` | 446 | 403 | 44 | 10.9 % | █░░░░░░░░░ |
+| **Total** | **446** | **403** | **44** | **10.9 %** | █░░░░░░░░░ |
 
 <!-- coverage:end -->
 

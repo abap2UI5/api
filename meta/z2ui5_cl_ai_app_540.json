@@ -1,0 +1,31 @@
+{
+  "class": "z2ui5_cl_ai_app_540",
+  "sample": "sap.m.sample.DatePickerHidden",
+  "entity": "sap.m.DatePicker",
+  "file": "src/01/b05/z2ui5_cl_ai_app_540.clas.abap",
+  "batch": "b05",
+  "audit": {
+    "frontend_action": true,
+    "event_t_arg": true
+  },
+  "status": "generated",
+  "checked": null,
+  "deviations": [
+    {
+      "type": "LIVE_TEST",
+      "what": "the 1:1 openBy wiring (press -> backend event -> follow_up_action control_by_id HiddenDP//openBy/<anchorId>) is whitelisted upstream since 2026-07-20 (pr/control-methods-openby-setactivepage: new domRef arg kind resolves the anchor id to its DOM element, control fallback) - confirm in a running system that each of the three anchors (Button, icon Button, Link) opens the hidden DatePicker anchored to itself and the change toast shows the picked date."
+    },
+    {
+      "type": "POST_171",
+      "what": "Button.ariaHasPopup (since UI5 1.84) is newer than 1.71 but kept for the 1:1 port on both Buttons - the app needs a UI5 release >= 1.84 to render it."
+    },
+    {
+      "type": "POST_171",
+      "what": "Link.ariaHasPopup (since UI5 1.86) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.86 to render it."
+    },
+    {
+      "type": "POST_171",
+      "what": "DatePicker.hideInput (since UI5 1.97) is newer than 1.71 but kept for the 1:1 port - the sample's central property (the picker input stays hidden, opened only via the anchor controls); openBy is also since 1.97, so the app needs a UI5 release >= 1.97 to render this sample's behavior."
+    }
+  ]
+}
