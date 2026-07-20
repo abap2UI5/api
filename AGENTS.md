@@ -118,7 +118,7 @@ source in the upstream
 
 Archive **everything** the sample's `manifest.json` lists under `sap.ui5 >
 config > sample > files` (resolving `../<OtherSample>/` references), or fidelity
-cannot be verified offline — app 401 was missing its controller and table for a
+cannot be verified offline — app 022 was missing its controller and table for a
 while. Shared demo kit mock data (`sap/ui/demo/mock/*.json`) is snapshotted once
 under `ui5/mock/` (see its README for provenance); upstream it lives in the
 [UI5/openui5](https://github.com/UI5/openui5) repository (the SAP/openui5 URLs
@@ -135,10 +135,10 @@ source of truth:
 
 ```jsonc
 {
-  "class":   "z2ui5_cl_ai_app_421",
+  "class":   "z2ui5_cl_ai_app_007",
   "sample":  "sap.m.sample.CheckBoxTriState",   // join key to ui5/<lib>/<Name>/
   "entity":  "sap.m.CheckBox",
-  "file":    "src/01/b02/z2ui5_cl_ai_app_421.clas.abap",
+  "file":    "src/01/b02/z2ui5_cl_ai_app_007.clas.abap",
   "batch":   "b02",
   "audit":   { "frontend_action": false,        // uses _event_client? (note: which)
                "event_t_arg": true },           // passes event args via t_arg?
@@ -166,8 +166,8 @@ source of truth:
   genuinely cannot be expressed.
 - **Before declaring any sample feature inexpressible, check `CAPABILITIES.md`**
   — the map of what abap2UI5 can express, each entry backed by a port that
-  proves it. Never improvise around a feature it marks ✅/🔶 (app 529 replaced a
-  Dialog with a toast although app 469 shows Dialogs work 1:1 via
+  proves it. Never improvise around a feature it marks ✅/🔶 (app 042 replaced a
+  Dialog with a toast although app 044 shows Dialogs work 1:1 via
   `popup_display`). When a port proves a new technique or disproves a ❌,
   update `CAPABILITIES.md` in the same change.
 - **Every improvement idea for the abap2UI5 framework goes into `pr/`** — one
@@ -208,9 +208,9 @@ CLASS z2ui5_cl_ai_app_<n> DEFINITION PUBLIC.       " lowercase, not FINAL
 
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
-    METHODS model_init.       " only if the app has model data
-    METHODS on_event.        " only if the app reacts to events
     METHODS view_display.
+    METHODS on_event.        " only if the app reacts to events
+    METHODS model_init.      " only if the app has model data - declared LAST
 
   PRIVATE SECTION.           " always present, kept empty
 ENDCLASS.
@@ -234,14 +234,18 @@ ENDMETHOD.
 
 - **Method order in the implementation**: `z2ui5_if_app~main` is always the
   **first** method; the remaining methods follow **in the order they are
-  called from `main`**, depth-first (`model_init` → `view_display` →
-  `on_event` → helpers right after their caller). pattern-lint checks that
-  main comes first.
+  called from `main`**, depth-first (`view_display` → `on_event` → helpers
+  right after their caller) — **except `model_init`, which always goes LAST**,
+  after every other method (and is declared last in the DEFINITION too). It
+  usually holds a large `VALUE #( )` block of mock data; keeping it at the
+  bottom stops that data from interrupting the reading flow of the dispatcher,
+  view and event methods. pattern-lint checks that main comes first and that
+  model_init comes last.
 - `check_on_init( )` fires once when the app starts — seed the data, draw the view.
 - `check_on_event( )` fires on every user interaction — dispatch in `on_event( )`.
 - Add `model_init( )` / `on_event( )` **only when the app actually has data /
   events** — never a pass-through method with a single statement. A static app
-  (like app 408) has just `view_display( )` under `check_on_init( )`.
+  (like app 051) has just `view_display( )` under `check_on_init( )`.
 - If the sample re-displays on navigation, add an
   `ELSEIF client->check_on_navigated( ). view_display( ).` branch.
 
@@ -251,7 +255,7 @@ The sample's JSON model becomes ABAP: one `ty_s_`/`ty_t_` type per JSON array,
 filled with `VALUE #( ( … ) ( … ) )`. Field names are the JSON keys, upper-cased
 by ABAP; bindings reference them in braces (`{TITLE}`, `{PRODUCT_ID}`). Keep the
 data verbatim from the sample (same rows, same text); a row subset needs an
-IMPROVISED note (checkable against `ui5/mock/`). See app 454.
+IMPROVISED note (checkable against `ui5/mock/`). See app 040.
 
 **abap2UI5 serves a single default model — there are no named models.** A sample
 that binds against a named model (`img>/products/pic1`, a separate `JSONModel`,
@@ -260,8 +264,19 @@ merge the extra model's fields into the row type, or — for pure display assets
 like image URLs that are the same for every row — inline them as literals /
 build them from a shared base (a non-bound `base_url` kept in `PROTECTED`, not
 `PUBLIC`, so the round-trip model scan stays small). Record the flattening as an
-`IMPROVISED:` note. Worked example: app 420 (`sap.m.Carousel`, `img>` model →
+`IMPROVISED:` note — also when it merely drops unbound columns of a shared
+mock model. Worked example: app 006 (`sap.m.Carousel`, `img>` model →
 static image URLs).
+
+**Absent JSON properties must not become empty strings.** A flat ABAP row
+serializes every field on every row; where the original JSON simply omits a
+property, the port sends `""` — and UI5 rejects `""` on **enum**-typed
+properties (`validateProperty` throws where the original's `undefined`
+picked the default) and overrides non-empty property **defaults** (e.g.
+`Link.target` `_blank`). Fill the UI5 default value explicitly in the ABAP
+data, or split the aggregation into per-shape templates. Found by the
+2026-07-19 hold-out probe (QuickView port: `QuickViewGroupElementType`/
+`AvatarShape` crashed every page).
 
 #### `view_display` — the view via `z2ui5_cl_ai_xml`
 
@@ -361,7 +376,7 @@ client->view_display( view->stringify( ) ).
 - **Client handle strings (`_event`, `_bind`, `_event_client`, …) are
   written inline at each control — never captured in a variable**, even when
   the same call repeats on many controls and even inside expression bindings
-  (human decision 2026-07-17, apps 526/486/421; pattern-lint blocks
+  (human decision 2026-07-17, apps 005/053/007; pattern-lint blocks
   `DATA(x) = client->_…(`).
 - Read event parameters (declared via `_event( … t_arg = … )`) with
   `client->get_event_arg( )` — the index defaults to 1; **write it only for
@@ -382,14 +397,14 @@ client->view_display( view->stringify( ) ).
   `t_arg` (`t_arg = VALUE #( ( \`${NOTES}\` ) )`). This exact confusion was the
   overview-app bug (`{NOTES}` → `${NOTES}`) — the property-binding brace form
   was wrongly reused as an event arg. The same `$`-prefix rule covers the UI5
-  event object: `` `$event.oSource.sId` `` (the pressed control's id — app 526),
-  `` `${$source>/text}` `` (a bound property of the event source — app 530),
-  `` `$event.mParameters.selectedItems` `` (app 401).
+  event object: `` `$event.oSource.sId` `` (the pressed control's id — app 005),
+  `` `${$source>/text}` `` (a bound property of the event source — app 003),
+  `` `$event.mParameters.selectedItems` `` (app 022).
 - **Don't fake a value you can actually read from the event.** When the original
   controller reads something off the event/source (`evt.getSource().getId()`,
   `evt.getParameter(...)`), transport it with the `$event.…` arg above and read
   it back with `get_event_arg( )` — do **not** substitute a static placeholder.
-  App 526 originally toasted a hard-coded `` `Button Pressed` `` on the wrong
+  App 005 originally toasted a hard-coded `` `Button Pressed` `` on the wrong
   assumption that the client-side control id could not reach the backend; it can,
   via `` `$event.oSource.sId` ``.
 - **A property computed from several bound values → a UI5 expression binding
@@ -400,7 +415,7 @@ client->view_display( view->stringify( ) ).
   and any pipes: e.g. a "select all"/"partially selected" pair —
   `` v = |\{= ${ client->_bind( child1 ) } \|\| ${ client->_bind( child2 ) } \|\| ${ client->_bind( child3 ) } \}| `` (OR)
   and `` v = |\{= !(${ client->_bind( child1 ) } && ${ client->_bind( child2 ) } && ${ client->_bind( child3 ) })\}| ``
-  (NOT-AND). Worked example: app 421 (`sap.m.CheckBox` tri-state parent). Do the
+  (NOT-AND). Worked example: app 007 (`sap.m.CheckBox` tri-state parent). Do the
   logic in the binding, not by round-tripping — no event needed to keep the
   parent box in sync.
 
@@ -416,7 +431,7 @@ value comes from an ABAP boolean variable, wrap it with `as_bool( )`:
 
 Use **only** controls/properties available since UI5 1.71; never a deprecated
 one. When a sample uses something newer, either omit that one optional property
-with a one-line comment (see app 454: `showClearIcon` dropped, `" … omitted to
+with a one-line comment (see app 040: `showClearIcon` dropped, `" … omitted to
 stay compatible with UI5 1.71`) if the sample still works without it, or — if the
 sample's whole point needs the newer/deprecated control — **do not port it** and
 leave it as an ❌ gap. Never silently substitute a different control.
@@ -430,15 +445,15 @@ binding/event form you could not verify — record it as an entry in the
 with a closed `type` vocabulary so deviations stay countable:
 
 - `LIVE_TEST` — needs checking in a running system: an unverified
-  binding/event path, or uncertain rendering (e.g. app 530's `${$source>/text}`
+  binding/event path, or uncertain rendering (e.g. app 003's `${$source>/text}`
   event arg).
 - `IMPROVISED` — deviates from the sample: e.g. a named model flattened to
-  static values (app 420), or a MessageManager replaced by a hardcoded message
-  table (app 449). Only improvise what `CAPABILITIES.md` does not mark
-  expressible — app 529's Dialog→toast substitution was a wrong improvisation;
-  app 469 shows the 1:1 way (`popup_display`).
+  static values (app 006), or a MessageManager replaced by a hardcoded message
+  table (app 038). Only improvise what `CAPABILITIES.md` does not mark
+  expressible — app 042's Dialog→toast substitution was a wrong improvisation;
+  app 044 shows the 1:1 way (`popup_display`).
 - `DROPPED_171` — a control / property / enum value newer than 1.71 was
-  dropped or downgraded (app 529's `Indication06`+ states set to `None`).
+  dropped or downgraded (app 042's `Indication06`+ states set to `None`).
 - `SUBSET_DATA` — the port binds a row subset of the sample's mock data
   (checkable against `ui5/mock/`).
 - `NOTE` — anything else worth flagging.
@@ -451,13 +466,18 @@ these entries.
 
 #### Worked references
 
-Three PoC ports show the full range — read them before writing a new one:
+Read the 2–3 nearest ones before writing a new port. Since 2026-07-20 the
+repo has `golden` ports (live-checked + exemplary, the only ports allowed
+as prompt references per TRAINING.md):
 
 | App | Sample | Shows |
 |-----|--------|-------|
-| `src/01/b01/z2ui5_cl_ai_app_408` | `sap.m.Text` | static view, no data/events, `&&`-split text |
-| `src/01/b02/z2ui5_cl_ai_app_421` | `sap.m.CheckBox` | two-way bind, expression bindings, boolean event arg (CHECKED in-system) |
-| `src/01/b02/z2ui5_cl_ai_app_454` | `sap.m.MultiInput` | data, bound aggregation, `core:Item`, tokens, NOTES block |
+| `src/01/b01/z2ui5_cl_ai_app_051` | `sap.m.Text` | static view, no data/events, `&&`-split text |
+| `src/01/b02/z2ui5_cl_ai_app_007` | `sap.m.CheckBox` | two-way bind, expression bindings, boolean event arg (GOLDEN) |
+| `src/01/b02/z2ui5_cl_ai_app_040` | `sap.m.MultiInput` | data, bound aggregation, `core:Item`, tokens, cc control `z2ui5.cc.MultiInputExt` (GOLDEN) |
+| `src/01/b04/z2ui5_cl_ai_app_022` | `sap.m.FacetFilter` | compound `binding_call` filter, curated formatter module, two-way facet selection (GOLDEN) |
+| `src/01/b06/z2ui5_cl_ai_app_019` | `sap.m.Dialog` | fragment-popup dialogs, roundtrip-free live-enable expression, both popup_close paths (GOLDEN) |
+| `src/01/b05/z2ui5_cl_ai_app_016` | `sap.m.DatePicker` | frontend action (`openBy`/domRef), `$event.oSource.sId` anchor transport, POST_171 discipline (GOLDEN) |
 
 ### Generation prompt
 
@@ -521,6 +541,12 @@ node scripts/generate-overview.mjs     # then: git diff must stay clean
 node scripts/generate-coverage.mjs     # (README/api.md must stay clean too)
 ```
 
+The last two are automated by the tracked **`.githooks/pre-commit`** hook: on
+every commit it regenerates the overview app + coverage docs and stages them,
+so they never drift from `meta/` (which the `meta_valid` CI job enforces on
+PRs). It is enabled with `git config core.hooksPath .githooks`, which
+`npm ci` / `npm install` runs automatically via the `prepare` script.
+
 ### abapGit file format (all serialized files)
 
 - Encoding UTF-8 (BOM allowed); line endings **LF only**; **final newline**.
@@ -545,15 +571,37 @@ scripts.**
   no separate deprecated-controls section — everything sits in this table.
 - **`src/z2ui5_cl_ai_app_overview.clas.*`** — the in-system overview **app**:
   an abap2UI5 app that lists every ported app as one row of a `sap.m.Table`,
-  sorted by module → control → sample. Columns:
-  **Module** (text) · **Control** (link → OpenUI5 API) · **Sample** (name →
-  OpenUI5 repo source, ↗ → live fullscreen sample) · **abap2UI5** (class →
-  generated class on GitHub, ↗ → starts the app via `?app_start=<CLASS>`) ·
-  **Note** (green check when live-verified; hint button opens the deviations
-  popup). **Every link opens in a new browser tab** (`target="_blank"`). All
-  source links point at OpenUI5; only the class + start links are local.
-  The per-row URLs are built in `view_display` (the start URL needs the runtime
-  system origin), the static facts come from `get_catalog`.
+  sorted by module → control → sample. Columns (all plain text — links moved to
+  the trailing **Open** column): **Module** · **Control** · **Since** (the UI5
+  release the control appeared in) · **Sample** · **abap2UI5** (class name) ·
+  **Note** (gold star for `golden` ports; green check when live-verified; hint
+  button opens the deviations popup) · **Open** (a button that opens an anchored
+  popover of every link: OpenUI5 API, OpenUI5 source, live fullscreen sample,
+  the generated class on GitHub, and starting the app). The **Control** name and
+  the **Since** value come from `ui5/universe.json`. **Text is never coloured**;
+  a deprecated control's name is struck through (via a `sap.m.FormattedText`
+  `htmlText`, so the strikethrough can vary per row — a bound `class` would not,
+  being applied once at parse time). All current ports are in-scope (≤ 1.71,
+  non-deprecated), so none is struck today. A **Switch** in the subheader
+  toggles between the table and a **module → control → sample tree**
+  (`sap.m.Tree`, built in `build_tree` from the full catalog, expanded by
+  default via a `numberOfExpandedLevels` binding parameter, with Expand-all /
+  Collapse-all buttons in its header toolbar — client-side
+  `cs_event-control_by_id` `expandToLevel`/`collapseAll`) showing the same
+  samples; each tree leaf has the same jump popover as the table's **Open**
+  column. Both views are bound and their `visible` is an expression binding
+  over the two-way `show_tree` flag, so the toggle runs entirely on the client
+  (like app 007). The **search field** filters **only the table**, on the
+  client (`binding_call` `Contains` over a per-row `filter` blob via
+  `_event_client` — no round-trip); the **tree is intentionally not filtered**.
+  Each column header also carries client-side ascending/descending **sort**
+  icons via the same `binding_call` mechanism. **Every link opens in a new browser tab**
+  (`target="_blank"`). All source links point at OpenUI5; only the class +
+  start links are local. The per-row URLs are built in `view_display` (the
+  start URL needs the runtime system origin), the static facts come from
+  `get_catalog`. Ports are numbered gap-free `z2ui5_cl_ai_app_001..NNN` in this
+  same overview order; a renumber is a repo-wide rename (class token, sidecar
+  `class`/`file`, and every `app NNN` doc reference) followed by a regenerate.
 
 ```bash
 node scripts/generate-coverage.mjs          # README + api.md (offline, from ui5/universe.json)
@@ -612,13 +660,13 @@ the ports share that style. Essentials:
   methods, no explicit forms where the implicit one reads the same.
 - **Derive values from the data when the original does** — `selected =
   t_items[ 1 ]-text.` like the sample's `oMData[0].text`, never the resolved
-  literal (human fix in app 530, 2026-07-17).
+  literal (human fix in app 003, 2026-07-17).
 - **`VALUE #( )` alignment is all-or-nothing**: one field per line with every
   `=` in the same column — and after renaming a field, re-align the WHOLE
-  block including the TYPES definition (human fix in app 440, 2026-07-17).
+  block including the TYPES definition (human fix in app 033, 2026-07-17).
 - **Inline comments stay minimal**: one line at the exact spot of a deviation;
   multi-line rationale belongs in the sidecar, not the code (human deletion
-  in app 452, 2026-07-17).
+  in app 039, 2026-07-17).
 - Class names **lowercase** in `DEFINITION` and `IMPLEMENTATION`; not `FINAL`;
   `DEFINITION PUBLIC.` (never `CREATE PUBLIC`).
 - Always include `PROTECTED SECTION.` and `PRIVATE SECTION.` (keep `PRIVATE`
@@ -681,7 +729,7 @@ How to record it:
 - **Literal braces in attribute values are read as a BINDING by the XMLView
   parser** — CSS/JS braces inside a `core:HTML` `content` (or any literal
   attribute value) must be escaped `\{ … \}` or view creation crashes.
-  Found by render-smoke on app 431 (2026-07-18); pattern-lint rule
+  Found by render-smoke on app 028 (2026-07-18); pattern-lint rule
   `unescaped-brace-in-style-content` gates the `<style>` case.
 - **Event args need the `$`-prefixed form** (`${COL}`, `$event.oSource.sId`), not
   a bare `{COL}` — see §5 "Data binding & events".
@@ -690,7 +738,7 @@ How to record it:
 - **`_bind( val = x path = abap_true )` returns the bare model path**
   (no braces) — use it when composing raw binding-info strings
   (`{ path: '...', sorter: ... }`); never reconstruct the path with substring
-  tricks. Human-taught fix in app 452, 2026-07-16.
+  tricks. Human-taught fix in app 039, 2026-07-16.
 - **abapGit pushes from a system can carry stale generated files** — a human
   who pulled before the latest repo change and pushes back from the system
   silently reverts it (happened to the overview app's SUBSET labels,
@@ -704,7 +752,7 @@ How to record it:
   `generate-overview.mjs` is gone — the overview and the coverage read `meta/`.
 - **UI5 2.x validates control property types strictly** — a bound value that
   serializes as a JSON string is rejected when the property is a number/boolean
-  (`"100" is of type string, expected float` on `sap.m.Slider.value`, app 486).
+  (`"100" is of type string, expected float` on `sap.m.Slider.value`, app 053).
   Type the bound ABAP field numerically (`i`/packed) or as `abap_bool`, never
   as `string`, so the model carries a real JSON number/boolean.
 - **Device APIs need a secure context (HTTPS)** — geolocation and the camera
@@ -715,7 +763,7 @@ How to record it:
   certifies the code that was live-verified, not the class name. Any
   behavioral rework of a `checked` port resets `status` to `generated`
   (keep the historical check as context inside a `LIVE_TEST` deviation) or
-  restamps `checked` after a fresh live run. App 530 carried a 07-15 check
+  restamps `checked` after a fresh live run. App 003 carried a 07-15 check
   across its 07-16 round-trip removal and showed green in the overview while
   its central interaction path was unverified (found 2026-07-19).
 - **Prefer a bindable property over a frontend action / round-trip** — if a
@@ -724,3 +772,17 @@ How to record it:
   driving it imperatively. Only methods with no bindable equivalent
   (`NavContainer.to`, `focus`, `scrollToIndex`) need a frontend action.
   Compare app 088 (NavContainer + action) with the IconTabBar samples.
+- **A whitelisted control method silently drops arguments beyond its
+  declared kinds** — `castArgs` in `FrontendAction.js` maps over the
+  `CONTROL_METHODS` kinds list, so a `to` transition name or a
+  ViewSettingsDialog `open` page key never reaches the method; the call
+  "works" and the behavior is quietly wrong. Verify the method's kinds in
+  the framework source BEFORE wiring a parametrized call; if the sample
+  needs the arg, that is a declared deviation **plus a pr/ request in the
+  same change** — never a LIVE_TEST for something source-decidable
+  (hold-out probe apps 609/624, 2026-07-19; pr/control-method-args).
+- **POST_171 covers event *parameters* too** — a post-1.71 event parameter
+  read via `${$parameters>/…}` (e.g. SearchField `searchButtonPressed`,
+  since 1.114) needs its POST_171 deviation exactly like a bound member;
+  `property-check.mjs` only scans `a( n = … )` attributes and cannot see
+  t_arg usage (gate blind spot found 2026-07-19, STATUS backlog).

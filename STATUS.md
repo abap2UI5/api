@@ -1,6 +1,6 @@
 # STATUS.md — current state & open findings
 
-_Point-in-time summary, last updated **2026-07-19**. Update this file whenever
+_Point-in-time summary, last updated **2026-07-20**. Update this file whenever
 findings are fixed or new ones land (same-change discipline as AGENTS.md §10).
 For the process itself see TRAINING.md; for what abap2UI5 can express see
 CAPABILITIES.md._
@@ -9,13 +9,13 @@ CAPABILITIES.md._
 
 | Aspect | State |
 |---|---|
-| Ports | 34 / **403 in-scope** `sap.m` samples (8.4 %) — in scope = control exists since UI5 1.71 and is not deprecated; 43 of 446 samples are out of scope (16 deprecated, 21 newer, 6 without control metadata) |
+| Ports | 54 / **403 in-scope** `sap.m` samples (13.4 %) — in scope = control exists since UI5 1.71 and is not deprecated; 43 of 446 samples are out of scope (16 deprecated, 21 newer, 6 without control metadata) |
 | CI | ABAP_STANDARD, ABAP_CLOUD, ABAP_702 all green |
-| Structural view diff | **0 undeclared differences** across all 34 ports (`node scripts/structural-diff.mjs --strict`) — including simple **binding values** and, since 2026-07-19, **`id` attributes** (name-level per control type; dropped original ids must be restored or declared) |
-| Render smoke | **0 failing / 1 skipped** (`npm run smoke`): every reconstructable port's view loads in a real headless `XMLView.create` (app 481 skipped — helper-method view building is not statically reconstructable) |
+| Structural view diff | **0 undeclared differences** across all 54 ports (`node scripts/structural-diff.mjs --strict`) — including simple **binding values** and, since 2026-07-19, **`id` attributes** (name-level per control type; dropped original ids must be restored or declared) |
+| Render smoke | **0 failing / 1 skipped** (`npm run smoke`): every reconstructable port's view loads in a real headless `XMLView.create` (app 049 skipped — helper-method view building is not statically reconstructable); harness carries `sap.f` and mocks scalar-row tables as empty arrays since b05 |
 | Pattern lint | **0 errors, 0 warnings, empty baseline** (`node scripts/pattern-lint.mjs`) |
-| Meta sidecars | 34 in `meta/` — status: 31 `generated`, 3 `checked` (530 reset 2026-07-19 per the checked-invalidation rule); deviations: 9 IMPROVISED, 14 POST_171, 20 LIVE_TEST, 8 SUBSET_DATA, 17 NOTE, 1 DROPPED_171 (app 401's `p:ColumnAIAction` plugin — a whole control newer than 1.71, unlike the restorable members). `audit` is a structured object since 2026-07-18 |
-| Manually verified in a running system | 420, 421, 526 (`CHECKED`); 530's 07-15 check was invalidated by its 07-16 rework — restamp pending |
+| Meta sidecars | 54 in `meta/` — status: 14 `generated`, 35 `checked`, **5 `golden`** (401, 421, 454, 540, 543 — promoted 2026-07-20 after the full live check); deviations: 30 IMPROVISED, 27 POST_171, **0 LIVE_TEST**, 9 SUBSET_DATA, 57 NOTE, 2 DROPPED_171 (the `p:ColumnAIAction` plugin in apps 022 and 534 — a whole control newer than 1.71, unlike the restorable members). `audit` is a structured object since 2026-07-18 |
+| Manually verified in a running system | **40 of 54 ports** — 2026-07-20 human live check per the interaction checklist (all b05/b06 + every port that carried an open question, incl. the 530 restamp); previously: 420/421/526 interactive, 404/431/440/460/487 visual 2026-07-19. The 14 remaining `generated` ports are b01–b04 apps that never carried an open question |
 | Archive | `ui5/sap.m/<SampleName>/` — full originals for the 34 ported samples (+2 cross-referenced: `FacetFilterSimple`, `Table`); mock snapshot in `ui5/mock/`. Unported samples are copied over batch by batch. |
 
 ## Batches
@@ -26,13 +26,103 @@ The 34 existing ports are retro-grouped into review batches — one subpackage
 
 | Batch | Theme | Apps | Live-checked |
 |---|---|---|---|
-| `b01` | Display & navigation | 408, 409, 431, 434, 440, 460, 529, 530 | — (530 restamp pending) |
-| `b02` | Selection & input | 421, 422, 423, 439, 452, 454, 472, 481, 527, 528 | 421 |
-| `b03` | Actions, toolbars & popups | 447, 448, 449, 469, 474, 486, 526 | 526 |
-| `b04` | Layout, lists & data | 401, 404, 420, 433, 441, 445, 471, 473, 487 | 420 |
+| `b01` | Display & navigation | 408, 409, 431, 434, 440, 460, 529, 530 | 431, 434, 440, 460, 529, 530 |
+| `b02` | Selection & input | 421, 422, 423, 439, 452, 454, 472, 481, 527, 528 | 421, 452, 454 |
+| `b03` | Actions, toolbars & popups | 447, 448, 449, 469, 474, 486, 526 | 469, 474, 486, 526 |
+| `b04` | Layout, lists & data | 401, 404, 420, 433, 441, 445, 471, 473, 487 | 401, 404, 420, 433, 471, 473, 487 |
+| `b05` | Backlog top: bars, tables, custom items & patterns | 531, 532, 533, 534, 535, 536, 537, 538, 539, 540 | all (2026-07-20) |
+| `b06` | Date pickers, dialogs, feeds & tiles | 541, 542, 543, 544, 545, 546, 547, 548, 549, 550 | all (2026-07-20) |
 
-New generation batches continue as `b05`, `b06`, … per the process in
+New generation batches continue as `b07`, `b08`, … per the process in
 TRAINING.md.
+
+## Full human live check (2026-07-20) — every open question cleared
+
+The human worked through the complete interaction checklist in a running
+system (batches b01–b06, all framework-mechanism firsts incl. the freshly
+merged openBy/compound-filter paths, the review-fixed 550 scroll step, the
+device> phone checks and the 530 restamp) and confirmed every item. All
+LIVE_TEST deviations are closed, **40 of 54 ports are `checked`** — the
+14 remaining `generated` ports are b01–b04 apps that never carried an open
+question. Follow-up same day: **five ports promoted to `golden`** (401 compound
+filter + formatter, 421 expression bindings, 454 cc-control tokens,
+540 frontend action, 543 dialog flows) — the generation-prompt reference
+set in AGENTS §5 now spans six worked references across the technique
+range.
+
+## Human visual pass over b05+b06 (2026-07-20, earlier the same day)
+
+All 20 new ports were started in a running system and render without
+errors (apps opened and looked at; interactions not exercised). Closed on
+that basis: 401's weight-state colors and 542's date-type rendering half
+(DateTimeWithTimezone composites, empty-string DTP11, Islamic calendar).
+The interaction LIVE_TESTs stay open — a prioritized detail-check list
+was handed to the human (top of the list: 454 tokens, 540 openBy,
+401 compound filter, 469/471, 550's fixed initial scroll step).
+
+## Batch b06 generated (2026-07-20)
+
+The next 10 backlog-top NEW-CONTROL samples (breadth-first): 541
+DateRangeSelection, 542 DateTimePicker, 543 DialogConfirm, 544
+DisplayListItem, 545 DraftIndicator, 546 FeedContent, 547 Feed
+(FeedInput), 548 FeedListItem, 549 GenericTag, 550 HeaderContainer.
+Machine-verified to green (abaplint ×3, validate-meta, pattern-lint,
+structural-diff --strict, render-smoke --strict, property-check);
+generation fixes: 544 chain-end paren, 541 t_arg alignment, 543 fragment
+extras declared. Adversarial AI review (2 reviewers × 5 apps): **7 CLEAN,
+2 MINOR, 1 MAJOR** — the MAJOR was a real behavior bug in 550
+(`scrollStepByItem` seeded 0 instead of the UI5 default 1: initial arrow
+scroll was 200 px instead of one item, with a sidecar note asserting the
+wrong default as fact — fixed, seeded 1). MINORs fixed: 544's
+supplier.json is now snapshotted byte-identical in `ui5/mock/` (the
+AGENTS §4 offline-verifiability lesson) and its false "first element
+binding" LIVE_TEST rewrote to a NOTE (app 041 already proved the
+mechanism); 547's date-rebuild note now names the server-vs-browser
+timezone delta. The reviewers source-verified the heavy claims: 541/542's
+date-type bindings (source patterns, DateTimeWithTimezone V4
+constraints), 545's DraftIndicator setter-equivalence, and 548's
+`.indexOfItem(...)` method-call event arg (legal per ExpressionParser).
+Notables: 545 replaces the un-whitelisted DraftIndicator show* calls with
+a source-verified equivalent two-way `state` binding; 542/541 carry the
+full date-type battery (source patterns, DateTimeWithTimezone V4
+constraints, DateCreateObject); 544 fetched the un-snapshotted
+supplier.json from upstream and noted it.
+
+## Batch b05 generated (2026-07-19) — first post-probe batch
+
+The first 10 backlog-top NEW-CONTROL samples (breadth-first per AGENTS §1),
+generated with the probe-hardened rule set, machine-verified to green
+(abaplint ×3, validate-meta, pattern-lint, structural-diff --strict,
+render-smoke --strict, property-check) and adversarially AI-reviewed
+(2 reviewers × 5 apps): **7 CLEAN, 3 MINOR, 0 MAJOR, no BUG-class
+findings** — none of the probe's three MAJOR root causes recurred. Review
+findings fixed in-place: ComparisonPattern archive completed
+(formatter.js/manifest.json beyond the sample's own incomplete `files`
+list), 536/540 sidecar prose now references the filed pr, 534's four
+numeric mock fields retyped packed (batch-consistent with 535), 535's
+popinLayout round-trip converted to the 534 expression-binding form, and
+535's sidecar corrected on the local-vs-shared products.json difference
+(HT-9995 differs in content). Highlights:
+
+- The probe's distilled rules visibly held: no `popover_display( val = )`
+  recurrence, flattening declared everywhere, app 015 explicitly reasoned
+  the empty-string/enum rule, app 010 seeded `popinLayout` non-empty.
+- **App 009** re-applies the app-401 `DROPPED_171` decision for
+  `p:ColumnAIAction` (plugin class newer than 1.71 — dropped, not POST_171).
+- **Two new framework gaps** → pr/control-methods-openby-setactivepage,
+  **implemented upstream 2026-07-20** (new `domRef` arg kind, `openBy`,
+  `setActivePage`; folder archived in pr/README Implemented): app 016's
+  hidden-DatePicker wiring is now valid (IMPROVISED→LIVE_TEST). App 012's
+  Carousel re-sync stays dropped — aggregation-template clone ids are not
+  backend-addressable (recorded in the sidecar + CAPABILITIES; an
+  index-based page resolution would be a new request if more samples need
+  it).
+- Render-smoke harness extended for b05: `sap.f` library loaded
+  (DynamicPage/GridList/Card in 536/537) and scalar-row tables
+  (`TABLE OF string` bound to array properties like `Table.sticky`, app 009) mocked as empty arrays instead of `{}` rows.
+- New LIVE_TESTs are tracked in the b05 sidecars (popup/timer cycle 533,
+  image dialog 538, `$source>/selectedKey` arg 535, sticky round-trip 534,
+  binding_call-on-init + `to` navigation 536, popup focus flow 537).
 
 ## Verified fixed (2026-07-16)
 
@@ -44,17 +134,17 @@ reviewers), followed by fixes:
   into the CHECKED text, literal chunking can no longer split a doubled
   backtick. Output byte-identical on the existing 34 ports.
 - **Builder `z2ui5_cl_ai_xml`** — LF/CR/TAB in attribute values now escape to
-  `&#xA;`/`&#xD;`/`&#x9;` (fixes app 445's lost noDataText line break at the
+  `&#xA;`/`&#xD;`/`&#x9;` (fixes app 035's lost noDataText line break at the
   root).
-- **App 401 (FacetFilter)** — Reset now really resets (two-way `selected`
+- **App 022 (FacetFilter)** — Reset now really resets (two-way `selected`
   binding per FacetFilterItem) and the fragile JSON parse of
   `$event.mParameters.selectedItems` (private internals, silent CATCH) is gone;
   full NOTES block added. LIVE-TEST pending.
-- **App 454 (MultiInput)** — the 6+1 pre-set tokens from `onInit` render again
+- **App 040 (MultiInput)** — the 6+1 pre-set tokens from `onInit` render again
   (tokens aggregation), View height restored, NOTES block added.
-- **App 422 (ColorPalette)** — boolean `defaultAction` echoed as `true`/`false`
+- **App 008 (ColorPalette)** — boolean `defaultAction` echoed as `true`/`false`
   instead of raw `X`/space.
-- **Apps 441/469/481** — existing deviations declared in the header NOTES.
+- **Apps 034/044/049** — existing deviations declared in the header NOTES.
 
 ## Verified fixed (2026-07-16, second pass — fidelity backlog)
 
@@ -86,7 +176,7 @@ Two human correction commits so far; every change fed back as a rule:
   even repeated, even in expression bindings (526, then 486; 481/421 aligned
   accordingly) → pattern-lint error rule + AGENTS §5. Process lesson: my
   first distillation scoped the rule too narrowly (events only, bind handles
-  exempted citing app 421) — the human had to fix the same error class twice.
+  exempted citing app 007) — the human had to fix the same error class twice.
   When distilling, prefer the GENERAL principle over the narrowest reading.
 - Derive values from data like the original (530 `t_items[ 1 ]-text`),
   all-or-nothing `VALUE #( )` alignment after renames (440), minimal inline
@@ -163,7 +253,7 @@ Two ideas the audit surfaced, handled per their true nature:
   composite **types** ✅ via raw binding-info string; only custom JS formatter
   **functions** stay ❌), and ports **440**/**401** converted to keep the
   original Currency binding 1:1 over a numeric `PRICE` (`TYPE p`) field —
-  IMPROVISED dropped, LIVE_TEST added. App 460 keeps its static single-record
+  IMPROVISED dropped, LIVE_TEST added. App 041 keeps its static single-record
   resolution (an unrelated deviation), not blocked by the type.
 - **MultiInput `addValidator` — NOT a framework gap either** — the bundled
   custom control `z2ui5.cc.MultiInputExt` installs exactly the sample's
@@ -172,7 +262,7 @@ Two ideas the audit surfaced, handled per their true nature:
   token changes back via `addedTokens`/`removedTokens` + `change`. CAPABILITIES
   row added (🔶) and the app-454 deviation corrected IMPROVISED→NOTE. Initially
   left unwired (first cc-control usage needs a live check); **wired 2026-07-18**
-  (human direction): app 454 now declares `xmlns:z2ui5="z2ui5.cc"` and one
+  (human direction): app 040 now declares `xmlns:z2ui5="z2ui5.cc"` and one
   `z2ui5:MultiInputExt` leaf per token input (`multiInput1`/`multiInput2`,
   matching the original's two addValidator calls); the render-smoke harness
   carries a metadata-only mirror of the cc control so view creation stays
@@ -184,7 +274,7 @@ and the MultiInput validator were both already in the framework — the map/port
 had wrongly treated them as ❌. Exactly the "declared impossible although it
 already works" failure mode CAPABILITIES.md opens by warning against.
 
-**Same failure mode again — `sap.m.MessageView` (2026-07-18):** app 449 was
+**Same failure mode again — `sap.m.MessageView` (2026-07-18):** app 038 was
 marked `IMPROVISED` / the map carried "MessageManager / `message>` model ❌",
 yet the port already renders the MessageView 1:1 by binding the messages as a
 plain ABAP table on the `items` aggregation with a `MessageItem` template — the
@@ -408,13 +498,13 @@ produce; two were regenerated, plus hygiene. All changes in this pass:
 - **Self-referential deviations reclassified** IMPROVISED→NOTE in 472
   (range→value/value2), 486 (expression-bound widths), 474 (two-way
   selectedKey) — same class the 2026-07-17 audit fixed for 447/452/454/449;
-  the counts above now reflect it. App 449's NOTE no longer claims "no
+  the counts above now reflect it. App 038's NOTE no longer claims "no
   MessageManager model" (stale since pr/message-model).
 - **Checked-invalidation rule** (new, AGENTS §10 + TRAINING): a code change
   to a `checked` port resets the status until restamped. Applied to 530
   (07-15 check vs 07-16 rework).
 - **Structural diff now compares `id` attributes** (name-level per control
-  type): app 474 had dropped the original `SB1`/`selectedItemPreview` ids —
+  type): app 047 had dropped the original `SB1`/`selectedItemPreview` ids —
   restored; the gate keeps it from recurring. Extra port-added ids stay
   unflagged.
 - **Style normalized**: 528 rewritten from the one-off `a = VALUE #( )`
@@ -427,50 +517,60 @@ produce; two were regenerated, plus hygiene. All changes in this pass:
   `control_by_id` empty-view wording corrected to the framework behavior
   (global lookup, not "keeps the slot").
 
+## Hold-out regeneration probe #1 (2026-07-19) — baseline set
+
+The first TRAINING.md regeneration probe ran: all 25 hold-out samples
+generated from scratch, first-try, scored by every gate plus a 5-reviewer
+adversarial pass. Full protocol and per-app numbers:
+**`probes/holdout-2026-07-19.md`**. Headlines: 21/25 CI-green on first try,
+23/25 structural-diff-clean, 0 genuine render failures, review 14 CLEAN /
+5 MINOR / 6 MAJOR with only **three root causes** behind all MAJORs —
+each distilled in the same change:
+
+- `popover_display( val = )` guessed by analogy (3 apps, does not compile)
+  → exact signature in CAPABILITIES, pattern-lint rule
+  `popover-display-val`, prompt updated.
+- `CONTROL_METHODS` arg-kinds ignored (2 apps: `to` transition /
+  ViewSettingsDialog `open` page silently dropped, mis-filed as LIVE_TEST)
+  → AGENTS §10 gotcha + CAPABILITIES row warning + pr/control-method-args
+  (**implemented upstream same day**: `to [transitionName]`,
+  `open [pageKey]`, `goToStep [controlId, bool]`; `castArgs` no longer pads
+  missing trailing args — folder removed, see pr/README Implemented).
+- Empty-string flattening breaks enum properties / overrides defaults
+  (1 app, QuickView) → AGENTS §5 model rule, prompt updated.
+
+Probe-found infrastructure fixes (landed 2026-07-19): render-smoke
+formatter mirror synced to the full upstream contract; `resolveExpr` now
+resolves `&&`-chained templates. The probe ports themselves are never
+merged (hold-out discipline); the worktree snapshot exists only locally.
+
+## Compound binding_call filters implemented + 401 converted (2026-07-20)
+
+The last open framework request, pr/binding-call-compound-filters, was
+implemented upstream (`BINDING_METHODS.filter` accepts a JSON groups
+payload: OR inside each group, AND across groups, whitelisted operators,
+empty clears; the positional single-filter form is unchanged). Port 401
+now expresses the original's nested FacetFilter exactly — apply_filter
+builds the groups JSON from the two-way bound selected flags and schedules
+`cs_event-binding_call`; the ABAP-side model rebuild and the
+`t_products_all` mirror are gone (deviation IMPROVISED→NOTE, new
+LIVE_TEST). **pr/ is empty again** — every request implemented or
+declined; see pr/README.
+
 ## Open findings (backlog)
 
-Live tests pending (in-system) — the 2026-07-16 framework source pass
-(CAPABILITIES.md) already confirmed the *mechanics* of several; what remains
-is visual/UX confirmation:
-- [ ] **401** — Reset unchecks the facet popover checkboxes (mechanics
-  source-verified: model applied before on_event).
-- [ ] **401** — the weight states render Success/Warning/Error via the
-  core:require'd `Formatter.weightState` (first port referencing the
-  curated formatter module, converted 2026-07-18).
-- [ ] **469** — the popup-mode PDFViewer opens via the whitelisted
-  CONTROL_BY_ID `open` (`follow_up_action( cs_event-control_by_id )`) and
-  shows the clicked PDF (converted 2026-07-18; the earlier Dialog check is
-  obsolete).
-- [ ] **471** — the third panel toggles via the whitelisted CONTROL_BY_ID
-  `setExpanded` (`follow_up_action( cs_event-control_by_id )`) on each
-  toolbar press (converted 2026-07-18).
-- [ ] **487** — nested tree binding renders expandable levels (serialization
-  source-verified; framework ships z2ui5.cc.Tree).
-- [ ] **529** — the press Dialog opens/closes (popup_display).
-- [ ] **404/431** — injected CSS styles the flex items / floats the tiles.
-- [ ] **486** — expression-bound toolbar widths follow the slider.
-- [ ] **474** — toast shows the newly selected item (timing source-verified).
-- [ ] **454** — free text + Enter creates a token on both multiInput1 and
-  multiInput2 via the `z2ui5.cc.MultiInputExt` companions (first cc-control
-  usage in these ports, wired 2026-07-18).
-- [ ] **452** — the bound-template + group-sorter binding-info conversion
-  shipped 2026-07-16; what remains is the LIVE-TEST of the default group
-  headers.
-- [ ] **433/473** — the `{device>/…}` bindings are restored in code
-  (433 `expanded`, 473 `width` expressions); what remains is the LIVE-TEST.
-- [ ] **434** — injected CSS colors the imageContainer background AND the
-  device-dependent image size expression follows phone/desktop.
-- [ ] **440** — the Currency composite binding renders the formatted price
-  (raw binding-info string over `price TYPE p`, converted 2026-07-17).
-- [ ] **401** — the popin layout switches via the two-way ComboBox
-  selectedKey and the ToggleButton hides/shows the restored infoToolbar via
-  the visible expression binding (restored 2026-07-19).
-- [ ] **460** — the element binding (`binding="{/S_PRODUCT}"`) resolves the
-  relative field bindings incl. the Currency number (first `binding=`
-  context port, converted from full static resolution 2026-07-19).
-- [ ] **530** — RESTAMP: the 07-15 live check predates the 07-16 rework and
-  was reset 2026-07-19; re-verify the clicked-link toast and the instant
-  separator switch, then set `checked` again.
+Live tests: **ALL CLEARED 2026-07-20** — the human live check followed the
+interaction checklist through batches b01–b06 (facet compound filter + Reset
++ popin toggle 401, MultiInputExt tokens 454, popup PDFViewer 469, panel
+toggle 471, group headers 452, slider widths 486, selection toast 474,
+press Dialog 529, BusyDialog timer cycle 533, sticky round-trip 534,
+ComparisonPattern navigation 536, cookie focus flow 537, image dialog 538,
+hidden-DatePicker openBy 540, date-picker CHANGE round-trips 541/542,
+dialog flows 543, feed sender args 547/548, scroll-step switching 550, the
+device> phone checks 433/434/473, and the 530 RESTAMP). Every LIVE_TEST
+deviation is closed and the apps are promoted to `checked` in their
+sidecars; 40 of 54 ports are now live-verified (the remaining 14 are
+b01–b04 ports that never carried an open question).
 
 Idiom / style (low):
 - [x] ~~`main` method placed last in several ports~~ — done 2026-07-16: new
@@ -487,7 +587,7 @@ Infrastructure:
   same day: **1:1 beats 1.71-purity** — post-1.71 members are KEPT when the
   original uses them and must be declared as `POST_171` (the gate enforces
   the declaration); the previously dropped members were restored. First
-  catch: app 420's Carousel `ariaLabelledBy` (association only since 1.125)
+  catch: app 006's Carousel `ariaLabelledBy` (association only since 1.125)
   had been silently copied without any declaration.
 - [x] ~~generate-coverage.mjs: `FOCUS_LIBS` undocumented; orphan ports vanish
   silently; header-regex fragility~~ — done 2026-07-16: ported set comes from
@@ -499,15 +599,29 @@ Infrastructure:
   past the root null-refs; duplicate attribute names render invalid XML~~ —
   done 2026-07-18: all three ASSERT (fail fast at the call site), plus a local
   unit test class on `z2ui5_cl_ai_xml`.
+- [ ] property-check blind spot (hold-out probe 2026-07-19): the gate only
+  scans `a( n = … )` attributes, so a post-1.71 **event parameter** read via
+  `${$parameters>/…}` in a `t_arg` slips through undeclared (probe app 618,
+  SearchField `searchButtonPressed` since 1.114). Teach the gate to match
+  `$parameters>/<name>` against the entity's member list, or accept and
+  keep the AGENTS §10 rule as the only guard.
 - [ ] pattern-lint stays regex-based **by decision** (2026-07-18): the rule
   set is green and each rule is small; a rewrite on the abaplint AST API only
   pays once regex rules start producing false positives/negatives in
   practice. Revisit when a rule needs real syntax awareness (first candidate:
   anything that must distinguish strings from code).
-- [ ] render-smoke: app 481 is SKIPped (view built via `render_item` helper
+- [ ] render-smoke: app 049 is SKIPped (view built via `render_item` helper
   methods — not statically reconstructable). Either teach the reconstructor
   simple single-level helper inlining, or accept the skip; never let skips
   grow silently (the run prints them).
+- [x] ~~render-smoke harness gaps found by the 2026-07-19 hold-out probe~~ —
+  fixed same day: (a) the inline formatter mirror had only `weightState`
+  while upstream `model/formatter.js` had grown the date helpers + demo kit
+  pack — now mirrors the full curated contract; (b) `resolveExpr` treated a
+  value starting with `|` as ONE template, so a template continued with `&&`
+  leaked literal `| &&` into the attribute — now the (template-aware) `&&`
+  split runs first and each piece resolves independently. Existing 34 ports
+  unaffected (0 failing / 1 skipped before and after).
 - [x] ~~TRAINING.md stage 2: generate the header block from `meta/`
   (inversion)~~ — done 2026-07-16, stricter than planned: port classes carry
   no header at all; `meta/` is the source of truth (validate-meta in CI,
@@ -517,4 +631,4 @@ Infrastructure:
   generated-artifacts sync check on every PR.
 - [x] ~~AGENTS.md §5 "Worked references" points at nonexistent
   `src/04/z2ui5_cl_ai_app_416`; §8 names the wrong builder classes~~ — fixed
-  2026-07-16 (416 row replaced by app 421, §8 corrected to `z2ui5_cl_ai_xml`).
+  2026-07-16 (416 row replaced by app 007, §8 corrected to `z2ui5_cl_ai_xml`).

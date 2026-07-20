@@ -1,0 +1,36 @@
+{
+	"sap.app": {
+		"id": "sap.m.sample.TableTest",
+		"applicationVersion": {
+			"version": "1.0.0"
+		}
+	},
+	"sap.ui5": {
+		"dependencies": {
+			"libs": {
+				"sap.m": {},
+				"sap.ui.core": {}
+			}
+		},
+		"config": {
+			"sample": {
+				"iframe": "Test.qunit.html?testsuite=test-resources/sap/m/demokit/sample/TableTest/testsuite.qunit&test=OpaTableTest",
+				"stretch": true,
+				"files": [
+					"applicationUnderTest/index.html",
+					"applicationUnderTest/Component.js",
+					"applicationUnderTest/products.json",
+					"applicationUnderTest/view/Table.view.xml",
+					"applicationUnderTest/view/Table.controller.js",
+					"applicationUnderTest/view/Formatter.js",
+					"Component.js",
+					"manifest.json",
+					"OpaTableTest.qunit.js",
+					"Test.qunit.html",
+					"testsuite.qunit.html",
+					"testsuite.qunit.js"
+				]
+			}
+		}
+	}
+}
