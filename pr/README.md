@@ -20,7 +20,6 @@ on the details live upstream and in CAPABILITIES.md/STATUS.md.
 | Request | Motivation |
 |---------|------------|
 | [binding-call-compound-filters](binding-call-compound-filters/README.md) | the `BINDING_CALL` filter builds exactly one path/operator/value `Filter`; the standard multi-facet AND-of-ORs pattern (FacetFilter, ViewSettingsDialog) is not expressible, so port 401 falls back to ABAP-side model filtering |
-| [control-methods-openby-setactivepage](control-methods-openby-setactivepage/README.md) | `DatePicker.openBy` (needs a new DOM-ref-resolving arg kind; blocks the DatePickerHidden port's core feature) and `Carousel.setActivePage` are not in `CONTROL_METHODS` (found by batch b05, apps 540/536) |
 
 ## Declined / deferred (folder removed 2026-07-19)
 
@@ -40,3 +39,4 @@ on the details live upstream and in CAPABILITIES.md/STATUS.md.
 | binding-call | 2026-07-18 | declarative filter/sort on aggregation bindings via `cs_event-binding_call` (whitelisted methods/operators, built from data); beta samples `z2ui5_cl_demo_app_454`/`_455`. 2026-07-19: the interim `binding_call_by_id` wrapper method was consolidated into `follow_up_action` + `cs_event-binding_call` |
 | message-model | 2026-07-18 | every view slot carries the central UI5 message model as `message>` with `handleValidation` registration; beta sample `z2ui5_cl_demo_app_458` |
 | control-method-args | 2026-07-19 | `to` takes an optional transitionName, `open` an optional page key, `goToStep: [controlId, bool]` whitelisted; `castArgs` no longer pads missing trailing args (open() stays no-arg, no NaN ints). Found by hold-out probe #1 (apps 609/624/625) |
+| control-methods-openby-setactivepage | 2026-07-20 | new `domRef` arg kind (control id → DOM element, control fallback) + `openBy: [domRef]` (unblocks app 540's hidden DatePicker; covers the TimePicker/Menu anchored-open family) and `setActivePage: [controlId]`. Found by batch b05 (apps 540/536). Note: 536's Carousel re-sync stays dropped — template-clone page ids are not backend-addressable; an index-based page resolution would be a new request if more samples need it |

@@ -323,13 +323,14 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` replaced by a bound VISIBLE flag per comparison value row, toggled in the PANEL_EXPANDED event via t_arg ${KEY} + ${$parameters>/expand}; the description HBox's literal visible="false" becomes the` &&
                  ` {VISIBLE} binding (initial false). // LIVE-TEST: the PAGE_CHANGED event arg ${$parameters>/activePages/0} (array-element path over the event-parameters model, standing in for the controller's` &&
                  ` activePages[0]) is unverified; if it resolves empty the window recompute degrades gracefully to page 0. Also confirm the init-roundtrip binding_call filter and the control_by_id 'to' navigation` &&
-                 ` render as expected. // IMPROVISED: snapped/expanded Carousel re-sync dropped: Carousel.setActivePage is not in the CONTROL_METHODS whitelist - requested in pr/control-methods-openby-setactivepage` &&
-                 ` (cites this port); restore the re-sync once implemented upstream. // NOTE: the DynamicPageTitle stateChange handler (.onStateChange, add/removeSnappedContent of the snapped Carousel as a` &&
-                 ` Carousel-animation workaround) is dropped together with its stateChange attribute - imperative aggregation surgery with no framework equivalent; the snapped/expanded content still switches natively` &&
-                 ` with the DynamicPage header state. // NOTE: comparison Props are built from a fixed 19-key list in the mock JSON key order (the original iterates the FIRST selected product's own keys, skipping` &&
-                 ` ProductPicUrl - so a first product without DateOfSale would drop that row, and missing values rendered '<strong>undefined</strong>' where the port renders an empty <strong></strong>); selected` &&
-                 ` products are taken in model row order, not click order; the original's per-product information cache is unnecessary server-side. The controller's handleButtonPress (MessageBox) is dead code` &&
-                 ` referenced by no view and not ported.` )
+                 ` render as expected. // IMPROVISED: snapped/expanded Carousel re-sync stays dropped although Carousel.setActivePage is whitelisted upstream since 2026-07-20 (pr/control-methods-openby-setactivepage):` &&
+                 ` the carousels' pages are aggregation-template CLONES whose ids (templateId-parentId-index, view-prefixed; nondeterministic under extended change detection) are not addressable from the backend -` &&
+                 ` restoring the re-sync would need an index-based page-resolution mechanism, a new framework idea if more samples turn out to need it. // NOTE: the DynamicPageTitle stateChange handler (.onStateChange,` &&
+                 ` add/removeSnappedContent of the snapped Carousel as a Carousel-animation workaround) is dropped together with its stateChange attribute - imperative aggregation surgery with no framework equivalent;` &&
+                 ` the snapped/expanded content still switches natively with the DynamicPage header state. // NOTE: comparison Props are built from a fixed 19-key list in the mock JSON key order (the original iterates` &&
+                 ` the FIRST selected product's own keys, skipping ProductPicUrl - so a first product without DateOfSale would drop that row, and missing values rendered '<strong>undefined</strong>' where the port` &&
+                 ` renders an empty <strong></strong>); selected products are taken in model row order, not click order; the original's per-product information cache is unnecessary server-side. The controller's` &&
+                 ` handleButtonPress (MessageBox) is dead code referenced by no view and not ported.` )
       ( module = `sap.m` control = `sap.m.CookieSettingsDialogPattern` name = `CookieSettingsDialogPattern` class = `z2ui5_cl_ai_app_537` path = `src/01/b05/z2ui5_cl_ai_app_537.clas.abap`
         notes = `IMPROVISED: the i18n> ResourceModel (i18n/i18n.properties) has no framework i18n mechanism here - all texts (dialog title, section titles/summaries/details, button labels) are inlined as the resolved` &&
                  ` English literals from the properties file; this covers every i18n>-bound text incl. the Panel headerText 'More Info'. // IMPROVISED: the cookieData> named JSON model is flattened into the default` &&
@@ -357,13 +358,12 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` // NOTE: the flat ABAP row types serialize an empty NODES array on leaf rows where the original Tree.json simply omits the 'nodes' property (levels 1-4; the level-5 row type carries no NODES field at` &&
                  ` all); ClientTreeBinding treats an empty child array as a childless node, so the rendered tree matches. TEXT and REF are present on every original node - no absent-property/empty-string enum risk.` )
       ( module = `sap.m` control = `sap.m.DatePicker`                  name = `DatePickerHidden`            class = `z2ui5_cl_ai_app_540` path = `src/01/b05/z2ui5_cl_ai_app_540.clas.abap`
-        notes = `IMPROVISED: DatePicker.openBy(domRef) is NOT in the CONTROL_METHODS whitelist (source-verified in app/webapp/core/FrontendAction.js); the port keeps the 1:1 wiring (press -> backend event ->` &&
-                 ` follow_up_action control_by_id HiddenDP//openBy/<anchorId>), which the frontend rejects with a logged error until the whitelist grows - the picker does not open and the change toast cannot fire.` &&
-                 ` Requested in pr/control-methods-openby-setactivepage (needs a new domRef-resolving arg kind; cites this port). No alternative exists: DatePicker has no public open() and no bindable open-state` &&
-                 ` property (verified in sap/m/DatePicker.js). // POST-1.71: Button.ariaHasPopup (since UI5 1.84) is newer than 1.71 but kept for the 1:1 port on both Buttons - the app needs a UI5 release >= 1.84 to` &&
-                 ` render it. // POST-1.71: Link.ariaHasPopup (since UI5 1.86) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.86 to render it. // POST-1.71: DatePicker.hideInput (since` &&
-                 ` UI5 1.97) is newer than 1.71 but kept for the 1:1 port - the sample's central property (the picker input stays hidden, opened only via the anchor controls); openBy is also since 1.97, so the app` &&
-                 ` needs a UI5 release >= 1.97 to render this sample's behavior.`
+        notes = `LIVE-TEST: the 1:1 openBy wiring (press -> backend event -> follow_up_action control_by_id HiddenDP//openBy/<anchorId>) is whitelisted upstream since 2026-07-20` &&
+                 ` (pr/control-methods-openby-setactivepage: new domRef arg kind resolves the anchor id to its DOM element, control fallback) - confirm in a running system that each of the three anchors (Button, icon` &&
+                 ` Button, Link) opens the hidden DatePicker anchored to itself and the change toast shows the picked date. // POST-1.71: Button.ariaHasPopup (since UI5 1.84) is newer than 1.71 but kept for the 1:1` &&
+                 ` port on both Buttons - the app needs a UI5 release >= 1.84 to render it. // POST-1.71: Link.ariaHasPopup (since UI5 1.86) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >=` &&
+                 ` 1.86 to render it. // POST-1.71: DatePicker.hideInput (since UI5 1.97) is newer than 1.71 but kept for the 1:1 port - the sample's central property (the picker input stays hidden, opened only via the` &&
+                 ` anchor controls); openBy is also since 1.97, so the app needs a UI5 release >= 1.97 to render this sample's behavior.`
         post171 = `Button.ariaHasPopup (since UI5 1.84) is newer than 1.71 but kept for the 1:1 port on both Buttons - the app needs a UI5 release >= 1.84 to render it. // Link.ariaHasPopup (since UI5 1.86) is newer` &&
                  ` than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.86 to render it. // DatePicker.hideInput (since UI5 1.97) is newer than 1.71 but kept for the 1:1 port - the sample's central` &&
                  ` property (the picker input stays hidden, opened only via the anchor controls); openBy is also since 1.97, so the app needs a UI5 release >= 1.97 to render this sample's behavior.` )

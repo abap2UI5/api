@@ -56,11 +56,14 @@ popinLayout round-trip converted to the 534 expression-binding form, and
   the empty-string/enum rule, app 535 seeded `popinLayout` non-empty.
 - **App 534** re-applies the app-401 `DROPPED_171` decision for
   `p:ColumnAIAction` (plugin class newer than 1.71 — dropped, not POST_171).
-- **Two new framework gaps** →
-  `pr/control-methods-openby-setactivepage`: `DatePicker.openBy` (blocks
-  app 540's core feature — the port keeps the 1:1 wiring, client-side
-  rejected until whitelisted) and `Carousel.setActivePage` (app 536's
-  header re-sync, dropped/declared).
+- **Two new framework gaps** → pr/control-methods-openby-setactivepage,
+  **implemented upstream 2026-07-20** (new `domRef` arg kind, `openBy`,
+  `setActivePage`; folder archived in pr/README Implemented): app 540's
+  hidden-DatePicker wiring is now valid (IMPROVISED→LIVE_TEST). App 536's
+  Carousel re-sync stays dropped — aggregation-template clone ids are not
+  backend-addressable (recorded in the sidecar + CAPABILITIES; an
+  index-based page resolution would be a new request if more samples need
+  it).
 - Render-smoke harness extended for b05: `sap.f` library loaded
   (DynamicPage/GridList/Card in 536/537) and scalar-row tables
   (`TABLE OF string` bound to array properties like `Table.sticky`, app

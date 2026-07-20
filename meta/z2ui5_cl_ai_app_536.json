@@ -45,7 +45,7 @@
     },
     {
       "type": "IMPROVISED",
-      "what": "snapped/expanded Carousel re-sync dropped: Carousel.setActivePage is not in the CONTROL_METHODS whitelist - requested in pr/control-methods-openby-setactivepage (cites this port); restore the re-sync once implemented upstream."
+      "what": "snapped/expanded Carousel re-sync stays dropped although Carousel.setActivePage is whitelisted upstream since 2026-07-20 (pr/control-methods-openby-setactivepage): the carousels' pages are aggregation-template CLONES whose ids (templateId-parentId-index, view-prefixed; nondeterministic under extended change detection) are not addressable from the backend - restoring the re-sync would need an index-based page-resolution mechanism, a new framework idea if more samples turn out to need it."
     },
     {
       "type": "NOTE",
