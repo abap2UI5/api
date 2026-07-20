@@ -853,6 +853,28 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         post171 = `ariaHasPopup="Dialog" on both buttons (since UI5 1.84) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.84 to render it. // the MessageBox emphasizedAction option (since` &&
                  ` UI5 1.75) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.75 to render it. // the MessageBox dependentOn option (since UI5 1.124) is restored via message_box_display's` &&
                  ` dependenton parameter, pointing at the view layout (id messageBoxHost); the app needs a UI5 release >= 1.124 to render it.` )
+      ( module = `sap.m` control = `sap.m.MessagePopover`              name = `MessagePopover`                      class = `z2ui5_cl_ai_app_066` path = `src/01/b08/z2ui5_cl_ai_app_066.clas.abap`
+        since = `1.28`
+        notes = `POST-1.71: Button.ariaHasPopup (since UI5 1.84) kept on the message-popover button. The Button.type value 'Negative' (a sap.m.ButtonType value since 1.73) is what the sample's buttonTypeFormatter` &&
+                 ` returns for the highest-severity Error message. // IMPROVISED: the MessagePopover (built in the controller and addDependent'ed to the button) is declared 1:1 in the button's ``dependents``` &&
+                 ` aggregation; the controller's oMessagePopover.toggle(button) becomes client->follow_up_action( cs_event-control_by_id, toggleBy ) anchored to the button's DOM ref ($event.oSource.sId) -` &&
+                 ` open-if-closed / close-if-open. // NOTE: the sample's three severity formatters (buttonIconFormatter/buttonTypeFormatter/highestSeverityMessages) compute the button icon/type/count from the` &&
+                 ` highest-severity message; the mock data is static, so the results are precomputed in ABAP (error icon, Negative type, count 2 for the two Error messages) and bound as scalars. The sample's root-array` &&
+                 ` JSON model (items path '/') is carried under a /T_MESSAGES field of the single default model. // LIVE-TEST: confirm in a running system that the button toggles the MessagePopover open/closed` &&
+                 ` (toggleBy) and lists the five messages with their MessageItem link, and that activeTitlePress toasts on the active (first Error) title.`
+        post171 = `Button.ariaHasPopup (since UI5 1.84) kept on the message-popover button. The Button.type value 'Negative' (a sap.m.ButtonType value since 1.73) is what the sample's buttonTypeFormatter returns for the` &&
+                 ` highest-severity Error message.` )
+      ( module = `sap.m` control = `sap.m.MessagePopover`              name = `MessagePopoverAsyncMessageHandling`  class = `z2ui5_cl_ai_app_067` path = `src/01/b08/z2ui5_cl_ai_app_067.clas.abap`
+        since = `1.28`
+        notes = `POST-1.71: Button.ariaHasPopup (since UI5 1.84) kept on the message-popover button; the Button.type value 'Negative' is a sap.m.ButtonType value since 1.73. MessageItem.markupDescription (renders the` &&
+                 ` HTML description) is kept for the async sample's rich-text messages. // IMPROVISED: the MessagePopover (built in the controller) is declared 1:1 in the button's ``dependents``; the controller's` &&
+                 ` toggle(button) becomes client->follow_up_action( cs_event-control_by_id, toggleBy ) anchored to $event.oSource.sId. // IMPROVISED: the sample's oMessagePopover.setAsyncURLHandler(...) - a client-side` &&
+                 ` JS callback that asynchronously validates each link URL (disabling absolute http links, allowing relative ones) before navigation - has no abap2UI5 equivalent and is dropped; the messages and their` &&
+                 ` markupDescription HTML (with the two demo <a> links) render, but the async URL-validation gate is not reproduced. // NOTE: the three severity formatters are precomputed in ABAP from the static mock` &&
+                 ` (error icon, Negative type, count 2); the root-array JSON model is carried under /T_MESSAGES on the single default model. // LIVE-TEST: confirm the button toggles the MessagePopover (toggleBy) and` &&
+                 ` the first Error message renders its HTML markupDescription (h2/p/ul/ol + links); activeTitlePress toasts.`
+        post171 = `Button.ariaHasPopup (since UI5 1.84) kept on the message-popover button; the Button.type value 'Negative' is a sap.m.ButtonType value since 1.73. MessageItem.markupDescription (renders the HTML` &&
+                 ` description) is kept for the async sample's rich-text messages.` )
       ( module = `sap.m` control = `sap.m.MessagePopover`              name = `MessagePopoverMessageHandling`       class = `z2ui5_cl_ai_app_065` path = `src/01/b08/z2ui5_cl_ai_app_065.clas.abap`
         since = `1.28`
         notes = `POST-1.71: two post-1.71 members are kept for the 1:1 port: Button.ariaHasPopup (since UI5 1.84) on the MessagePopover button, and MessagePopover.groupItems (since UI5 1.73). // IMPROVISED: the` &&
