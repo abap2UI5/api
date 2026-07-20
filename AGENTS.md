@@ -571,12 +571,19 @@ scripts.**
   no separate deprecated-controls section — everything sits in this table.
 - **`src/z2ui5_cl_ai_app_overview.clas.*`** — the in-system overview **app**:
   an abap2UI5 app that lists every ported app as one row of a `sap.m.Table`,
-  sorted by module → control → sample. Columns:
-  **Module** (text) · **Control** (link → OpenUI5 API) · **Sample** (name →
-  OpenUI5 repo source, ↗ → live fullscreen sample) · **abap2UI5** (class →
-  generated class on GitHub, ↗ → starts the app via `?app_start=<CLASS>`) ·
+  sorted by module → control → sample. Columns (all plain text — links moved to
+  the trailing **Open** column): **Module** · **Control** · **Since** (the UI5
+  release the control appeared in) · **Sample** · **abap2UI5** (class name) ·
   **Note** (gold star for `golden` ports; green check when live-verified; hint
-  button opens the deviations popup). **Search and sort run entirely on the
+  button opens the deviations popup) · **Open** (a button that opens an anchored
+  popover of every link: OpenUI5 API, OpenUI5 source, live fullscreen sample,
+  the generated class on GitHub, and starting the app). The **Control** name and
+  the **Since** value are coloured by availability (from `ui5/universe.json`):
+  green when the control existed by UI5 1.71, yellow when newer, red +
+  strikethrough when deprecated — carried as an inline-styled `sap.m.FormattedText`
+  `htmlText` so the colour varies per row (a bound `class` would not, being applied
+  once at parse time). All current ports are in-scope (≤ 1.71, non-deprecated), so
+  they all render green today. **Search and sort run entirely on the
   frontend** — a **search field** in the page subheader filters the rows by a
   substring over every column, and each column header carries
   ascending/descending **sort** icons; both are wired via

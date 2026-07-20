@@ -34,6 +34,20 @@ function walk(dir, out = []) {
   return out;
 }
 
+// control availability from the sample-universe snapshot (same source as the
+// coverage docs): the release a control appeared in + whether it is deprecated
+const uni = JSON.parse(fs.readFileSync(path.join(ROOT, 'ui5', 'universe.json'), 'utf8'));
+const uniMap = new Map();
+for (const lib of uni.libs) for (const s of lib.samples) uniMap.set(`${lib.lib}|${s.name}`, s);
+// a control is in-scope (green) when it existed by UI5 1.71 (empty since = older
+// than tracking); newer than 1.71 is yellow; deprecated is red (§7 AGENTS.md)
+const sinceLeq171 = (since) => {
+  if (!since) return true;
+  const m = String(since).match(/^(\d+)\.(\d+)/);
+  if (!m) return true;
+  return +m[1] < 1 || (+m[1] === 1 && +m[2] <= 71);
+};
+
 // collect ported apps: control (entity), module (library), sample name, class,
 // and the repo-relative path of the generated class (for the ABAP GitHub link)
 const apps = [];
@@ -43,16 +57,23 @@ for (const mf of fs.readdirSync(META)) {
   const m = JSON.parse(fs.readFileSync(path.join(META, mf), 'utf8'));
   const i = m.sample.indexOf('.sample.');
   if (i === -1) continue;
+  const module = m.sample.slice(0, i);
+  const name = m.sample.slice(i + '.sample.'.length);
+  const u = uniMap.get(`${module}|${name}`) || {};
+  const dep = u.deprecated || null;
   apps.push({
-    module: m.sample.slice(0, i),
+    module,
     control: m.entity,
-    name: m.sample.slice(i + '.sample.'.length),
+    name,
     cls: m.class,
     file: m.file,
     checked: m.checked ? `CHECKED (${m.checked.date}): ${m.checked.note}` : '',
     notes: (m.deviations || []).map((d) => `${DEV_LABEL[d.type] ?? d.type}: ${d.what}`).join(' // '),
     post171: (m.deviations || []).filter((d) => d.type === 'POST_171').map((d) => d.what).join(' // '),
     golden: m.status === 'golden',
+    since: u.since || '',
+    is_newer: Boolean(u.since && !sinceLeq171(u.since)),
+    dep_text: dep ? `Deprecated since ${dep.since}: ${dep.text}` : '',
   });
 }
 // order by module, then control, then sample name (case-insensitive)
@@ -95,6 +116,9 @@ const rows = apps.map((a) => {
     ` path = \`${a.file}\`${' '.repeat(wf - a.file.length)}`;
   const extras = [];
   if (a.golden) extras.push('golden = abap_true');
+  if (a.since) extras.push(`since = \`${a.since}\``);
+  if (a.is_newer) extras.push('is_newer = abap_true');
+  if (a.dep_text) extras.push(`dep_text = ${abapStr(a.dep_text)}`);
   if (a.checked) extras.push(`checked = ${abapStr(a.checked)}`);
   if (a.notes) extras.push(`notes = ${abapStr(a.notes)}`);
   if (a.post171) extras.push(`post171 = ${abapStr(a.post171)}`);
@@ -115,10 +139,8 @@ const sortCall = (path, desc) =>
   'client->_event_client( val = client->cs_event-binding_call' +
   ` t_arg = VALUE #( ( \`${ID_TABLE}\` ) ( \`items\` ) ( \`sort\` ) ( \`${path}\` )${desc ? ' ( `X` )' : ''} ) )`;
 
-// the four sortable columns (label shown in the header, model path sorted on);
-// the Note column is not sortable
-const SORT_COLS = [['Module', 'MODULE'], ['Control', 'CTRL_NAME'], ['Sample', 'NAME'], ['abap2UI5', 'CLASS']];
-const sortableColumn = ([label, path]) => `                        )->open( \`Column\`
+// a sortable column: header label + ascending/descending sort icons (client-side)
+const sortableColumn = (label, path) => `                        )->open( \`Column\`
                             )->open( \`HBox\`
                                 )->a( n = \`alignItems\` v = \`Center\`
 
@@ -136,22 +158,31 @@ const sortableColumn = ([label, path]) => `                        )->open( \`Co
 
                             )->shut(
                         )->shut(`;
-const columnsBlock = SORT_COLS.map(sortableColumn).join('\n') + `
-                        )->open( \`Column\`
-                            )->leaf( \`Text\`
-                                )->a( n = \`text\` v = \`Note\`
-
-                        )->shut(
-                        )->open( \`Column\`
-                            )->a( n = \`width\`  v = \`5rem\`
-                            )->a( n = \`hAlign\` v = \`Center\`
-
-                            )->leaf( \`Text\`
-                                )->a( n = \`text\` v = \`Open\`
-
-                        )->shut(`;
+// a plain (non-sortable) column: header label only, plus optional Column attrs
+const plainColumn = (label, attrs = []) => {
+  const attrLines = attrs.map(([n, v]) => `                            )->a( n = \`${n}\` v = \`${v}\``).join('\n');
+  const head = attrs.length
+    ? `                        )->open( \`Column\`\n${attrLines}\n\n                            )->leaf( \`Text\``
+    : `                        )->open( \`Column\`\n                            )->leaf( \`Text\``;
+  return `${head}\n                                )->a( n = \`text\` v = \`${label}\`\n\n                        )->shut(`;
+};
+// column order (mirrored 1:1 by the cells below): Since sits after Control,
+// Note + Open are the trailing non-sortable columns
+const columnsBlock = [
+  sortableColumn('Module', 'MODULE'),
+  sortableColumn('Control', 'CTRL_NAME'),
+  plainColumn('Since', [['width', '6rem']]),
+  sortableColumn('Sample', 'NAME'),
+  sortableColumn('abap2UI5', 'CLASS'),
+  plainColumn('Note'),
+  plainColumn('Open', [['width', '5rem'], ['hAlign', 'Center']]),
+].join('\n');
 
 const abap = `"! Generated overview app - lists every abap2UI5 api sample app in a table.
+"! The Control name and the Since column (the UI5 release the control appeared
+"! in) are coloured by availability: green when the control existed by UI5 1.71,
+"! yellow when it is newer, red + strikethrough when deprecated (inline-styled
+"! FormattedText, so the colour varies per row); the source is ui5/universe.json.
 "! The Module / Control / Sample / abap2UI5 columns are plain text; every link
 "! (OpenUI5 API, OpenUI5 source, live fullscreen sample, the generated ABAP
 "! class on GitHub, and starting the app) lives in the trailing Open column: its
@@ -189,6 +220,11 @@ CLASS ${CLASS} DEFINITION PUBLIC.
         post171   TYPE string,
         has_p171  TYPE abap_bool,
         golden    TYPE abap_bool,
+        since     TYPE string,
+        is_newer  TYPE abap_bool,
+        dep_text  TYPE string,
+        ctrl_html TYPE string,
+        since_html TYPE string,
         filter    TYPE string,
       END OF ty_s_app.
     TYPES ty_t_app TYPE STANDARD TABLE OF ty_s_app WITH EMPTY KEY.
@@ -340,12 +376,23 @@ CLASS ${CLASS} IMPLEMENTATION.
       <app>-has_notes = xsdbool( <app>-notes IS NOT INITIAL ).
       <app>-has_p171  = xsdbool( <app>-post171 IS NOT INITIAL ).
 
+      " control-availability colouring: green when the control existed by UI5 1.71,
+      " yellow when it is newer, red + strikethrough when deprecated - carried as an
+      " inline-styled FormattedText htmlText so the colour can vary per row
+      DATA(lv_since) = COND string( WHEN <app>-since IS INITIAL THEN \`<= 1.71\` ELSE <app>-since ).
+      DATA(lv_color) = COND string( WHEN <app>-dep_text IS NOT INITIAL THEN \`#bb0000\`
+                                    WHEN <app>-is_newer = abap_true      THEN \`#b8860b\`
+                                    ELSE                                      \`#107e3e\` ).
+      DATA(lv_deco)  = COND string( WHEN <app>-dep_text IS NOT INITIAL THEN \`;text-decoration:line-through\` ELSE \`\` ).
+      <app>-ctrl_html  = |<span style="color:{ lv_color }{ lv_deco }">{ <app>-ctrl_name }</span>|.
+      <app>-since_html = |<span style="color:{ lv_color }">{ lv_since }</span>|.
+
       " one searchable blob per row, bound as the FILTER column that the search
       " field's client-side Contains filter (binding_call) matches against - so
       " a single field filters over every visible column at once
       <app>-filter = <app>-module   && \` \` && <app>-control && \` \` && <app>-ctrl_name && \` \` &&
-                     <app>-name     && \` \` && <app>-class   && \` \` && <app>-notes     && \` \` &&
-                     <app>-checked  && \` \` && <app>-post171.
+                     <app>-name     && \` \` && <app>-class   && \` \` && <app>-since     && \` \` &&
+                     <app>-notes    && \` \` && <app>-checked && \` \` && <app>-post171.
 
     ENDLOOP.
 
@@ -389,8 +436,15 @@ ${columnsBlock}
                             )->open( \`cells\`
                                 )->leaf( \`Text\`
                                     )->a( n = \`text\` v = \`{MODULE}\`
-                                )->leaf( \`Text\`
-                                    )->a( n = \`text\` v = \`{CTRL_NAME}\`
+                                " control name coloured by availability (green <=1.71 /
+                                " yellow newer / red + strikethrough deprecated), and the
+                                " release it appeared in - both inline-styled FormattedText
+                                )->leaf( \`FormattedText\`
+                                    )->a( n = \`htmlText\` v = \`{CTRL_HTML}\`
+                                    )->a( n = \`tooltip\`  v = \`{DEP_TEXT}\`
+                                )->leaf( \`FormattedText\`
+                                    )->a( n = \`htmlText\` v = \`{SINCE_HTML}\`
+                                    )->a( n = \`tooltip\`  v = \`{DEP_TEXT}\`
                                 )->leaf( \`Text\`
                                     )->a( n = \`text\` v = \`{NAME}\`
                                 )->leaf( \`Text\`
