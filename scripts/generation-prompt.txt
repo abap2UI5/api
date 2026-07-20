@@ -31,7 +31,10 @@ Rules:
     ENDIF.
   Add model_init / on_event only when the app actually has data / events.
   z2ui5_if_app~main is always the FIRST method in the implementation; the
-  remaining methods follow in the order they are called from main.
+  remaining methods follow in the order they are called from main, EXCEPT
+  model_init which always goes LAST (after every other method, and declared
+  last in the DEFINITION too) - its large mock-data VALUE #( ) block must not
+  interrupt the reading flow of the dispatcher/view/event methods.
 - Always the simplest possible notation: omit parameters that equal the
   default - get_event_arg( ) not get_event_arg( 1 ) (index only for 2+).
 - Move the sample's JSON model data into ABAP (VALUE #( ... )) and bind it
