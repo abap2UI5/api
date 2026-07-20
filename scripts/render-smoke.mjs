@@ -16,6 +16,15 @@
  * renderer crashes. What it cannot catch: event round-trips, visual/UX
  * fidelity — those stay with the human live check.
  *
+ * Reconstructability: the reconstructor follows the linear factory-chain idiom
+ * (one descend/ascend stack). A port that builds view parts in HELPER methods
+ * — passing a held node handle in and chaining a returned handle out (app 049)
+ * — is not statically reconstructable this way. Such a port must DECLARE the
+ * skip in its sidecar (`"render_smoke": { "skip": true, "reason": "…" }`);
+ * an UNDECLARED non-reconstructable port is a FAILURE, not a silent skip, and
+ * a declaration that has gone stale (the port now reconstructs) is a FAILURE
+ * too — so the skip set can never drift.
+ *
  * Substitutions while reconstructing (the harness controls both sides, so
  * exact framework path names do not matter):
  *   client->_bind( var )                        -> {/VAR}
@@ -669,11 +678,28 @@ let failed = 0;
 let skipped = 0;
 for (const meta of metas) {
   const { cls, docs, model, notes, helperTokens } = preparePort(meta);
+  const declaredSkip = meta.render_smoke?.skip === true;
   if (helperTokens > 0) {
-    // view parts built in helper methods are not statically attributable —
-    // report loudly instead of rendering a wrong reconstruction
-    skipped++;
-    console.log(`SKIP  ${cls}  (${helperTokens} builder call(s) in helper methods — not statically reconstructable)`);
+    // view parts built in helper methods are not statically attributable (the
+    // reconstructor models one descend/ascend stack, not held node-handle
+    // re-entry across method calls). A skip is legitimate ONLY when the
+    // sidecar declares it — otherwise it is a FAILURE, so skips can never
+    // grow silently: a new helper-built port fails CI until a human either
+    // reconstructs it or consciously declares render_smoke.skip with a reason.
+    if (declaredSkip) {
+      skipped++;
+      console.log(`SKIP  ${cls}  (declared render_smoke.skip: ${helperTokens} builder call(s) in helper methods)`);
+    } else {
+      failed++;
+      console.log(`FAIL  ${cls}  (${helperTokens} builder call(s) in helper methods — not statically reconstructable and no render_smoke.skip declared in meta)`);
+    }
+    continue;
+  }
+  if (declaredSkip) {
+    // the declaration has gone stale — the port now reconstructs, so the skip
+    // must be removed and the port actually smoke-tested
+    failed++;
+    console.log(`FAIL  ${cls}  (meta declares render_smoke.skip but the view reconstructs — remove the stale declaration)`);
     continue;
   }
   const errs = [];

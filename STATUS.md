@@ -599,21 +599,44 @@ Infrastructure:
   past the root null-refs; duplicate attribute names render invalid XML~~ —
   done 2026-07-18: all three ASSERT (fail fast at the call site), plus a local
   unit test class on `z2ui5_cl_ai_xml`.
-- [ ] property-check blind spot (hold-out probe 2026-07-19): the gate only
+- [x] ~~property-check blind spot (hold-out probe 2026-07-19): the gate only
   scans `a( n = … )` attributes, so a post-1.71 **event parameter** read via
   `${$parameters>/…}` in a `t_arg` slips through undeclared (probe app 618,
-  SearchField `searchButtonPressed` since 1.114). Teach the gate to match
-  `$parameters>/<name>` against the entity's member list, or accept and
-  keep the AGENTS §10 rule as the only guard.
+  SearchField `searchButtonPressed` since 1.114)~~ — done 2026-07-20:
+  `usedMembers` now also scans each control slice for `$parameters>/<name>`
+  and resolves the first path segment against the same flat member map
+  (event parameters already carry their `@since` in `properties.json`, e.g.
+  `sap.m.SearchField.searchButtonPressed` = 1.114), attributing the ref to
+  the control that fired it (the one carrying the event `a()`, = last
+  opened). Error message names it as an event parameter and a `POST_171`
+  deviation clears it, exactly like a property. Zero new errors on the 54
+  live ports (every existing `$parameters` ref is ≤ 1.71); verified with a
+  throwaway SearchField probe that the undeclared→declared transition flips
+  exit 1→0. Deeper path segments (`item/oParent`) are runtime object fields,
+  not metadata, and stay unchecked by design.
 - [ ] pattern-lint stays regex-based **by decision** (2026-07-18): the rule
   set is green and each rule is small; a rewrite on the abaplint AST API only
   pays once regex rules start producing false positives/negatives in
   practice. Revisit when a rule needs real syntax awareness (first candidate:
   anything that must distinguish strings from code).
-- [ ] render-smoke: app 049 is SKIPped (view built via `render_item` helper
+- [x] ~~render-smoke: app 049 is SKIPped (view built via `render_item` helper
   methods — not statically reconstructable). Either teach the reconstructor
   simple single-level helper inlining, or accept the skip; never let skips
-  grow silently (the run prints them).
+  grow silently~~ — resolved 2026-07-20 by making the skip an explicit,
+  CI-enforced decision (the second option). Single-level inlining does not
+  actually suffice: the builder is handle-based (`open`/`shut` navigate a
+  tree via held node refs, not one global stack), so app 049's `render_item`
+  passes the List handle in and chains a returned handle out — faithfully
+  rebuilding it needs a handle-tracking interpreter, and a wrong-but-rendering
+  reconstruction would be a *false pass*, strictly worse than a visible skip.
+  So: a port may declare `"render_smoke": { "skip": true, "reason": "…" }` in
+  its sidecar (validated by validate-meta); render-smoke SKIPs a declared
+  port but now **FAILS** an undeclared non-reconstructable one (helper-method
+  builder calls with no declaration) *and* FAILS a stale declaration (a port
+  that reconstructs but still declares skip). Skips can no longer grow
+  silently — a new helper-built port fails CI until a human consciously
+  declares or reconstructs it. app 049 carries the declaration; run stays
+  **0 failing / 1 skipped**.
 - [x] ~~render-smoke harness gaps found by the 2026-07-19 hold-out probe~~ —
   fixed same day: (a) the inline formatter mirror had only `weightState`
   while upstream `model/formatter.js` had grown the date helpers + demo kit
