@@ -38,9 +38,11 @@ TRAINING.md.
 ## Batch b05 generated (2026-07-19) — first post-probe batch
 
 The first 10 backlog-top NEW-CONTROL samples (breadth-first per AGENTS §1),
-generated with the probe-hardened rule set, machine-verified to green
+generated with the probe-hardened rule set and machine-verified to green
 (abaplint ×3, validate-meta, pattern-lint, structural-diff --strict,
-render-smoke --strict, property-check) and AI-reviewed. Highlights:
+render-smoke --strict, property-check). **The adversarial AI review pass
+is still pending** (TRAINING step 2 second half) — run it before the human
+live check. Highlights:
 
 - The probe's distilled rules visibly held: no `popover_display( val = )`
   recurrence, flattening declared everywhere, app 539 explicitly reasoned
