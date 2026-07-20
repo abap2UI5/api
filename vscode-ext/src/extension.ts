@@ -3,6 +3,12 @@ import * as path from "path";
 
 const CONFIG_SECTION = "abap2ui5";
 const TEMPLATE_KEY = "launchUrlTemplate";
+const OPEN_MODE_KEY = "openMode";
+
+/** Kollabiert doppelte Slashes im Pfad, lässt aber `://` im Protokoll intakt. */
+function normalizeUrl(url: string): string {
+  return url.replace(/(?<!:)\/{2,}/g, "/");
+}
 
 /** Muss in der Klasse vorkommen, damit F9 die App startet. */
 const APP_INTERFACE_RE = /interfaces\s+z2ui5_if_app/i;
@@ -158,8 +164,19 @@ async function runApp(provider: PreviewViewProvider): Promise<void> {
     return;
   }
 
-  const url = template.replace(/\{class\}/gi, encodeURIComponent(className));
-  await provider.show(url);
+  const url = normalizeUrl(
+    template.replace(/\{class\}/gi, encodeURIComponent(className))
+  );
+
+  const openMode = vscode.workspace
+    .getConfiguration(CONFIG_SECTION)
+    .get<string>(OPEN_MODE_KEY, "external");
+
+  if (openMode === "panel") {
+    await provider.show(url);
+  } else {
+    await vscode.env.openExternal(vscode.Uri.parse(url));
+  }
 }
 
 export function activate(context: vscode.ExtensionContext): void {

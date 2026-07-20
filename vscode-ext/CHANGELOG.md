@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0
+
+- Neue Einstellung `abap2ui5.openMode` (`external` | `panel`), Default `external`
+  - `external`: F9 öffnet die App im normalen Browser (nutzt SAP-Session/SSO)
+  - `panel`: eingebettet im Panel (nur ohne interaktive Anmeldung, sonst 401)
+- URL-Normalisierung: doppelte Slashes im Pfad werden entfernt
+
 ## 0.1.0
 
 - **F9** startet eine `z2ui5_if_app`-Klasse im eingebetteten Browser-Panel unten

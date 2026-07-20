@@ -28,11 +28,18 @@ https://host:44300/sap/bc/z2ui5?app_start={class}&sap-client=100
 Die URL wird gespeichert und lässt sich jederzeit ändern:
 Settings → `abap2ui5.launchUrlTemplate` (oder in `settings.json`).
 
-> **Wichtig – Einbettung im Panel:** VS Code lädt die Seite per `<iframe>`.
-> Sendet dein SAP-Server `X-Frame-Options` / CSP `frame-ancestors` (häufig),
-> oder ist das Zertifikat nicht vertrauenswürdig, bleibt der eingebettete
-> Bereich leer. Dafür gibt es oben im Panel den Button **"Extern öffnen"**,
-> der die App im normalen Browser startet.
+## Öffnen: Browser vs. Panel (`abap2ui5.openMode`)
+
+- **`external`** (Standard): F9 öffnet die App im normalen Browser. Nutzt deine
+  bestehende SAP-Anmeldung/SSO – funktioniert zuverlässig.
+- **`panel`**: F9 zeigt die App eingebettet unten im VS-Code-Panel.
+
+> **Warum nicht immer Panel?** Der eingebettete iframe hat **keine** SAP-Session.
+> Verlangt der Server eine Anmeldung, erscheint dort **401 Not authorized** (der
+> Basic-Auth-Dialog wird in eingebetteten Views unterdrückt). `panel` klappt nur,
+> wenn der Aufruf ohne interaktives Login funktioniert – z. B. via SICF-Anonym-Logon
+> auf dem `/sap/bc/z2ui5`-Knoten. Für den Normalfall ist `external` richtig.
+> (Der Panel-View hat oben zusätzlich einen **"Extern öffnen"**-Button.)
 
 ---
 
