@@ -8,8 +8,8 @@ CLASS z2ui5_cl_ai_app_053 DEFINITION PUBLIC.
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
 
-    METHODS model_init.
     METHODS view_display.
+    METHODS model_init.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -24,13 +24,6 @@ CLASS z2ui5_cl_ai_app_053 IMPLEMENTATION.
       model_init( ).
       view_display( ).
     ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD model_init.
-
-    slider_value = 100.
 
   ENDMETHOD.
 
@@ -143,6 +136,13 @@ CLASS z2ui5_cl_ai_app_053 IMPLEMENTATION.
         )->shut( ).
 
     client->view_display( view->stringify( ) ).
+
+  ENDMETHOD.
+
+
+  METHOD model_init.
+
+    slider_value = 100.
 
   ENDMETHOD.
 

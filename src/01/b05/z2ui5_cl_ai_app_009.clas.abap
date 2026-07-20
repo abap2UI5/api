@@ -25,9 +25,9 @@ CLASS z2ui5_cl_ai_app_009 DEFINITION PUBLIC.
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
 
-    METHODS model_init.
     METHODS view_display.
     METHODS on_event.
+    METHODS model_init.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -44,6 +44,173 @@ CLASS z2ui5_cl_ai_app_009 IMPLEMENTATION.
     ELSEIF client->check_on_event( ).
       on_event( ).
     ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD view_display.
+
+    DATA(view) = z2ui5_cl_ai_xml=>factory( ).
+
+    view->open( n = `View` ns = `mvc`
+        )->a( n = `xmlns`        v = `sap.m`
+        )->a( n = `xmlns:mvc`    v = `sap.ui.core.mvc`
+        )->a( n = `xmlns:core`   v = `sap.ui.core`
+        " the original's local Formatter.js weightState is the framework's curated formatter module (see the NOTE + POST_171 deviations)
+        )->a( n = `core:require` v = |\{Formatter: 'z2ui5/model/formatter'\}|
+
+        " sticky + popinLayout are set imperatively by the original controller (onSelect / onPopinLayoutChanged) - bound properties here
+        )->open( `Table`
+            )->a( n = `id`          v = `idProductsTable`
+            )->a( n = `inset`       v = `false`
+            )->a( n = `items`       v = |\{ path: '{ client->_bind( val = t_products path = abap_true ) }', sorter: \{ path: 'NAME' \} \}|
+            )->a( n = `sticky`      v = client->_bind( t_sticky )
+            )->a( n = `popinLayout` v = |\{= ${ client->_bind( popin_key ) } === 'GridLarge' \|\| ${ client->_bind( popin_key ) } === 'GridSmall' ? ${ client->_bind( popin_key ) } : 'Block' \}|
+
+            )->open( `headerToolbar`
+                )->open( `OverflowToolbar`
+                    )->open( `content`
+                        )->leaf( `Title`
+                            )->a( n = `text`  v = `Products`
+                            )->a( n = `level` v = `H2`
+                        )->leaf( `ToolbarSpacer`
+
+                        " the original change handler's PopinLayout switch lives in the Table's popinLayout expression binding
+                        )->open( `ComboBox`
+                            )->a( n = `id`          v = `idPopinLayout`
+                            )->a( n = `placeholder` v = `Popin layout options`
+                            )->a( n = `selectedKey` v = client->_bind( popin_key )
+
+                            )->open( `items`
+                                )->leaf( n = `Item` ns = `core`
+                                    )->a( n = `text` v = `Block`
+                                    )->a( n = `key`  v = `Block`
+                                )->leaf( n = `Item` ns = `core`
+                                    )->a( n = `text` v = `Grid Large`
+                                    )->a( n = `key`  v = `GridLarge`
+                                )->leaf( n = `Item` ns = `core`
+                                    )->a( n = `text` v = `Grid Small`
+                                    )->a( n = `key`  v = `GridSmall`
+
+                            )->shut(
+                        )->shut(
+                        )->leaf( `Label`
+                            )->a( n = `text` v = `Sticky options:`
+                        )->leaf( `CheckBox`
+                            )->a( n = `text`   v = `ColumnHeaders`
+                            )->a( n = `select` v = client->_event( val   = `STICKY_SELECT`
+                                                                   t_arg = VALUE #( ( `${$source>/text}` ) ( `${$parameters>/selected}` ) ) )
+                        )->leaf( `CheckBox`
+                            )->a( n = `text`   v = `HeaderToolbar`
+                            )->a( n = `select` v = client->_event( val   = `STICKY_SELECT`
+                                                                   t_arg = VALUE #( ( `${$source>/text}` ) ( `${$parameters>/selected}` ) ) )
+                        )->leaf( `CheckBox`
+                            )->a( n = `text`   v = `InfoToolbar`
+                            )->a( n = `select` v = client->_event( val   = `STICKY_SELECT`
+                                                                   t_arg = VALUE #( ( `${$source>/text}` ) ( `${$parameters>/selected}` ) ) )
+                        " the original press handler (infoToolbar.setVisible(!pressed)) is the visible expression binding on the infoToolbar below
+                        )->leaf( `ToggleButton`
+                            )->a( n = `id`      v = `toggleInfoToolbar`
+                            )->a( n = `text`    v = `Hide/Show InfoToolbar`
+                            )->a( n = `pressed` v = client->_bind( toggle_pressed )
+
+                    )->shut(
+                )->shut(
+            )->shut(
+            )->open( `infoToolbar`
+                )->open( `OverflowToolbar`
+                    )->a( n = `visible` v = |\{= !${ client->_bind( toggle_pressed ) } \}|
+
+                    )->leaf( `Label`
+                        )->a( n = `text` v = `Wide range of available products`
+
+                )->shut(
+            )->shut(
+            )->open( `columns`
+                )->open( `Column`
+                    )->a( n = `width` v = `12em`
+
+                    " p:ColumnAIAction dependents dropped - plugin class newer than 1.71, see DROPPED_171 (as app 401)
+                    )->leaf( `Text`
+                        )->a( n = `text` v = `Product`
+
+                )->shut(
+                )->open( `Column`
+                    )->a( n = `minScreenWidth` v = `Tablet`
+                    )->a( n = `demandPopin`    v = `true`
+
+                    )->leaf( `Text`
+                        )->a( n = `text` v = `Supplier`
+
+                )->shut(
+                )->open( `Column`
+                    )->a( n = `minScreenWidth` v = `Desktop`
+                    )->a( n = `demandPopin`    v = `true`
+                    )->a( n = `hAlign`         v = `End`
+
+                    )->leaf( `Text`
+                        )->a( n = `text` v = `Dimensions`
+
+                )->shut(
+                )->open( `Column`
+                    )->a( n = `minScreenWidth` v = `Desktop`
+                    )->a( n = `demandPopin`    v = `true`
+                    )->a( n = `hAlign`         v = `Center`
+
+                    )->leaf( `Text`
+                        )->a( n = `text` v = `Weight`
+
+                )->shut(
+                )->open( `Column`
+                    )->a( n = `hAlign` v = `End`
+
+                    )->leaf( `Text`
+                        )->a( n = `text` v = `Price`
+
+                )->shut(
+            )->shut(
+            )->open( `items`
+                )->open( `ColumnListItem`
+                    )->a( n = `vAlign` v = `Middle`
+
+                    )->open( `cells`
+                        )->leaf( `ObjectIdentifier`
+                            )->a( n = `title` v = `{NAME}`
+                            )->a( n = `text`  v = `{PRODUCT_ID}`
+                        )->leaf( `Text`
+                            )->a( n = `text` v = `{SUPPLIER_NAME}`
+                        )->leaf( `Text`
+                            )->a( n = `text` v = `{WIDTH} x {DEPTH} x {HEIGHT} {DIM_UNIT}`
+                        )->leaf( `ObjectNumber`
+                            )->a( n = `number` v = `{WEIGHT_MEASURE}`
+                            )->a( n = `unit`   v = `{WEIGHT_UNIT}`
+                            )->a( n = `state`  v = |\{ parts: [ \{ path: 'WEIGHT_MEASURE' \}, \{ path: 'WEIGHT_UNIT' \} ], formatter: 'Formatter.weightState' \}|
+                        )->leaf( `ObjectNumber`
+                            )->a( n = `number` v = |\{ parts: [ \{ path: 'PRICE' \}, \{ path: 'CURRENCY_CODE' \} ], type: 'sap.ui.model.type.Currency', formatOptions: \{ showMeasure: false \} \}|
+                            )->a( n = `unit`   v = `{CURRENCY_CODE}` ).
+
+    client->view_display( view->stringify( ) ).
+
+  ENDMETHOD.
+
+
+  METHOD on_event.
+
+    DATA selected TYPE abap_bool.
+
+    CASE client->get( )-event.
+
+      WHEN `STICKY_SELECT`.
+        DATA(sticky_text) = client->get_event_arg( ).
+        selected = client->get_event_arg( 2 ).
+        IF selected = abap_true.
+          INSERT sticky_text INTO TABLE t_sticky.
+        ELSE.
+          DELETE t_sticky WHERE table_line = sticky_text.
+        ENDIF.
+        client->view_model_update( ).
+
+    ENDCASE.
 
   ENDMETHOD.
 
@@ -298,173 +465,6 @@ CLASS z2ui5_cl_ai_app_009 IMPLEMENTATION.
         weight_measure = '3.8' weight_unit = `KG` price = '749' currency_code = `EUR` width = '48' depth = '31' height = '4.5' dim_unit = `cm` )
       ( product_id = `PF-1000` name = `Flyer` supplier_name = `Titanium`
         weight_measure = '0.01' weight_unit = `KG` price = '0' currency_code = `EUR` width = '46' depth = '30' height = '3' dim_unit = `cm` ) ).
-
-  ENDMETHOD.
-
-
-  METHOD view_display.
-
-    DATA(view) = z2ui5_cl_ai_xml=>factory( ).
-
-    view->open( n = `View` ns = `mvc`
-        )->a( n = `xmlns`        v = `sap.m`
-        )->a( n = `xmlns:mvc`    v = `sap.ui.core.mvc`
-        )->a( n = `xmlns:core`   v = `sap.ui.core`
-        " the original's local Formatter.js weightState is the framework's curated formatter module (see the NOTE + POST_171 deviations)
-        )->a( n = `core:require` v = |\{Formatter: 'z2ui5/model/formatter'\}|
-
-        " sticky + popinLayout are set imperatively by the original controller (onSelect / onPopinLayoutChanged) - bound properties here
-        )->open( `Table`
-            )->a( n = `id`          v = `idProductsTable`
-            )->a( n = `inset`       v = `false`
-            )->a( n = `items`       v = |\{ path: '{ client->_bind( val = t_products path = abap_true ) }', sorter: \{ path: 'NAME' \} \}|
-            )->a( n = `sticky`      v = client->_bind( t_sticky )
-            )->a( n = `popinLayout` v = |\{= ${ client->_bind( popin_key ) } === 'GridLarge' \|\| ${ client->_bind( popin_key ) } === 'GridSmall' ? ${ client->_bind( popin_key ) } : 'Block' \}|
-
-            )->open( `headerToolbar`
-                )->open( `OverflowToolbar`
-                    )->open( `content`
-                        )->leaf( `Title`
-                            )->a( n = `text`  v = `Products`
-                            )->a( n = `level` v = `H2`
-                        )->leaf( `ToolbarSpacer`
-
-                        " the original change handler's PopinLayout switch lives in the Table's popinLayout expression binding
-                        )->open( `ComboBox`
-                            )->a( n = `id`          v = `idPopinLayout`
-                            )->a( n = `placeholder` v = `Popin layout options`
-                            )->a( n = `selectedKey` v = client->_bind( popin_key )
-
-                            )->open( `items`
-                                )->leaf( n = `Item` ns = `core`
-                                    )->a( n = `text` v = `Block`
-                                    )->a( n = `key`  v = `Block`
-                                )->leaf( n = `Item` ns = `core`
-                                    )->a( n = `text` v = `Grid Large`
-                                    )->a( n = `key`  v = `GridLarge`
-                                )->leaf( n = `Item` ns = `core`
-                                    )->a( n = `text` v = `Grid Small`
-                                    )->a( n = `key`  v = `GridSmall`
-
-                            )->shut(
-                        )->shut(
-                        )->leaf( `Label`
-                            )->a( n = `text` v = `Sticky options:`
-                        )->leaf( `CheckBox`
-                            )->a( n = `text`   v = `ColumnHeaders`
-                            )->a( n = `select` v = client->_event( val   = `STICKY_SELECT`
-                                                                   t_arg = VALUE #( ( `${$source>/text}` ) ( `${$parameters>/selected}` ) ) )
-                        )->leaf( `CheckBox`
-                            )->a( n = `text`   v = `HeaderToolbar`
-                            )->a( n = `select` v = client->_event( val   = `STICKY_SELECT`
-                                                                   t_arg = VALUE #( ( `${$source>/text}` ) ( `${$parameters>/selected}` ) ) )
-                        )->leaf( `CheckBox`
-                            )->a( n = `text`   v = `InfoToolbar`
-                            )->a( n = `select` v = client->_event( val   = `STICKY_SELECT`
-                                                                   t_arg = VALUE #( ( `${$source>/text}` ) ( `${$parameters>/selected}` ) ) )
-                        " the original press handler (infoToolbar.setVisible(!pressed)) is the visible expression binding on the infoToolbar below
-                        )->leaf( `ToggleButton`
-                            )->a( n = `id`      v = `toggleInfoToolbar`
-                            )->a( n = `text`    v = `Hide/Show InfoToolbar`
-                            )->a( n = `pressed` v = client->_bind( toggle_pressed )
-
-                    )->shut(
-                )->shut(
-            )->shut(
-            )->open( `infoToolbar`
-                )->open( `OverflowToolbar`
-                    )->a( n = `visible` v = |\{= !${ client->_bind( toggle_pressed ) } \}|
-
-                    )->leaf( `Label`
-                        )->a( n = `text` v = `Wide range of available products`
-
-                )->shut(
-            )->shut(
-            )->open( `columns`
-                )->open( `Column`
-                    )->a( n = `width` v = `12em`
-
-                    " p:ColumnAIAction dependents dropped - plugin class newer than 1.71, see DROPPED_171 (as app 401)
-                    )->leaf( `Text`
-                        )->a( n = `text` v = `Product`
-
-                )->shut(
-                )->open( `Column`
-                    )->a( n = `minScreenWidth` v = `Tablet`
-                    )->a( n = `demandPopin`    v = `true`
-
-                    )->leaf( `Text`
-                        )->a( n = `text` v = `Supplier`
-
-                )->shut(
-                )->open( `Column`
-                    )->a( n = `minScreenWidth` v = `Desktop`
-                    )->a( n = `demandPopin`    v = `true`
-                    )->a( n = `hAlign`         v = `End`
-
-                    )->leaf( `Text`
-                        )->a( n = `text` v = `Dimensions`
-
-                )->shut(
-                )->open( `Column`
-                    )->a( n = `minScreenWidth` v = `Desktop`
-                    )->a( n = `demandPopin`    v = `true`
-                    )->a( n = `hAlign`         v = `Center`
-
-                    )->leaf( `Text`
-                        )->a( n = `text` v = `Weight`
-
-                )->shut(
-                )->open( `Column`
-                    )->a( n = `hAlign` v = `End`
-
-                    )->leaf( `Text`
-                        )->a( n = `text` v = `Price`
-
-                )->shut(
-            )->shut(
-            )->open( `items`
-                )->open( `ColumnListItem`
-                    )->a( n = `vAlign` v = `Middle`
-
-                    )->open( `cells`
-                        )->leaf( `ObjectIdentifier`
-                            )->a( n = `title` v = `{NAME}`
-                            )->a( n = `text`  v = `{PRODUCT_ID}`
-                        )->leaf( `Text`
-                            )->a( n = `text` v = `{SUPPLIER_NAME}`
-                        )->leaf( `Text`
-                            )->a( n = `text` v = `{WIDTH} x {DEPTH} x {HEIGHT} {DIM_UNIT}`
-                        )->leaf( `ObjectNumber`
-                            )->a( n = `number` v = `{WEIGHT_MEASURE}`
-                            )->a( n = `unit`   v = `{WEIGHT_UNIT}`
-                            )->a( n = `state`  v = |\{ parts: [ \{ path: 'WEIGHT_MEASURE' \}, \{ path: 'WEIGHT_UNIT' \} ], formatter: 'Formatter.weightState' \}|
-                        )->leaf( `ObjectNumber`
-                            )->a( n = `number` v = |\{ parts: [ \{ path: 'PRICE' \}, \{ path: 'CURRENCY_CODE' \} ], type: 'sap.ui.model.type.Currency', formatOptions: \{ showMeasure: false \} \}|
-                            )->a( n = `unit`   v = `{CURRENCY_CODE}` ).
-
-    client->view_display( view->stringify( ) ).
-
-  ENDMETHOD.
-
-
-  METHOD on_event.
-
-    DATA selected TYPE abap_bool.
-
-    CASE client->get( )-event.
-
-      WHEN `STICKY_SELECT`.
-        DATA(sticky_text) = client->get_event_arg( ).
-        selected = client->get_event_arg( 2 ).
-        IF selected = abap_true.
-          INSERT sticky_text INTO TABLE t_sticky.
-        ELSE.
-          DELETE t_sticky WHERE table_line = sticky_text.
-        ENDIF.
-        client->view_model_update( ).
-
-    ENDCASE.
 
   ENDMETHOD.
 

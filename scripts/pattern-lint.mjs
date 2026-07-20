@@ -104,6 +104,22 @@ const RULES = [
     },
   },
   {
+    id: 'model-init-last',
+    level: 'error',
+    doc: 'model_init holds the mock-data VALUE #( ) block and must be the LAST method in the implementation so it never interrupts the reading flow of the dispatcher/view/event methods above it (AGENTS §5)',
+    portsOnly: true,
+    find(content) {
+      const impl = content.split(/^CLASS \w+ IMPLEMENTATION\.$/m)[1] || '';
+      const names = [...impl.matchAll(/^  METHOD (\S+)\./gm)].map((x) => x[1]);
+      const mi = names.indexOf('model_init');
+      if (mi !== -1 && mi !== names.length - 1) {
+        return [{ line: lineOf(content, content.indexOf('  METHOD model_init.')),
+                  text: `model_init is followed by ${names.slice(mi + 1).join(', ')}` }];
+      }
+      return [];
+    },
+  },
+  {
     id: 'commercial-ui5-host',
     level: 'error',
     doc: 'URL points at the commercial SAPUI5 host — always use sdk.openui5.org — AGENTS §5',

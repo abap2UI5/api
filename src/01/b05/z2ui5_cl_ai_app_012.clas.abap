@@ -61,11 +61,11 @@ CLASS z2ui5_cl_ai_app_012 DEFINITION PUBLIC.
     DATA client     TYPE REF TO z2ui5_if_client.
     DATA first_item TYPE i.
 
-    METHODS model_init.
     METHODS view_display.
     METHODS on_event.
     METHODS comparison_build.
     METHODS comparison_props_build.
+    METHODS model_init.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -82,61 +82,6 @@ CLASS z2ui5_cl_ai_app_012 IMPLEMENTATION.
     ELSEIF client->check_on_event( ).
       on_event( ).
     ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD model_init.
-
-    " the 11 Category=Laptops rows of the shared mock /ProductCollection; ProductPicUrl resolved to absolute OpenUI5 URLs (the sample's .formatter.url)
-    t_products = VALUE #(
-      ( product_id = `HT-1000` category = `Laptops` main_category = `Computer Systems` tax_tarif_code = `1` supplier_name = `Very Best Screens` weight_measure = `4.2` weight_unit = `KG`
-        description = `Notebook Basic 15 with 2,80 GHz quad core, 15" LCD, 4 GB DDR3 RAM, 500 GB Hard Disc, Windows 8 Pro` name = `Notebook Basic 15` date_of_sale = `2017-03-26`
-        product_pic_url = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1000.jpg`
-        status = `Available` quantity = `10` uom = `PC` currency_code = `EUR` price = 956 width = `30` depth = `18` height = `3` dim_unit = `cm` )
-      ( product_id = `HT-1001` category = `Laptops` main_category = `Computer Systems` tax_tarif_code = `1` supplier_name = `Very Best Screens` weight_measure = `4.5` weight_unit = `KG`
-        description = `Notebook Basic 17 with 2,80 GHz quad core, 17" LCD, 4 GB DDR3 RAM, 500 GB Hard Disc, Windows 8 Pro` name = `Notebook Basic 17` date_of_sale = `2017-04-17`
-        product_pic_url = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1001.jpg`
-        status = `Available` quantity = `20` uom = `PC` currency_code = `EUR` price = 1249 width = `29` depth = `17` height = `3.1` dim_unit = `cm` )
-      ( product_id = `HT-1002` category = `Laptops` main_category = `Computer Systems` tax_tarif_code = `1` supplier_name = `Very Best Screens` weight_measure = `4.2` weight_unit = `KG`
-        description = `Notebook Basic 18 with 2,80 GHz quad core, 18" LCD, 8 GB DDR3 RAM, 1000 GB Hard Disc, Windows 8 Pro` name = `Notebook Basic 18` date_of_sale = `2017-01-07`
-        product_pic_url = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1002.jpg`
-        status = `Available` quantity = `10` uom = `PC` currency_code = `EUR` price = 1570 width = `28` depth = `19` height = `2.5` dim_unit = `cm` )
-      ( product_id = `HT-1003` category = `Laptops` main_category = `Computer Systems` tax_tarif_code = `1` supplier_name = `Smartcards` weight_measure = `4.2` weight_unit = `KG`
-        description = `Notebook Basic 19 with 2,80 GHz quad core, 19" LCD, 8 GB DDR3 RAM, 1000 GB Hard Disc, Windows 8 Pro` name = `Notebook Basic 19` date_of_sale = `2017-04-09`
-        product_pic_url = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1003.jpg`
-        status = `Out of Stock` quantity = `15` uom = `PC` currency_code = `EUR` price = 1650 width = `32` depth = `21` height = `4` dim_unit = `cm` )
-      ( product_id = `HT-1011` category = `Laptops` main_category = `Computer Systems` tax_tarif_code = `1` supplier_name = `Very Best Screens` weight_measure = `4.1` weight_unit = `KG`
-        description = `Notebook Professional 17 with 2,80 GHz quad core, 17" Multitouch LCD, 8 GB DDR3 RAM, 500 GB SSD - DVD-Writer (DVD-R/+R/-RW/-RAM),Windows 8 Pro` name = `Notebook Professional 17` date_of_sale = `2017-01-02`
-        product_pic_url = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1011.jpg`
-        status = `Out of Stock` quantity = `17` uom = `PC` currency_code = `EUR` price = 2299 width = `33` depth = `23` height = `2` dim_unit = `cm` )
-      ( product_id = `HT-1251` category = `Laptops` main_category = `Computer Systems` tax_tarif_code = `1` supplier_name = `Ultrasonic United` weight_measure = `4.2` weight_unit = `KG`
-        description = `Flexible Laptop with 2,5 GHz Quad Core, 15" HD TN, 16 GB DDR SDRAM, 256 GB SSD, Windows 10 Pro` name = `Astro Laptop 1516`
-        product_pic_url = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1251.jpg`
-        status = `Available` quantity = `23` uom = `PC` currency_code = `EUR` price = 989 width = `30` depth = `18` height = `3` dim_unit = `cm` )
-      ( product_id = `HT-1253` category = `Laptops` main_category = `Computer Systems` tax_tarif_code = `1` supplier_name = `Ultrasonic United` weight_measure = `4.2` weight_unit = `KG`
-        description = `Flexible Laptop with 2,5 GHz Dual Core, 14" HD+ TN, 8 GB DDR SDRAM, 324 GB SSD, Windows 10 Pro` name = `Benda Laptop 1408`
-        product_pic_url = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1253.jpg`
-        status = `Discontinued` quantity = `27` uom = `PC` currency_code = `EUR` price = 976 width = `30` depth = `18` height = `3` dim_unit = `cm` )
-      ( product_id = `HT-8000` category = `Laptops` main_category = `Computer Systems` tax_tarif_code = `1` supplier_name = `Titanium` weight_measure = `4` weight_unit = `KG`
-        description = `Notebook with 2,80 GHz dual core, 4 GB DDR3 SDRAM, 500 GB Hard Disc, Windows 8` name = `ITelO FlexTop I4000`
-        product_pic_url = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-8000.jpg`
-        status = `Available` quantity = `11` uom = `PC` currency_code = `EUR` price = 799 width = `31` depth = `19` height = `3.1` dim_unit = `cm` )
-      ( product_id = `HT-8001` category = `Laptops` main_category = `Computer Systems` tax_tarif_code = `1` supplier_name = `Titanium` weight_measure = `4.2` weight_unit = `KG`
-        description = `Notebook with 2,80 GHz dual core, 8 GB DDR3 SDRAM, 500 GB Hard Disc, Windows 8` name = `ITelO FlexTop I6300c`
-        product_pic_url = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-8001.jpg`
-        status = `Discontinued` quantity = `20` uom = `PC` currency_code = `EUR` price = 799 width = `32` depth = `20` height = `3.4` dim_unit = `cm` )
-      ( product_id = `HT-8002` category = `Laptops` main_category = `Computer Systems` tax_tarif_code = `1` supplier_name = `Titanium` weight_measure = `3.5` weight_unit = `KG`
-        description = `Notebook with 2,80 GHz quad core, 4 GB DDR3 SDRAM, 1000 GB Hard Disc, Windows 8` name = `ITelO FlexTop I9100`
-        product_pic_url = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-8002.jpg`
-        status = `Available` quantity = `20` uom = `PC` currency_code = `EUR` price = 1199 width = `38` depth = `21` height = `4.1` dim_unit = `cm` )
-      ( product_id = `HT-8003` category = `Laptops` main_category = `Computer Systems` tax_tarif_code = `1` supplier_name = `Titanium` weight_measure = `3.8` weight_unit = `KG`
-        description = `Notebook with 2,80 GHz quad core, 8 GB DDR3 SDRAM, 1000 GB Hard Disc, Windows 8` name = `ITelO FlexTop I9800`
-        product_pic_url = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-8003.jpg`
-        status = `Available` quantity = `22` uom = `PC` currency_code = `EUR` price = 1388 width = `48` depth = `31` height = `4.5` dim_unit = `cm` ) ).
-
-    " explicit UI5 default of CarouselLayout.visiblePagesCount (the original's settings> model is empty until the route matches)
-    pages_count = 1.
 
   ENDMETHOD.
 
@@ -605,6 +550,61 @@ CLASS z2ui5_cl_ai_app_012 IMPLEMENTATION.
       ENDLOOP.
       APPEND s_prop TO t_comp_props.
     ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD model_init.
+
+    " the 11 Category=Laptops rows of the shared mock /ProductCollection; ProductPicUrl resolved to absolute OpenUI5 URLs (the sample's .formatter.url)
+    t_products = VALUE #(
+      ( product_id = `HT-1000` category = `Laptops` main_category = `Computer Systems` tax_tarif_code = `1` supplier_name = `Very Best Screens` weight_measure = `4.2` weight_unit = `KG`
+        description = `Notebook Basic 15 with 2,80 GHz quad core, 15" LCD, 4 GB DDR3 RAM, 500 GB Hard Disc, Windows 8 Pro` name = `Notebook Basic 15` date_of_sale = `2017-03-26`
+        product_pic_url = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1000.jpg`
+        status = `Available` quantity = `10` uom = `PC` currency_code = `EUR` price = 956 width = `30` depth = `18` height = `3` dim_unit = `cm` )
+      ( product_id = `HT-1001` category = `Laptops` main_category = `Computer Systems` tax_tarif_code = `1` supplier_name = `Very Best Screens` weight_measure = `4.5` weight_unit = `KG`
+        description = `Notebook Basic 17 with 2,80 GHz quad core, 17" LCD, 4 GB DDR3 RAM, 500 GB Hard Disc, Windows 8 Pro` name = `Notebook Basic 17` date_of_sale = `2017-04-17`
+        product_pic_url = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1001.jpg`
+        status = `Available` quantity = `20` uom = `PC` currency_code = `EUR` price = 1249 width = `29` depth = `17` height = `3.1` dim_unit = `cm` )
+      ( product_id = `HT-1002` category = `Laptops` main_category = `Computer Systems` tax_tarif_code = `1` supplier_name = `Very Best Screens` weight_measure = `4.2` weight_unit = `KG`
+        description = `Notebook Basic 18 with 2,80 GHz quad core, 18" LCD, 8 GB DDR3 RAM, 1000 GB Hard Disc, Windows 8 Pro` name = `Notebook Basic 18` date_of_sale = `2017-01-07`
+        product_pic_url = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1002.jpg`
+        status = `Available` quantity = `10` uom = `PC` currency_code = `EUR` price = 1570 width = `28` depth = `19` height = `2.5` dim_unit = `cm` )
+      ( product_id = `HT-1003` category = `Laptops` main_category = `Computer Systems` tax_tarif_code = `1` supplier_name = `Smartcards` weight_measure = `4.2` weight_unit = `KG`
+        description = `Notebook Basic 19 with 2,80 GHz quad core, 19" LCD, 8 GB DDR3 RAM, 1000 GB Hard Disc, Windows 8 Pro` name = `Notebook Basic 19` date_of_sale = `2017-04-09`
+        product_pic_url = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1003.jpg`
+        status = `Out of Stock` quantity = `15` uom = `PC` currency_code = `EUR` price = 1650 width = `32` depth = `21` height = `4` dim_unit = `cm` )
+      ( product_id = `HT-1011` category = `Laptops` main_category = `Computer Systems` tax_tarif_code = `1` supplier_name = `Very Best Screens` weight_measure = `4.1` weight_unit = `KG`
+        description = `Notebook Professional 17 with 2,80 GHz quad core, 17" Multitouch LCD, 8 GB DDR3 RAM, 500 GB SSD - DVD-Writer (DVD-R/+R/-RW/-RAM),Windows 8 Pro` name = `Notebook Professional 17` date_of_sale = `2017-01-02`
+        product_pic_url = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1011.jpg`
+        status = `Out of Stock` quantity = `17` uom = `PC` currency_code = `EUR` price = 2299 width = `33` depth = `23` height = `2` dim_unit = `cm` )
+      ( product_id = `HT-1251` category = `Laptops` main_category = `Computer Systems` tax_tarif_code = `1` supplier_name = `Ultrasonic United` weight_measure = `4.2` weight_unit = `KG`
+        description = `Flexible Laptop with 2,5 GHz Quad Core, 15" HD TN, 16 GB DDR SDRAM, 256 GB SSD, Windows 10 Pro` name = `Astro Laptop 1516`
+        product_pic_url = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1251.jpg`
+        status = `Available` quantity = `23` uom = `PC` currency_code = `EUR` price = 989 width = `30` depth = `18` height = `3` dim_unit = `cm` )
+      ( product_id = `HT-1253` category = `Laptops` main_category = `Computer Systems` tax_tarif_code = `1` supplier_name = `Ultrasonic United` weight_measure = `4.2` weight_unit = `KG`
+        description = `Flexible Laptop with 2,5 GHz Dual Core, 14" HD+ TN, 8 GB DDR SDRAM, 324 GB SSD, Windows 10 Pro` name = `Benda Laptop 1408`
+        product_pic_url = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-1253.jpg`
+        status = `Discontinued` quantity = `27` uom = `PC` currency_code = `EUR` price = 976 width = `30` depth = `18` height = `3` dim_unit = `cm` )
+      ( product_id = `HT-8000` category = `Laptops` main_category = `Computer Systems` tax_tarif_code = `1` supplier_name = `Titanium` weight_measure = `4` weight_unit = `KG`
+        description = `Notebook with 2,80 GHz dual core, 4 GB DDR3 SDRAM, 500 GB Hard Disc, Windows 8` name = `ITelO FlexTop I4000`
+        product_pic_url = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-8000.jpg`
+        status = `Available` quantity = `11` uom = `PC` currency_code = `EUR` price = 799 width = `31` depth = `19` height = `3.1` dim_unit = `cm` )
+      ( product_id = `HT-8001` category = `Laptops` main_category = `Computer Systems` tax_tarif_code = `1` supplier_name = `Titanium` weight_measure = `4.2` weight_unit = `KG`
+        description = `Notebook with 2,80 GHz dual core, 8 GB DDR3 SDRAM, 500 GB Hard Disc, Windows 8` name = `ITelO FlexTop I6300c`
+        product_pic_url = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-8001.jpg`
+        status = `Discontinued` quantity = `20` uom = `PC` currency_code = `EUR` price = 799 width = `32` depth = `20` height = `3.4` dim_unit = `cm` )
+      ( product_id = `HT-8002` category = `Laptops` main_category = `Computer Systems` tax_tarif_code = `1` supplier_name = `Titanium` weight_measure = `3.5` weight_unit = `KG`
+        description = `Notebook with 2,80 GHz quad core, 4 GB DDR3 SDRAM, 1000 GB Hard Disc, Windows 8` name = `ITelO FlexTop I9100`
+        product_pic_url = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-8002.jpg`
+        status = `Available` quantity = `20` uom = `PC` currency_code = `EUR` price = 1199 width = `38` depth = `21` height = `4.1` dim_unit = `cm` )
+      ( product_id = `HT-8003` category = `Laptops` main_category = `Computer Systems` tax_tarif_code = `1` supplier_name = `Titanium` weight_measure = `3.8` weight_unit = `KG`
+        description = `Notebook with 2,80 GHz quad core, 8 GB DDR3 SDRAM, 1000 GB Hard Disc, Windows 8` name = `ITelO FlexTop I9800`
+        product_pic_url = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/HT-8003.jpg`
+        status = `Available` quantity = `22` uom = `PC` currency_code = `EUR` price = 1388 width = `48` depth = `31` height = `4.5` dim_unit = `cm` ) ).
+
+    " explicit UI5 default of CarouselLayout.visiblePagesCount (the original's settings> model is empty until the route matches)
+    pages_count = 1.
 
   ENDMETHOD.
 

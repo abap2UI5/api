@@ -16,9 +16,9 @@ CLASS z2ui5_cl_ai_app_024 DEFINITION PUBLIC.
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
 
-    METHODS model_init.
     METHODS view_display.
     METHODS on_event.
+    METHODS model_init.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -35,38 +35,6 @@ CLASS z2ui5_cl_ai_app_024 IMPLEMENTATION.
     ELSEIF client->check_on_event( ).
       on_event( ).
     ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD model_init.
-
-    t_entries = VALUE #(
-      ( author         = `Alexandrina Victoria`
-        author_pic_url = `https://sdk.openui5.org/test-resources/sap/m/images/dronning_victoria.jpg`
-        type           = `Request`
-        date           = `March 03 2013`
-        text           = `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.` &&
-                         `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. ` &&
-                         `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, seddiamnonumyeirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. ` &&
-                         `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. ` &&
-                         `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. ` &&
-                         `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.` )
-      ( author         = `George Washington`
-        author_pic_url = `https://sdk.openui5.org/test-resources/sap/m/images/george_washington.jpg`
-        type           = `Reply`
-        date           = `March 04 2013`
-        text           = `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore` )
-      ( author         = `Alexandrina Victoria`
-        author_pic_url = `https://sdk.openui5.org/test-resources/sap/m/images/dronning_victoria.jpg`
-        type           = `Request`
-        date           = `March 05 2013`
-        text           = `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat` )
-      ( author         = `George Washington`
-        author_pic_url = `https://sdk.openui5.org/test-resources/sap/m/images/george_washington.jpg`
-        type           = `Rejection`
-        date           = `March 07 2013`
-        text           = `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.` ) ).
 
   ENDMETHOD.
 
@@ -132,6 +100,38 @@ CLASS z2ui5_cl_ai_app_024 IMPLEMENTATION.
         client->message_toast_display( |Clicked on Image: { client->get_event_arg( ) }| ).
 
     ENDCASE.
+
+  ENDMETHOD.
+
+
+  METHOD model_init.
+
+    t_entries = VALUE #(
+      ( author         = `Alexandrina Victoria`
+        author_pic_url = `https://sdk.openui5.org/test-resources/sap/m/images/dronning_victoria.jpg`
+        type           = `Request`
+        date           = `March 03 2013`
+        text           = `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.` &&
+                         `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. ` &&
+                         `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, seddiamnonumyeirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. ` &&
+                         `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. ` &&
+                         `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. ` &&
+                         `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.` )
+      ( author         = `George Washington`
+        author_pic_url = `https://sdk.openui5.org/test-resources/sap/m/images/george_washington.jpg`
+        type           = `Reply`
+        date           = `March 04 2013`
+        text           = `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore` )
+      ( author         = `Alexandrina Victoria`
+        author_pic_url = `https://sdk.openui5.org/test-resources/sap/m/images/dronning_victoria.jpg`
+        type           = `Request`
+        date           = `March 05 2013`
+        text           = `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat` )
+      ( author         = `George Washington`
+        author_pic_url = `https://sdk.openui5.org/test-resources/sap/m/images/george_washington.jpg`
+        type           = `Rejection`
+        date           = `March 07 2013`
+        text           = `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.` ) ).
 
   ENDMETHOD.
 

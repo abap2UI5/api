@@ -13,8 +13,8 @@ CLASS z2ui5_cl_ai_app_034 DEFINITION PUBLIC.
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
 
-    METHODS model_init.
     METHODS view_display.
+    METHODS model_init.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -29,24 +29,6 @@ CLASS z2ui5_cl_ai_app_034 IMPLEMENTATION.
       model_init( ).
       view_display( ).
     ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD model_init.
-
-    t_products = VALUE #(
-      ( name = `Notebook Basic 15`        quantity = 10 )
-      ( name = `Notebook Basic 17`        quantity = 20 )
-      ( name = `Notebook Basic 18`        quantity = 10 )
-      ( name = `Notebook Basic 19`        quantity = 15 )
-      ( name = `ITelO Vault`              quantity = 15 )
-      ( name = `Notebook Professional 15` quantity = 16 )
-      ( name = `Notebook Professional 17` quantity = 17 )
-      ( name = `ITelO Vault Net`          quantity = 14 )
-      ( name = `ITelO Vault SAT`          quantity = 50 )
-      ( name = `Comfort Easy`             quantity = 30 )
-      ( name = `Comfort Senior`           quantity = 24 ) ).
 
   ENDMETHOD.
 
@@ -69,6 +51,24 @@ CLASS z2ui5_cl_ai_app_034 IMPLEMENTATION.
                 )->a( n = `counter` v = `{QUANTITY}` ).
 
     client->view_display( view->stringify( ) ).
+
+  ENDMETHOD.
+
+
+  METHOD model_init.
+
+    t_products = VALUE #(
+      ( name = `Notebook Basic 15`        quantity = 10 )
+      ( name = `Notebook Basic 17`        quantity = 20 )
+      ( name = `Notebook Basic 18`        quantity = 10 )
+      ( name = `Notebook Basic 19`        quantity = 15 )
+      ( name = `ITelO Vault`              quantity = 15 )
+      ( name = `Notebook Professional 15` quantity = 16 )
+      ( name = `Notebook Professional 17` quantity = 17 )
+      ( name = `ITelO Vault Net`          quantity = 14 )
+      ( name = `ITelO Vault SAT`          quantity = 50 )
+      ( name = `Comfort Easy`             quantity = 30 )
+      ( name = `Comfort Senior`           quantity = 24 ) ).
 
   ENDMETHOD.
 

@@ -14,9 +14,9 @@ CLASS z2ui5_cl_ai_app_003 DEFINITION PUBLIC.
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
 
-    METHODS model_init.
     METHODS view_display.
     METHODS on_event.
+    METHODS model_init.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -33,24 +33,6 @@ CLASS z2ui5_cl_ai_app_003 IMPLEMENTATION.
     ELSEIF client->check_on_event( ).
       on_event( ).
     ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD model_init.
-
-    " Rows built in the original onInit from the sap.m BreadcrumbsSeparatorStyle enum
-    " (UI5 1.71): key = enum name, text = enum value (value equals name here)
-    t_items = VALUE #(
-      ( key = `Slash`             text = `Slash` )
-      ( key = `BackSlash`         text = `BackSlash` )
-      ( key = `DoubleBackSlash`   text = `DoubleBackSlash` )
-      ( key = `DoubleSlash`       text = `DoubleSlash` )
-      ( key = `DoubleGreaterThan` text = `DoubleGreaterThan` )
-      ( key = `GreaterThan`       text = `GreaterThan` ) ).
-
-    " original: selected = oMData[0].text -> the first item's text
-    selected = t_items[ 1 ]-text.
 
   ENDMETHOD.
 
@@ -133,6 +115,24 @@ CLASS z2ui5_cl_ai_app_003 IMPLEMENTATION.
         client->message_toast_display( |{ client->get_event_arg( ) } has been activated| ).
 
     ENDCASE.
+
+  ENDMETHOD.
+
+
+  METHOD model_init.
+
+    " Rows built in the original onInit from the sap.m BreadcrumbsSeparatorStyle enum
+    " (UI5 1.71): key = enum name, text = enum value (value equals name here)
+    t_items = VALUE #(
+      ( key = `Slash`             text = `Slash` )
+      ( key = `BackSlash`         text = `BackSlash` )
+      ( key = `DoubleBackSlash`   text = `DoubleBackSlash` )
+      ( key = `DoubleSlash`       text = `DoubleSlash` )
+      ( key = `DoubleGreaterThan` text = `DoubleGreaterThan` )
+      ( key = `GreaterThan`       text = `GreaterThan` ) ).
+
+    " original: selected = oMData[0].text -> the first item's text
+    selected = t_items[ 1 ]-text.
 
   ENDMETHOD.
 

@@ -25,9 +25,9 @@ CLASS z2ui5_cl_ai_app_017 DEFINITION PUBLIC.
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
 
-    METHODS model_init.
     METHODS view_display.
     METHODS on_event.
+    METHODS model_init.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -44,30 +44,6 @@ CLASS z2ui5_cl_ai_app_017 IMPLEMENTATION.
     ELSEIF client->check_on_event( ).
       on_event( ).
     ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD model_init.
-
-    " the original controller's UI5Date objects kept as ISO strings - the Date part types parse them via their source pattern
-    drs1_start       = `2014-02-02`.
-    drs1_end         = `2014-02-17`.
-    drs2_start       = `2016-02-16`.
-    drs2_end         = `2016-02-18`.
-    drs2_min_date    = `2016-01-01`.
-    drs2_max_date    = `2016-12-31`.
-    drs3_start       = `2014-02-02`.
-    drs3_end         = `2014-02-17`.
-    drs4_start       = `2019-04-02`.
-    drs4_end         = `2019-10-17`.
-    drs5_start       = `2009-02-02`.
-    drs5_end         = `2025-02-17`.
-    drs1_value_state = `None`.
-    drs2_value_state = `None`.
-    drs3_value_state = `None`.
-    drs4_value_state = `None`.
-    drs5_value_state = `None`.
 
   ENDMETHOD.
 
@@ -204,6 +180,30 @@ CLASS z2ui5_cl_ai_app_017 IMPLEMENTATION.
         client->view_model_update( ).
 
     ENDCASE.
+
+  ENDMETHOD.
+
+
+  METHOD model_init.
+
+    " the original controller's UI5Date objects kept as ISO strings - the Date part types parse them via their source pattern
+    drs1_start       = `2014-02-02`.
+    drs1_end         = `2014-02-17`.
+    drs2_start       = `2016-02-16`.
+    drs2_end         = `2016-02-18`.
+    drs2_min_date    = `2016-01-01`.
+    drs2_max_date    = `2016-12-31`.
+    drs3_start       = `2014-02-02`.
+    drs3_end         = `2014-02-17`.
+    drs4_start       = `2019-04-02`.
+    drs4_end         = `2019-10-17`.
+    drs5_start       = `2009-02-02`.
+    drs5_end         = `2025-02-17`.
+    drs1_value_state = `None`.
+    drs2_value_state = `None`.
+    drs3_value_state = `None`.
+    drs4_value_state = `None`.
+    drs5_value_state = `None`.
 
   ENDMETHOD.
 

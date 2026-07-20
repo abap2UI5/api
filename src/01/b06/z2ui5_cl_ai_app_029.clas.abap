@@ -9,9 +9,9 @@ CLASS z2ui5_cl_ai_app_029 DEFINITION PUBLIC.
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
 
-    METHODS model_init.
     METHODS view_display.
     METHODS on_event.
+    METHODS model_init.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -28,15 +28,6 @@ CLASS z2ui5_cl_ai_app_029 IMPLEMENTATION.
     ELSEIF client->check_on_event( ).
       on_event( ).
     ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD model_init.
-
-    selected_key = `1`.
-    " the UI5 property default is 1 (scroll by one item), matching the Select's initial "1 item"
-    scroll_step_by_item = 1.
 
   ENDMETHOD.
 
@@ -208,6 +199,15 @@ CLASS z2ui5_cl_ai_app_029 IMPLEMENTATION.
         client->view_model_update( ).
 
     ENDCASE.
+
+  ENDMETHOD.
+
+
+  METHOD model_init.
+
+    selected_key = `1`.
+    " the UI5 property default is 1 (scroll by one item), matching the Select's initial "1 item"
+    scroll_step_by_item = 1.
 
   ENDMETHOD.
 

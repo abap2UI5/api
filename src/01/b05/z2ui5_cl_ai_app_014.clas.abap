@@ -14,9 +14,9 @@ CLASS z2ui5_cl_ai_app_014 DEFINITION PUBLIC.
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
 
-    METHODS model_init.
     METHODS view_display.
     METHODS on_event.
+    METHODS model_init.
     METHODS popup_display_image
       IMPORTING
         pic_url TYPE string.
@@ -36,6 +36,78 @@ CLASS z2ui5_cl_ai_app_014 IMPLEMENTATION.
     ELSEIF client->check_on_event( ).
       on_event( ).
     ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD view_display.
+
+    DATA(view) = z2ui5_cl_ai_xml=>factory( ).
+
+    view->open( n = `View` ns = `mvc`
+        )->a( n = `xmlns:core` v = `sap.ui.core`
+        )->a( n = `xmlns:mvc`  v = `sap.ui.core.mvc`
+        )->a( n = `xmlns`      v = `sap.m`
+
+        )->open( `List`
+            )->a( n = `headerText` v = `Custom Content`
+            )->a( n = `mode`       v = `Delete`
+            )->a( n = `items`      v = client->_bind( t_products )
+
+            )->open( `CustomListItem`
+                )->open( `HBox`
+                    )->leaf( n = `Icon` ns = `core`
+                        )->a( n = `size`  v = `2rem`
+                        )->a( n = `src`   v = `sap-icon://attachment-photo`
+                        )->a( n = `class` v = `sapUiSmallMarginBegin sapUiSmallMarginTopBottom`
+
+                    )->open( `VBox`
+                        )->a( n = `class` v = `sapUiSmallMarginBegin sapUiSmallMarginTopBottom`
+
+                        )->leaf( `Link`
+                            )->a( n = `text`   v = `{NAME}`
+                            )->a( n = `target` v = `{PRODUCT_PIC_URL}`
+                            )->a( n = `press`  v = client->_event( val   = `LINK_PRESS`
+                                                                   t_arg = VALUE #( ( `${PRODUCT_PIC_URL}` ) ) )
+                        )->leaf( `Label`
+                            )->a( n = `text` v = `{PRODUCT_ID}` ).
+
+    client->view_display( view->stringify( ) ).
+
+  ENDMETHOD.
+
+
+  METHOD on_event.
+
+    CASE client->get( )-event.
+
+      WHEN `LINK_PRESS`.
+        popup_display_image( client->get_event_arg( ) ).
+
+    ENDCASE.
+
+  ENDMETHOD.
+
+
+  METHOD popup_display_image.
+
+    " the controller-built Dialog (handlePress), rebuilt as a fragment shown via popup_display
+    DATA(popup) = z2ui5_cl_ai_xml=>factory( ).
+
+    popup->open( n = `FragmentDefinition` ns = `core`
+        )->a( n = `xmlns`      v = `sap.m`
+        )->a( n = `xmlns:core` v = `sap.ui.core`
+
+        )->open( `Dialog`
+            )->leaf( `Image`
+                )->a( n = `src` v = pic_url
+
+            )->open( `beginButton`
+                )->leaf( `Button`
+                    )->a( n = `text`  v = `Close`
+                    )->a( n = `press` v = client->_event_client( client->cs_event-popup_close ) ).
+
+    client->popup_display( popup->stringify( ) ).
 
   ENDMETHOD.
 
@@ -172,78 +244,6 @@ CLASS z2ui5_cl_ai_app_014 IMPLEMENTATION.
     LOOP AT t_products ASSIGNING FIELD-SYMBOL(<s_product>).
       <s_product>-product_pic_url = |https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/{ <s_product>-product_id }.jpg|.
     ENDLOOP.
-
-  ENDMETHOD.
-
-
-  METHOD view_display.
-
-    DATA(view) = z2ui5_cl_ai_xml=>factory( ).
-
-    view->open( n = `View` ns = `mvc`
-        )->a( n = `xmlns:core` v = `sap.ui.core`
-        )->a( n = `xmlns:mvc`  v = `sap.ui.core.mvc`
-        )->a( n = `xmlns`      v = `sap.m`
-
-        )->open( `List`
-            )->a( n = `headerText` v = `Custom Content`
-            )->a( n = `mode`       v = `Delete`
-            )->a( n = `items`      v = client->_bind( t_products )
-
-            )->open( `CustomListItem`
-                )->open( `HBox`
-                    )->leaf( n = `Icon` ns = `core`
-                        )->a( n = `size`  v = `2rem`
-                        )->a( n = `src`   v = `sap-icon://attachment-photo`
-                        )->a( n = `class` v = `sapUiSmallMarginBegin sapUiSmallMarginTopBottom`
-
-                    )->open( `VBox`
-                        )->a( n = `class` v = `sapUiSmallMarginBegin sapUiSmallMarginTopBottom`
-
-                        )->leaf( `Link`
-                            )->a( n = `text`   v = `{NAME}`
-                            )->a( n = `target` v = `{PRODUCT_PIC_URL}`
-                            )->a( n = `press`  v = client->_event( val   = `LINK_PRESS`
-                                                                   t_arg = VALUE #( ( `${PRODUCT_PIC_URL}` ) ) )
-                        )->leaf( `Label`
-                            )->a( n = `text` v = `{PRODUCT_ID}` ).
-
-    client->view_display( view->stringify( ) ).
-
-  ENDMETHOD.
-
-
-  METHOD on_event.
-
-    CASE client->get( )-event.
-
-      WHEN `LINK_PRESS`.
-        popup_display_image( client->get_event_arg( ) ).
-
-    ENDCASE.
-
-  ENDMETHOD.
-
-
-  METHOD popup_display_image.
-
-    " the controller-built Dialog (handlePress), rebuilt as a fragment shown via popup_display
-    DATA(popup) = z2ui5_cl_ai_xml=>factory( ).
-
-    popup->open( n = `FragmentDefinition` ns = `core`
-        )->a( n = `xmlns`      v = `sap.m`
-        )->a( n = `xmlns:core` v = `sap.ui.core`
-
-        )->open( `Dialog`
-            )->leaf( `Image`
-                )->a( n = `src` v = pic_url
-
-            )->open( `beginButton`
-                )->leaf( `Button`
-                    )->a( n = `text`  v = `Close`
-                    )->a( n = `press` v = client->_event_client( client->cs_event-popup_close ) ).
-
-    client->popup_display( popup->stringify( ) ).
 
   ENDMETHOD.
 

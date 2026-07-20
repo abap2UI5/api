@@ -34,10 +34,10 @@ CLASS z2ui5_cl_ai_app_022 DEFINITION PUBLIC.
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
 
-    METHODS model_init.
     METHODS view_display.
     METHODS on_event.
     METHODS apply_filter.
+    METHODS model_init.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -54,35 +54,6 @@ CLASS z2ui5_cl_ai_app_022 IMPLEMENTATION.
     ELSEIF client->check_on_event( ).
       on_event( ).
     ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD model_init.
-
-    " Data taken from the shared mock data sap/ui/demo/mock/products.json of the original sample
-    t_products = VALUE #(
-        ( name = `Comfort Easy` category = `Accessories` supplier_name = `Technocom` width = `84` depth = `1.5` height = `14` dim_unit = `cm` weight_measure = `0.2` weight_unit = `KG` price = `1679.00` currency_code = `EUR` )
-        ( name = `Comfort Senior` category = `Accessories` supplier_name = `Technocom` width = `80` depth = `1.6` height = `13` dim_unit = `cm` weight_measure = `0.8` weight_unit = `KG` price = `512.00` currency_code = `EUR` )
-        ( name = `Ergo Screen E-I` category = `Flat Screen Monitors` supplier_name = `Very Best Screens` width = `37` depth = `12` height = `36` dim_unit = `cm` weight_measure = `21` weight_unit = `KG` price = `230.00` currency_code = `EUR` )
-        ( name = `ITelO Vault` category = `Accessories` supplier_name = `Technocom` width = `32` depth = `22` height = `3` dim_unit = `cm` weight_measure = `0.2` weight_unit = `KG` price = `299.00` currency_code = `EUR` )
-        ( name = `ITelO Vault Net` category = `Accessories` supplier_name = `Technocom` width = `10` depth = `1.8` height = `17` dim_unit = `cm` weight_measure = `0.16` weight_unit = `KG` price = `459.00` currency_code = `EUR` )
-        ( name = `ITelO Vault SAT` category = `Accessories` supplier_name = `Technocom` width = `11` depth = `1.7` height = `18` dim_unit = `cm` weight_measure = `0.18` weight_unit = `KG` price = `149.00` currency_code = `EUR` )
-        ( name = `Notebook Basic 15` category = `Laptops` supplier_name = `Very Best Screens` width = `30` depth = `18` height = `3` dim_unit = `cm` weight_measure = `4.2` weight_unit = `KG` price = `956.00` currency_code = `EUR` )
-        ( name = `Notebook Basic 17` category = `Laptops` supplier_name = `Very Best Screens` width = `29` depth = `17` height = `3.1` dim_unit = `cm` weight_measure = `4.5` weight_unit = `KG` price = `1249.00` currency_code = `EUR` )
-        ( name = `Notebook Basic 19` category = `Laptops` supplier_name = `Smartcards` width = `32` depth = `21` height = `4` dim_unit = `cm` weight_measure = `4.2` weight_unit = `KG` price = `1650.00` currency_code = `EUR` )
-        ( name = `Notebook Professional 15` category = `Accessories` supplier_name = `Very Best Screens` width = `33` depth = `20` height = `3` dim_unit = `cm` weight_measure = `4.3` weight_unit = `KG` price = `1999.00` currency_code = `EUR` ) ).
-
-    " Facet values with counters recomputed for the 10-row subset above
-    " (the original binds the precomputed /ProductCollectionStats/Filters)
-    t_categories = VALUE #(
-        ( text = `Accessories` count = 6 )
-        ( text = `Flat Screen Monitors` count = 1 )
-        ( text = `Laptops` count = 3 ) ).
-    t_suppliers = VALUE #(
-        ( text = `Smartcards` count = 1 )
-        ( text = `Technocom` count = 5 )
-        ( text = `Very Best Screens` count = 4 ) ).
 
   ENDMETHOD.
 
@@ -315,6 +286,35 @@ CLASS z2ui5_cl_ai_app_022 IMPLEMENTATION.
     client->follow_up_action( val   = client->cs_event-binding_call
                               t_arg = VALUE #( ( `idProductsTable` ) ( `items` ) ( `filter` ) ( json_groups ) ) ).
     client->view_model_update( ).
+
+  ENDMETHOD.
+
+
+  METHOD model_init.
+
+    " Data taken from the shared mock data sap/ui/demo/mock/products.json of the original sample
+    t_products = VALUE #(
+        ( name = `Comfort Easy` category = `Accessories` supplier_name = `Technocom` width = `84` depth = `1.5` height = `14` dim_unit = `cm` weight_measure = `0.2` weight_unit = `KG` price = `1679.00` currency_code = `EUR` )
+        ( name = `Comfort Senior` category = `Accessories` supplier_name = `Technocom` width = `80` depth = `1.6` height = `13` dim_unit = `cm` weight_measure = `0.8` weight_unit = `KG` price = `512.00` currency_code = `EUR` )
+        ( name = `Ergo Screen E-I` category = `Flat Screen Monitors` supplier_name = `Very Best Screens` width = `37` depth = `12` height = `36` dim_unit = `cm` weight_measure = `21` weight_unit = `KG` price = `230.00` currency_code = `EUR` )
+        ( name = `ITelO Vault` category = `Accessories` supplier_name = `Technocom` width = `32` depth = `22` height = `3` dim_unit = `cm` weight_measure = `0.2` weight_unit = `KG` price = `299.00` currency_code = `EUR` )
+        ( name = `ITelO Vault Net` category = `Accessories` supplier_name = `Technocom` width = `10` depth = `1.8` height = `17` dim_unit = `cm` weight_measure = `0.16` weight_unit = `KG` price = `459.00` currency_code = `EUR` )
+        ( name = `ITelO Vault SAT` category = `Accessories` supplier_name = `Technocom` width = `11` depth = `1.7` height = `18` dim_unit = `cm` weight_measure = `0.18` weight_unit = `KG` price = `149.00` currency_code = `EUR` )
+        ( name = `Notebook Basic 15` category = `Laptops` supplier_name = `Very Best Screens` width = `30` depth = `18` height = `3` dim_unit = `cm` weight_measure = `4.2` weight_unit = `KG` price = `956.00` currency_code = `EUR` )
+        ( name = `Notebook Basic 17` category = `Laptops` supplier_name = `Very Best Screens` width = `29` depth = `17` height = `3.1` dim_unit = `cm` weight_measure = `4.5` weight_unit = `KG` price = `1249.00` currency_code = `EUR` )
+        ( name = `Notebook Basic 19` category = `Laptops` supplier_name = `Smartcards` width = `32` depth = `21` height = `4` dim_unit = `cm` weight_measure = `4.2` weight_unit = `KG` price = `1650.00` currency_code = `EUR` )
+        ( name = `Notebook Professional 15` category = `Accessories` supplier_name = `Very Best Screens` width = `33` depth = `20` height = `3` dim_unit = `cm` weight_measure = `4.3` weight_unit = `KG` price = `1999.00` currency_code = `EUR` ) ).
+
+    " Facet values with counters recomputed for the 10-row subset above
+    " (the original binds the precomputed /ProductCollectionStats/Filters)
+    t_categories = VALUE #(
+        ( text = `Accessories` count = 6 )
+        ( text = `Flat Screen Monitors` count = 1 )
+        ( text = `Laptops` count = 3 ) ).
+    t_suppliers = VALUE #(
+        ( text = `Smartcards` count = 1 )
+        ( text = `Technocom` count = 5 )
+        ( text = `Very Best Screens` count = 4 ) ).
 
   ENDMETHOD.
 

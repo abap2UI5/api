@@ -13,8 +13,8 @@ CLASS z2ui5_cl_ai_app_011 DEFINITION PUBLIC.
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
 
-    METHODS model_init.
     METHODS view_display.
+    METHODS model_init.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -29,6 +29,33 @@ CLASS z2ui5_cl_ai_app_011 IMPLEMENTATION.
       model_init( ).
       view_display( ).
     ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD view_display.
+
+    DATA(view) = z2ui5_cl_ai_xml=>factory( ).
+
+    view->open( n = `View` ns = `mvc`
+        )->a( n = `height`     v = `100%`
+        )->a( n = `xmlns:core` v = `sap.ui.core`
+        )->a( n = `xmlns:mvc`  v = `sap.ui.core.mvc`
+        )->a( n = `xmlns`      v = `sap.m`
+
+        )->open( `Page`
+            )->a( n = `showHeader` v = `false`
+            )->a( n = `class`      v = `sapUiContentPadding`
+
+            )->open( `content`
+                )->open( `ComboBox`
+                    )->a( n = `items` v = |\{ path: '{ client->_bind( val = t_countries path = abap_true ) }', sorter: \{ path: 'TEXT' \} \}|
+
+                    )->leaf( n = `Item` ns = `core`
+                        )->a( n = `key`  v = `{KEY}`
+                        )->a( n = `text` v = `{TEXT}` ).
+
+    client->view_display( view->stringify( ) ).
 
   ENDMETHOD.
 
@@ -107,33 +134,6 @@ CLASS z2ui5_cl_ai_app_011 IMPLEMENTATION.
       ( key = `AE` text = `United Arab Emirates` )
       ( key = `GB` text = `United Kingdom` )
       ( key = `YE` text = `Yemen` ) ).
-
-  ENDMETHOD.
-
-
-  METHOD view_display.
-
-    DATA(view) = z2ui5_cl_ai_xml=>factory( ).
-
-    view->open( n = `View` ns = `mvc`
-        )->a( n = `height`     v = `100%`
-        )->a( n = `xmlns:core` v = `sap.ui.core`
-        )->a( n = `xmlns:mvc`  v = `sap.ui.core.mvc`
-        )->a( n = `xmlns`      v = `sap.m`
-
-        )->open( `Page`
-            )->a( n = `showHeader` v = `false`
-            )->a( n = `class`      v = `sapUiContentPadding`
-
-            )->open( `content`
-                )->open( `ComboBox`
-                    )->a( n = `items` v = |\{ path: '{ client->_bind( val = t_countries path = abap_true ) }', sorter: \{ path: 'TEXT' \} \}|
-
-                    )->leaf( n = `Item` ns = `core`
-                        )->a( n = `key`  v = `{KEY}`
-                        )->a( n = `text` v = `{TEXT}` ).
-
-    client->view_display( view->stringify( ) ).
 
   ENDMETHOD.
 

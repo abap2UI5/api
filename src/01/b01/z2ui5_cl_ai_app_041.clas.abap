@@ -21,8 +21,8 @@ CLASS z2ui5_cl_ai_app_041 DEFINITION PUBLIC.
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
 
-    METHODS model_init.
     METHODS view_display.
+    METHODS model_init.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -37,23 +37,6 @@ CLASS z2ui5_cl_ai_app_041 IMPLEMENTATION.
       model_init( ).
       view_display( ).
     ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD model_init.
-
-    " the bound record /ProductCollection/0 of the shared mock data sap/ui/demo/mock/products.json
-    s_product = VALUE #( name           = `Notebook Basic 15`
-                         description    = `Notebook Basic 15 with 2,80 GHz quad core, 15" LCD, 4 GB DDR3 RAM, 500 GB Hard Disc, Windows 8 Pro`
-                         weight_measure = `4.2`
-                         weight_unit    = `KG`
-                         width          = `30`
-                         depth          = `18`
-                         height         = `3`
-                         dim_unit       = `cm`
-                         price          = `956.00`
-                         currency_code  = `EUR` ).
 
   ENDMETHOD.
 
@@ -97,6 +80,23 @@ CLASS z2ui5_cl_ai_app_041 IMPLEMENTATION.
                                                               t_arg = VALUE #( ( `http://www.sap.com` ) ) ) ).
 
     client->view_display( view->stringify( ) ).
+
+  ENDMETHOD.
+
+
+  METHOD model_init.
+
+    " the bound record /ProductCollection/0 of the shared mock data sap/ui/demo/mock/products.json
+    s_product = VALUE #( name           = `Notebook Basic 15`
+                         description    = `Notebook Basic 15 with 2,80 GHz quad core, 15" LCD, 4 GB DDR3 RAM, 500 GB Hard Disc, Windows 8 Pro`
+                         weight_measure = `4.2`
+                         weight_unit    = `KG`
+                         width          = `30`
+                         depth          = `18`
+                         height         = `3`
+                         dim_unit       = `cm`
+                         price          = `956.00`
+                         currency_code  = `EUR` ).
 
   ENDMETHOD.
 

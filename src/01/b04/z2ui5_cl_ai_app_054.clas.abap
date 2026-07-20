@@ -33,8 +33,8 @@ CLASS z2ui5_cl_ai_app_054 DEFINITION PUBLIC.
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
 
-    METHODS model_init.
     METHODS view_display.
+    METHODS model_init.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -49,6 +49,27 @@ CLASS z2ui5_cl_ai_app_054 IMPLEMENTATION.
       model_init( ).
       view_display( ).
     ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD view_display.
+
+    DATA(view) = z2ui5_cl_ai_xml=>factory( ).
+
+    view->open( n = `View` ns = `mvc`
+        )->a( n = `xmlns`     v = `sap.m`
+        )->a( n = `xmlns:mvc` v = `sap.ui.core.mvc`
+
+        )->open( `Tree`
+            )->a( n = `id`    v = `Tree`
+            " '{path: '/'}' -> bind the root table; the nested `nodes` drive the depth
+            )->a( n = `items` v = client->_bind( t_nodes )
+
+            )->leaf( `StandardTreeItem`
+                )->a( n = `title` v = `{TEXT}` ).
+
+    client->view_display( view->stringify( ) ).
 
   ENDMETHOD.
 
@@ -80,27 +101,6 @@ CLASS z2ui5_cl_ai_app_054 IMPLEMENTATION.
                 ref  = `sap-icon://create` ) ) )
         ( text = `Node2`
           ref  = `sap-icon://customer-financial-fact-sheet` ) ).
-
-  ENDMETHOD.
-
-
-  METHOD view_display.
-
-    DATA(view) = z2ui5_cl_ai_xml=>factory( ).
-
-    view->open( n = `View` ns = `mvc`
-        )->a( n = `xmlns`     v = `sap.m`
-        )->a( n = `xmlns:mvc` v = `sap.ui.core.mvc`
-
-        )->open( `Tree`
-            )->a( n = `id`    v = `Tree`
-            " '{path: '/'}' -> bind the root table; the nested `nodes` drive the depth
-            )->a( n = `items` v = client->_bind( t_nodes )
-
-            )->leaf( `StandardTreeItem`
-                )->a( n = `title` v = `{TEXT}` ).
-
-    client->view_display( view->stringify( ) ).
 
   ENDMETHOD.
 

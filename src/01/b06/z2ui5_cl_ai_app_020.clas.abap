@@ -17,8 +17,8 @@ CLASS z2ui5_cl_ai_app_020 DEFINITION PUBLIC.
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
 
-    METHODS model_init.
     METHODS view_display.
+    METHODS model_init.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -33,20 +33,6 @@ CLASS z2ui5_cl_ai_app_020 IMPLEMENTATION.
       model_init( ).
       view_display( ).
     ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD model_init.
-
-    " the single record of the shared mock supplier.json /SupplierCollection, bound columns only
-    t_suppliers = VALUE #(
-      ( supplier_name = `Red Point Stores`
-        street        = `Main St`
-        house_number  = `1618`
-        zip_code      = `31415`
-        city          = `Maintown`
-        country       = `Germany` ) ).
 
   ENDMETHOD.
 
@@ -86,6 +72,20 @@ CLASS z2ui5_cl_ai_app_020 IMPLEMENTATION.
                         )->a( n = `type`  v = `Navigation` ).
 
     client->view_display( view->stringify( ) ).
+
+  ENDMETHOD.
+
+
+  METHOD model_init.
+
+    " the single record of the shared mock supplier.json /SupplierCollection, bound columns only
+    t_suppliers = VALUE #(
+      ( supplier_name = `Red Point Stores`
+        street        = `Main St`
+        house_number  = `1618`
+        zip_code      = `31415`
+        city          = `Maintown`
+        country       = `Germany` ) ).
 
   ENDMETHOD.
 

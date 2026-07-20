@@ -14,8 +14,8 @@ CLASS z2ui5_cl_ai_app_039 DEFINITION PUBLIC.
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
 
-    METHODS model_init.
     METHODS view_display.
+    METHODS model_init.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -30,30 +30,6 @@ CLASS z2ui5_cl_ai_app_039 IMPLEMENTATION.
       model_init( ).
       view_display( ).
     ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD model_init.
-
-    " Data of the mock model /ProductCollection used by the original sample
-    t_products = VALUE #(
-      ( product_id = `HT-1000` name = `Notebook Basic 15`        supplier_name = `Very Best Screens` )
-      ( product_id = `HT-1001` name = `Notebook Basic 17`        supplier_name = `Very Best Screens` )
-      ( product_id = `HT-1002` name = `Notebook Basic 18`        supplier_name = `Very Best Screens` )
-      ( product_id = `HT-1003` name = `Notebook Basic 19`        supplier_name = `Smartcards` )
-      ( product_id = `HT-1007` name = `ITelO Vault`              supplier_name = `Technocom` )
-      ( product_id = `HT-1010` name = `Notebook Professional 15` supplier_name = `Very Best Screens` )
-      ( product_id = `HT-1011` name = `Notebook Professional 17` supplier_name = `Very Best Screens` )
-      ( product_id = `HT-1020` name = `ITelO Vault Net`          supplier_name = `Technocom` )
-      ( product_id = `HT-1021` name = `ITelO Vault SAT`          supplier_name = `Technocom` )
-      ( product_id = `HT-1022` name = `Comfort Easy`             supplier_name = `Technocom` )
-      ( product_id = `HT-1023` name = `Comfort Senior`           supplier_name = `Technocom` )
-      ( product_id = `HT-1030` name = `Ergo Screen E-I`          supplier_name = `Very Best Screens` )
-      ( product_id = `HT-1031` name = `Ergo Screen E-II`         supplier_name = `Very Best Screens` )
-      ( product_id = `HT-1032` name = `Ergo Screen E-III`        supplier_name = `Very Best Screens` )
-      ( product_id = `HT-1035` name = `Flat Basic`               supplier_name = `Very Best Screens` )
-      ( product_id = `HT-1036` name = `Flat Future`              supplier_name = `Very Best Screens` ) ).
 
   ENDMETHOD.
 
@@ -82,6 +58,30 @@ CLASS z2ui5_cl_ai_app_039 IMPLEMENTATION.
                     )->a( n = `text` v = `{NAME}` ).
 
     client->view_display( view->stringify( ) ).
+
+  ENDMETHOD.
+
+
+  METHOD model_init.
+
+    " Data of the mock model /ProductCollection used by the original sample
+    t_products = VALUE #(
+      ( product_id = `HT-1000` name = `Notebook Basic 15`        supplier_name = `Very Best Screens` )
+      ( product_id = `HT-1001` name = `Notebook Basic 17`        supplier_name = `Very Best Screens` )
+      ( product_id = `HT-1002` name = `Notebook Basic 18`        supplier_name = `Very Best Screens` )
+      ( product_id = `HT-1003` name = `Notebook Basic 19`        supplier_name = `Smartcards` )
+      ( product_id = `HT-1007` name = `ITelO Vault`              supplier_name = `Technocom` )
+      ( product_id = `HT-1010` name = `Notebook Professional 15` supplier_name = `Very Best Screens` )
+      ( product_id = `HT-1011` name = `Notebook Professional 17` supplier_name = `Very Best Screens` )
+      ( product_id = `HT-1020` name = `ITelO Vault Net`          supplier_name = `Technocom` )
+      ( product_id = `HT-1021` name = `ITelO Vault SAT`          supplier_name = `Technocom` )
+      ( product_id = `HT-1022` name = `Comfort Easy`             supplier_name = `Technocom` )
+      ( product_id = `HT-1023` name = `Comfort Senior`           supplier_name = `Technocom` )
+      ( product_id = `HT-1030` name = `Ergo Screen E-I`          supplier_name = `Very Best Screens` )
+      ( product_id = `HT-1031` name = `Ergo Screen E-II`         supplier_name = `Very Best Screens` )
+      ( product_id = `HT-1032` name = `Ergo Screen E-III`        supplier_name = `Very Best Screens` )
+      ( product_id = `HT-1035` name = `Flat Basic`               supplier_name = `Very Best Screens` )
+      ( product_id = `HT-1036` name = `Flat Future`              supplier_name = `Very Best Screens` ) ).
 
   ENDMETHOD.
 

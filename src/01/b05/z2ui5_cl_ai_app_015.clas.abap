@@ -41,9 +41,9 @@ CLASS z2ui5_cl_ai_app_015 DEFINITION PUBLIC.
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
 
-    METHODS model_init.
     METHODS view_display.
     METHODS on_event.
+    METHODS model_init.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -60,23 +60,6 @@ CLASS z2ui5_cl_ai_app_015 IMPLEMENTATION.
     ELSEIF client->check_on_event( ).
       on_event( ).
     ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD model_init.
-
-    t_tree = VALUE #(
-      ( text = `Node1` ref = `sap-icon://attachment-audio` nodes = VALUE #(
-          ( text = `Node1-1` ref = `sap-icon://attachment-e-pub` nodes = VALUE #(
-              ( text = `Node1-1-1` ref = `sap-icon://attachment-html` )
-              ( text = `Node1-1-2` ref = `sap-icon://attachment-photo` nodes = VALUE #(
-                  ( text = `Node1-1-1` ref = `sap-icon://attachment-text-file` nodes = VALUE #(
-                      ( text = `Node1-1-1-1` ref = `sap-icon://attachment-video` )
-                      ( text = `Node1-1-1-2` ref = `sap-icon://attachment-zip-file` )
-                      ( text = `Node1-1-1-3` ref = `sap-icon://course-program` ) ) ) ) ) ) )
-          ( text = `Node1-2` ref = `sap-icon://create` ) ) )
-      ( text = `Node2` ref = `sap-icon://customer-financial-fact-sheet` ) ).
 
   ENDMETHOD.
 
@@ -127,6 +110,23 @@ CLASS z2ui5_cl_ai_app_015 IMPLEMENTATION.
         client->message_toast_display( `Button pressed` ).
 
     ENDCASE.
+
+  ENDMETHOD.
+
+
+  METHOD model_init.
+
+    t_tree = VALUE #(
+      ( text = `Node1` ref = `sap-icon://attachment-audio` nodes = VALUE #(
+          ( text = `Node1-1` ref = `sap-icon://attachment-e-pub` nodes = VALUE #(
+              ( text = `Node1-1-1` ref = `sap-icon://attachment-html` )
+              ( text = `Node1-1-2` ref = `sap-icon://attachment-photo` nodes = VALUE #(
+                  ( text = `Node1-1-1` ref = `sap-icon://attachment-text-file` nodes = VALUE #(
+                      ( text = `Node1-1-1-1` ref = `sap-icon://attachment-video` )
+                      ( text = `Node1-1-1-2` ref = `sap-icon://attachment-zip-file` )
+                      ( text = `Node1-1-1-3` ref = `sap-icon://course-program` ) ) ) ) ) ) )
+          ( text = `Node1-2` ref = `sap-icon://create` ) ) )
+      ( text = `Node2` ref = `sap-icon://customer-financial-fact-sheet` ) ).
 
   ENDMETHOD.
 

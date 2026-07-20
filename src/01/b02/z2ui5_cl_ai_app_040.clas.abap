@@ -13,8 +13,8 @@ CLASS z2ui5_cl_ai_app_040 DEFINITION PUBLIC.
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
 
-    METHODS model_init.
     METHODS view_display.
+    METHODS model_init.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -29,29 +29,6 @@ CLASS z2ui5_cl_ai_app_040 IMPLEMENTATION.
       model_init( ).
       view_display( ).
     ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD model_init.
-
-    t_products = VALUE #(
-      ( product_id = `HT-1000` name = `Notebook Basic 15` )
-      ( product_id = `HT-1001` name = `Notebook Basic 17` )
-      ( product_id = `HT-1002` name = `Notebook Basic 18` )
-      ( product_id = `HT-1003` name = `Notebook Basic 19` )
-      ( product_id = `HT-1007` name = `ITelO Vault` )
-      ( product_id = `HT-1010` name = `Notebook Professional 15` )
-      ( product_id = `HT-1011` name = `Notebook Professional 17` )
-      ( product_id = `HT-1020` name = `ITelO Vault Net` )
-      ( product_id = `HT-1021` name = `ITelO Vault SAT` )
-      ( product_id = `HT-1022` name = `Comfort Easy` )
-      ( product_id = `HT-1023` name = `Comfort Senior` )
-      ( product_id = `HT-1030` name = `Ergo Screen E-I` )
-      ( product_id = `HT-1031` name = `Ergo Screen E-II` )
-      ( product_id = `HT-1032` name = `Ergo Screen E-III` )
-      ( product_id = `HT-1035` name = `Flat Basic` )
-      ( product_id = `HT-1036` name = `Flat Future` ) ).
 
   ENDMETHOD.
 
@@ -148,6 +125,29 @@ CLASS z2ui5_cl_ai_app_040 IMPLEMENTATION.
                 )->a( n = `MultiInputId` v = `multiInput2` ).
 
     client->view_display( view->stringify( ) ).
+
+  ENDMETHOD.
+
+
+  METHOD model_init.
+
+    t_products = VALUE #(
+      ( product_id = `HT-1000` name = `Notebook Basic 15` )
+      ( product_id = `HT-1001` name = `Notebook Basic 17` )
+      ( product_id = `HT-1002` name = `Notebook Basic 18` )
+      ( product_id = `HT-1003` name = `Notebook Basic 19` )
+      ( product_id = `HT-1007` name = `ITelO Vault` )
+      ( product_id = `HT-1010` name = `Notebook Professional 15` )
+      ( product_id = `HT-1011` name = `Notebook Professional 17` )
+      ( product_id = `HT-1020` name = `ITelO Vault Net` )
+      ( product_id = `HT-1021` name = `ITelO Vault SAT` )
+      ( product_id = `HT-1022` name = `Comfort Easy` )
+      ( product_id = `HT-1023` name = `Comfort Senior` )
+      ( product_id = `HT-1030` name = `Ergo Screen E-I` )
+      ( product_id = `HT-1031` name = `Ergo Screen E-II` )
+      ( product_id = `HT-1032` name = `Ergo Screen E-III` )
+      ( product_id = `HT-1035` name = `Flat Basic` )
+      ( product_id = `HT-1036` name = `Flat Future` ) ).
 
   ENDMETHOD.
 

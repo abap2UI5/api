@@ -8,9 +8,9 @@ CLASS z2ui5_cl_ai_app_021 DEFINITION PUBLIC.
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
 
-    METHODS model_init.
     METHODS view_display.
     METHODS on_event.
+    METHODS model_init.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -27,14 +27,6 @@ CLASS z2ui5_cl_ai_app_021 IMPLEMENTATION.
     ELSEIF client->check_on_event( ).
       on_event( ).
     ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD model_init.
-
-    " the UI5 default of the enum-typed state property - an empty string would crash it
-    state = `Clear`.
 
   ENDMETHOD.
 
@@ -101,6 +93,14 @@ CLASS z2ui5_cl_ai_app_021 IMPLEMENTATION.
         client->view_model_update( ).
 
     ENDCASE.
+
+  ENDMETHOD.
+
+
+  METHOD model_init.
+
+    " the UI5 default of the enum-typed state property - an empty string would crash it
+    state = `Clear`.
 
   ENDMETHOD.
 

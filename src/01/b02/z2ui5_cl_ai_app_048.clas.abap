@@ -21,8 +21,8 @@ CLASS z2ui5_cl_ai_app_048 DEFINITION PUBLIC.
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
 
-    METHODS model_init.
     METHODS view_display.
+    METHODS model_init.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -37,39 +37,6 @@ CLASS z2ui5_cl_ai_app_048 IMPLEMENTATION.
       model_init( ).
       view_display( ).
     ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD model_init.
-
-    " Data of the inline JSON model defined in the original sample controller
-    selected_product  = `HT-1001`.
-    selected_product2 = `HT-1001`.
-    selected_product3 = `HT-1001`.
-    enabled  = abap_true.
-    editable = abap_true.
-
-    t_products = VALUE #(
-      ( product_id = `HT-1000` name = `Notebook Basic 15` )
-      ( product_id = `HT-1001` name = `Notebook Basic 17` )
-      ( product_id = `HT-1002` name = `Notebook Basic 18` )
-      ( product_id = `HT-1003` name = `Notebook Basic 19` )
-      ( product_id = `HT-1007` name = `ITelO Vault` ) ).
-
-    t_products2 = VALUE #(
-      ( product_id = `HT-1000` name = `Notebook Basic 15` )
-      ( product_id = `HT-1001` name = `Notebook Basic 17` )
-      ( product_id = `HT-1002` name = `Notebook Basic 18` )
-      ( product_id = `HT-1003` name = `Notebook Basic 19` )
-      ( product_id = `HT-1007` name = `ITelO Vault` ) ).
-
-    t_products3 = VALUE #(
-      ( product_id = `HT-1000` name = `Notebook Basic 15` )
-      ( product_id = `HT-1001` name = `Notebook Basic 17` )
-      ( product_id = `HT-1002` name = `Notebook Basic 18` )
-      ( product_id = `HT-1003` name = `Notebook Basic 19` )
-      ( product_id = `HT-1007` name = `ITelO Vault` ) ).
 
   ENDMETHOD.
 
@@ -164,6 +131,39 @@ CLASS z2ui5_cl_ai_app_048 IMPLEMENTATION.
                             )->a( n = `text` v = `{NAME}` ).
 
     client->view_display( view->stringify( ) ).
+
+  ENDMETHOD.
+
+
+  METHOD model_init.
+
+    " Data of the inline JSON model defined in the original sample controller
+    selected_product  = `HT-1001`.
+    selected_product2 = `HT-1001`.
+    selected_product3 = `HT-1001`.
+    enabled  = abap_true.
+    editable = abap_true.
+
+    t_products = VALUE #(
+      ( product_id = `HT-1000` name = `Notebook Basic 15` )
+      ( product_id = `HT-1001` name = `Notebook Basic 17` )
+      ( product_id = `HT-1002` name = `Notebook Basic 18` )
+      ( product_id = `HT-1003` name = `Notebook Basic 19` )
+      ( product_id = `HT-1007` name = `ITelO Vault` ) ).
+
+    t_products2 = VALUE #(
+      ( product_id = `HT-1000` name = `Notebook Basic 15` )
+      ( product_id = `HT-1001` name = `Notebook Basic 17` )
+      ( product_id = `HT-1002` name = `Notebook Basic 18` )
+      ( product_id = `HT-1003` name = `Notebook Basic 19` )
+      ( product_id = `HT-1007` name = `ITelO Vault` ) ).
+
+    t_products3 = VALUE #(
+      ( product_id = `HT-1000` name = `Notebook Basic 15` )
+      ( product_id = `HT-1001` name = `Notebook Basic 17` )
+      ( product_id = `HT-1002` name = `Notebook Basic 18` )
+      ( product_id = `HT-1003` name = `Notebook Basic 19` )
+      ( product_id = `HT-1007` name = `ITelO Vault` ) ).
 
   ENDMETHOD.
 

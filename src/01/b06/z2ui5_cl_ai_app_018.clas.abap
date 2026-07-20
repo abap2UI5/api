@@ -25,9 +25,9 @@ CLASS z2ui5_cl_ai_app_018 DEFINITION PUBLIC.
     DATA client TYPE REF TO z2ui5_if_client.
     DATA event_count TYPE i.
 
-    METHODS model_init.
     METHODS view_display.
     METHODS on_event.
+    METHODS model_init.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -44,32 +44,6 @@ CLASS z2ui5_cl_ai_app_018 IMPLEMENTATION.
     ELSEIF client->check_on_event( ).
       on_event( ).
     ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD model_init.
-
-    " the original's UI5Date instances become date strings - parsed by the source patterns / V4 constraints in the view bindings
-    DATA(now) = |{ sy-datum(4) }-{ sy-datum+4(2) }-{ sy-datum+6(2) } { sy-uzeit(2) }:{ sy-uzeit+2(2) }:{ sy-uzeit+4(2) }|.
-
-    value_dtp2 = `2016-02-18 10:32:30`.
-    value_dtp3 = now.
-    value_dtp4 = `2016-02-18 10:32:30`.
-    value_dtp5 = now.
-    value_dtp8 = `2016-02-18 10:32:30`.
-    value_dtp10 = `2023-03-31T10:32:30Z`.
-    " value_dtp11 stays initial - the original binds null; the original's valueDTP9 is bound by no control and is omitted
-    timezone_dtp10 = `Australia/Sydney`.
-    timezone_dtp11 = `Asia/Tokyo`.
-    init_focus_dtp6 = `2017-06-13T11:12:13`.
-    text_result = `Change event result`.
-    vs_dtp1 = `None`.
-    vs_dtp2 = `None`.
-    vs_dtp3 = `None`.
-    vs_dtp4 = `None`.
-    vs_dtp6 = `None`.
-    vs_dtp7 = `None`.
 
   ENDMETHOD.
 
@@ -265,6 +239,32 @@ CLASS z2ui5_cl_ai_app_018 IMPLEMENTATION.
         client->view_model_update( ).
 
     ENDCASE.
+
+  ENDMETHOD.
+
+
+  METHOD model_init.
+
+    " the original's UI5Date instances become date strings - parsed by the source patterns / V4 constraints in the view bindings
+    DATA(now) = |{ sy-datum(4) }-{ sy-datum+4(2) }-{ sy-datum+6(2) } { sy-uzeit(2) }:{ sy-uzeit+2(2) }:{ sy-uzeit+4(2) }|.
+
+    value_dtp2 = `2016-02-18 10:32:30`.
+    value_dtp3 = now.
+    value_dtp4 = `2016-02-18 10:32:30`.
+    value_dtp5 = now.
+    value_dtp8 = `2016-02-18 10:32:30`.
+    value_dtp10 = `2023-03-31T10:32:30Z`.
+    " value_dtp11 stays initial - the original binds null; the original's valueDTP9 is bound by no control and is omitted
+    timezone_dtp10 = `Australia/Sydney`.
+    timezone_dtp11 = `Asia/Tokyo`.
+    init_focus_dtp6 = `2017-06-13T11:12:13`.
+    text_result = `Change event result`.
+    vs_dtp1 = `None`.
+    vs_dtp2 = `None`.
+    vs_dtp3 = `None`.
+    vs_dtp4 = `None`.
+    vs_dtp6 = `None`.
+    vs_dtp7 = `None`.
 
   ENDMETHOD.
 

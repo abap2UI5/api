@@ -16,8 +16,8 @@ CLASS z2ui5_cl_ai_app_006 DEFINITION PUBLIC.
     " not bound - the shared image base URL, kept out of PUBLIC so the round-trip model scan stays small
     DATA base_url TYPE string.
 
-    METHODS model_init.
     METHODS view_display.
+    METHODS model_init.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -32,27 +32,6 @@ CLASS z2ui5_cl_ai_app_006 IMPLEMENTATION.
       model_init( ).
       view_display( ).
     ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD model_init.
-
-    " Image URLs of the mock models sap/ui/demo/mock/img.json and products.json used by the original sample
-    base_url = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/`.
-
-    " Subset of the mock model sap/ui/demo/mock/products.json used by the original sample
-    t_products = VALUE #(
-      ( name = `Notebook Basic 15` product_id = `HT-1000` product_pic_url = base_url && `HT-1000.jpg` )
-      ( name = `Notebook Basic 17` product_id = `HT-1001` product_pic_url = base_url && `HT-1001.jpg` )
-      ( name = `Notebook Basic 18` product_id = `HT-1002` product_pic_url = base_url && `HT-1002.jpg` )
-      ( name = `Notebook Basic 19` product_id = `HT-1003` product_pic_url = base_url && `HT-1003.jpg` )
-      ( name = `ITelO Vault` product_id = `HT-1007` product_pic_url = base_url && `HT-1007.jpg` )
-      ( name = `Notebook Professional 15` product_id = `HT-1010` product_pic_url = base_url && `HT-1010.jpg` )
-      ( name = `Notebook Professional 17` product_id = `HT-1011` product_pic_url = base_url && `HT-1011.jpg` )
-      ( name = `ITelO Vault Net` product_id = `HT-1020` product_pic_url = base_url && `HT-1020.jpg` )
-      ( name = `ITelO Vault SAT` product_id = `HT-1021` product_pic_url = base_url && `HT-1021.jpg` )
-      ( name = `Comfort Easy` product_id = `HT-1022` product_pic_url = base_url && `HT-1022.jpg` ) ).
 
   ENDMETHOD.
 
@@ -119,6 +98,27 @@ CLASS z2ui5_cl_ai_app_006 IMPLEMENTATION.
                 )->a( n = `alt` v = `Example picture of spotlight` ).
 
     client->view_display( view->stringify( ) ).
+
+  ENDMETHOD.
+
+
+  METHOD model_init.
+
+    " Image URLs of the mock models sap/ui/demo/mock/img.json and products.json used by the original sample
+    base_url = `https://sdk.openui5.org/test-resources/sap/ui/documentation/sdk/images/`.
+
+    " Subset of the mock model sap/ui/demo/mock/products.json used by the original sample
+    t_products = VALUE #(
+      ( name = `Notebook Basic 15` product_id = `HT-1000` product_pic_url = base_url && `HT-1000.jpg` )
+      ( name = `Notebook Basic 17` product_id = `HT-1001` product_pic_url = base_url && `HT-1001.jpg` )
+      ( name = `Notebook Basic 18` product_id = `HT-1002` product_pic_url = base_url && `HT-1002.jpg` )
+      ( name = `Notebook Basic 19` product_id = `HT-1003` product_pic_url = base_url && `HT-1003.jpg` )
+      ( name = `ITelO Vault` product_id = `HT-1007` product_pic_url = base_url && `HT-1007.jpg` )
+      ( name = `Notebook Professional 15` product_id = `HT-1010` product_pic_url = base_url && `HT-1010.jpg` )
+      ( name = `Notebook Professional 17` product_id = `HT-1011` product_pic_url = base_url && `HT-1011.jpg` )
+      ( name = `ITelO Vault Net` product_id = `HT-1020` product_pic_url = base_url && `HT-1020.jpg` )
+      ( name = `ITelO Vault SAT` product_id = `HT-1021` product_pic_url = base_url && `HT-1021.jpg` )
+      ( name = `Comfort Easy` product_id = `HT-1022` product_pic_url = base_url && `HT-1022.jpg` ) ).
 
   ENDMETHOD.
 

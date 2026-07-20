@@ -17,8 +17,8 @@ CLASS z2ui5_cl_ai_app_045 DEFINITION PUBLIC.
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
 
-    METHODS model_init.
     METHODS view_display.
+    METHODS model_init.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -33,22 +33,6 @@ CLASS z2ui5_cl_ai_app_045 IMPLEMENTATION.
       model_init( ).
       view_display( ).
     ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD model_init.
-
-    rs1_value  = 0.
-    rs1_value2 = 100.
-    rs2_value  = -50.
-    rs2_value2 = 50.
-    rs3_value  = 20.
-    rs3_value2 = 80.
-    rs4_value  = -500.
-    rs4_value2 = 500.
-    rs5_value  = 0.
-    rs5_value2 = 500.
 
   ENDMETHOD.
 
@@ -164,6 +148,22 @@ CLASS z2ui5_cl_ai_app_045 IMPLEMENTATION.
                     )->a( n = `tickmarksBetweenLabels` v = `3` ).
 
     client->view_display( view->stringify( ) ).
+
+  ENDMETHOD.
+
+
+  METHOD model_init.
+
+    rs1_value  = 0.
+    rs1_value2 = 100.
+    rs2_value  = -50.
+    rs2_value2 = 50.
+    rs3_value  = 20.
+    rs3_value2 = 80.
+    rs4_value  = -500.
+    rs4_value2 = 500.
+    rs5_value  = 0.
+    rs5_value2 = 500.
 
   ENDMETHOD.
 

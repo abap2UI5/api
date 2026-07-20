@@ -15,8 +15,8 @@ CLASS z2ui5_cl_ai_app_038 DEFINITION PUBLIC.
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
 
-    METHODS model_init.
     METHODS view_display.
+    METHODS model_init.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -31,30 +31,6 @@ CLASS z2ui5_cl_ai_app_038 IMPLEMENTATION.
       model_init( ).
       view_display( ).
     ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD model_init.
-
-    " messages the original registers on the sap.ui.core.message.MessageManager
-    t_messages = VALUE #(
-      ( type            = `Error`
-        message         = `Error message`
-        additional_text = `Example of additionalText`
-        description     = `Example of description` )
-      ( type            = `Information`
-        message         = `Information message`
-        additional_text = `Example of additionalText`
-        description     = `Example of description` )
-      ( type            = `Success`
-        message         = `Success message`
-        additional_text = `Example of additionalText`
-        description     = `Example of description` )
-      ( type            = `Warning`
-        message         = `Warning message`
-        additional_text = `Example of additionalText`
-        description     = `Example of description` ) ).
 
   ENDMETHOD.
 
@@ -82,6 +58,30 @@ CLASS z2ui5_cl_ai_app_038 IMPLEMENTATION.
                     )->a( n = `description` v = `{DESCRIPTION}` ).
 
     client->view_display( view->stringify( ) ).
+
+  ENDMETHOD.
+
+
+  METHOD model_init.
+
+    " messages the original registers on the sap.ui.core.message.MessageManager
+    t_messages = VALUE #(
+      ( type            = `Error`
+        message         = `Error message`
+        additional_text = `Example of additionalText`
+        description     = `Example of description` )
+      ( type            = `Information`
+        message         = `Information message`
+        additional_text = `Example of additionalText`
+        description     = `Example of description` )
+      ( type            = `Success`
+        message         = `Success message`
+        additional_text = `Example of additionalText`
+        description     = `Example of description` )
+      ( type            = `Warning`
+        message         = `Warning message`
+        additional_text = `Example of additionalText`
+        description     = `Example of description` ) ).
 
   ENDMETHOD.
 

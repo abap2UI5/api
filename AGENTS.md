@@ -208,9 +208,9 @@ CLASS z2ui5_cl_ai_app_<n> DEFINITION PUBLIC.       " lowercase, not FINAL
 
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
-    METHODS model_init.       " only if the app has model data
-    METHODS on_event.        " only if the app reacts to events
     METHODS view_display.
+    METHODS on_event.        " only if the app reacts to events
+    METHODS model_init.      " only if the app has model data - declared LAST
 
   PRIVATE SECTION.           " always present, kept empty
 ENDCLASS.
@@ -234,9 +234,13 @@ ENDMETHOD.
 
 - **Method order in the implementation**: `z2ui5_if_app~main` is always the
   **first** method; the remaining methods follow **in the order they are
-  called from `main`**, depth-first (`model_init` → `view_display` →
-  `on_event` → helpers right after their caller). pattern-lint checks that
-  main comes first.
+  called from `main`**, depth-first (`view_display` → `on_event` → helpers
+  right after their caller) — **except `model_init`, which always goes LAST**,
+  after every other method (and is declared last in the DEFINITION too). It
+  usually holds a large `VALUE #( )` block of mock data; keeping it at the
+  bottom stops that data from interrupting the reading flow of the dispatcher,
+  view and event methods. pattern-lint checks that main comes first and that
+  model_init comes last.
 - `check_on_init( )` fires once when the app starts — seed the data, draw the view.
 - `check_on_event( )` fires on every user interaction — dispatch in `on_event( )`.
 - Add `model_init( )` / `on_event( )` **only when the app actually has data /
