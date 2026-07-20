@@ -101,6 +101,48 @@ const rows = apps.map((a) => {
   return extras.length ? `${base}\n        ${extras.join('\n        ')} )` : `${base} )`;
 });
 
+// --- client-side (roundtrip-free) filter & sort, both via cs_event-binding_call
+// wired through _event_client (see abap2UI5 z2ui5_if_client / FrontendAction.js):
+// the value/direction is resolved on the frontend, the model stays untouched. ---
+const ID_TABLE = 'idOverviewTable';
+// a Contains filter on the FILTER blob column; valExpr is a client-resolved
+// $-expression (the search field's newValue/query). Empty value clears it.
+const filterCall = (valExpr) =>
+  'client->_event_client( val = client->cs_event-binding_call' +
+  ` t_arg = VALUE #( ( \`${ID_TABLE}\` ) ( \`items\` ) ( \`filter\` ) ( \`FILTER\` ) ( \`Contains\` ) ( \`${valExpr}\` ) ) )`;
+// a Sorter on one column path; descending passes the abap_bool `X`, ascending omits it
+const sortCall = (path, desc) =>
+  'client->_event_client( val = client->cs_event-binding_call' +
+  ` t_arg = VALUE #( ( \`${ID_TABLE}\` ) ( \`items\` ) ( \`sort\` ) ( \`${path}\` )${desc ? ' ( `X` )' : ''} ) )`;
+
+// the four sortable columns (label shown in the header, model path sorted on);
+// the Note column is not sortable
+const SORT_COLS = [['Module', 'MODULE'], ['Control', 'CTRL_NAME'], ['Sample', 'NAME'], ['abap2UI5', 'CLASS']];
+const sortableColumn = ([label, path]) => `                        )->open( \`Column\`
+                            )->open( \`HBox\`
+                                )->a( n = \`alignItems\` v = \`Center\`
+
+                                )->leaf( \`Text\`
+                                    )->a( n = \`text\` v = \`${label}\`
+                                )->leaf( \`core:Icon\`
+                                    )->a( n = \`src\`     v = \`sap-icon://sort-ascending\`
+                                    )->a( n = \`tooltip\` v = \`Sort by ${label} ascending\`
+                                    )->a( n = \`class\`   v = \`sapUiTinyMarginBegin\`
+                                    )->a( n = \`press\`   v = ${sortCall(path, false)}
+                                )->leaf( \`core:Icon\`
+                                    )->a( n = \`src\`     v = \`sap-icon://sort-descending\`
+                                    )->a( n = \`tooltip\` v = \`Sort by ${label} descending\`
+                                    )->a( n = \`press\`   v = ${sortCall(path, true)}
+
+                            )->shut(
+                        )->shut(`;
+const columnsBlock = SORT_COLS.map(sortableColumn).join('\n') + `
+                        )->open( \`Column\`
+                            )->leaf( \`Text\`
+                                )->a( n = \`text\` v = \`Note\`
+
+                        )->shut(`;
+
 const abap = `"! Generated overview app - lists every abap2UI5 api sample app in a table.
 "! In the Sample column the name links the OpenUI5 source and the ↗ starts the
 "! live OpenUI5 sample; in the abap2UI5 column the class name links the generated
@@ -109,8 +151,10 @@ const abap = `"! Generated overview app - lists every abap2UI5 api sample app in
 "! ports (live-checked and exemplary), a green check when the port was manually
 "! verified in a running system, and a hint button that opens a popup with the
 "! port's generation caveats when present. The search field above the table
-"! filters all rows by a case-insensitive substring over every column. Do not
-"! edit by hand - regenerate with scripts/generate-overview.mjs
+"! filters all rows by a substring over every column, and each column header
+"! carries ascending/descending sort icons - both run entirely on the frontend
+"! (cs_event-binding_call via _event_client, no server round-trip). Do not edit
+"! by hand - regenerate with scripts/generate-overview.mjs
 CLASS ${CLASS} DEFINITION PUBLIC.
 
   PUBLIC SECTION.
@@ -141,15 +185,12 @@ CLASS ${CLASS} DEFINITION PUBLIC.
     TYPES ty_t_app TYPE STANDARD TABLE OF ty_s_app WITH EMPTY KEY.
 
     DATA t_app TYPE ty_t_app.
-    DATA search TYPE string.
 
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
-    DATA t_app_all TYPE ty_t_app.
 
     METHODS view_display.
     METHODS on_event.
-    METHODS apply_filter.
     METHODS get_catalog
       RETURNING
         VALUE(result) TYPE ty_t_app.
@@ -177,10 +218,6 @@ CLASS ${CLASS} IMPLEMENTATION.
   METHOD on_event.
 
     CASE client->get( )-event.
-
-      WHEN \`SEARCH\`.
-        apply_filter( ).
-        client->view_model_update( ).
 
       WHEN \`SHOW_NOTES\`.
         " one Text per bullet of the clicked row's generation notes
@@ -215,27 +252,13 @@ CLASS ${CLASS} IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD apply_filter.
-
-    " one big case-insensitive substring search over every column of every row
-    DATA(term) = to_lower( search ).
-    IF term IS INITIAL.
-      t_app = t_app_all.
-    ELSE.
-      t_app = VALUE #( FOR ls_app IN t_app_all
-                       WHERE ( filter CS term ) ( ls_app ) ).
-    ENDIF.
-
-  ENDMETHOD.
-
-
   METHOD view_display.
 
     " base url to launch an abap2UI5 app in a new browser tab
     DATA(start) = |{ client->get( )-s_config-origin }{ client->get( )-s_config-pathname }?app_start=|.
 
-    t_app_all = get_catalog( ).
-    LOOP AT t_app_all ASSIGNING FIELD-SYMBOL(<app>).
+    t_app = get_catalog( ).
+    LOOP AT t_app ASSIGNING FIELD-SYMBOL(<app>).
 
       DATA(libpath) = replace( val = <app>-module
                                sub = \`.\`
@@ -258,15 +281,14 @@ CLASS ${CLASS} IMPLEMENTATION.
       <app>-has_notes = xsdbool( <app>-notes IS NOT INITIAL ).
       <app>-has_p171  = xsdbool( <app>-post171 IS NOT INITIAL ).
 
-      " lower-cased blob of every column, backing the search field's substring filter
-      <app>-filter = to_lower( <app>-module   && \` \` && <app>-control && \` \` && <app>-ctrl_name && \` \` &&
-                               <app>-name     && \` \` && <app>-class   && \` \` && <app>-notes     && \` \` &&
-                               <app>-checked  && \` \` && <app>-post171 ).
+      " one searchable blob per row, bound as the FILTER column that the search
+      " field's client-side Contains filter (binding_call) matches against - so
+      " a single field filters over every visible column at once
+      <app>-filter = <app>-module   && \` \` && <app>-control && \` \` && <app>-ctrl_name && \` \` &&
+                     <app>-name     && \` \` && <app>-class   && \` \` && <app>-notes     && \` \` &&
+                     <app>-checked  && \` \` && <app>-post171.
 
     ENDLOOP.
-
-    " keep the current search term applied across re-displays (navigation)
-    apply_filter( ).
 
     DATA(view) = z2ui5_cl_ai_xml=>factory( ).
 
@@ -283,46 +305,24 @@ CLASS ${CLASS} IMPLEMENTATION.
 
                 )->open( \`subHeader\`
                     )->open( \`Toolbar\`
+                        " client-side filter: liveChange/search run a binding_call Contains
+                        " filter on the FILTER blob via _event_client - no backend round-trip
                         )->leaf( \`SearchField\`
-                            )->a( n = \`value\`       v = client->_bind( search )
                             )->a( n = \`placeholder\` v = \`Search across all samples - module, control, sample, class, notes...\`
-                            )->a( n = \`search\`      v = client->_event( \`SEARCH\` )
-                            )->a( n = \`liveChange\`  v = client->_event( \`SEARCH\` )
                             )->a( n = \`width\`       v = \`100%\`
+                            )->a( n = \`liveChange\`  v = ${filterCall('${$parameters>/newValue}')}
+                            )->a( n = \`search\`      v = ${filterCall('${$parameters>/query}')}
 
                     )->shut(
                 )->shut(
 
                 )->open( \`Table\`
+                    )->a( n = \`id\`     v = \`${ID_TABLE}\`
                     )->a( n = \`sticky\` v = \`ColumnHeaders\`
                     )->a( n = \`items\`  v = client->_bind( t_app )
 
                     )->open( \`columns\`
-                        )->open( \`Column\`
-                            )->leaf( \`Text\`
-                                )->a( n = \`text\` v = \`Module\`
-
-                        )->shut(
-                        )->open( \`Column\`
-                            )->leaf( \`Text\`
-                                )->a( n = \`text\` v = \`Control\`
-
-                        )->shut(
-                        )->open( \`Column\`
-                            )->leaf( \`Text\`
-                                )->a( n = \`text\` v = \`Sample\`
-
-                        )->shut(
-                        )->open( \`Column\`
-                            )->leaf( \`Text\`
-                                )->a( n = \`text\` v = \`abap2UI5\`
-
-                        )->shut(
-                        )->open( \`Column\`
-                            )->leaf( \`Text\`
-                                )->a( n = \`text\` v = \`Note\`
-
-                        )->shut(
+${columnsBlock}
                     )->shut(
 
                     )->open( \`items\`

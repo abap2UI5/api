@@ -576,10 +576,16 @@ scripts.**
   OpenUI5 repo source, ↗ → live fullscreen sample) · **abap2UI5** (class →
   generated class on GitHub, ↗ → starts the app via `?app_start=<CLASS>`) ·
   **Note** (gold star for `golden` ports; green check when live-verified; hint
-  button opens the deviations popup). A **search field** in the page subheader
-  filters the rows by a case-insensitive substring over every column (a
-  pre-built lower-cased `filter` blob per row; the `SEARCH` event runs
-  `apply_filter`). **Every link opens in a new browser tab**
+  button opens the deviations popup). **Search and sort run entirely on the
+  frontend** — a **search field** in the page subheader filters the rows by a
+  substring over every column, and each column header carries
+  ascending/descending **sort** icons; both are wired via
+  `client->_event_client( val = client->cs_event-binding_call … )`, the
+  roundtrip-free variant of the UI5 `getBinding('items').filter/sort(…)`
+  pattern (CAPABILITIES.md; the model stays untouched, no server round-trip).
+  The filter matches a `Contains` operator against a per-row `FILTER` blob
+  (every column concatenated, built in `view_display`); the sort passes the
+  column's model path. **Every link opens in a new browser tab**
   (`target="_blank"`). All source links point at OpenUI5; only the class +
   start links are local. The per-row URLs are built in `view_display` (the
   start URL needs the runtime system origin), the static facts come from
