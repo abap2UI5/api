@@ -9,14 +9,14 @@ CAPABILITIES.md._
 
 | Aspect | State |
 |---|---|
-| Ports | 54 / **403 in-scope** `sap.m` samples (13.4 %) — in scope = control exists since UI5 1.71 and is not deprecated; 43 of 446 samples are out of scope (16 deprecated, 21 newer, 6 without control metadata) |
+| Ports | 64 / **403 in-scope** `sap.m` samples (15.9 %) — in scope = control exists since UI5 1.71 and is not deprecated; 43 of 446 samples are out of scope (16 deprecated, 21 newer, 6 without control metadata) |
 | CI | ABAP_STANDARD, ABAP_CLOUD, ABAP_702 all green |
-| Structural view diff | **0 undeclared differences** across all 54 ports (`node scripts/structural-diff.mjs --strict`) — including simple **binding values** and, since 2026-07-19, **`id` attributes** (name-level per control type; dropped original ids must be restored or declared) |
-| Render smoke | **0 failing / 1 skipped** (`npm run smoke`): every reconstructable port's view loads in a real headless `XMLView.create` (app 049 skipped — helper-method view building is not statically reconstructable); harness carries `sap.f` and mocks scalar-row tables as empty arrays since b05 |
+| Structural view diff | **0 undeclared differences** across all 64 ports (`node scripts/structural-diff.mjs --strict`) — including simple **binding values** and, since 2026-07-19, **`id` attributes** (name-level per control type; dropped original ids must be restored or declared) |
+| Render smoke | **0 failing / 1 skipped** (`npm run smoke`): every reconstructable port's view loads in a real headless `XMLView.create`; app 049's skip is now a **declared, CI-enforced** `render_smoke.skip` (helper-method view building is not statically reconstructable — an undeclared non-reconstructable port now FAILS); harness carries `sap.f` and mocks scalar-row tables as empty arrays since b05 |
 | Pattern lint | **0 errors, 0 warnings, empty baseline** (`node scripts/pattern-lint.mjs`) |
-| Meta sidecars | 54 in `meta/` — status: 14 `generated`, 35 `checked`, **5 `golden`** (401, 421, 454, 540, 543 — promoted 2026-07-20 after the full live check); deviations: 30 IMPROVISED, 27 POST_171, **0 LIVE_TEST**, 9 SUBSET_DATA, 57 NOTE, 2 DROPPED_171 (the `p:ColumnAIAction` plugin in apps 022 and 534 — a whole control newer than 1.71, unlike the restorable members). `audit` is a structured object since 2026-07-18 |
-| Manually verified in a running system | **40 of 54 ports** — 2026-07-20 human live check per the interaction checklist (all b05/b06 + every port that carried an open question, incl. the 530 restamp); previously: 420/421/526 interactive, 404/431/440/460/487 visual 2026-07-19. The 14 remaining `generated` ports are b01–b04 apps that never carried an open question |
-| Archive | `ui5/sap.m/<SampleName>/` — full originals for the 34 ported samples (+2 cross-referenced: `FacetFilterSimple`, `Table`); mock snapshot in `ui5/mock/`. Unported samples are copied over batch by batch. |
+| Meta sidecars | 64 in `meta/` — status: 24 `generated`, 35 `checked`, **5 `golden`** (401, 421, 454, 540, 543 — promoted 2026-07-20 after the full live check); deviations: 35 IMPROVISED, 30 POST_171, 2 LIVE_TEST (b07 apps 060/061 menu item args), 9 SUBSET_DATA, 66 NOTE, 2 DROPPED_171 (the `p:ColumnAIAction` plugin in apps 022 and 534 — a whole control newer than 1.71, unlike the restorable members). `audit` is a structured object since 2026-07-18 |
+| Manually verified in a running system | **40 of 64 ports** — 2026-07-20 human live check per the interaction checklist (all b05/b06 + every port that carried an open question, incl. the 530 restamp); previously: 420/421/526 interactive, 404/431/440/460/487 visual 2026-07-19. The 24 remaining `generated` ports are the b01–b04 apps that never carried an open question plus the 10 fresh b07 ports (machine-verified only) |
+| Archive | `ui5/sap.m/<SampleName>/` — full originals for the 44 ported samples (+2 cross-referenced: `FacetFilterSimple`, `Table`); mock snapshot in `ui5/mock/`. Unported samples are copied over batch by batch. |
 
 ## Batches
 
@@ -32,9 +32,50 @@ The 34 existing ports are retro-grouped into review batches — one subpackage
 | `b04` | Layout, lists & data | 401, 404, 420, 433, 441, 445, 471, 473, 487 | 401, 404, 420, 433, 471, 473, 487 |
 | `b05` | Backlog top: bars, tables, custom items & patterns | 531, 532, 533, 534, 535, 536, 537, 538, 539, 540 | all (2026-07-20) |
 | `b06` | Date pickers, dialogs, feeds & tiles | 541, 542, 543, 544, 545, 546, 547, 548, 549, 550 | all (2026-07-20) |
+| `b07` | Icon tabs, tile content, menus, list items & message strips | IconTabHeader, ImageContent, InputListItem, LabelProperties, LightBox, Menu, MenuButton, MessageStrip, NewsContent, NumericContent (classes 055–064) | — (machine-verified only) |
 
-New generation batches continue as `b07`, `b08`, … per the process in
+New generation batches continue as `b08`, `b09`, … per the process in
 TRAINING.md.
+
+## Batch b07 generated (2026-07-20)
+
+The next 10 backlog-top NEW-CONTROL samples, breadth-first (one port per
+uncovered control), classes **055–064**: 055 IconTabHeader, 056 ImageContent,
+057 InputListItem, 058 LabelProperties (`sap.m.Label`), 059 LightBox,
+060 Menu, 061 MenuButton, 062 MessageStripWithEnableFormattedText,
+063 NewsContent, 064 NumericContentIcon. Machine-verified to green
+(abaplint ×STANDARD+CLOUD, validate-meta, pattern-lint, structural-diff
+`--strict`, render-smoke `--strict`, property-check). Adversarial AI review
+(2 reviewers × 5 apps): **9 CLEAN, 1 MINOR, 0 MAJOR** — the MINOR was app 060's
+press handler dropping the sample's toggle (close-if-open) branch; the menu's
+open/closed state lives client-side and is not reliably mirrorable
+server-side, so the port always (re-)opens and the reduction is now declared
+in the sidecar.
+
+Three controls at the top of the backlog were **deferred** rather than forced
+into a lossy 1:1 (AGENTS §5 "if the sample's whole point needs an
+inexpressible feature, do not port it"): **InitialPagePattern** (an
+app-level pattern — seven fragments, value-help dialog, IllustratedMessage,
+client filtering), **InputModelUpdate** (its whole point is oData v2 late
+binding via `bindElement`/`dataReceived`, and abap2UI5 serves a single
+default model), and **MessagePopoverMessageHandling** (built on the UI5
+MessageManager / message model). They stay `NEW-CONTROL` in the backlog for a
+later dedicated effort.
+
+Techniques worth noting: **060 Menu** reuses the golden app-016 openBy
+frontend action — the Menu is declared in the Button's `dependents`
+aggregation and opened via `control_by_id`/`openBy` anchored to
+`$event.oSource.sId`. **058 LabelProperties** is roundtrip-free: the four
+controller handlers become two-way `state` binds (displayOnly/wrapping) plus
+`{= }` expression bindings (`wrappingType = hyphenation ? 'Hyphenated' :
+'Normal'`, container `width = slider_value + '%'`), the app-007 pattern.
+**062 MessageStrip** keeps the post-1.71 `controls` multi-link aggregation
+(1.129, declared) and the `enableFormattedText` HTML strips. New POST_171
+firsts this batch: `Button.ariaHasPopup` (1.84, app 060),
+`MenuButton.beforeMenuOpen` (1.94, app 061), `MessageStrip.controls` (1.129,
+app 062). The b07 ports are `generated` (no human live check yet); the menu
+item-arg paths (`${$parameters>/item/text}`) and the openBy anchoring are the
+open LIVE_TESTs.
 
 ## Full human live check (2026-07-20) — every open question cleared
 

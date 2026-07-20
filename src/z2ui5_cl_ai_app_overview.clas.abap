@@ -504,17 +504,17 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
   METHOD get_catalog.
 
     result = VALUE #(
-      ( module = `sap.m` control = `sap.m.ActionListItem`              name = `ActionListItem`              class = `z2ui5_cl_ai_app_001` path = `src/01/b05/z2ui5_cl_ai_app_001.clas.abap`
+      ( module = `sap.m` control = `sap.m.ActionListItem`              name = `ActionListItem`                      class = `z2ui5_cl_ai_app_001` path = `src/01/b05/z2ui5_cl_ai_app_001.clas.abap`
         checked = `CHECKED (2026-07-20): verified in a running system - human pass 2026-07-20: app starts and renders like the original; no interaction paths were open for this port` )
-      ( module = `sap.m` control = `sap.m.Bar`                         name = `Page`                        class = `z2ui5_cl_ai_app_002` path = `src/01/b05/z2ui5_cl_ai_app_002.clas.abap`
+      ( module = `sap.m` control = `sap.m.Bar`                         name = `Page`                                class = `z2ui5_cl_ai_app_002` path = `src/01/b05/z2ui5_cl_ai_app_002.clas.abap`
         checked = `CHECKED (2026-07-20): verified in a running system - human pass 2026-07-20: app starts and renders like the original; no interaction paths were open for this port` )
-      ( module = `sap.m` control = `sap.m.Breadcrumbs`                 name = `Breadcrumbs`                 class = `z2ui5_cl_ai_app_003` path = `src/01/b01/z2ui5_cl_ai_app_003.clas.abap`
+      ( module = `sap.m` control = `sap.m.Breadcrumbs`                 name = `Breadcrumbs`                         class = `z2ui5_cl_ai_app_003` path = `src/01/b01/z2ui5_cl_ai_app_003.clas.abap`
         since = `1.34`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed); RESTAMP after the 2026-07-16 rework (link toast +` &&
                  ` instant separator switch confirmed)`
         notes = `NOTE: the original wires a change handler on the separator Select (SEP_CHANGE round-trip, removed 2026-07-16): selectedKey and separatorStyle share one two-way model path, so the Select.change` &&
                  ` attribute is deliberately MISSING vs the original view. Instant switching confirmed in the 2026-07-20 live check (restamp).` )
-      ( module = `sap.m` control = `sap.m.BusyDialog`                  name = `BusyDialog`                  class = `z2ui5_cl_ai_app_004` path = `src/01/b05/z2ui5_cl_ai_app_004.clas.abap`
+      ( module = `sap.m` control = `sap.m.BusyDialog`                  name = `BusyDialog`                          class = `z2ui5_cl_ai_app_004` path = `src/01/b05/z2ui5_cl_ai_app_004.clas.abap`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `NOTE: the BusyDialog fragment is rebuilt 1:1 as a core:FragmentDefinition shown via client->popup_display (the framework's displayFragment calls .open() on the fragment root, the equivalent of the` &&
                  ` controller's Fragment.load + oBusyDialog.open()); one attribute is added vs the original fragment: id="busyDialog", needed so the backend timer event can close the dialog via the whitelisted` &&
@@ -524,21 +524,21 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` protected guard flag (check_busy) ignores it - same visible behavior (no second toast, dialog already closed), one extra no-op round-trip. // NOTE: the controller's syncStyleClass('sapUiSizeCompact',` &&
                  ` view, dialog) is dropped: it only copies the compact-density class when the view itself carries it, which the sample view does not; abap2UI5's popup slot has no per-view density sync, so there is` &&
                  ` nothing to propagate.` )
-      ( module = `sap.m` control = `sap.m.Button`                      name = `Button`                      class = `z2ui5_cl_ai_app_005` path = `src/01/b03/z2ui5_cl_ai_app_005.clas.abap`
+      ( module = `sap.m` control = `sap.m.Button`                      name = `Button`                              class = `z2ui5_cl_ai_app_005` path = `src/01/b03/z2ui5_cl_ai_app_005.clas.abap`
         checked = `CHECKED (2026-07-15): manually verified in a running system - each press toasts the pressed button's client-side control id, read via the event arg $event.oSource.sId, exactly like the original.` )
-      ( module = `sap.m` control = `sap.m.Carousel`                    name = `CarouselWithControls`        class = `z2ui5_cl_ai_app_006` path = `src/01/b04/z2ui5_cl_ai_app_006.clas.abap`
+      ( module = `sap.m` control = `sap.m.Carousel`                    name = `CarouselWithControls`                class = `z2ui5_cl_ai_app_006` path = `src/01/b04/z2ui5_cl_ai_app_006.clas.abap`
         checked = `CHECKED (2026-07-15): manually verified in a running system - renders and scrolls like the original (see the note below on the flattened image model).`
         notes = `IMPROVISED: the three carousel images bind to a separate named model in the original (img>/products/pic1..3 from sap/ui/demo/mock/img.json); resolved here to static image URLs, as abap2UI5 serves a` &&
                  ` single default model. // SUBSET: the bound /ProductCollection shows a 10-row subset of the 123-row mock (ui5/mock/products.json) - a full unroll adds no demo value. // POST-1.71: ariaLabelledBy on` &&
                  ` the Carousel (since UI5 1.125) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.125 to render it.`
         post171 = `ariaLabelledBy on the Carousel (since UI5 1.125) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.125 to render it.` )
-      ( module = `sap.m` control = `sap.m.CheckBox`                    name = `CheckBoxTriState`            class = `z2ui5_cl_ai_app_007` path = `src/01/b02/z2ui5_cl_ai_app_007.clas.abap`
+      ( module = `sap.m` control = `sap.m.CheckBox`                    name = `CheckBoxTriState`                    class = `z2ui5_cl_ai_app_007` path = `src/01/b02/z2ui5_cl_ai_app_007.clas.abap`
         golden = abap_true
         checked = `CHECKED (2026-07-15): manually verified in a running system - the select-all parent checkbox and its tri-state expression bindings behave like the original.; promoted to golden 2026-07-20 (human` &&
                  ` decision) - exemplary for: expression bindings, two-way bind, boolean event arg` )
-      ( module = `sap.m` control = `sap.m.ColorPalette`                name = `ColorPalette`                class = `z2ui5_cl_ai_app_008` path = `src/01/b02/z2ui5_cl_ai_app_008.clas.abap`
+      ( module = `sap.m` control = `sap.m.ColorPalette`                name = `ColorPalette`                        class = `z2ui5_cl_ai_app_008` path = `src/01/b02/z2ui5_cl_ai_app_008.clas.abap`
         since = `1.54` )
-      ( module = `sap.m` control = `sap.m.Column`                      name = `Table`                       class = `z2ui5_cl_ai_app_009` path = `src/01/b05/z2ui5_cl_ai_app_009.clas.abap`
+      ( module = `sap.m` control = `sap.m.Column`                      name = `Table`                               class = `z2ui5_cl_ai_app_009` path = `src/01/b05/z2ui5_cl_ai_app_009.clas.abap`
         since = `1.12`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `IMPROVISED: the shared demo kit mock model sap/ui/demo/mock/products.json (/ProductCollection, snapshotted in ui5/mock/products.json) is flattened into the default model: all 123 rows are kept` &&
@@ -555,7 +555,7 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` abap2UI5 app/webapp/model/formatter.js). // 1.71: the p:ColumnAIAction column plugin (sap.m.plugins, since UI5 1.136 - far newer than 1.71) is dropped with its dependents aggregation, the xmlns:p` &&
                  ` namespace and the press toast - the plugin class does not exist on a 1.71 runtime, so keeping it would break view creation there (same decision as app 022).`
         post171 = `core:require (since UI5 1.74) on the view root loads the curated formatter module z2ui5/model/formatter for the weightState binding - the app needs a UI5 release >= 1.74 to render it.` )
-      ( module = `sap.m` control = `sap.m.ColumnListItem`              name = `TableTest`                   class = `z2ui5_cl_ai_app_010` path = `src/01/b05/z2ui5_cl_ai_app_010.clas.abap`
+      ( module = `sap.m` control = `sap.m.ColumnListItem`              name = `TableTest`                           class = `z2ui5_cl_ai_app_010` path = `src/01/b05/z2ui5_cl_ai_app_010.clas.abap`
         since = `1.12`
         checked = `CHECKED (2026-07-20): verified in a running system - human pass 2026-07-20: app starts and renders like the original; no interaction paths were open for this port`
         notes = `NOTE: the sample is an OPA-test demo: only the UI app under applicationUnderTest/ (Table.view.xml, Table.controller.js, Formatter.js, products.json) is ported 1:1; the qunit/OPA harness files` &&
@@ -573,9 +573,9 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` follows the local file, the sample's actual model source.`
         post171 = `core:require on the view root (since UI5 1.74) wires the formatter module - the app needs a UI5 release >= 1.74 to render it (pre-1.74 the published global z2ui5.Formatter.weightState would be the` &&
                  ` fallback).` )
-      ( module = `sap.m` control = `sap.m.ComboBox`                    name = `ComboBox`                    class = `z2ui5_cl_ai_app_011` path = `src/01/b02/z2ui5_cl_ai_app_011.clas.abap`
+      ( module = `sap.m` control = `sap.m.ComboBox`                    name = `ComboBox`                            class = `z2ui5_cl_ai_app_011` path = `src/01/b02/z2ui5_cl_ai_app_011.clas.abap`
         since = `1.22` )
-      ( module = `sap.m` control = `sap.m.ComparisonPattern`           name = `ComparisonPattern`           class = `z2ui5_cl_ai_app_012` path = `src/01/b05/z2ui5_cl_ai_app_012.clas.abap`
+      ( module = `sap.m` control = `sap.m.ComparisonPattern`           name = `ComparisonPattern`                   class = `z2ui5_cl_ai_app_012` path = `src/01/b05/z2ui5_cl_ai_app_012.clas.abap`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `IMPROVISED: the pattern's three views (App.view with sap.m.App id=rootControl, Main.view, Comparison.view) plus manifest routing are merged into ONE view: the App hosts the Main Page and the` &&
                  ` Comparison f:DynamicPage (id page-comparison added) directly as its pages; the router's navTo("page2") is mapped to the documented NavContainer frontend action follow_up_action(` &&
@@ -601,7 +601,7 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` 19-key list in the mock JSON key order (the original iterates the FIRST selected product's own keys, skipping ProductPicUrl - so a first product without DateOfSale would drop that row, and missing` &&
                  ` values rendered '<strong>undefined</strong>' where the port renders an empty <strong></strong>); selected products are taken in model row order, not click order; the original's per-product` &&
                  ` information cache is unnecessary server-side. The controller's handleButtonPress (MessageBox) is dead code referenced by no view and not ported.` )
-      ( module = `sap.m` control = `sap.m.CookieSettingsDialogPattern` name = `CookieSettingsDialogPattern` class = `z2ui5_cl_ai_app_013` path = `src/01/b05/z2ui5_cl_ai_app_013.clas.abap`
+      ( module = `sap.m` control = `sap.m.CookieSettingsDialogPattern` name = `CookieSettingsDialogPattern`         class = `z2ui5_cl_ai_app_013` path = `src/01/b05/z2ui5_cl_ai_app_013.clas.abap`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `IMPROVISED: the i18n> ResourceModel (i18n/i18n.properties) has no framework i18n mechanism here - all texts (dialog title, section titles/summaries/details, button labels) are inlined as the resolved` &&
                  ` English literals from the properties file; this covers every i18n>-bound text incl. the Panel headerText 'More Info'. // IMPROVISED: the cookieData> named JSON model is flattened into the default` &&
@@ -612,7 +612,7 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` style classes. // NOTE: the controller's lazy Fragment.load + cached-instance open()/close() lifecycle maps to client->popup_display (the fragment XML is rebuilt per open, forcing` &&
                  ` showCookieDetails=false like the original's openCookieSettingsDialog) and client->popup_destroy in the close handlers; the original's empty 'insert your ... logic here' placeholders remain as backend` &&
                  ` event branches (ACCEPT_ALL_COOKIES/REJECT_ALL_COOKIES/SAVE_COOKIES) that only close the dialog.` )
-      ( module = `sap.m` control = `sap.m.CustomListItem`              name = `CustomListItem`              class = `z2ui5_cl_ai_app_014` path = `src/01/b05/z2ui5_cl_ai_app_014.clas.abap`
+      ( module = `sap.m` control = `sap.m.CustomListItem`              name = `CustomListItem`                      class = `z2ui5_cl_ai_app_014` path = `src/01/b05/z2ui5_cl_ai_app_014.clas.abap`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `IMPROVISED: the shared mock model /ProductCollection (ui5/mock/products.json) is flattened into the default model with only the three bound columns (ProductId, Name, ProductPicUrl); all unbound` &&
                  ` columns are dropped. The full 123-row set is kept verbatim. // NOTE: the ProductPicUrl values point at the OpenUI5 host (https://sdk.openui5.org/test-resources/...) per the asset-URL rule; they are` &&
@@ -620,14 +620,14 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` + Close button, afterClose destroy) is rebuilt 1:1 as a core:FragmentDefinition -> Dialog shown via client->popup_display (the CAPABILITIES.md pattern, app 042). The Link press ships the row's` &&
                  ` ProductPicUrl via t_arg ${PRODUCT_PIC_URL} - the original reads evt.getSource().getTarget(), whose target property is bound to the same column. The Close button maps to client->_event_client(` &&
                  ` popup_close ); the original's afterClose destroy is handled by the framework's popup lifecycle and is not wired separately.` )
-      ( module = `sap.m` control = `sap.m.CustomTreeItem`              name = `CustomTreeItem`              class = `z2ui5_cl_ai_app_015` path = `src/01/b05/z2ui5_cl_ai_app_015.clas.abap`
+      ( module = `sap.m` control = `sap.m.CustomTreeItem`              name = `CustomTreeItem`                      class = `z2ui5_cl_ai_app_015` path = `src/01/b05/z2ui5_cl_ai_app_015.clas.abap`
         since = `1.48.0`
         checked = `CHECKED (2026-07-20): verified in a running system - human pass 2026-07-20: app starts and renders like the original; no interaction paths were open for this port`
         notes = `NOTE: the original binds the Tree's items to the whole JSON model root (items="{path: '/'}", the model IS the node array from Tree.json); abap2UI5 serves a single default model, so the array is` &&
                  ` flattened into it as the bound table T_TREE and the binding-info keeps its shape with the bound path substituted for '/' (nested tree binding is expressible per CAPABILITIES.md, proven by app 054).` &&
                  ` // NOTE: the flat ABAP row types serialize an empty NODES array on leaf rows where the original Tree.json simply omits the 'nodes' property (levels 1-4; the level-5 row type carries no NODES field at` &&
                  ` all); ClientTreeBinding treats an empty child array as a childless node, so the rendered tree matches. TEXT and REF are present on every original node - no absent-property/empty-string enum risk.` )
-      ( module = `sap.m` control = `sap.m.DatePicker`                  name = `DatePickerHidden`            class = `z2ui5_cl_ai_app_016` path = `src/01/b05/z2ui5_cl_ai_app_016.clas.abap`
+      ( module = `sap.m` control = `sap.m.DatePicker`                  name = `DatePickerHidden`                    class = `z2ui5_cl_ai_app_016` path = `src/01/b05/z2ui5_cl_ai_app_016.clas.abap`
         golden = abap_true
         since = `1.22.0`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed); promoted to golden 2026-07-20 (human decision) -` &&
@@ -639,7 +639,7 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         post171 = `Button.ariaHasPopup (since UI5 1.84) is newer than 1.71 but kept for the 1:1 port on both Buttons - the app needs a UI5 release >= 1.84 to render it. // Link.ariaHasPopup (since UI5 1.86) is newer` &&
                  ` than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.86 to render it. // DatePicker.hideInput (since UI5 1.97) is newer than 1.71 but kept for the 1:1 port - the sample's central` &&
                  ` property (the picker input stays hidden, opened only via the anchor controls); openBy is also since 1.97, so the app needs a UI5 release >= 1.97 to render this sample's behavior.` )
-      ( module = `sap.m` control = `sap.m.DateRangeSelection`          name = `DateRangeSelection`          class = `z2ui5_cl_ai_app_017` path = `src/01/b06/z2ui5_cl_ai_app_017.clas.abap`
+      ( module = `sap.m` control = `sap.m.DateRangeSelection`          name = `DateRangeSelection`                  class = `z2ui5_cl_ai_app_017` path = `src/01/b06/z2ui5_cl_ai_app_017.clas.abap`
         since = `1.22.0`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `NOTE: the original controller's JSON model carries UI5Date objects; the ABAP model carries the same dates as ISO 'yyyy-MM-dd' strings, and each sap.ui.model.type.Date part of the DateInterval value` &&
@@ -655,7 +655,7 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` used in the sample.`
         post171 = `core:require (UI5 >= 1.74) on the view root loads z2ui5/model/formatter for the DRS2 minDate/maxDate Formatter.DateCreateObject bindings - the app needs a UI5 release >= 1.74 to render it. //` &&
                  ` showCurrentDateButton (since UI5 1.95) on DRS3 is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.95 to render it.` )
-      ( module = `sap.m` control = `sap.m.DateTimePicker`              name = `DateTimePicker`              class = `z2ui5_cl_ai_app_018` path = `src/01/b06/z2ui5_cl_ai_app_018.clas.abap`
+      ( module = `sap.m` control = `sap.m.DateTimePicker`              name = `DateTimePicker`                      class = `z2ui5_cl_ai_app_018` path = `src/01/b06/z2ui5_cl_ai_app_018.clas.abap`
         since = `1.38.0`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `IMPROVISED: the JSON model's UI5Date instances become date strings in the flat ABAP model: the sap.ui.model.type.DateTime bindings (DTP2/3/4/5/8) get an added source pattern 'yyyy-MM-dd HH:mm:ss'` &&
@@ -676,7 +676,7 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         post171 = `showCurrentDateButton (since UI5 1.95) on DTP2 is kept for the 1:1 port. // showCurrentTimeButton (since UI5 1.98) on DTP2 and DTP11 is kept for the 1:1 port. // showTimezone (since UI5 1.99) on DTP8` &&
                  ` and DTP11 is kept for the 1:1 port. // timezone (since UI5 1.99) on DTP8 is kept for the 1:1 port. // core:require of the z2ui5/model/formatter module on the view root needs UI5 >= 1.74, and the` &&
                  ` sap.ui.model.odata.type.DateTimeWithTimezone binding type of DTP10/DTP11 (since UI5 1.99) is kept 1:1 - the app needs a UI5 release >= 1.99 overall.` )
-      ( module = `sap.m` control = `sap.m.Dialog`                      name = `DialogConfirm`               class = `z2ui5_cl_ai_app_019` path = `src/01/b06/z2ui5_cl_ai_app_019.clas.abap`
+      ( module = `sap.m` control = `sap.m.Dialog`                      name = `DialogConfirm`                       class = `z2ui5_cl_ai_app_019` path = `src/01/b06/z2ui5_cl_ai_app_019.clas.abap`
         golden = abap_true
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed); promoted to golden 2026-07-20 (human decision) -` &&
                  ` exemplary for: fragment-popup dialogs, roundtrip-free live-enable expression, popup_close paths`
@@ -689,14 +689,14 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` expression binding {= ${...}.length > 0 } on the begin button's enabled - same behavior, starts disabled with the empty note (CAPABILITIES.md: prefer a pure expression binding over an event` &&
                  ` round-trip). // NOTE: Cancel: the approve dialog (no inputs) closes client-side via _event_client popup_close; the three note dialogs cancel through a backend DIALOG_CANCEL event + popup_destroy so` &&
                  ` the two-way model sync keeps the typed note across a reopen, matching the original's reused cached dialog instances.` )
-      ( module = `sap.m` control = `sap.m.DisplayListItem`             name = `DisplayListItem`             class = `z2ui5_cl_ai_app_020` path = `src/01/b06/z2ui5_cl_ai_app_020.clas.abap`
+      ( module = `sap.m` control = `sap.m.DisplayListItem`             name = `DisplayListItem`                     class = `z2ui5_cl_ai_app_020` path = `src/01/b06/z2ui5_cl_ai_app_020.clas.abap`
         checked = `CHECKED (2026-07-20): verified in a running system - human pass 2026-07-20: app starts and renders like the original; no interaction paths were open for this port`
         notes = `IMPROVISED: the shared mock model sap/ui/demo/mock/supplier.json is flattened into the default model: the row type keeps only the six bound columns (SupplierName, Street, HouseNumber, ZIPCode, City,` &&
                  ` Country) of the single /SupplierCollection record and drops the unbound columns (Url, Twitter, Tel, Sms, Mobile, Pager, Fax, Email, Rating, Prime, Disposable); the record itself is kept verbatim. //` &&
                  ` NOTE: the sample controller loads the shared mock sap/ui/demo/mock/supplier.json - snapshotted byte-identical into ui5/mock/supplier.json (2026-07-20, git sparse checkout of SAP/openui5 master); one` &&
                  ` SupplierCollection record, full row set, values verifiable offline. // NOTE: element binding binding="{/T_SUPPLIERS/0}" with relative DisplayListItem value bindings - the binding= context mechanism` &&
                  ` is already live-verified via app 041 (checked 2026-07-19); the /0 array-index path variant is a plain JSONModel path resolution, source-decidable, so no LIVE_TEST is carried.` )
-      ( module = `sap.m` control = `sap.m.DraftIndicator`              name = `DraftIndicator`              class = `z2ui5_cl_ai_app_021` path = `src/01/b06/z2ui5_cl_ai_app_021.clas.abap`
+      ( module = `sap.m` control = `sap.m.DraftIndicator`              name = `DraftIndicator`                      class = `z2ui5_cl_ai_app_021` path = `src/01/b06/z2ui5_cl_ai_app_021.clas.abap`
         since = `1.32.0`
         checked = `CHECKED (2026-07-20): verified in a running system - human pass 2026-07-20: app starts and renders like the original; no interaction paths were open for this port`
         notes = `IMPROVISED: the controller's imperative DraftIndicator calls (showDraftSaving/showDraftSaved/clearDraftState on byId('draftIndi')) are not in the FrontendAction CONTROL_METHODS whitelist; per AGENTS` &&
@@ -705,7 +705,7 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` methods queue (setState('Saving') queues Saving+Clear like showDraftSaving, sap/m/DraftIndicator.js). Adds the state attribute on the DraftIndicator vs the original view.xml. // NOTE: pressing the` &&
                  ` same button twice in direct succession does not re-run the indicator - the model value is unchanged, so no binding change fires and setState is not called again (the original re-queues on every` &&
                  ` method call); pressing a different button in between restores the behaviour.` )
-      ( module = `sap.m` control = `sap.m.FacetFilter`                 name = `FacetFilterLight`            class = `z2ui5_cl_ai_app_022` path = `src/01/b04/z2ui5_cl_ai_app_022.clas.abap`
+      ( module = `sap.m` control = `sap.m.FacetFilter`                 name = `FacetFilterLight`                    class = `z2ui5_cl_ai_app_022` path = `src/01/b04/z2ui5_cl_ai_app_022.clas.abap`
         golden = abap_true
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed); promoted to golden 2026-07-20 (human decision) -` &&
                  ` exemplary for: compound binding_call filter, curated formatter module, two-way facet selection`
@@ -733,36 +733,36 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` (ui5/mock/products.json), facet counters recomputed for the subset.`
         post171 = `core:require on the view root (since UI5 1.74) is newer than 1.71 but used for the formatter wiring - the app needs a UI5 release >= 1.74; on older releases reference the published global instead` &&
                  ` (formatter: 'z2ui5.Formatter.weightState').` )
-      ( module = `sap.m` control = `sap.m.FeedContent`                 name = `FeedContent`                 class = `z2ui5_cl_ai_app_023` path = `src/01/b06/z2ui5_cl_ai_app_023.clas.abap`
+      ( module = `sap.m` control = `sap.m.FeedContent`                 name = `FeedContent`                         class = `z2ui5_cl_ai_app_023` path = `src/01/b06/z2ui5_cl_ai_app_023.clas.abap`
         since = `1.34`
         checked = `CHECKED (2026-07-20): verified in a running system - human pass 2026-07-20: app starts and renders like the original; no interaction paths were open for this port` )
-      ( module = `sap.m` control = `sap.m.FeedInput`                   name = `Feed`                        class = `z2ui5_cl_ai_app_024` path = `src/01/b06/z2ui5_cl_ai_app_024.clas.abap`
+      ( module = `sap.m` control = `sap.m.FeedInput`                   name = `Feed`                                class = `z2ui5_cl_ai_app_024` path = `src/01/b06/z2ui5_cl_ai_app_024.clas.abap`
         since = `1.22`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `IMPROVISED: the controller's client-side DateFormat.getDateTimeInstance({ style: 'medium' }).format(new Date()) for the new entry's Date is rebuilt server-side in ABAP from sy-datum/sy-uzeit as an` &&
                  ` English medium-style timestamp (e.g. 'Jul 20, 2026, 1:23:45 PM') - the locale-dependent client formatter is not available in the backend round-trip; the value is a plain model string exactly like in` &&
                  ` the original; note the source differs too: sy-datum/sy-uzeit is the SERVER date/time and timezone, while the original renders the browser-local new Date() - around midnight or across timezones the` &&
                  ` displayed timestamp of a new entry can differ from a client-side clock.` )
-      ( module = `sap.m` control = `sap.m.FeedListItem`                name = `FeedListItem`                class = `z2ui5_cl_ai_app_025` path = `src/01/b06/z2ui5_cl_ai_app_025.clas.abap`
+      ( module = `sap.m` control = `sap.m.FeedListItem`                name = `FeedListItem`                        class = `z2ui5_cl_ai_app_025` path = `src/01/b06/z2ui5_cl_ai_app_025.clas.abap`
         since = `1.12`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `NOTE: the original's removeItem derives the entry index from the item's binding-context path (getBindingContext().getPath().split('/').pop()); the port transports the List's indexOfItem(item) instead` &&
                  ` - the aggregation index equals the model index for this bound list, so the spliced row is the same. // NOTE: feed.json entries 2 and 4 have no Actions property; the flat ABAP row type serializes` &&
                  ` ACTIONS as an empty array ([] instead of undefined) - the actions aggregation renders no actions either way, and an empty array is not an empty-string/enum hazard. // NOTE: the relative AuthorPicUrl` &&
                  ` asset paths (test-resources/sap/m/images/*.jpg) are rewritten to absolute https://sdk.openui5.org/test-resources/... per the project rule for runtime asset URLs.` )
-      ( module = `sap.m` control = `sap.m.FlexBox`                     name = `FlexBoxNested`               class = `z2ui5_cl_ai_app_026` path = `src/01/b04/z2ui5_cl_ai_app_026.clas.abap`
+      ( module = `sap.m` control = `sap.m.FlexBox`                     name = `FlexBoxNested`                       class = `z2ui5_cl_ai_app_026` path = `src/01/b04/z2ui5_cl_ai_app_026.clas.abap`
         checked = `CHECKED (2026-07-19): verified in a running system - human visual pass 2026-07-19 over all apps: the six flex items and the h2 headings render with their injected-CSS background colours like the` &&
                  ` original.`
         notes = `NOTE: the original colours .item1..item6 and the h2 headings via a separate style.css; here it is injected as a core:HTML content attribute (a style tag, minified - see CAPABILITIES.md; the EXTRA` &&
                  ` core:HTML control vs the original view). Confirmed rendering via the human visual pass 2026-07-19.` )
-      ( module = `sap.m` control = `sap.m.GenericTag`                  name = `GenericTag`                  class = `z2ui5_cl_ai_app_027` path = `src/01/b06/z2ui5_cl_ai_app_027.clas.abap`
+      ( module = `sap.m` control = `sap.m.GenericTag`                  name = `GenericTag`                          class = `z2ui5_cl_ai_app_027` path = `src/01/b06/z2ui5_cl_ai_app_027.clas.abap`
         since = `1.62.0`
         checked = `CHECKED (2026-07-20): verified in a running system - human pass 2026-07-20: app starts and renders like the original; no interaction paths were open for this port`
         notes = `POST-1.71: ariaLabelledBy (since UI5 1.97) on the labeled GenericTag is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.97 to render it. // NOTE: the sample's` &&
                  ` Page.controller.js defines a press handler (MessageToast 'The GenericTag is pressed.') that is not referenced anywhere in Page.view.xml - no GenericTag carries a press attribute - so the port wires` &&
                  ` no event; the rendered view is a faithful 1:1 rebuild.`
         post171 = `ariaLabelledBy (since UI5 1.97) on the labeled GenericTag is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.97 to render it.` )
-      ( module = `sap.m` control = `sap.m.GenericTile`                 name = `GenericTileAsKPITile`        class = `z2ui5_cl_ai_app_028` path = `src/01/b01/z2ui5_cl_ai_app_028.clas.abap`
+      ( module = `sap.m` control = `sap.m.GenericTile`                 name = `GenericTileAsKPITile`                class = `z2ui5_cl_ai_app_028` path = `src/01/b01/z2ui5_cl_ai_app_028.clas.abap`
         since = `1.34.0`
         checked = `CHECKED (2026-07-19): verified in a running system - human visual pass 2026-07-19 over all apps: the KPI tiles float left via the injected tileLayout CSS and render like the original.`
         notes = `POST-1.71: frameType values OneByHalf / TwoByHalf (since UI5 1.83) are newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.83 to render them; OneByOne / TwoByOne (1.71) were` &&
@@ -773,7 +773,7 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         post171 = `frameType values OneByHalf / TwoByHalf (since UI5 1.83) are newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.83 to render them; OneByOne / TwoByOne (1.71) were never` &&
                  ` affected. // systemInfo and appShortcut (since UI5 1.92) are newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.92 to render them. // url on the link tiles (since UI5 1.76)` &&
                  ` is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.76 to render it.` )
-      ( module = `sap.m` control = `sap.m.HeaderContainer`             name = `HeaderContainer`             class = `z2ui5_cl_ai_app_029` path = `src/01/b06/z2ui5_cl_ai_app_029.clas.abap`
+      ( module = `sap.m` control = `sap.m.HeaderContainer`             name = `HeaderContainer`                     class = `z2ui5_cl_ai_app_029` path = `src/01/b06/z2ui5_cl_ai_app_029.clas.abap`
         since = `1.44.0`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `NOTE: the Select's literal selectedKey="1" is replaced by a two-way binding {SELECTED_KEY} (seeded with '1') so the SCROLL_CHANGED handler can read the chosen key on the backend - the` &&
@@ -782,17 +782,23 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` setScrollStepByItem(0 | Number(key)) calls on both containers expressed as a shared two-way scrollStepByItem binding (typed i for a real JSON number; the method is not in the CONTROL_METHODS` &&
                  ` whitelist and the prefer-a-bindable-property rule applies). Seeded 1 - the UI5 property default (HeaderContainer.js defaultValue: 1; the property carries no @since, present since the control) - so` &&
                  ` the initial arrow scroll is one item, exactly the original's untouched state; selecting px sets 0 (px stepping via scrollStep), like the controller.` )
-      ( module = `sap.m` control = `sap.m.IconTabBar`                  name = `IconTabBarStretchContent`    class = `z2ui5_cl_ai_app_030` path = `src/01/b04/z2ui5_cl_ai_app_030.clas.abap`
+      ( module = `sap.m` control = `sap.m.IconTabBar`                  name = `IconTabBarStretchContent`            class = `z2ui5_cl_ai_app_030` path = `src/01/b04/z2ui5_cl_ai_app_030.clas.abap`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed); incl. the phone-emulation device> check`
         notes = `SUBSET: the bound /ProductCollection shows a 8-row subset of the 123-row mock (ui5/mock/products.json) - a full unroll adds no demo value. // NOTE: the original binds expanded="{device>/isNoPhone}" (a` &&
                  ` demo-kit helper model); expressed over the framework's device> model as the expression {= !${device>/system/phone} } - same truth value, different binding text. Confirmed on desktop and phone` &&
                  ` emulation in the 2026-07-20 live check.` )
-      ( module = `sap.m` control = `sap.m.Image`                       name = `ImageModeBackground`         class = `z2ui5_cl_ai_app_031` path = `src/01/b01/z2ui5_cl_ai_app_031.clas.abap`
+      ( module = `sap.m` control = `sap.m.IconTabHeader`               name = `IconTabHeader`                       class = `z2ui5_cl_ai_app_055` path = `src/01/b07/z2ui5_cl_ai_app_055.clas.abap`
+        since = `1.15` )
+      ( module = `sap.m` control = `sap.m.Image`                       name = `ImageModeBackground`                 class = `z2ui5_cl_ai_app_031` path = `src/01/b01/z2ui5_cl_ai_app_031.clas.abap`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed); incl. the phone-emulation device> check`
         notes = `IMPROVISED: the original binds src/mode to a JSONModel (img>/products, /imageMode); these fixed sample values are inlined here as literals (mode Background, the HT-7777 / HT-6100 demo images).` &&
                  ` height/width are restored over the device> model, see below. // NOTE: the custom CSS class imageContainer (light blue background) of the box4 HBox is kept and the sample's styles.css injected via a` &&
                  ` core:HTML content attribute (CAPABILITIES.md CSS row, as apps 028/026; the EXTRA core:HTML control vs the original view). Confirmed rendering via the human visual pass 2026-07-19.` )
-      ( module = `sap.m` control = `sap.m.Input`                       name = `InputValueState`             class = `z2ui5_cl_ai_app_032` path = `src/01/b02/z2ui5_cl_ai_app_032.clas.abap`
+      ( module = `sap.m` control = `sap.m.ImageContent`                name = `ImageContent`                        class = `z2ui5_cl_ai_app_056` path = `src/01/b07/z2ui5_cl_ai_app_056.clas.abap`
+        since = `1.38`
+        notes = `NOTE: the profile-image and logo ImageContent keep the sample's original demokit test-resources asset paths (test-resources/sap/m/demokit/sample/ImageContent/images/*.png) as the src literal 1:1;` &&
+                 ` abap2UI5 does not serve those static assets, so only the first (sap-icon://area-chart) icon renders offline. The images are archived under ui5/sap.m/ImageContent/images/.` )
+      ( module = `sap.m` control = `sap.m.Input`                       name = `InputValueState`                     class = `z2ui5_cl_ai_app_032` path = `src/01/b02/z2ui5_cl_ai_app_032.clas.abap`
         notes = `POST-1.71: showClearIcon (since UI5 1.94) on three inputs is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.94 to render it. // POST-1.71: the two formattedValueStateText` &&
                  ` aggregations (a FormattedText carrying Links, since UI5 1.78) are newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.78 to render them. // NOTE: the Links' press` &&
                  ` (.onFormattedTextLinkPress) round-trips as event LINK_PRESS and shows the controller's toast text, docked at CenterCenter 1:1 via message_toast_display( my = 'center center' at = 'center center' )` &&
@@ -800,17 +806,44 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` to suppress.`
         post171 = `showClearIcon (since UI5 1.94) on three inputs is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.94 to render it. // the two formattedValueStateText aggregations (a` &&
                  ` FormattedText carrying Links, since UI5 1.78) are newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.78 to render them.` )
-      ( module = `sap.m` control = `sap.m.Link`                        name = `LinkEmphasized`              class = `z2ui5_cl_ai_app_033` path = `src/01/b01/z2ui5_cl_ai_app_033.clas.abap`
+      ( module = `sap.m` control = `sap.m.InputListItem`               name = `InputListItem`                       class = `z2ui5_cl_ai_app_057` path = `src/01/b07/z2ui5_cl_ai_app_057.clas.abap` )
+      ( module = `sap.m` control = `sap.m.Label`                       name = `LabelProperties`                     class = `z2ui5_cl_ai_app_058` path = `src/01/b07/z2ui5_cl_ai_app_058.clas.abap`
+        notes = `IMPROVISED: the four controller handlers (onDisplayOnlyChange/onWrappingChange/onHyphenationChange/onWidthChange) are replaced by a roundtrip-free binding model, so the Switch ``change`` and Slider` &&
+                 ` ``liveChange`` event attributes are dropped: the three Switches bind their ``state`` two-way to display_only/wrapping/hyphenation, the two result Labels bind ``displayOnly`` and ``wrapping`` to the` &&
+                 ` same variables, and ``wrappingType`` (added on the two Labels, not present in the sample view) plus both container ``width`` values derive live via ``{= }`` expression bindings (wrappingType =` &&
+                 ` hyphenation ? 'Hyphenated' : 'Normal'; width = slider_value + '%'). Same technique as app 007.` )
+      ( module = `sap.m` control = `sap.m.LightBox`                    name = `LightBox`                            class = `z2ui5_cl_ai_app_059` path = `src/01/b07/z2ui5_cl_ai_app_059.clas.abap`
+        notes = `NOTE: the Image src and LightBoxItem imageSrc keep the sample's original demokit sdk asset paths (test-resources/sap/ui/documentation/sdk/images/...) as literals 1:1; abap2UI5 does not serve those` &&
+                 ` static assets, so the thumbnails/large images do not display offline. The LightBox still opens on image click (built-in Image.detailBox behaviour, no controller). The last item deliberately points` &&
+                 ` imageSrc at a non-existent file to show the LightBox load-error state, exactly as in the sample. // NOTE: the six identical filler paragraphs use the same ABAP literal via a local ``lorem`` variable;` &&
+                 ` XML attribute whitespace (newlines/tabs in the sample's indented multi-line text) is normalised to single spaces (visually identical).` )
+      ( module = `sap.m` control = `sap.m.Link`                        name = `LinkEmphasized`                      class = `z2ui5_cl_ai_app_033` path = `src/01/b01/z2ui5_cl_ai_app_033.clas.abap`
         since = `1.12`
         checked = `CHECKED (2026-07-19): verified in a running system - human visual pass 2026-07-19 over all apps: the Currency composite binding renders the formatted price per currency (raw binding-info string over` &&
                  ` PRICE TYPE p).`
         notes = `SUBSET: the bound /ProductCollection shows a 6-row subset of the 123-row mock (ui5/mock/products.json); HT-1002 is not part of the subset.` )
-      ( module = `sap.m` control = `sap.m.List`                        name = `ListCounter`                 class = `z2ui5_cl_ai_app_034` path = `src/01/b04/z2ui5_cl_ai_app_034.clas.abap`
+      ( module = `sap.m` control = `sap.m.List`                        name = `ListCounter`                         class = `z2ui5_cl_ai_app_034` path = `src/01/b04/z2ui5_cl_ai_app_034.clas.abap`
         notes = `POST-1.71: headerLevel="H2" on the List (since UI5 1.117) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.117 to render it. // SUBSET: the bound /ProductCollection` &&
                  ` shows a 11-row subset of the 123-row mock (ui5/mock/products.json) - a full unroll adds no demo value.`
         post171 = `headerLevel="H2" on the List (since UI5 1.117) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.117 to render it.` )
-      ( module = `sap.m` control = `sap.m.List`                        name = `ListNoData`                  class = `z2ui5_cl_ai_app_035` path = `src/01/b04/z2ui5_cl_ai_app_035.clas.abap` )
-      ( module = `sap.m` control = `sap.m.MessageBox`                  name = `MessageBoxInitialFocus`      class = `z2ui5_cl_ai_app_036` path = `src/01/b03/z2ui5_cl_ai_app_036.clas.abap`
+      ( module = `sap.m` control = `sap.m.List`                        name = `ListNoData`                          class = `z2ui5_cl_ai_app_035` path = `src/01/b04/z2ui5_cl_ai_app_035.clas.abap` )
+      ( module = `sap.m` control = `sap.m.Menu`                        name = `Menu`                                class = `z2ui5_cl_ai_app_060` path = `src/01/b07/z2ui5_cl_ai_app_060.clas.abap`
+        notes = `POST-1.71: Button.ariaHasPopup (since UI5 1.84) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.84 to render it. // IMPROVISED: the sample loads the Menu from` &&
+                 ` Menu.fragment.xml on first press and calls oMenu.openBy(button) in the controller. The port declares the Menu 1:1 inside the Button's ``dependents`` aggregation and opens it via` &&
+                 ` client->follow_up_action( cs_event-control_by_id, openBy ) anchored to the button's DOM ref ($event.oSource.sId), the same frontend-action pattern as golden app 016. The sample's press handler` &&
+                 ` additionally TOGGLES (closes the menu if it is already open, via the client-side isOpen() check); the port always (re-)opens, because the menu's open/closed state lives client-side (an item click or` &&
+                 ` outside click closes it without notifying the backend) and cannot be reliably mirrored server-side. // IMPROVISED: onMenuAction builds a breadcrumb path by walking the selected MenuItem's parent` &&
+                 ` chain (e.g. 'Create New Site > Official Store'); the server cannot walk the client-side control tree, so the toast shows only the selected item's own text, transported via ${$parameters>/item/text}.` &&
+                 ` // LIVE-TEST: confirm in a running system that the Menu opens anchored to the button (openBy) and that ${$parameters>/item/text} delivers the clicked MenuItem's text to the toast.`
+        post171 = `Button.ariaHasPopup (since UI5 1.84) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.84 to render it.` )
+      ( module = `sap.m` control = `sap.m.MenuButton`                  name = `MenuButton`                          class = `z2ui5_cl_ai_app_061` path = `src/01/b07/z2ui5_cl_ai_app_061.clas.abap`
+        notes = `POST-1.71: the MenuButton ``beforeMenuOpen`` event (since UI5 1.94) is kept 1:1 on the split-mode buttons that use it. menuPosition (1.56), buttonMode and useDefaultActionOnly are <= 1.71. //` &&
+                 ` IMPROVISED: onMenuAction builds a breadcrumb path by walking the selected MenuItem's parent chain (e.g. 'basic > add'); the server cannot walk the client-side control tree, so the toast shows only` &&
+                 ` the selected item's own text, transported via ${$parameters>/item/text}. // NOTE: onPress toasts the pressed MenuItem's control id (the sample's evt.getSource().getId() + ' Pressed'), transported via` &&
+                 ` $event.oSource.sId. The Edit item's core:CustomData (key=target, value=p1) is kept 1:1 as inert view metadata. // LIVE-TEST: confirm in a running system that` &&
+                 ` itemSelected/press/defaultAction/beforeMenuOpen all fire their toasts and that ${$parameters>/item/text} delivers the selected MenuItem text.`
+        post171 = `the MenuButton ``beforeMenuOpen`` event (since UI5 1.94) is kept 1:1 on the split-mode buttons that use it. menuPosition (1.56), buttonMode and useDefaultActionOnly are <= 1.71.` )
+      ( module = `sap.m` control = `sap.m.MessageBox`                  name = `MessageBoxInitialFocus`              class = `z2ui5_cl_ai_app_036` path = `src/01/b03/z2ui5_cl_ai_app_036.clas.abap`
         since = `1.21.2`
         notes = `NOTE: the sample opens a sap.m.MessageBox from its controller; there is no such control in the view. It is driven by two buttons wired to events that call client->message_box_display - the documented` &&
                  ` 1:1 path (CAPABILITIES.md marks sap.m.MessageBox as expressible with app 036 as its evidence port), not a workaround. // POST-1.71: ariaHasPopup="Dialog" on both buttons (since UI5 1.84) is newer` &&
@@ -820,21 +853,30 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         post171 = `ariaHasPopup="Dialog" on both buttons (since UI5 1.84) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.84 to render it. // the MessageBox emphasizedAction option (since` &&
                  ` UI5 1.75) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.75 to render it. // the MessageBox dependentOn option (since UI5 1.124) is restored via message_box_display's` &&
                  ` dependenton parameter, pointing at the view layout (id messageBoxHost); the app needs a UI5 release >= 1.124 to render it.` )
-      ( module = `sap.m` control = `sap.m.MessageToast`                name = `MessageToast`                class = `z2ui5_cl_ai_app_037` path = `src/01/b03/z2ui5_cl_ai_app_037.clas.abap`
+      ( module = `sap.m` control = `sap.m.MessageStrip`                name = `MessageStripWithEnableFormattedText` class = `z2ui5_cl_ai_app_062` path = `src/01/b07/z2ui5_cl_ai_app_062.clas.abap`
+        since = `1.30`
+        notes = `POST-1.71: the MessageStrip ``controls`` aggregation (since UI5 1.129) is kept 1:1 for the fifth strip's %%0/%%1/%%2 multi-link formatted text (three sap.m.Link). enableFormattedText itself is since` &&
+                 ` 1.50 (<= 1.71). // IMPROVISED: the inlineIconsHelper text is built in the controller from sap.m.MessageStripUtilities.getInlineIcon() (a JS utility with no abap2UI5 equivalent); it is replaced by` &&
+                 ` equivalent hardcoded inline-icon markup (<span class='sapMMsgStripInlineIcon'>&#x....;</span>), matching the sample's rendering approach. The icon codepoints are illustrative. // NOTE: the sample's` &&
+                 ` JSONModel of static formatted-text strings is rebuilt as ABAP string fields on the single default model and bound 1:1 (text={/...}); field names differ from the JSON keys (default->default_text etc.)` &&
+                 ` but values are display-only, so the binding-value diff does not apply.`
+        post171 = `the MessageStrip ``controls`` aggregation (since UI5 1.129) is kept 1:1 for the fifth strip's %%0/%%1/%%2 multi-link formatted text (three sap.m.Link). enableFormattedText itself is since 1.50 (<=` &&
+                 ` 1.71).` )
+      ( module = `sap.m` control = `sap.m.MessageToast`                name = `MessageToast`                        class = `z2ui5_cl_ai_app_037` path = `src/01/b03/z2ui5_cl_ai_app_037.clas.abap`
         since = `1.9.2` )
-      ( module = `sap.m` control = `sap.m.MessageView`                 name = `MessageViewMessageManager`   class = `z2ui5_cl_ai_app_038` path = `src/01/b03/z2ui5_cl_ai_app_038.clas.abap`
+      ( module = `sap.m` control = `sap.m.MessageView`                 name = `MessageViewMessageManager`           class = `z2ui5_cl_ai_app_038` path = `src/01/b03/z2ui5_cl_ai_app_038.clas.abap`
         since = `1.46`
         notes = `NOTE: the original registers its four messages on the sap.ui.core.message.MessageManager and the MessageView binds them via the message> model. abap2UI5 DOES carry the message> model on every view` &&
                  ` slot since pr/message-model (2026-07-18, auto-collecting control validation messages), but there is no ABAP API to push an arbitrary static message set into it - so for this render-only sample the` &&
                  ` messages are bound as a plain ABAP table on MessageView items with a MessageItem template (client->_bind( t_messages )), the path CAPABILITIES.md explicitly endorses for static message sets. Same` &&
                  ` rendering as the original. Proven by the curated sample z2ui5_cl_demo_app_038 (MessageView + MessageItem + MessagePopover over a bound table).` )
-      ( module = `sap.m` control = `sap.m.MultiComboBox`               name = `MultiComboBoxGrouping`       class = `z2ui5_cl_ai_app_039` path = `src/01/b02/z2ui5_cl_ai_app_039.clas.abap`
+      ( module = `sap.m` control = `sap.m.MultiComboBox`               name = `MultiComboBoxGrouping`               class = `z2ui5_cl_ai_app_039` path = `src/01/b02/z2ui5_cl_ai_app_039.clas.abap`
         since = `1.22.0`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `NOTE: the custom groupHeaderFactory '.getGroupHeader' (controller code) is replaced by UI5's default group headers - the sample's factory builds a SeparatorItem with the group key, which is exactly` &&
                  ` what the default renders anyway (CAPABILITIES.md group-sorter row, source-verified on both sides), so this is a faithful 1:1, not a workaround. The items are a bound template with the original's` &&
                  ` sorter (path SUPPLIER_NAME, group: true) as a raw binding-info string. // SUBSET: 16-row subset of the 123-row mock (ui5/mock/products.json).` )
-      ( module = `sap.m` control = `sap.m.MultiInput`                  name = `MultiInput`                  class = `z2ui5_cl_ai_app_040` path = `src/01/b02/z2ui5_cl_ai_app_040.clas.abap`
+      ( module = `sap.m` control = `sap.m.MultiInput`                  name = `MultiInput`                          class = `z2ui5_cl_ai_app_040` path = `src/01/b02/z2ui5_cl_ai_app_040.clas.abap`
         golden = abap_true
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed); promoted to golden 2026-07-20 (human decision) -` &&
                  ` exemplary for: cc control (MultiInputExt), bound aggregation, tokens, sorter binding-info`
@@ -846,14 +888,20 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` data is a 16-row subset of the mock /ProductCollection (ui5/mock/products.json). // NOTE: The original's stray placeholder attributes on the two Labels (not a Label property) are dropped. //` &&
                  ` POST-1.71: showClearIcon (since UI5 1.94) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.94 to render it.`
         post171 = `showClearIcon (since UI5 1.94) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.94 to render it.` )
-      ( module = `sap.m` control = `sap.m.ObjectHeader`                name = `ObjectHeader`                class = `z2ui5_cl_ai_app_041` path = `src/01/b01/z2ui5_cl_ai_app_041.clas.abap`
+      ( module = `sap.m` control = `sap.m.NewsContent`                 name = `NewsContent`                         class = `z2ui5_cl_ai_app_063` path = `src/01/b07/z2ui5_cl_ai_app_063.clas.abap`
+        since = `1.34` )
+      ( module = `sap.m` control = `sap.m.NumericContent`              name = `NumericContentIcon`                  class = `z2ui5_cl_ai_app_064` path = `src/01/b07/z2ui5_cl_ai_app_064.clas.abap`
+        since = `1.34`
+        notes = `NOTE: the second NumericContent keeps the sample's original demokit test-resources image path (test-resources/sap/m/demokit/sample/NumericContentIcon/images/grass.jpg) as the icon literal 1:1;` &&
+                 ` abap2UI5 does not serve that static asset, so it does not render offline (the first tile's sap-icon://travel-expense does). The image is archived under ui5/sap.m/NumericContentIcon/images/.` )
+      ( module = `sap.m` control = `sap.m.ObjectHeader`                name = `ObjectHeader`                        class = `z2ui5_cl_ai_app_041` path = `src/01/b01/z2ui5_cl_ai_app_041.clas.abap`
         since = `1.12`
         checked = `CHECKED (2026-07-19): verified in a running system - human visual pass 2026-07-19 over all apps: the element binding {/S_PRODUCT} resolves all relative field bindings incl. the Currency number - the` &&
                  ` ObjectHeader renders fully populated.`
         notes = `NOTE: the ObjectHeader keeps the original element binding and relative field bindings 1:1 (title, numberUnit, the ObjectAttribute composite texts and the sap.ui.model.type.Currency number binding);` &&
                  ` only the binding context path changes - a one-record structure /S_PRODUCT in the default model instead of {/ProductCollection/0}, since the port does not carry the whole collection. // SUBSET: the` &&
                  ` model holds exactly the bound record /ProductCollection/0 (Notebook Basic 15) of ui5/mock/products.json, verbatim.` )
-      ( module = `sap.m` control = `sap.m.ObjectStatus`                name = `ObjectStatus`                class = `z2ui5_cl_ai_app_042` path = `src/01/b01/z2ui5_cl_ai_app_042.clas.abap`
+      ( module = `sap.m` control = `sap.m.ObjectStatus`                name = `ObjectStatus`                        class = `z2ui5_cl_ai_app_042` path = `src/01/b01/z2ui5_cl_ai_app_042.clas.abap`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `POST-1.71: the ObjectStatus state values Indication06-Indication08 (since UI5 1.75) and Indication09-Indication20 (since UI5 1.120) are newer than 1.71 but kept for the 1:1 port - the app needs a UI5` &&
                  ` release >= 1.120 to render them all (>= 1.75 for Indication06-Indication08). // NOTE: the active status press opens the controller-built Dialog 1:1 (core:FragmentDefinition + popup_display): the` &&
@@ -861,13 +909,13 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` working in the 2026-07-20 live check.`
         post171 = `the ObjectStatus state values Indication06-Indication08 (since UI5 1.75) and Indication09-Indication20 (since UI5 1.120) are newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >=` &&
                  ` 1.120 to render them all (>= 1.75 for Indication06-Indication08).` )
-      ( module = `sap.m` control = `sap.m.Panel`                       name = `PanelExpanded`               class = `z2ui5_cl_ai_app_043` path = `src/01/b04/z2ui5_cl_ai_app_043.clas.abap`
+      ( module = `sap.m` control = `sap.m.Panel`                       name = `PanelExpanded`                       class = `z2ui5_cl_ai_app_043` path = `src/01/b04/z2ui5_cl_ai_app_043.clas.abap`
         since = `1.16`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `NOTE: the original controller toggles the third panel imperatively (onOverflowToolbarPress -> oPanel.setExpanded(!oPanel.getExpanded())). Reproduced 1:1 since the whitelist extension (2026-07-18, see` &&
                  ` pr/control-call-whitelist): the TOOLBAR_PRESSED handler inverts a server-side mirror of the state and calls the whitelisted setExpanded on the panel via client->follow_up_action(` &&
                  ` cs_event-control_by_id ) - the view no longer carries the improvised two-way ``expanded`` binding, matching the original view.xml exactly.` )
-      ( module = `sap.m` control = `sap.m.PDFViewer`                   name = `PDFViewerPopup`              class = `z2ui5_cl_ai_app_044` path = `src/01/b03/z2ui5_cl_ai_app_044.clas.abap`
+      ( module = `sap.m` control = `sap.m.PDFViewer`                   name = `PDFViewerPopup`                      class = `z2ui5_cl_ai_app_044` path = `src/01/b03/z2ui5_cl_ai_app_044.clas.abap`
         since = `1.48`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `NOTE: the original onInit creates a popup-mode sap.m.PDFViewer and adds it as a view dependent; it is declared 1:1 in the view's mvc:dependents aggregation (an extra PDFViewer element vs the original` &&
@@ -879,33 +927,33 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` (or a patched maintenance release) to render it.`
         post171 = `the PDFViewer property isTrustedSource (since UI5 1.121, backported to maintenance patches down to 1.71.63; the original controller passes isTrustedSource: true) is newer than 1.71 but kept for the` &&
                  ` 1:1 port - the app needs a UI5 release >= 1.121 (or a patched maintenance release) to render it.` )
-      ( module = `sap.m` control = `sap.m.RangeSlider`                 name = `RangeSlider`                 class = `z2ui5_cl_ai_app_045` path = `src/01/b02/z2ui5_cl_ai_app_045.clas.abap`
+      ( module = `sap.m` control = `sap.m.RangeSlider`                 name = `RangeSlider`                         class = `z2ui5_cl_ai_app_045` path = `src/01/b02/z2ui5_cl_ai_app_045.clas.abap`
         since = `1.38`
         notes = `NOTE: the sample binds the composite RangeSlider "range" property (an array [low, high] - range="{/RS1}" / range="0,100"). abap2UI5 binds scalar ABAP fields, so each range is expressed as the` &&
                  ` equivalent value / value2 properties the control keeps in sync - identical rendering.` )
-      ( module = `sap.m` control = `sap.m.ScrollContainer`             name = `ScrollContainer`             class = `z2ui5_cl_ai_app_046` path = `src/01/b04/z2ui5_cl_ai_app_046.clas.abap`
+      ( module = `sap.m` control = `sap.m.ScrollContainer`             name = `ScrollContainer`                     class = `z2ui5_cl_ai_app_046` path = `src/01/b04/z2ui5_cl_ai_app_046.clas.abap`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed); incl. the phone-emulation device> check`
         notes = `IMPROVISED: the Image src binds {img>/products/pic1} in the original, a JSON image model not available server-side; a static demo image URL is used instead.` )
-      ( module = `sap.m` control = `sap.m.SegmentedButton`             name = `SegmentedButton`             class = `z2ui5_cl_ai_app_047` path = `src/01/b03/z2ui5_cl_ai_app_047.clas.abap`
+      ( module = `sap.m` control = `sap.m.SegmentedButton`             name = `SegmentedButton`                     class = `z2ui5_cl_ai_app_047` path = `src/01/b03/z2ui5_cl_ai_app_047.clas.abap`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `NOTE: the original reads the selected item via oEvent.getParameter("item").getText() / getSelectedItem(). Here the items get keys (one/two/three - an addition, SB1 has none in the sample) and` &&
                  ` selectedKey is two-way bound, so the selection arrives with the event and no private event path is needed - the documented 1:1 path for controller-read selection (CAPABILITIES.md), not a workaround.` )
-      ( module = `sap.m` control = `sap.m.Select`                      name = `Select`                      class = `z2ui5_cl_ai_app_048` path = `src/01/b02/z2ui5_cl_ai_app_048.clas.abap` )
-      ( module = `sap.m` control = `sap.m.StepInput`                   name = `StepInput`                   class = `z2ui5_cl_ai_app_049` path = `src/01/b02/z2ui5_cl_ai_app_049.clas.abap`
+      ( module = `sap.m` control = `sap.m.Select`                      name = `Select`                              class = `z2ui5_cl_ai_app_048` path = `src/01/b02/z2ui5_cl_ai_app_048.clas.abap` )
+      ( module = `sap.m` control = `sap.m.StepInput`                   name = `StepInput`                           class = `z2ui5_cl_ai_app_049` path = `src/01/b02/z2ui5_cl_ai_app_049.clas.abap`
         since = `1.40`
         notes = `IMPROVISED: the sample binds a List to the JSON model /modelData and renders one templated CustomListItem per row. The rows are unrolled into static list items here because every row sets a different` &&
                  ` subset of the StepInput properties - an empty ABAP model field would bind as "" instead of leaving the property at its default, so a bound template would not render 1:1. Template properties no row` &&
                  ` ever sets (valueState) are dropped with it.` )
-      ( module = `sap.m` control = `sap.m.Switch`                      name = `Switch`                      class = `z2ui5_cl_ai_app_050` path = `src/01/b02/z2ui5_cl_ai_app_050.clas.abap` )
-      ( module = `sap.m` control = `sap.m.Text`                        name = `Text`                        class = `z2ui5_cl_ai_app_051` path = `src/01/b01/z2ui5_cl_ai_app_051.clas.abap` )
-      ( module = `sap.m` control = `sap.m.TextArea`                    name = `TextArea`                    class = `z2ui5_cl_ai_app_052` path = `src/01/b01/z2ui5_cl_ai_app_052.clas.abap`
+      ( module = `sap.m` control = `sap.m.Switch`                      name = `Switch`                              class = `z2ui5_cl_ai_app_050` path = `src/01/b02/z2ui5_cl_ai_app_050.clas.abap` )
+      ( module = `sap.m` control = `sap.m.Text`                        name = `Text`                                class = `z2ui5_cl_ai_app_051` path = `src/01/b01/z2ui5_cl_ai_app_051.clas.abap` )
+      ( module = `sap.m` control = `sap.m.TextArea`                    name = `TextArea`                            class = `z2ui5_cl_ai_app_052` path = `src/01/b01/z2ui5_cl_ai_app_052.clas.abap`
         since = `1.9.0` )
-      ( module = `sap.m` control = `sap.m.Toolbar`                     name = `ToolbarShrinkable`           class = `z2ui5_cl_ai_app_053` path = `src/01/b03/z2ui5_cl_ai_app_053.clas.abap`
+      ( module = `sap.m` control = `sap.m.Toolbar`                     name = `ToolbarShrinkable`                   class = `z2ui5_cl_ai_app_053` path = `src/01/b03/z2ui5_cl_ai_app_053.clas.abap`
         since = `1.16`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `NOTE: the sample's controller onSliderLiveChange resizes the toolbars in JS; there is no width in the source XML (the port adds the width attribute, the original wires liveChange instead). Rebuilt as` &&
                  ` a client-side expression binding {= slider + '%' } on each Toolbar width - no event round-trip, resizes instantly like the original; the documented preferred path (CAPABILITIES.md), not a workaround.` )
-      ( module = `sap.m` control = `sap.m.Tree`                        name = `Tree`                        class = `z2ui5_cl_ai_app_054` path = `src/01/b04/z2ui5_cl_ai_app_054.clas.abap`
+      ( module = `sap.m` control = `sap.m.Tree`                        name = `Tree`                                class = `z2ui5_cl_ai_app_054` path = `src/01/b04/z2ui5_cl_ai_app_054.clas.abap`
         since = `1.42`
         checked = `CHECKED (2026-07-19): verified in a running system - human visual pass 2026-07-19 over all apps: the nested-table hierarchy renders as an expandable Tree like the original.` ) ).
 
