@@ -72,16 +72,26 @@ function htmlForUrl(frameUrl: string, externalUrl: string): string {
 </style></head>
 <body>
   <div class="bar">
-    <span class="url" title="${safeExternal}">${safeExternal}</span>
+    <span class="url" id="url" title="${safeExternal}">${safeExternal}</span>
     <button onclick="openExt()">Extern öffnen</button>
   </div>
   <div class="frame-wrap">
-    <iframe src="${safeFrame}"
+    <iframe id="app" src="${safeFrame}"
             sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-modals allow-downloads"></iframe>
   </div>
   <script>
     const vscodeApi = acquireVsCodeApi();
+    const iframe = document.getElementById('app');
+    const urlEl = document.getElementById('url');
     function openExt() { vscodeApi.postMessage({ type: 'openExternal' }); }
+    // F9 erneut -> Host schickt 'load'; gleiche URL = Reload, neue URL = Wechsel.
+    window.addEventListener('message', (e) => {
+      const m = e.data || {};
+      if (m.type === 'load') {
+        if (urlEl) { urlEl.textContent = m.externalUrl; urlEl.title = m.externalUrl; }
+        iframe.src = m.frameUrl; // Neuzuweisung erzwingt das Neuladen des iframes
+      }
+    });
   </script>
 </body></html>`;
 }
@@ -96,33 +106,47 @@ class PreviewViewProvider implements vscode.WebviewViewProvider {
   private view?: vscode.WebviewView;
   private frameUrl?: string;
   private externalUrl?: string;
+  private htmlSet = false;
 
   resolveWebviewView(view: vscode.WebviewView): void {
     this.view = view;
+    this.htmlSet = false;
     view.webview.options = { enableScripts: true };
     view.webview.onDidReceiveMessage((msg) => {
       if (msg?.type === "openExternal" && this.externalUrl) {
         vscode.env.openExternal(vscode.Uri.parse(this.externalUrl));
       }
     });
-    this.render();
+    this.renderOrReload();
   }
 
   async show(frameUrl: string, externalUrl: string): Promise<void> {
     this.frameUrl = frameUrl;
     this.externalUrl = externalUrl;
     await vscode.commands.executeCommand(`${PreviewViewProvider.viewId}.focus`);
-    this.render();
+    this.renderOrReload();
   }
 
-  private render(): void {
-    if (!this.view) {
+  private renderOrReload(): void {
+    const view = this.view;
+    if (!view) {
       return;
     }
-    this.view.webview.html =
-      this.frameUrl && this.externalUrl
-        ? htmlForUrl(this.frameUrl, this.externalUrl)
-        : placeholderHtml();
+    if (!this.frameUrl || !this.externalUrl) {
+      view.webview.html = placeholderHtml();
+      this.htmlSet = false;
+      return;
+    }
+    if (!this.htmlSet) {
+      view.webview.html = htmlForUrl(this.frameUrl, this.externalUrl);
+      this.htmlSet = true;
+    } else {
+      void view.webview.postMessage({
+        type: "load",
+        frameUrl: this.frameUrl,
+        externalUrl: this.externalUrl,
+      });
+    }
   }
 }
 
@@ -136,9 +160,10 @@ let appPanelExternalUrl: string | undefined;
 function showInTab(frameUrl: string, externalUrl: string, title: string): void {
   appPanelExternalUrl = externalUrl;
   if (appPanel) {
+    // Bestehender Tab: nur neu laden (bzw. auf neue Klasse wechseln).
     appPanel.title = title;
-    appPanel.webview.html = htmlForUrl(frameUrl, externalUrl);
     appPanel.reveal(vscode.ViewColumn.Beside, true);
+    void appPanel.webview.postMessage({ type: "load", frameUrl, externalUrl });
     return;
   }
   appPanel = vscode.window.createWebviewPanel(

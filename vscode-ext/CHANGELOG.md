@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0
+
+- **F9 aktualisiert** jetzt zuverlässig den bestehenden Tab/Panel (Reload der
+  App), statt einen neuen zu öffnen. Bei einer anderen Klasse wechselt der
+  bestehende Tab auf die neue App. Reload läuft per Nachricht an den iframe.
+
 ## 0.3.1
 
 - Fix: leere/weiße App im Tab – der Proxy entfernt jetzt `X-Frame-Options`
