@@ -9,12 +9,12 @@ CAPABILITIES.md._
 
 | Aspect | State |
 |---|---|
-| Ports | 64 / **403 in-scope** `sap.m` samples (15.9 %) — in scope = control exists since UI5 1.71 and is not deprecated; 43 of 446 samples are out of scope (16 deprecated, 21 newer, 6 without control metadata) |
+| Ports | 65 / **403 in-scope** `sap.m` samples (16.1 %) — in scope = control exists since UI5 1.71 and is not deprecated; 43 of 446 samples are out of scope (16 deprecated, 21 newer, 6 without control metadata) |
 | CI | ABAP_STANDARD, ABAP_CLOUD, ABAP_702 all green |
 | Structural view diff | **0 undeclared differences** across all 64 ports (`node scripts/structural-diff.mjs --strict`) — including simple **binding values** and, since 2026-07-19, **`id` attributes** (name-level per control type; dropped original ids must be restored or declared) |
 | Render smoke | **0 failing / 1 skipped** (`npm run smoke`): every reconstructable port's view loads in a real headless `XMLView.create`; app 049's skip is now a **declared, CI-enforced** `render_smoke.skip` (helper-method view building is not statically reconstructable — an undeclared non-reconstructable port now FAILS); harness carries `sap.f` and mocks scalar-row tables as empty arrays since b05 |
 | Pattern lint | **0 errors, 0 warnings, empty baseline** (`node scripts/pattern-lint.mjs`) |
-| Meta sidecars | 64 in `meta/` — status: 24 `generated`, 35 `checked`, **5 `golden`** (401, 421, 454, 540, 543 — promoted 2026-07-20 after the full live check); deviations: 35 IMPROVISED, 30 POST_171, 2 LIVE_TEST (b07 apps 060/061 menu item args), 9 SUBSET_DATA, 66 NOTE, 2 DROPPED_171 (the `p:ColumnAIAction` plugin in apps 022 and 534 — a whole control newer than 1.71, unlike the restorable members). `audit` is a structured object since 2026-07-18 |
+| Meta sidecars | 65 in `meta/` — status: 25 `generated`, 35 `checked`, **5 `golden`** (401, 421, 454, 540, 543 — promoted 2026-07-20 after the full live check); deviations: 35 IMPROVISED, 30 POST_171, 2 LIVE_TEST (b07 apps 060/061 menu item args), 9 SUBSET_DATA, 66 NOTE, 2 DROPPED_171 (the `p:ColumnAIAction` plugin in apps 022 and 534 — a whole control newer than 1.71, unlike the restorable members). `audit` is a structured object since 2026-07-18 |
 | Manually verified in a running system | **40 of 64 ports** — 2026-07-20 human live check per the interaction checklist (all b05/b06 + every port that carried an open question, incl. the 530 restamp); previously: 420/421/526 interactive, 404/431/440/460/487 visual 2026-07-19. The 24 remaining `generated` ports are the b01–b04 apps that never carried an open question plus the 10 fresh b07 ports (machine-verified only) |
 | Archive | `ui5/sap.m/<SampleName>/` — full originals for the 44 ported samples (+2 cross-referenced: `FacetFilterSimple`, `Table`); mock snapshot in `ui5/mock/`. Unported samples are copied over batch by batch. |
 
@@ -33,9 +33,44 @@ The 34 existing ports are retro-grouped into review batches — one subpackage
 | `b05` | Backlog top: bars, tables, custom items & patterns | 531, 532, 533, 534, 535, 536, 537, 538, 539, 540 | all (2026-07-20) |
 | `b06` | Date pickers, dialogs, feeds & tiles | 541, 542, 543, 544, 545, 546, 547, 548, 549, 550 | all (2026-07-20) |
 | `b07` | Icon tabs, tile content, menus, list items & message strips | IconTabHeader, ImageContent, InputListItem, LabelProperties, LightBox, Menu, MenuButton, MessageStrip, NewsContent, NumericContent (classes 055–064) | — (machine-verified only) |
+| `b08` | Message handling | MessagePopoverMessageHandling (class 065) | — (machine-verified only) |
 
 New generation batches continue as `b08`, `b09`, … per the process in
 TRAINING.md.
+
+## Batch b08 generated (2026-07-20) — message handling, built on a new cc control
+
+Single port **065 MessagePopoverMessageHandling** (`sap.m.MessagePopover`), the
+message-model sample that was deferred from b07. It needed a framework
+addition: a new **`z2ui5.cc.MessageManager`** companion control (abap2UI5,
+this branch) that bridges the UI5 message manager to a two-way bound ABAP
+table — app-authored messages (`items`) are reconciled into the manager with a
+target + the view's model as processor (so they set field valueState and show
+in the MessagePopover), while binding-type/constraint validation still
+auto-collects into the `message>` model. The cc mirrors the MultiInputExt
+pattern (invisible companion, `Lib.registerCallback` init, `checkInit` guard),
+is unit-tested (add / dedup / remove-own / leave-foreign / defer), and is in
+the framework preload. The `message-manager-binding` idea earlier recorded as
+"not filed — already covered" was thus only half-right: reading was covered by
+`message>`, but **writing** app-authored messages needed this cc.
+
+The port: two forms bound to `/T_FORMS` (3-row subset) and `/T_EMPLOYMENT`
+with typed value bindings + constraints (`ZIP_CODE` Integer, `WEEKLYHOURS`
+Integer max 40, `EMAIL` search regex) so validation auto-collects; a
+MessagePopover in the button's `dependents` bound to `{message>/}`; the cc
+bound to `/T_MESSAGES`; Save authors a demo message through the cc. Deviations
+declared: nested model flattened + dropped ColumnElementData layoutData
+(IMPROVISED), controller-only severity/group/scroll/CommandExecution
+(DROPPED_171), 3-of-8 rows (SUBSET_DATA), the message-manager runtime
+(LIVE_TEST — unverifiable headlessly). Machine-verified green (abaplint
+STANDARD+CLOUD, validate-meta, pattern-lint, structural-diff `--strict`,
+render-smoke `--strict` with a new `z2ui5.cc.MessageManager` harness mirror +
+empty `message>` model, property-check). Render-smoke bugs fixed while
+porting: the missing Button-closing `shut` (MessagePopover leaked as a direct
+Button child), the email regex needing `\\`-escaped backslashes for the
+binding parser, and `DATA … TYPE <named-table-type>` not recognised as a table
+by the reconstructor (switched to inline `STANDARD TABLE OF`, the AGENTS §5
+convention).
 
 ## Batch b07 generated (2026-07-20)
 

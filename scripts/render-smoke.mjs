@@ -592,6 +592,22 @@ const HARNESS = `<!DOCTYPE html>
           renderer: { apiVersion: 2, render: function () {} },
         });
       });
+      // Metadata-only mirror of z2ui5.cc.MessageManager (invisible companion
+      // that bridges the UI5 message manager to a two-way bound items table).
+      // The harness only validates view creation. Keep in sync with abap2UI5
+      // app/webapp/cc/MessageManager.js.
+      sap.ui.define('z2ui5/cc/MessageManager', ['sap/ui/core/Control'], function (Control) {
+        return Control.extend('z2ui5.cc.MessageManager', {
+          metadata: {
+            properties: {
+              items: { type: 'object' },
+              checkInit: { type: 'boolean', defaultValue: false },
+            },
+            events: { change: { allowPreventDefault: true, parameters: {} } },
+          },
+          renderer: { apiVersion: 2, render: function () {} },
+        });
+      });
       sap.ui.require(['sap/ui/core/Core', 'sap/base/Log'], function (Core, Log) {
         Log.addLogListener({ onLogEntry: function (e) {
           if (e.level <= Log.Level.ERROR) window.uiErrors.push('LOG: ' + e.message);
@@ -622,6 +638,9 @@ const HARNESS = `<!DOCTYPE html>
       } else {
         var view = await XMLView.create({ definition: input.xml });
         view.setModel(model); view.setModel(device, 'device');
+        // empty message model so {message>/} bindings (MessagePopover /
+        // z2ui5.cc.MessageManager ports) resolve like the framework's slot
+        view.setModel(new JSONModel([]), 'message');
         view.placeAt('content');
         await new Promise(function (r) { setTimeout(r, 120); });
         view.destroy();

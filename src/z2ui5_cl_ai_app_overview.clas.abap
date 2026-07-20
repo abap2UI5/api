@@ -853,6 +853,22 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         post171 = `ariaHasPopup="Dialog" on both buttons (since UI5 1.84) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.84 to render it. // the MessageBox emphasizedAction option (since` &&
                  ` UI5 1.75) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.75 to render it. // the MessageBox dependentOn option (since UI5 1.124) is restored via message_box_display's` &&
                  ` dependenton parameter, pointing at the view layout (id messageBoxHost); the app needs a UI5 release >= 1.124 to render it.` )
+      ( module = `sap.m` control = `sap.m.MessagePopover`              name = `MessagePopoverMessageHandling`       class = `z2ui5_cl_ai_app_065` path = `src/01/b08/z2ui5_cl_ai_app_065.clas.abap`
+        since = `1.28`
+        notes = `POST-1.71: two post-1.71 members are kept for the 1:1 port: Button.ariaHasPopup (since UI5 1.84) on the MessagePopover button, and MessagePopover.groupItems (since UI5 1.73). // IMPROVISED: the` &&
+                 ` controller's manual MessageManager handling is replaced by two framework mechanisms: (1) the typed value bindings with constraints (sap.ui.model.type.Integer/String, ZIP_CODE Integer, WEEKLYHOURS` &&
+                 ` Integer maximum 40, EMAIL search regex) collect/clear their validation messages AUTOMATICALLY into the message> model (no app code) - replacing onChange/handleRequiredField/checkInputConstraints; (2)` &&
+                 ` app-authored messages (the Save 'A mandatory field is required') go through the new z2ui5.cc.MessageManager companion control (items bound to /T_MESSAGES), which reconciles them into the message` &&
+                 ` manager with a target + processor. Save stands in for generateInvalidUserInput. // IMPROVISED: the sample's nested JSON model (street/name, zip/code, phone/number) is flattened into a flat ABAP row` &&
+                 ` (STREET_NAME, ZIP_CODE, PHONE_NUMBER, ...) - abap2UI5 serves one default model; the bindings use the flattened field names. The three f:ColumnElementData layoutData hints (cellsSmall/cellsLarge` &&
+                 ` column spans on the street-number, zip-code and one employment Input) are dropped - responsive-span cosmetics with no data/behaviour. // 1.71: controller-only pieces with no view/binding equivalent` &&
+                 ` are dropped: buttonIconFormatter/buttonTypeFormatter/highestSeverityMessages (the button's severity-based icon/type/count) is reduced to text={=${message>/}.length}, type=Emphasized; the MessageItem` &&
+                 ` groupName/activeTitle formatters and activeTitlePress scroll-to-control navigation; core:CommandExecution (the Ctrl+Shift+M focus shortcut); isPositionable. // SUBSET: 3 of the 8 mock form rows are` &&
+                 ` kept (incl. John Miller's invalid ZIP 'AAA' that trips the Integer validation on render); the single employment row is kept 1:1. Checkable against` &&
+                 ` ui5/sap.m/MessagePopoverMessageHandling/localService/mockdata/FormsModel.json. // LIVE-TEST: confirm in a running system: the Integer/email constraint bindings auto-collect their errors into the` &&
+                 ` message> model (invalid ZIP 'AAA', >40 weekly hours, malformed email) and set the field valueState; the MessagePopover button shows/hides on {message>/} and lists them; and the Save-authored message` &&
+                 ` flows through z2ui5.cc.MessageManager into the MessagePopover 1:1.`
+        post171 = `two post-1.71 members are kept for the 1:1 port: Button.ariaHasPopup (since UI5 1.84) on the MessagePopover button, and MessagePopover.groupItems (since UI5 1.73).` )
       ( module = `sap.m` control = `sap.m.MessageStrip`                name = `MessageStripWithEnableFormattedText` class = `z2ui5_cl_ai_app_062` path = `src/01/b07/z2ui5_cl_ai_app_062.clas.abap`
         since = `1.30`
         notes = `POST-1.71: the MessageStrip ``controls`` aggregation (since UI5 1.129) is kept 1:1 for the fifth strip's %%0/%%1/%%2 multi-link formatted text (three sap.m.Link). enableFormattedText itself is since` &&
