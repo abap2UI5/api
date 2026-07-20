@@ -115,26 +115,8 @@ const rows = apps.map((a) => {
   return extras.length ? `${base}\n        ${extras.join('\n        ')} )` : `${base} )`;
 });
 
-// nested tree data for the Tree view: module -> control -> sample (apps are
-// already sorted module/control/sample, so a running group-by suffices). Each
-// level carries a `nodes` child table, the property sap.m.Tree recurses on.
-const bareCtrl = (e) => e.slice(e.lastIndexOf('.') + 1);
-const treeData = [];
-for (const a of apps) {
-  let mod = treeData.at(-1);
-  if (!mod || mod.text !== a.module) { mod = { text: a.module, ctrls: [] }; treeData.push(mod); }
-  let ctrl = mod.ctrls.at(-1);
-  if (!ctrl || ctrl.key !== a.control) { ctrl = { key: a.control, text: bareCtrl(a.control), samples: [] }; mod.ctrls.push(ctrl); }
-  ctrl.samples.push(`${a.name} - ${a.cls}`);
-}
-const tq = (s) => '`' + String(s).replace(/`/g, '``') + '`';
-const treeRows = treeData.map((mod) =>
-  `      ( text = ${tq(mod.text)} nodes = VALUE #(\n` +
-  mod.ctrls.map((ctrl) =>
-    `          ( text = ${tq(ctrl.text)} nodes = VALUE #(\n` +
-    ctrl.samples.map((s) => `              ( text = ${tq(s)} )`).join('\n') +
-    ' ) )').join('\n') +
-  ' ) )').join('\n');
+// the Tree view's nested model is built in ABAP (build_tree) from the filtered
+// app list, so the search filters the tree as well as the table.
 
 // --- client-side (roundtrip-free) filter & sort, both via cs_event-binding_call
 // wired through _event_client (see abap2UI5 z2ui5_if_client / FrontendAction.js):
@@ -191,9 +173,12 @@ const columnsBlock = [
 
 const abap = `"! Generated overview app - lists every abap2UI5 api sample app in a table.
 "! A Switch in the header toggles between the table and a module -> control ->
-"! sample tree (sap.m.Tree) showing the same samples - both views are bound and
-"! their visibility is an expression binding over the two-way show_tree flag, so
-"! the toggle runs entirely on the client (no round-trip).
+"! sample tree (sap.m.Tree, expanded by default) showing the same samples - both
+"! views are bound and their visibility is an expression binding over the two-way
+"! show_tree flag, so the toggle runs entirely on the client (no round-trip). The
+"! search field filters both views (backend SEARCH -> apply_filter, rebuilding the
+"! table rows and the tree). Each tree leaf has the same jump popover as the
+"! table's Open column.
 "! The Since column shows the UI5 release the control appeared in (from
 "! ui5/universe.json; blank when older than tracking). Text is never coloured;
 "! a deprecated control's name is struck through (FormattedText htmlText, so the
@@ -242,10 +227,17 @@ CLASS ${CLASS} DEFINITION PUBLIC.
       END OF ty_s_app.
     TYPES ty_t_app TYPE STANDARD TABLE OF ty_s_app WITH EMPTY KEY.
 
-    " nested tree model (module -> control -> sample); sap.m.Tree recurses on the nodes tables
+    " nested tree model (module -> control -> sample); sap.m.Tree recurses on the
+    " nodes tables. The sample leaves carry the same links as the table's Open column
     TYPES:
       BEGIN OF ty_s_sample,
-        text TYPE string,
+        text      TYPE string,
+        api_url   TYPE string,
+        js_url    TYPE string,
+        ui5_url   TYPE string,
+        abap_url  TYPE string,
+        start_url TYPE string,
+        has_link  TYPE abap_bool,
       END OF ty_s_sample,
       BEGIN OF ty_s_control,
         text  TYPE string,
@@ -259,18 +251,24 @@ CLASS ${CLASS} DEFINITION PUBLIC.
 
     DATA t_app TYPE ty_t_app.
     DATA t_tree TYPE ty_t_tree.
-    " table when off, tree when on (bound two-way; drives the visible expressions)
+    " search term (bound two-way) and the table/tree toggle (drives visible)
+    DATA search TYPE string.
     DATA show_tree TYPE abap_bool.
 
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
+    " full catalog; t_app / t_tree are the search-filtered views of it
+    DATA t_app_all TYPE ty_t_app.
 
     METHODS view_display.
     METHODS on_event.
+    METHODS apply_filter.
     METHODS get_catalog
       RETURNING
         VALUE(result) TYPE ty_t_app.
-    METHODS get_tree
+    METHODS build_tree
+      IMPORTING
+        it_app        TYPE ty_t_app
       RETURNING
         VALUE(result) TYPE ty_t_tree.
 
@@ -297,6 +295,10 @@ CLASS ${CLASS} IMPLEMENTATION.
   METHOD on_event.
 
     CASE client->get( )-event.
+
+      WHEN \`SEARCH\`.
+        apply_filter( ).
+        client->view_model_update( ).
 
       WHEN \`LINKS\`.
         " every navigation link for the pressed row, resolved client-side and
@@ -386,9 +388,8 @@ CLASS ${CLASS} IMPLEMENTATION.
     " base url to launch an abap2UI5 app in a new browser tab
     DATA(start) = |{ client->get( )-s_config-origin }{ client->get( )-s_config-pathname }?app_start=|.
 
-    t_tree = get_tree( ).
-    t_app = get_catalog( ).
-    LOOP AT t_app ASSIGNING FIELD-SYMBOL(<app>).
+    t_app_all = get_catalog( ).
+    LOOP AT t_app_all ASSIGNING FIELD-SYMBOL(<app>).
 
       DATA(libpath) = replace( val = <app>-module
                                sub = \`.\`
@@ -419,14 +420,15 @@ CLASS ${CLASS} IMPLEMENTATION.
           THEN |<span style="text-decoration:line-through">{ <app>-ctrl_name }</span>|
           ELSE <app>-ctrl_name ).
 
-      " one searchable blob per row, bound as the FILTER column that the search
-      " field's client-side Contains filter (binding_call) matches against - so
-      " a single field filters over every visible column at once
-      <app>-filter = <app>-module   && \` \` && <app>-control && \` \` && <app>-ctrl_name && \` \` &&
-                     <app>-name     && \` \` && <app>-class   && \` \` && <app>-since     && \` \` &&
-                     <app>-notes    && \` \` && <app>-checked && \` \` && <app>-post171.
+      " lower-cased blob of every column, matched by the search filter (CS)
+      <app>-filter = to_lower( <app>-module   && \` \` && <app>-control && \` \` && <app>-ctrl_name && \` \` &&
+                               <app>-name     && \` \` && <app>-class   && \` \` && <app>-since     && \` \` &&
+                               <app>-notes    && \` \` && <app>-checked && \` \` && <app>-post171 ).
 
     ENDLOOP.
+
+    " apply the current search term to both the table (t_app) and the tree (t_tree)
+    apply_filter( ).
 
     DATA(view) = z2ui5_cl_ai_xml=>factory( ).
 
@@ -443,13 +445,14 @@ CLASS ${CLASS} IMPLEMENTATION.
 
                 )->open( \`subHeader\`
                     )->open( \`Toolbar\`
-                        " client-side filter: liveChange/search run a binding_call Contains
-                        " filter on the FILTER blob via _event_client - no backend round-trip
+                        " search filters both the table and the tree in the backend
+                        " (SEARCH -> apply_filter -> view_model_update)
                         )->leaf( \`SearchField\`
                             )->a( n = \`placeholder\` v = \`Search across all samples - module, control, sample, class, notes...\`
                             )->a( n = \`width\`       v = \`24rem\`
-                            )->a( n = \`liveChange\`  v = ${filterCall('${$parameters>/newValue}')}
-                            )->a( n = \`search\`      v = ${filterCall('${$parameters>/query}')}
+                            )->a( n = \`value\`       v = client->_bind( search )
+                            )->a( n = \`liveChange\`  v = client->_event( \`SEARCH\` )
+                            )->a( n = \`search\`      v = client->_event( \`SEARCH\` )
                         )->leaf( \`ToolbarSpacer\`
                         )->leaf( \`Label\`
                             )->a( n = \`text\` v = \`Tree view\`
@@ -543,14 +546,27 @@ ${columnsBlock}
                     )->shut(
 
                     " tree view (module -> control -> sample) - shown instead of the
-                    " table when the header Switch is on (client-side visible binding)
+                    " table when the header Switch is on (client-side visible binding);
+                    " numberOfExpandedLevels expands every level by default
                     )->open( \`Tree\`
                         )->a( n = \`id\`      v = \`idOverviewTree\`
                         )->a( n = \`visible\` v = |\\{= \${ client->_bind( show_tree ) } \\}|
-                        )->a( n = \`items\`   v = client->_bind( t_tree )
+                        )->a( n = \`items\`   v = |\\{ path: '{ client->_bind( val = t_tree path = abap_true ) }', parameters: \\{ numberOfExpandedLevels: 10 \\} \\}|
 
-                        )->leaf( \`StandardTreeItem\`
-                            )->a( n = \`title\` v = \`{TEXT}\` ).
+                        )->open( \`CustomTreeItem\`
+                            )->open( \`HBox\`
+                                )->a( n = \`alignItems\` v = \`Center\`
+
+                                )->leaf( \`Text\`
+                                    )->a( n = \`text\` v = \`{TEXT}\`
+                                " same jump popover as the table's Open column - only on sample leaves
+                                )->leaf( \`Button\`
+                                    )->a( n = \`icon\`    v = \`sap-icon://action\`
+                                    )->a( n = \`type\`    v = \`Transparent\`
+                                    )->a( n = \`tooltip\` v = \`Open links for this sample\`
+                                    )->a( n = \`class\`   v = \`sapUiTinyMarginBegin\`
+                                    )->a( n = \`visible\` v = \`{HAS_LINK}\`
+                                    )->a( n = \`press\`   v = client->_event( val = \`LINKS\` t_arg = VALUE #( ( \`\${API_URL}\` ) ( \`\${JS_URL}\` ) ( \`\${UI5_URL}\` ) ( \`\${ABAP_URL}\` ) ( \`\${START_URL}\` ) ( \`\$event.oSource.sId\` ) ) ) ).
 
     client->view_display( view->stringify( ) ).
 
@@ -565,10 +581,46 @@ ${rows.join('\n')} ).
   ENDMETHOD.
 
 
-  METHOD get_tree.
+  METHOD apply_filter.
 
-    result = VALUE #(
-${treeRows} ).
+    " one case-insensitive substring search over every column; drives both views
+    DATA(term) = to_lower( search ).
+    IF term IS INITIAL.
+      t_app = t_app_all.
+    ELSE.
+      t_app = VALUE #( FOR ls_app IN t_app_all
+                       WHERE ( filter CS term ) ( ls_app ) ).
+    ENDIF.
+    t_tree = build_tree( t_app ).
+
+  ENDMETHOD.
+
+
+  METHOD build_tree.
+
+    " group the (already module/control/sample-sorted) apps into the nested tree;
+    " each sample leaf keeps the links so its popover can jump the same places
+    LOOP AT it_app INTO DATA(ls_app).
+
+      IF result IS INITIAL OR result[ lines( result ) ]-text <> ls_app-module.
+        APPEND VALUE #( text = ls_app-module ) TO result.
+      ENDIF.
+      ASSIGN result[ lines( result ) ] TO FIELD-SYMBOL(<module>).
+
+      IF <module>-nodes IS INITIAL OR <module>-nodes[ lines( <module>-nodes ) ]-text <> ls_app-ctrl_name.
+        APPEND VALUE #( text = ls_app-ctrl_name ) TO <module>-nodes.
+      ENDIF.
+      ASSIGN <module>-nodes[ lines( <module>-nodes ) ] TO FIELD-SYMBOL(<control>).
+
+      APPEND VALUE #( text      = |{ ls_app-name } - { ls_app-class }|
+                      api_url   = ls_app-api_url
+                      js_url    = ls_app-js_url
+                      ui5_url   = ls_app-ui5_url
+                      abap_url  = ls_app-abap_url
+                      start_url = ls_app-start_url
+                      has_link  = abap_true ) TO <control>-nodes.
+
+    ENDLOOP.
 
   ENDMETHOD.
 
