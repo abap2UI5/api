@@ -25,7 +25,7 @@
     },
     {
       "type": "IMPROVISED",
-      "what": "the cards' iconSrc formatter '.formatter.url' (module app/model/formatter, resolving ProductPicUrl via sap.ui.require.toUrl; the module is not part of the archived sample files nor the framework formatter registry) is flattened: PRODUCT_PIC_URL is stored as absolute https://sdk.openui5.org/test-resources/... URLs and bound directly."
+      "what": "the '.formatter.url' iconSrc formatter flattened to absolute https://sdk.openui5.org image URLs - source-verified against the now-archived app/model/formatter.js (it only prefixes '../../../../../../', i.e. resolves to the test-resources root), so the absolute URLs are the faithful equivalent."
     },
     {
       "type": "NOTE",
@@ -45,7 +45,7 @@
     },
     {
       "type": "IMPROVISED",
-      "what": "the snapped and expanded Carousels are not re-synchronized after a page change (_updateCarouselsActivePage calls setActivePage, which is not in the CONTROL_METHODS whitelist of FrontendAction.js - would need a pr/control-call-whitelist extension); each Carousel keeps its own active page while the comparison columns follow the last pageChanged window. The Props window rebuild on pageChanged collapses the panels/descriptions, as re-rendering does in the original."
+      "what": "snapped/expanded Carousel re-sync dropped: Carousel.setActivePage is not in the CONTROL_METHODS whitelist - requested in pr/control-methods-openby-setactivepage (cites this port); restore the re-sync once implemented upstream."
     },
     {
       "type": "NOTE",
