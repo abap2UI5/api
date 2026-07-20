@@ -584,18 +584,16 @@ scripts.**
   being applied once at parse time). All current ports are in-scope (≤ 1.71,
   non-deprecated), so none is struck today. A **Switch** in the subheader
   toggles between the table and a **module → control → sample tree**
-  (`sap.m.Tree`, built in `build_tree` from the filtered apps, expanded by
+  (`sap.m.Tree`, built in `build_tree` from the full catalog, expanded by
   default via a `numberOfExpandedLevels` binding parameter) showing the same
   samples; each tree leaf has the same jump popover as the table's **Open**
   column. Both views are bound and their `visible` is an expression binding
   over the two-way `show_tree` flag, so the toggle runs entirely on the client
-  (like app 007). The **search field** filters **both** views in the backend
-  (`SEARCH` → `apply_filter`: `CS` over a per-row lower-cased `filter` blob →
-  `t_app` + `build_tree` → `view_model_update`) — a proven round-trip, chosen
-  after the roundtrip-free `binding_call` filter (unverified beta) did not work.
-  Each column header still carries client-side ascending/descending **sort**
-  icons wired via `client->_event_client( val = client->cs_event-binding_call … )`
-  (static params, no `$parameters` resolution). **Every link opens in a new browser tab**
+  (like app 007). The **search field** filters **only the table**, on the
+  client (`binding_call` `Contains` over a per-row `filter` blob via
+  `_event_client` — no round-trip); the **tree is intentionally not filtered**.
+  Each column header also carries client-side ascending/descending **sort**
+  icons via the same `binding_call` mechanism. **Every link opens in a new browser tab**
   (`target="_blank"`). All source links point at OpenUI5; only the class +
   start links are local. The per-row URLs are built in `view_display` (the
   start URL needs the runtime system origin), the static facts come from

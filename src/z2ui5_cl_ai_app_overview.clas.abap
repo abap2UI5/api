@@ -3,9 +3,9 @@
 "! sample tree (sap.m.Tree, expanded by default) showing the same samples - both
 "! views are bound and their visibility is an expression binding over the two-way
 "! show_tree flag, so the toggle runs entirely on the client (no round-trip). The
-"! search field filters both views (backend SEARCH -> apply_filter, rebuilding the
-"! table rows and the tree). Each tree leaf has the same jump popover as the
-"! table's Open column.
+"! search field filters the table on the client (binding_call Contains, no
+"! round-trip); the tree is not filtered. Each tree leaf has the same jump
+"! popover as the table's Open column.
 "! The Since column shows the UI5 release the control appeared in (from
 "! ui5/universe.json; blank when older than tracking). Text is never coloured;
 "! a deprecated control's name is struck through (FormattedText htmlText, so the
@@ -78,18 +78,14 @@ CLASS z2ui5_cl_ai_app_overview DEFINITION PUBLIC.
 
     DATA t_app TYPE ty_t_app.
     DATA t_tree TYPE ty_t_tree.
-    " search term (bound two-way) and the table/tree toggle (drives visible)
-    DATA search TYPE string.
+    " table/tree toggle (drives the visible expression bindings)
     DATA show_tree TYPE abap_bool.
 
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
-    " full catalog; t_app / t_tree are the search-filtered views of it
-    DATA t_app_all TYPE ty_t_app.
 
     METHODS view_display.
     METHODS on_event.
-    METHODS apply_filter.
     METHODS get_catalog
       RETURNING
         VALUE(result) TYPE ty_t_app.
@@ -122,10 +118,6 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
   METHOD on_event.
 
     CASE client->get( )-event.
-
-      WHEN `SEARCH`.
-        apply_filter( ).
-        client->view_model_update( ).
 
       WHEN `LINKS`.
         " every navigation link for the pressed row, resolved client-side and
@@ -215,8 +207,8 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
     " base url to launch an abap2UI5 app in a new browser tab
     DATA(start) = |{ client->get( )-s_config-origin }{ client->get( )-s_config-pathname }?app_start=|.
 
-    t_app_all = get_catalog( ).
-    LOOP AT t_app_all ASSIGNING FIELD-SYMBOL(<app>).
+    t_app = get_catalog( ).
+    LOOP AT t_app ASSIGNING FIELD-SYMBOL(<app>).
 
       DATA(libpath) = replace( val = <app>-module
                                sub = `.`
@@ -247,15 +239,16 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
           THEN |<span style="text-decoration:line-through">{ <app>-ctrl_name }</span>|
           ELSE <app>-ctrl_name ).
 
-      " lower-cased blob of every column, matched by the search filter (CS)
-      <app>-filter = to_lower( <app>-module   && ` ` && <app>-control && ` ` && <app>-ctrl_name && ` ` &&
-                               <app>-name     && ` ` && <app>-class   && ` ` && <app>-since     && ` ` &&
-                               <app>-notes    && ` ` && <app>-checked && ` ` && <app>-post171 ).
+      " one blob per row, bound as the FILTER column that the table search's
+      " client-side Contains filter (binding_call) matches against
+      <app>-filter = <app>-module   && ` ` && <app>-control && ` ` && <app>-ctrl_name && ` ` &&
+                     <app>-name     && ` ` && <app>-class   && ` ` && <app>-since     && ` ` &&
+                     <app>-notes    && ` ` && <app>-checked && ` ` && <app>-post171.
 
     ENDLOOP.
 
-    " apply the current search term to both the table (t_app) and the tree (t_tree)
-    apply_filter( ).
+    " the tree lists the full, unfiltered catalog (search filters only the table)
+    t_tree = build_tree( t_app ).
 
     DATA(view) = z2ui5_cl_ai_xml=>factory( ).
 
@@ -272,14 +265,14 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
 
                 )->open( `subHeader`
                     )->open( `Toolbar`
-                        " search filters both the table and the tree in the backend
-                        " (SEARCH -> apply_filter -> view_model_update)
+                        " client-side filter over the table only: liveChange/search run
+                        " a binding_call Contains filter via _event_client (no round-trip);
+                        " the tree is intentionally left unfiltered
                         )->leaf( `SearchField`
-                            )->a( n = `placeholder` v = `Search across all samples - module, control, sample, class, notes...`
+                            )->a( n = `placeholder` v = `Search the table - module, control, sample, class, notes...`
                             )->a( n = `width`       v = `24rem`
-                            )->a( n = `value`       v = client->_bind( search )
-                            )->a( n = `liveChange`  v = client->_event( `SEARCH` )
-                            )->a( n = `search`      v = client->_event( `SEARCH` )
+                            )->a( n = `liveChange`  v = client->_event_client( val = client->cs_event-binding_call t_arg = VALUE #( ( `idOverviewTable` ) ( `items` ) ( `filter` ) ( `FILTER` ) ( `Contains` ) ( `${$parameters>/newValue}` ) ) )
+                            )->a( n = `search`      v = client->_event_client( val = client->cs_event-binding_call t_arg = VALUE #( ( `idOverviewTable` ) ( `items` ) ( `filter` ) ( `FILTER` ) ( `Contains` ) ( `${$parameters>/query}` ) ) )
                         )->leaf( `ToolbarSpacer`
                         )->leaf( `Label`
                             )->a( n = `text` v = `Tree view`
@@ -898,21 +891,6 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
       ( module = `sap.m` control = `sap.m.Tree`                        name = `Tree`                        class = `z2ui5_cl_ai_app_054` path = `src/01/b04/z2ui5_cl_ai_app_054.clas.abap`
         since = `1.42`
         checked = `CHECKED (2026-07-19): verified in a running system - human visual pass 2026-07-19 over all apps: the nested-table hierarchy renders as an expandable Tree like the original.` ) ).
-
-  ENDMETHOD.
-
-
-  METHOD apply_filter.
-
-    " one case-insensitive substring search over every column; drives both views
-    DATA(term) = to_lower( search ).
-    IF term IS INITIAL.
-      t_app = t_app_all.
-    ELSE.
-      t_app = VALUE #( FOR ls_app IN t_app_all
-                       WHERE ( filter CS term ) ( ls_app ) ).
-    ENDIF.
-    t_tree = build_tree( t_app ).
 
   ENDMETHOD.
 
