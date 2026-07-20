@@ -17,13 +17,20 @@ on the details live upstream and in CAPABILITIES.md/STATUS.md.
 
 ## Open
 
-Currently none.
+Surfaced by batch **b07** (2026-07-20):
+
+| Request | Summary | Priority |
+|---------|---------|----------|
+| [`formatter-inline-icon`](formatter-inline-icon/) | Add a curated `inlineIcon(sap-icon://…)` helper (via `IconPool`) to `model/formatter.js` so MessageStrip formatted-text inline icons render 1:1 instead of hardcoded, guessed codepoints. From app 062 (`MessageStripWithEnableFormattedText`). Served-module only, CSP-clean, no ABAP API change | medium — clean, low-risk win |
+| [`menu-toggle-openby`](menu-toggle-openby/) | Add a client-side `toggleBy: ["domRef"]` to `CONTROL_METHODS` (open if closed, close if open) so a press-to-toggle menu button ports 1:1. From app 060 (`Menu`); the openBy family always re-opens because the popup open-state lives client-side | low — minor UX deviation |
+| [`menu-item-selected-path`](menu-item-selected-path/) | A resolvable payload for the selected menu item's ancestor-text breadcrumb (`Create New Site > Official Store`), or a documented capability boundary. From apps 060/061; today only the leaf `${$parameters>/item/text}` is transportable | low — cosmetic (toast text) |
 
 ## Declined / deferred (folder removed 2026-07-19)
 
 | Request | Decision |
 |---------|----------|
 | named-json-models | **Too complicated with the current abap2UI5 approach** — every view slot serializes exactly one ABAP-fed default JSONModel per roundtrip; a second named model would have to be carried through bind, serialization and model-update on every slot. Declined for now, possibly worth re-discussing in the future if the model layer changes. Workaround stays: flatten into the default model or resolve statically (IMPROVISED deviation, apps 006/031/046, same family app 044) |
+| message-manager-binding (not filed) | **Already covered** — considered while deferring the `MessagePopoverMessageHandling` sample (b07), but the `message>` model + `handleValidation` auto-collection landed 2026-07-18 (implemented `message-model`) and the plain-ABAP-table MessagePopover approach (app 038) both already express the family (CAPABILITIES.md rows for `MessageView`/`MessagePopover` = ✅). No framework change needed; that sample is a porting task, not a gap |
 
 ## Implemented (folders removed 2026-07-19)
 

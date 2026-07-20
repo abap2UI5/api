@@ -77,6 +77,18 @@ app 062). The b07 ports are `generated` (no human live check yet); the menu
 item-arg paths (`${$parameters>/item/text}`) and the openBy anchoring are the
 open LIVE_TESTs.
 
+**Framework gaps filed (`pr/` no longer empty):** three forwardable requests
+from b07 — `formatter-inline-icon` (a curated `inlineIcon` helper so app 062's
+MessageStrip inline icons render 1:1 instead of guessed codepoints; medium
+priority, clean win), `menu-toggle-openby` (a client-side `toggleBy` so app
+060's press-to-toggle menu is 1:1; low), and `menu-item-selected-path` (the
+selected menu item's ancestor breadcrumb for 060/061, or a documented
+boundary; low). A fourth idea, exposing the MessageManager for the deferred
+`MessagePopoverMessageHandling`, was **investigated and not filed** — the
+`message>` model (implemented 2026-07-18) and the plain-table approach
+(app 038) already cover the MessagePopover family, so that sample is a porting
+task, not a framework gap (recorded in `pr/README`).
+
 ## Full human live check (2026-07-20) — every open question cleared
 
 The human worked through the complete interaction checklist in a running
