@@ -141,18 +141,27 @@ const columnsBlock = SORT_COLS.map(sortableColumn).join('\n') + `
                             )->leaf( \`Text\`
                                 )->a( n = \`text\` v = \`Note\`
 
+                        )->shut(
+                        )->open( \`Column\`
+                            )->a( n = \`width\`  v = \`5rem\`
+                            )->a( n = \`hAlign\` v = \`Center\`
+
+                            )->leaf( \`Text\`
+                                )->a( n = \`text\` v = \`Open\`
+
                         )->shut(`;
 
 const abap = `"! Generated overview app - lists every abap2UI5 api sample app in a table.
-"! In the Sample column the name links the OpenUI5 source and the ↗ starts the
-"! live OpenUI5 sample; in the abap2UI5 column the class name links the generated
-"! ABAP class and the ↗ starts the app; Control links the OpenUI5 API - all
-"! opening in a new browser tab. The Note column shows a gold star for golden
-"! ports (live-checked and exemplary), a green check when the port was manually
-"! verified in a running system, and a hint button that opens a popup with the
-"! port's generation caveats when present. The search field above the table
-"! filters all rows by a substring over every column, and each column header
-"! carries ascending/descending sort icons - both run entirely on the frontend
+"! The Module / Control / Sample / abap2UI5 columns are plain text; every link
+"! (OpenUI5 API, OpenUI5 source, live fullscreen sample, the generated ABAP
+"! class on GitHub, and starting the app) lives in the trailing Open column: its
+"! button opens an anchored popover of all those links, each opening in a new
+"! browser tab. The Note column shows a gold star for golden ports (live-checked
+"! and exemplary), a green check when the port was manually verified in a
+"! running system, and a hint icon that opens a popup with the port's generation
+"! caveats when present. The search field above the table filters all rows by a
+"! substring over every column, and each column header carries ascending/
+"! descending sort icons - both run entirely on the frontend
 "! (cs_event-binding_call via _event_client, no server round-trip). Do not edit
 "! by hand - regenerate with scripts/generate-overview.mjs
 CLASS ${CLASS} DEFINITION PUBLIC.
@@ -218,6 +227,56 @@ CLASS ${CLASS} IMPLEMENTATION.
   METHOD on_event.
 
     CASE client->get( )-event.
+
+      WHEN \`LINKS\`.
+        " every navigation link for the pressed row, resolved client-side and
+        " passed in via t_arg; open them in an anchored popover (by the button id)
+        DATA(lv_api)   = client->get_event_arg( ).
+        DATA(lv_js)    = client->get_event_arg( 2 ).
+        DATA(lv_ui5)   = client->get_event_arg( 3 ).
+        DATA(lv_abap)  = client->get_event_arg( 4 ).
+        DATA(lv_start) = client->get_event_arg( 5 ).
+
+        DATA(links) = z2ui5_cl_ai_xml=>factory( ).
+        links->open( n = \`FragmentDefinition\` ns = \`core\`
+            )->a( n = \`xmlns\`      v = \`sap.m\`
+            )->a( n = \`xmlns:core\` v = \`sap.ui.core\`
+
+            )->open( \`Popover\`
+                )->a( n = \`title\`       v = \`Open in a new tab\`
+                )->a( n = \`placement\`   v = \`Auto\`
+                )->a( n = \`contentWidth\` v = \`22rem\`
+
+                )->open( \`VBox\`
+                    )->a( n = \`class\` v = \`sapUiContentPadding\`
+
+                    )->leaf( \`Link\`
+                        )->a( n = \`text\`   v = \`Control - OpenUI5 API reference\`
+                        )->a( n = \`href\`   v = lv_api
+                        )->a( n = \`target\` v = \`_blank\`
+                        )->a( n = \`class\`  v = \`sapUiTinyMarginBottom\`
+                    )->leaf( \`Link\`
+                        )->a( n = \`text\`   v = \`Sample - OpenUI5 source\`
+                        )->a( n = \`href\`   v = lv_js
+                        )->a( n = \`target\` v = \`_blank\`
+                        )->a( n = \`class\`  v = \`sapUiTinyMarginBottom\`
+                    )->leaf( \`Link\`
+                        )->a( n = \`text\`   v = \`Sample - live fullscreen runner\`
+                        )->a( n = \`href\`   v = lv_ui5
+                        )->a( n = \`target\` v = \`_blank\`
+                        )->a( n = \`class\`  v = \`sapUiTinyMarginBottom\`
+                    )->leaf( \`Link\`
+                        )->a( n = \`text\`   v = \`abap2UI5 - class on GitHub\`
+                        )->a( n = \`href\`   v = lv_abap
+                        )->a( n = \`target\` v = \`_blank\`
+                        )->a( n = \`class\`  v = \`sapUiTinyMarginBottom\`
+                    )->leaf( \`Link\`
+                        )->a( n = \`text\`   v = \`abap2UI5 - start this app\`
+                        )->a( n = \`href\`   v = lv_start
+                        )->a( n = \`target\` v = \`_blank\` ).
+
+        client->popover_display( xml   = links->stringify( )
+                                 by_id = client->get_event_arg( 6 ) ).
 
       WHEN \`SHOW_NOTES\`.
         " one Text per bullet of the clicked row's generation notes
@@ -330,37 +389,13 @@ ${columnsBlock}
                             )->open( \`cells\`
                                 )->leaf( \`Text\`
                                     )->a( n = \`text\` v = \`{MODULE}\`
-                                )->leaf( \`Link\`
-                                    )->a( n = \`text\`   v = \`{CTRL_NAME}\`
-                                    )->a( n = \`href\`   v = \`{API_URL}\`
-                                    )->a( n = \`target\` v = \`_blank\`
+                                )->leaf( \`Text\`
+                                    )->a( n = \`text\` v = \`{CTRL_NAME}\`
+                                )->leaf( \`Text\`
+                                    )->a( n = \`text\` v = \`{NAME}\`
+                                )->leaf( \`Text\`
+                                    )->a( n = \`text\` v = \`{CLASS}\`
 
-                                )->open( \`HBox\`
-                                    )->leaf( \`Link\`
-                                        )->a( n = \`text\`   v = \`{NAME}\`
-                                        )->a( n = \`href\`   v = \`{JS_URL}\`
-                                        )->a( n = \`target\` v = \`_blank\`
-                                    )->leaf( \`Text\`
-                                        )->a( n = \`text\` v = \` \`
-                                    )->leaf( \`Link\`
-                                        )->a( n = \`text\`   v = \`↗\`
-                                        )->a( n = \`href\`   v = \`{UI5_URL}\`
-                                        )->a( n = \`target\` v = \`_blank\`
-
-                                )->shut(
-                                )->open( \`HBox\`
-                                    )->leaf( \`Link\`
-                                        )->a( n = \`text\`   v = \`{CLASS}\`
-                                        )->a( n = \`href\`   v = \`{ABAP_URL}\`
-                                        )->a( n = \`target\` v = \`_blank\`
-                                    )->leaf( \`Text\`
-                                        )->a( n = \`text\` v = \` \`
-                                    )->leaf( \`Link\`
-                                        )->a( n = \`text\`   v = \`↗\`
-                                        )->a( n = \`href\`   v = \`{START_URL}\`
-                                        )->a( n = \`target\` v = \`_blank\`
-
-                                )->shut(
                                 )->open( \`HBox\`
                                     )->a( n = \`alignItems\` v = \`Center\`
                                     )->a( n = \`class\`      v = \`sapUiTinyMarginBegin\`
@@ -395,7 +430,17 @@ ${columnsBlock}
                                         )->a( n = \`color\`   v = \`#0a6ed1\`
                                         )->a( n = \`tooltip\` v = \`{NOTES}\`
                                         )->a( n = \`visible\` v = \`{HAS_NOTES}\`
-                                        )->a( n = \`press\`   v = client->_event( val = \`SHOW_NOTES\` t_arg = VALUE #( ( \`\${NOTES}\` ) ) ) ).
+                                        )->a( n = \`press\`   v = client->_event( val = \`SHOW_NOTES\` t_arg = VALUE #( ( \`\${NOTES}\` ) ) )
+
+                                )->shut(
+                                " opens an anchored popover with every link for this row (all navigation
+                                " lives here now that the table cells are plain text) - the pressed
+                                " button's runtime id (\$event.oSource.sId) anchors the popover
+                                )->leaf( \`Button\`
+                                    )->a( n = \`icon\`    v = \`sap-icon://action\`
+                                    )->a( n = \`type\`    v = \`Transparent\`
+                                    )->a( n = \`tooltip\` v = \`Open links for this sample\`
+                                    )->a( n = \`press\`   v = client->_event( val = \`LINKS\` t_arg = VALUE #( ( \`\${API_URL}\` ) ( \`\${JS_URL}\` ) ( \`\${UI5_URL}\` ) ( \`\${ABAP_URL}\` ) ( \`\${START_URL}\` ) ( \`\$event.oSource.sId\` ) ) ) ).
 
     client->view_display( view->stringify( ) ).
 
