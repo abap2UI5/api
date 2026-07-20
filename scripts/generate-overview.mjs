@@ -432,7 +432,7 @@ CLASS ${CLASS} IMPLEMENTATION.
 
         )->open( \`Shell\`
             )->open( \`Page\`
-                )->a( n = \`title\`          v = \`abap2UI5 - Demokit\`
+                )->a( n = \`title\`          v = \`abap2UI5 Demo Kit\`
                 )->a( n = \`navButtonPress\` v = client->_event_nav_app_leave( )
                 )->a( n = \`showNavButton\`  v = z2ui5_cl_ai_xml=>as_bool( client->check_app_prev_stack( ) )
 
@@ -547,6 +547,21 @@ ${columnsBlock}
                         )->a( n = \`id\`      v = \`idOverviewTree\`
                         )->a( n = \`visible\` v = |\\{= \${ client->_bind( show_tree ) } \\}|
                         )->a( n = \`items\`   v = |\\{ path: '{ client->_bind( val = t_tree path = abap_true ) }', parameters: \\{ numberOfExpandedLevels: 10 \\} \\}|
+
+                        " expand-all / collapse-all act on the tree by id, client-side
+                        )->open( \`headerToolbar\`
+                            )->open( \`Toolbar\`
+                                )->leaf( \`Button\`
+                                    )->a( n = \`text\`  v = \`Expand all\`
+                                    )->a( n = \`icon\`  v = \`sap-icon://expand-group\`
+                                    )->a( n = \`press\` v = client->_event_client( val = client->cs_event-control_by_id t_arg = VALUE #( ( \`idOverviewTree\` ) ( \`\` ) ( \`expandToLevel\` ) ( \`10\` ) ) )
+                                )->leaf( \`Button\`
+                                    )->a( n = \`text\`  v = \`Collapse all\`
+                                    )->a( n = \`icon\`  v = \`sap-icon://collapse-group\`
+                                    )->a( n = \`press\` v = client->_event_client( val = client->cs_event-control_by_id t_arg = VALUE #( ( \`idOverviewTree\` ) ( \`\` ) ( \`collapseAll\` ) ) )
+
+                            )->shut(
+                        )->shut(
 
                         )->open( \`CustomTreeItem\`
                             )->open( \`HBox\`

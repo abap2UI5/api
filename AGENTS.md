@@ -585,7 +585,9 @@ scripts.**
   non-deprecated), so none is struck today. A **Switch** in the subheader
   toggles between the table and a **module → control → sample tree**
   (`sap.m.Tree`, built in `build_tree` from the full catalog, expanded by
-  default via a `numberOfExpandedLevels` binding parameter) showing the same
+  default via a `numberOfExpandedLevels` binding parameter, with Expand-all /
+  Collapse-all buttons in its header toolbar — client-side
+  `cs_event-control_by_id` `expandToLevel`/`collapseAll`) showing the same
   samples; each tree leaf has the same jump popover as the table's **Open**
   column. Both views are bound and their `visible` is an expression binding
   over the two-way `show_tree` flag, so the toggle runs entirely on the client
