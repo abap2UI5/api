@@ -157,6 +157,31 @@ class PreviewViewProvider implements vscode.WebviewViewProvider {
 let appPanel: vscode.WebviewPanel | undefined;
 let appPanelExternalUrl: string | undefined;
 
+// Editor-Position, an die der Fokus nach F9 zurückkehren soll.
+let sourceDoc: vscode.TextDocument | undefined;
+let sourceSelection: vscode.Selection | undefined;
+let sourceColumn: vscode.ViewColumn | undefined;
+// Zeitfenster (ms-Timestamp), in dem ein Fokus-Wechsel zur App als
+// automatischer Fokus-Klau gilt und zurückgegeben wird.
+let bounceFocusUntil = 0;
+
+function rememberSource(editor: vscode.TextEditor): void {
+  sourceDoc = editor.document;
+  sourceSelection = editor.selection;
+  sourceColumn = editor.viewColumn;
+}
+
+async function restoreSourceFocus(): Promise<void> {
+  if (!sourceDoc) {
+    return;
+  }
+  await vscode.window.showTextDocument(sourceDoc, {
+    viewColumn: sourceColumn,
+    selection: sourceSelection,
+    preserveFocus: false,
+  });
+}
+
 function showInTab(frameUrl: string, externalUrl: string, title: string): void {
   appPanelExternalUrl = externalUrl;
   if (appPanel) {
@@ -174,6 +199,12 @@ function showInTab(frameUrl: string, externalUrl: string, title: string): void {
   );
   appPanel.onDidDispose(() => {
     appPanel = undefined;
+  });
+  // Wenn die ladende App kurz nach F9 den Fokus an sich reißt, zurück in den Code.
+  appPanel.onDidChangeViewState((e) => {
+    if (e.webviewPanel.active && Date.now() < bounceFocusUntil) {
+      void restoreSourceFocus();
+    }
   });
   appPanel.webview.onDidReceiveMessage((msg) => {
     if (msg?.type === "openExternal" && appPanelExternalUrl) {
@@ -312,9 +343,10 @@ async function runApp(
     return;
   }
 
-  // Cursor-Position merken, um den Fokus danach zurückzugeben.
-  const sourceColumn = editor.viewColumn;
-  const sourceSelection = editor.selection;
+  // Cursor-Position merken; Fenster öffnen, in dem ein Fokus-Klau der
+  // ladenden App zurückgegeben wird (der Inhalt lädt asynchron).
+  rememberSource(editor);
+  bounceFocusUntil = Date.now() + 2500;
 
   if (openMode === "panel") {
     await provider.show(frameUrl, externalUrl);
@@ -322,13 +354,8 @@ async function runApp(
     showInTab(frameUrl, externalUrl, `abap2UI5: ${className}`);
   }
 
-  // Fokus zurück in den Quelltext an dieselbe Stelle (F9 soll nicht aus dem
-  // Editor herausspringen).
-  await vscode.window.showTextDocument(editor.document, {
-    viewColumn: sourceColumn,
-    selection: sourceSelection,
-    preserveFocus: false,
-  });
+  // Fokus sofort zurück in den Quelltext an dieselbe Stelle.
+  await restoreSourceFocus();
 }
 
 // ---------------------------------------------------------------------------

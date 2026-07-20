@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.2
+
+- Fix: Cursor bleibt nach F9 wirklich im Quelltext. Die ladende UI5-App zieht
+  den Fokus asynchron an sich – die Extension fängt das jetzt für ein kurzes
+  Zeitfenster ab (`onDidChangeViewState`) und gibt den Fokus in den Code zurück.
+
 ## 0.4.1
 
 - F9 gibt den Fokus nach dem Start/Reload wieder an den Quelltext zurück –
