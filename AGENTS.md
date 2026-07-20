@@ -578,12 +578,16 @@ scripts.**
   button opens the deviations popup) · **Open** (a button that opens an anchored
   popover of every link: OpenUI5 API, OpenUI5 source, live fullscreen sample,
   the generated class on GitHub, and starting the app). The **Control** name and
-  the **Since** value are coloured by availability (from `ui5/universe.json`):
-  green when the control existed by UI5 1.71, yellow when newer, red +
-  strikethrough when deprecated — carried as an inline-styled `sap.m.FormattedText`
-  `htmlText` so the colour varies per row (a bound `class` would not, being applied
-  once at parse time). All current ports are in-scope (≤ 1.71, non-deprecated), so
-  they all render green today. **Search and sort run entirely on the
+  the **Since** value come from `ui5/universe.json`. **Text is never coloured**;
+  a deprecated control's name is struck through (via a `sap.m.FormattedText`
+  `htmlText`, so the strikethrough can vary per row — a bound `class` would not,
+  being applied once at parse time). All current ports are in-scope (≤ 1.71,
+  non-deprecated), so none is struck today. A **Switch** in the subheader
+  toggles between the table and a **module → control → sample tree**
+  (`sap.m.Tree`, nested `nodes`, `get_tree`) showing the same samples; both
+  views are bound and their `visible` is an expression binding over the two-way
+  `show_tree` flag, so the toggle runs entirely on the client (like app 007).
+  **Search and sort run entirely on the
   frontend** — a **search field** in the page subheader filters the rows by a
   substring over every column, and each column header carries
   ascending/descending **sort** icons; both are wired via

@@ -1,4 +1,8 @@
 "! Generated overview app - lists every abap2UI5 api sample app in a table.
+"! A Switch in the header toggles between the table and a module -> control ->
+"! sample tree (sap.m.Tree) showing the same samples - both views are bound and
+"! their visibility is an expression binding over the two-way show_tree flag, so
+"! the toggle runs entirely on the client (no round-trip).
 "! The Since column shows the UI5 release the control appeared in (from
 "! ui5/universe.json; blank when older than tracking). Text is never coloured;
 "! a deprecated control's name is struck through (FormattedText htmlText, so the
@@ -47,7 +51,25 @@ CLASS z2ui5_cl_ai_app_overview DEFINITION PUBLIC.
       END OF ty_s_app.
     TYPES ty_t_app TYPE STANDARD TABLE OF ty_s_app WITH EMPTY KEY.
 
+    " nested tree model (module -> control -> sample); sap.m.Tree recurses on the nodes tables
+    TYPES:
+      BEGIN OF ty_s_sample,
+        text TYPE string,
+      END OF ty_s_sample,
+      BEGIN OF ty_s_control,
+        text  TYPE string,
+        nodes TYPE STANDARD TABLE OF ty_s_sample WITH EMPTY KEY,
+      END OF ty_s_control,
+      BEGIN OF ty_s_module,
+        text  TYPE string,
+        nodes TYPE STANDARD TABLE OF ty_s_control WITH EMPTY KEY,
+      END OF ty_s_module.
+    TYPES ty_t_tree TYPE STANDARD TABLE OF ty_s_module WITH EMPTY KEY.
+
     DATA t_app TYPE ty_t_app.
+    DATA t_tree TYPE ty_t_tree.
+    " table when off, tree when on (bound two-way; drives the visible expressions)
+    DATA show_tree TYPE abap_bool.
 
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
@@ -57,6 +79,9 @@ CLASS z2ui5_cl_ai_app_overview DEFINITION PUBLIC.
     METHODS get_catalog
       RETURNING
         VALUE(result) TYPE ty_t_app.
+    METHODS get_tree
+      RETURNING
+        VALUE(result) TYPE ty_t_tree.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -170,6 +195,7 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
     " base url to launch an abap2UI5 app in a new browser tab
     DATA(start) = |{ client->get( )-s_config-origin }{ client->get( )-s_config-pathname }?app_start=|.
 
+    t_tree = get_tree( ).
     t_app = get_catalog( ).
     LOOP AT t_app ASSIGNING FIELD-SYMBOL(<app>).
 
@@ -230,17 +256,26 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                         " filter on the FILTER blob via _event_client - no backend round-trip
                         )->leaf( `SearchField`
                             )->a( n = `placeholder` v = `Search across all samples - module, control, sample, class, notes...`
-                            )->a( n = `width`       v = `100%`
+                            )->a( n = `width`       v = `24rem`
                             )->a( n = `liveChange`  v = client->_event_client( val = client->cs_event-binding_call t_arg = VALUE #( ( `idOverviewTable` ) ( `items` ) ( `filter` ) ( `FILTER` ) ( `Contains` ) ( `${$parameters>/newValue}` ) ) )
                             )->a( n = `search`      v = client->_event_client( val = client->cs_event-binding_call t_arg = VALUE #( ( `idOverviewTable` ) ( `items` ) ( `filter` ) ( `FILTER` ) ( `Contains` ) ( `${$parameters>/query}` ) ) )
+                        )->leaf( `ToolbarSpacer`
+                        )->leaf( `Label`
+                            )->a( n = `text` v = `Tree view`
+                        " Switch toggles table vs tree entirely on the client (two-way
+                        " bound show_tree drives both views' visible expression bindings)
+                        )->leaf( `Switch`
+                            )->a( n = `state`   v = client->_bind( show_tree )
+                            )->a( n = `tooltip` v = `Switch between the table and a module -> control -> sample tree`
 
                     )->shut(
                 )->shut(
 
                 )->open( `Table`
-                    )->a( n = `id`     v = `idOverviewTable`
-                    )->a( n = `sticky` v = `ColumnHeaders`
-                    )->a( n = `items`  v = client->_bind( t_app )
+                    )->a( n = `id`      v = `idOverviewTable`
+                    )->a( n = `sticky`  v = `ColumnHeaders`
+                    )->a( n = `visible` v = |\{= !${ client->_bind( show_tree ) } \}|
+                    )->a( n = `items`   v = client->_bind( t_app )
 
                     )->open( `columns`
                         )->open( `Column`
@@ -400,7 +435,22 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                                     )->a( n = `icon`    v = `sap-icon://action`
                                     )->a( n = `type`    v = `Transparent`
                                     )->a( n = `tooltip` v = `Open links for this sample`
-                                    )->a( n = `press`   v = client->_event( val = `LINKS` t_arg = VALUE #( ( `${API_URL}` ) ( `${JS_URL}` ) ( `${UI5_URL}` ) ( `${ABAP_URL}` ) ( `${START_URL}` ) ( `$event.oSource.sId` ) ) ) ).
+                                    )->a( n = `press`   v = client->_event( val = `LINKS` t_arg = VALUE #( ( `${API_URL}` ) ( `${JS_URL}` ) ( `${UI5_URL}` ) ( `${ABAP_URL}` ) ( `${START_URL}` ) ( `$event.oSource.sId` ) ) )
+
+                                )->shut(
+                            )->shut(
+                        )->shut(
+                    )->shut(
+
+                    " tree view (module -> control -> sample) - shown instead of the
+                    " table when the header Switch is on (client-side visible binding)
+                    )->open( `Tree`
+                        )->a( n = `id`      v = `idOverviewTree`
+                        )->a( n = `visible` v = |\{= ${ client->_bind( show_tree ) } \}|
+                        )->a( n = `items`   v = client->_bind( t_tree )
+
+                        )->leaf( `StandardTreeItem`
+                            )->a( n = `title` v = `{TEXT}` ).
 
     client->view_display( view->stringify( ) ).
 
@@ -814,6 +864,121 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
       ( module = `sap.m` control = `sap.m.Tree`                        name = `Tree`                        class = `z2ui5_cl_ai_app_054` path = `src/01/b04/z2ui5_cl_ai_app_054.clas.abap`
         since = `1.42`
         checked = `CHECKED (2026-07-19): verified in a running system - human visual pass 2026-07-19 over all apps: the nested-table hierarchy renders as an expandable Tree like the original.` ) ).
+
+  ENDMETHOD.
+
+
+  METHOD get_tree.
+
+    result = VALUE #(
+      ( text = `sap.m` nodes = VALUE #(
+          ( text = `ActionListItem` nodes = VALUE #(
+              ( text = `ActionListItem - z2ui5_cl_ai_app_001` ) ) )
+          ( text = `Bar` nodes = VALUE #(
+              ( text = `Page - z2ui5_cl_ai_app_002` ) ) )
+          ( text = `Breadcrumbs` nodes = VALUE #(
+              ( text = `Breadcrumbs - z2ui5_cl_ai_app_003` ) ) )
+          ( text = `BusyDialog` nodes = VALUE #(
+              ( text = `BusyDialog - z2ui5_cl_ai_app_004` ) ) )
+          ( text = `Button` nodes = VALUE #(
+              ( text = `Button - z2ui5_cl_ai_app_005` ) ) )
+          ( text = `Carousel` nodes = VALUE #(
+              ( text = `CarouselWithControls - z2ui5_cl_ai_app_006` ) ) )
+          ( text = `CheckBox` nodes = VALUE #(
+              ( text = `CheckBoxTriState - z2ui5_cl_ai_app_007` ) ) )
+          ( text = `ColorPalette` nodes = VALUE #(
+              ( text = `ColorPalette - z2ui5_cl_ai_app_008` ) ) )
+          ( text = `Column` nodes = VALUE #(
+              ( text = `Table - z2ui5_cl_ai_app_009` ) ) )
+          ( text = `ColumnListItem` nodes = VALUE #(
+              ( text = `TableTest - z2ui5_cl_ai_app_010` ) ) )
+          ( text = `ComboBox` nodes = VALUE #(
+              ( text = `ComboBox - z2ui5_cl_ai_app_011` ) ) )
+          ( text = `ComparisonPattern` nodes = VALUE #(
+              ( text = `ComparisonPattern - z2ui5_cl_ai_app_012` ) ) )
+          ( text = `CookieSettingsDialogPattern` nodes = VALUE #(
+              ( text = `CookieSettingsDialogPattern - z2ui5_cl_ai_app_013` ) ) )
+          ( text = `CustomListItem` nodes = VALUE #(
+              ( text = `CustomListItem - z2ui5_cl_ai_app_014` ) ) )
+          ( text = `CustomTreeItem` nodes = VALUE #(
+              ( text = `CustomTreeItem - z2ui5_cl_ai_app_015` ) ) )
+          ( text = `DatePicker` nodes = VALUE #(
+              ( text = `DatePickerHidden - z2ui5_cl_ai_app_016` ) ) )
+          ( text = `DateRangeSelection` nodes = VALUE #(
+              ( text = `DateRangeSelection - z2ui5_cl_ai_app_017` ) ) )
+          ( text = `DateTimePicker` nodes = VALUE #(
+              ( text = `DateTimePicker - z2ui5_cl_ai_app_018` ) ) )
+          ( text = `Dialog` nodes = VALUE #(
+              ( text = `DialogConfirm - z2ui5_cl_ai_app_019` ) ) )
+          ( text = `DisplayListItem` nodes = VALUE #(
+              ( text = `DisplayListItem - z2ui5_cl_ai_app_020` ) ) )
+          ( text = `DraftIndicator` nodes = VALUE #(
+              ( text = `DraftIndicator - z2ui5_cl_ai_app_021` ) ) )
+          ( text = `FacetFilter` nodes = VALUE #(
+              ( text = `FacetFilterLight - z2ui5_cl_ai_app_022` ) ) )
+          ( text = `FeedContent` nodes = VALUE #(
+              ( text = `FeedContent - z2ui5_cl_ai_app_023` ) ) )
+          ( text = `FeedInput` nodes = VALUE #(
+              ( text = `Feed - z2ui5_cl_ai_app_024` ) ) )
+          ( text = `FeedListItem` nodes = VALUE #(
+              ( text = `FeedListItem - z2ui5_cl_ai_app_025` ) ) )
+          ( text = `FlexBox` nodes = VALUE #(
+              ( text = `FlexBoxNested - z2ui5_cl_ai_app_026` ) ) )
+          ( text = `GenericTag` nodes = VALUE #(
+              ( text = `GenericTag - z2ui5_cl_ai_app_027` ) ) )
+          ( text = `GenericTile` nodes = VALUE #(
+              ( text = `GenericTileAsKPITile - z2ui5_cl_ai_app_028` ) ) )
+          ( text = `HeaderContainer` nodes = VALUE #(
+              ( text = `HeaderContainer - z2ui5_cl_ai_app_029` ) ) )
+          ( text = `IconTabBar` nodes = VALUE #(
+              ( text = `IconTabBarStretchContent - z2ui5_cl_ai_app_030` ) ) )
+          ( text = `Image` nodes = VALUE #(
+              ( text = `ImageModeBackground - z2ui5_cl_ai_app_031` ) ) )
+          ( text = `Input` nodes = VALUE #(
+              ( text = `InputValueState - z2ui5_cl_ai_app_032` ) ) )
+          ( text = `Link` nodes = VALUE #(
+              ( text = `LinkEmphasized - z2ui5_cl_ai_app_033` ) ) )
+          ( text = `List` nodes = VALUE #(
+              ( text = `ListCounter - z2ui5_cl_ai_app_034` )
+              ( text = `ListNoData - z2ui5_cl_ai_app_035` ) ) )
+          ( text = `MessageBox` nodes = VALUE #(
+              ( text = `MessageBoxInitialFocus - z2ui5_cl_ai_app_036` ) ) )
+          ( text = `MessageToast` nodes = VALUE #(
+              ( text = `MessageToast - z2ui5_cl_ai_app_037` ) ) )
+          ( text = `MessageView` nodes = VALUE #(
+              ( text = `MessageViewMessageManager - z2ui5_cl_ai_app_038` ) ) )
+          ( text = `MultiComboBox` nodes = VALUE #(
+              ( text = `MultiComboBoxGrouping - z2ui5_cl_ai_app_039` ) ) )
+          ( text = `MultiInput` nodes = VALUE #(
+              ( text = `MultiInput - z2ui5_cl_ai_app_040` ) ) )
+          ( text = `ObjectHeader` nodes = VALUE #(
+              ( text = `ObjectHeader - z2ui5_cl_ai_app_041` ) ) )
+          ( text = `ObjectStatus` nodes = VALUE #(
+              ( text = `ObjectStatus - z2ui5_cl_ai_app_042` ) ) )
+          ( text = `Panel` nodes = VALUE #(
+              ( text = `PanelExpanded - z2ui5_cl_ai_app_043` ) ) )
+          ( text = `PDFViewer` nodes = VALUE #(
+              ( text = `PDFViewerPopup - z2ui5_cl_ai_app_044` ) ) )
+          ( text = `RangeSlider` nodes = VALUE #(
+              ( text = `RangeSlider - z2ui5_cl_ai_app_045` ) ) )
+          ( text = `ScrollContainer` nodes = VALUE #(
+              ( text = `ScrollContainer - z2ui5_cl_ai_app_046` ) ) )
+          ( text = `SegmentedButton` nodes = VALUE #(
+              ( text = `SegmentedButton - z2ui5_cl_ai_app_047` ) ) )
+          ( text = `Select` nodes = VALUE #(
+              ( text = `Select - z2ui5_cl_ai_app_048` ) ) )
+          ( text = `StepInput` nodes = VALUE #(
+              ( text = `StepInput - z2ui5_cl_ai_app_049` ) ) )
+          ( text = `Switch` nodes = VALUE #(
+              ( text = `Switch - z2ui5_cl_ai_app_050` ) ) )
+          ( text = `Text` nodes = VALUE #(
+              ( text = `Text - z2ui5_cl_ai_app_051` ) ) )
+          ( text = `TextArea` nodes = VALUE #(
+              ( text = `TextArea - z2ui5_cl_ai_app_052` ) ) )
+          ( text = `Toolbar` nodes = VALUE #(
+              ( text = `ToolbarShrinkable - z2ui5_cl_ai_app_053` ) ) )
+          ( text = `Tree` nodes = VALUE #(
+              ( text = `Tree - z2ui5_cl_ai_app_054` ) ) ) ) ) ).
 
   ENDMETHOD.
 

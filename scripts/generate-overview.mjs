@@ -115,6 +115,27 @@ const rows = apps.map((a) => {
   return extras.length ? `${base}\n        ${extras.join('\n        ')} )` : `${base} )`;
 });
 
+// nested tree data for the Tree view: module -> control -> sample (apps are
+// already sorted module/control/sample, so a running group-by suffices). Each
+// level carries a `nodes` child table, the property sap.m.Tree recurses on.
+const bareCtrl = (e) => e.slice(e.lastIndexOf('.') + 1);
+const treeData = [];
+for (const a of apps) {
+  let mod = treeData.at(-1);
+  if (!mod || mod.text !== a.module) { mod = { text: a.module, ctrls: [] }; treeData.push(mod); }
+  let ctrl = mod.ctrls.at(-1);
+  if (!ctrl || ctrl.key !== a.control) { ctrl = { key: a.control, text: bareCtrl(a.control), samples: [] }; mod.ctrls.push(ctrl); }
+  ctrl.samples.push(`${a.name} - ${a.cls}`);
+}
+const tq = (s) => '`' + String(s).replace(/`/g, '``') + '`';
+const treeRows = treeData.map((mod) =>
+  `      ( text = ${tq(mod.text)} nodes = VALUE #(\n` +
+  mod.ctrls.map((ctrl) =>
+    `          ( text = ${tq(ctrl.text)} nodes = VALUE #(\n` +
+    ctrl.samples.map((s) => `              ( text = ${tq(s)} )`).join('\n') +
+    ' ) )').join('\n') +
+  ' ) )').join('\n');
+
 // --- client-side (roundtrip-free) filter & sort, both via cs_event-binding_call
 // wired through _event_client (see abap2UI5 z2ui5_if_client / FrontendAction.js):
 // the value/direction is resolved on the frontend, the model stays untouched. ---
@@ -169,6 +190,10 @@ const columnsBlock = [
 ].join('\n');
 
 const abap = `"! Generated overview app - lists every abap2UI5 api sample app in a table.
+"! A Switch in the header toggles between the table and a module -> control ->
+"! sample tree (sap.m.Tree) showing the same samples - both views are bound and
+"! their visibility is an expression binding over the two-way show_tree flag, so
+"! the toggle runs entirely on the client (no round-trip).
 "! The Since column shows the UI5 release the control appeared in (from
 "! ui5/universe.json; blank when older than tracking). Text is never coloured;
 "! a deprecated control's name is struck through (FormattedText htmlText, so the
@@ -217,7 +242,25 @@ CLASS ${CLASS} DEFINITION PUBLIC.
       END OF ty_s_app.
     TYPES ty_t_app TYPE STANDARD TABLE OF ty_s_app WITH EMPTY KEY.
 
+    " nested tree model (module -> control -> sample); sap.m.Tree recurses on the nodes tables
+    TYPES:
+      BEGIN OF ty_s_sample,
+        text TYPE string,
+      END OF ty_s_sample,
+      BEGIN OF ty_s_control,
+        text  TYPE string,
+        nodes TYPE STANDARD TABLE OF ty_s_sample WITH EMPTY KEY,
+      END OF ty_s_control,
+      BEGIN OF ty_s_module,
+        text  TYPE string,
+        nodes TYPE STANDARD TABLE OF ty_s_control WITH EMPTY KEY,
+      END OF ty_s_module.
+    TYPES ty_t_tree TYPE STANDARD TABLE OF ty_s_module WITH EMPTY KEY.
+
     DATA t_app TYPE ty_t_app.
+    DATA t_tree TYPE ty_t_tree.
+    " table when off, tree when on (bound two-way; drives the visible expressions)
+    DATA show_tree TYPE abap_bool.
 
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
@@ -227,6 +270,9 @@ CLASS ${CLASS} DEFINITION PUBLIC.
     METHODS get_catalog
       RETURNING
         VALUE(result) TYPE ty_t_app.
+    METHODS get_tree
+      RETURNING
+        VALUE(result) TYPE ty_t_tree.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -340,6 +386,7 @@ CLASS ${CLASS} IMPLEMENTATION.
     " base url to launch an abap2UI5 app in a new browser tab
     DATA(start) = |{ client->get( )-s_config-origin }{ client->get( )-s_config-pathname }?app_start=|.
 
+    t_tree = get_tree( ).
     t_app = get_catalog( ).
     LOOP AT t_app ASSIGNING FIELD-SYMBOL(<app>).
 
@@ -400,17 +447,26 @@ CLASS ${CLASS} IMPLEMENTATION.
                         " filter on the FILTER blob via _event_client - no backend round-trip
                         )->leaf( \`SearchField\`
                             )->a( n = \`placeholder\` v = \`Search across all samples - module, control, sample, class, notes...\`
-                            )->a( n = \`width\`       v = \`100%\`
+                            )->a( n = \`width\`       v = \`24rem\`
                             )->a( n = \`liveChange\`  v = ${filterCall('${$parameters>/newValue}')}
                             )->a( n = \`search\`      v = ${filterCall('${$parameters>/query}')}
+                        )->leaf( \`ToolbarSpacer\`
+                        )->leaf( \`Label\`
+                            )->a( n = \`text\` v = \`Tree view\`
+                        " Switch toggles table vs tree entirely on the client (two-way
+                        " bound show_tree drives both views' visible expression bindings)
+                        )->leaf( \`Switch\`
+                            )->a( n = \`state\`   v = client->_bind( show_tree )
+                            )->a( n = \`tooltip\` v = \`Switch between the table and a module -> control -> sample tree\`
 
                     )->shut(
                 )->shut(
 
                 )->open( \`Table\`
-                    )->a( n = \`id\`     v = \`${ID_TABLE}\`
-                    )->a( n = \`sticky\` v = \`ColumnHeaders\`
-                    )->a( n = \`items\`  v = client->_bind( t_app )
+                    )->a( n = \`id\`      v = \`${ID_TABLE}\`
+                    )->a( n = \`sticky\`  v = \`ColumnHeaders\`
+                    )->a( n = \`visible\` v = |\\{= !\${ client->_bind( show_tree ) } \\}|
+                    )->a( n = \`items\`   v = client->_bind( t_app )
 
                     )->open( \`columns\`
 ${columnsBlock}
@@ -479,7 +535,22 @@ ${columnsBlock}
                                     )->a( n = \`icon\`    v = \`sap-icon://action\`
                                     )->a( n = \`type\`    v = \`Transparent\`
                                     )->a( n = \`tooltip\` v = \`Open links for this sample\`
-                                    )->a( n = \`press\`   v = client->_event( val = \`LINKS\` t_arg = VALUE #( ( \`\${API_URL}\` ) ( \`\${JS_URL}\` ) ( \`\${UI5_URL}\` ) ( \`\${ABAP_URL}\` ) ( \`\${START_URL}\` ) ( \`\$event.oSource.sId\` ) ) ) ).
+                                    )->a( n = \`press\`   v = client->_event( val = \`LINKS\` t_arg = VALUE #( ( \`\${API_URL}\` ) ( \`\${JS_URL}\` ) ( \`\${UI5_URL}\` ) ( \`\${ABAP_URL}\` ) ( \`\${START_URL}\` ) ( \`\$event.oSource.sId\` ) ) )
+
+                                )->shut(
+                            )->shut(
+                        )->shut(
+                    )->shut(
+
+                    " tree view (module -> control -> sample) - shown instead of the
+                    " table when the header Switch is on (client-side visible binding)
+                    )->open( \`Tree\`
+                        )->a( n = \`id\`      v = \`idOverviewTree\`
+                        )->a( n = \`visible\` v = |\\{= \${ client->_bind( show_tree ) } \\}|
+                        )->a( n = \`items\`   v = client->_bind( t_tree )
+
+                        )->leaf( \`StandardTreeItem\`
+                            )->a( n = \`title\` v = \`{TEXT}\` ).
 
     client->view_display( view->stringify( ) ).
 
@@ -490,6 +561,14 @@ ${columnsBlock}
 
     result = VALUE #(
 ${rows.join('\n')} ).
+
+  ENDMETHOD.
+
+
+  METHOD get_tree.
+
+    result = VALUE #(
+${treeRows} ).
 
   ENDMETHOD.
 
