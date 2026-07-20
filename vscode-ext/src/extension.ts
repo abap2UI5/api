@@ -157,6 +157,23 @@ class PreviewViewProvider implements vscode.WebviewViewProvider {
 let appPanel: vscode.WebviewPanel | undefined;
 let appPanelExternalUrl: string | undefined;
 
+// Aktuell im Tab gezeigte App (für Auto-Reload beim Aktivieren/Speichern).
+let currentClassName: string | undefined;
+let currentFrameUrl: string | undefined;
+let currentExternalUrl: string | undefined;
+
+/** Lädt die im Tab gezeigte App neu, ohne den Fokus zu verschieben. */
+function reloadShownApp(): void {
+  if (!appPanel || !currentFrameUrl || !currentExternalUrl) {
+    return;
+  }
+  void appPanel.webview.postMessage({
+    type: "load",
+    frameUrl: currentFrameUrl,
+    externalUrl: currentExternalUrl,
+  });
+}
+
 // Editor-Position, an die der Fokus nach F9 zurückkehren soll.
 let sourceDoc: vscode.TextDocument | undefined;
 let sourceSelection: vscode.Selection | undefined;
@@ -348,6 +365,11 @@ async function runApp(
   rememberSource(editor);
   bounceFocusUntil = Date.now() + 2500;
 
+  // Für Auto-Reload beim Aktivieren/Speichern merken.
+  currentClassName = className;
+  currentFrameUrl = frameUrl;
+  currentExternalUrl = externalUrl;
+
   if (openMode === "panel") {
     await provider.show(frameUrl, externalUrl);
   } else {
@@ -375,6 +397,31 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand("abap2ui5.run", () =>
       runApp(context, proxy, provider)
     ),
+    // Auto-Reload: Klasse der gezeigten App aktiviert/gespeichert -> Tab neu laden.
+    vscode.workspace.onDidSaveTextDocument((doc) => {
+      if (!appPanel || doc.languageId !== "abap") {
+        return;
+      }
+      const on = vscode.workspace
+        .getConfiguration(CONFIG_SECTION)
+        .get<boolean>("reloadOnSave", true);
+      if (!on) {
+        return;
+      }
+      if (!APP_INTERFACE_RE.test(doc.getText())) {
+        return;
+      }
+      if (currentClassName && resolveClassName(doc) !== currentClassName) {
+        return;
+      }
+      // Fokus im Code halten, falls die neu ladende App ihn greifen will.
+      const ed = vscode.window.activeTextEditor;
+      if (ed && ed.document === doc) {
+        rememberSource(ed);
+        bounceFocusUntil = Date.now() + 2500;
+      }
+      reloadShownApp();
+    }),
     vscode.commands.registerCommand("abap2ui5.resetCredentials", async () => {
       await context.secrets.delete(SECRET_USER);
       await context.secrets.delete(SECRET_PASS);

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0
+
+- **Auto-Reload beim Aktivieren:** Wird die im Tab gezeigte App-Klasse
+  gespeichert/aktiviert, lädt der eingebettete Browser automatisch neu –
+  ohne F9. Abschaltbar über `abap2ui5.reloadOnSave` (Default: an).
+
 ## 0.4.2
 
 - Fix: Cursor bleibt nach F9 wirklich im Quelltext. Die ladende UI5-App zieht

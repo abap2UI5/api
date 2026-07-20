@@ -10,6 +10,9 @@ Gedacht zum **privaten Teilen** (du + Freunde) – ganz **ohne Marketplace**.
   (neben Terminal/Output) in einem eingebetteten Browser.
   Ist die Klasse *keine* z2ui5-App, verhält sich F9 wie gewohnt
   (Breakpoint umschalten).
+- **Auto-Reload beim Aktivieren** – Wird die im Tab gezeigte App-Klasse
+  gespeichert/aktiviert, lädt der eingebettete Browser automatisch neu (ohne F9).
+  Abschaltbar via `abap2ui5.reloadOnSave`.
 - **Command "abap2UI5: Neue App-Vorlage einfügen"** – App-Klassen-Skelett.
 - **Command "abap2UI5: Demokit im Browser öffnen"** – öffnet das abap2UI5-Repo.
 - **Snippets** (in ABAP-Dateien): `z2ui5app`, `z2ui5button`.
