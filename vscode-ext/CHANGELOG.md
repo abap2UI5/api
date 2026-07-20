@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1
+
+- Fix: leere/weiße App im Tab – der Proxy entfernt jetzt `X-Frame-Options`
+  und die CSP-Direktive `frame-ancestors` aus den SAP-Antworten, sodass der
+  Browser das Einbetten im iframe zulässt.
+
 ## 0.3.0
 
 - **Eingebettete App mit Anmeldung** über einen lokalen Auth-Proxy:

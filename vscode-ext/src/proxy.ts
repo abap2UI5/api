@@ -68,6 +68,28 @@ export class SapProxy {
     const proxyReq = mod.request(options, (proxyRes) => {
       const outHeaders: http.OutgoingHttpHeaders = { ...proxyRes.headers };
 
+      // Framing erlauben: der Server verbietet das Einbetten sonst per
+      // X-Frame-Options / CSP frame-ancestors -> iframe bliebe weiß.
+      delete outHeaders["x-frame-options"];
+      for (const key of [
+        "content-security-policy",
+        "content-security-policy-report-only",
+      ]) {
+        const csp = outHeaders[key];
+        if (typeof csp === "string") {
+          const cleaned = csp
+            .split(";")
+            .filter((d) => !/^\s*frame-ancestors/i.test(d))
+            .join(";")
+            .trim();
+          if (cleaned) {
+            outHeaders[key] = cleaned;
+          } else {
+            delete outHeaders[key];
+          }
+        }
+      }
+
       // Redirects vom SAP-Host auf den Proxy umschreiben
       if (outHeaders.location) {
         outHeaders.location = String(outHeaders.location).replace(
