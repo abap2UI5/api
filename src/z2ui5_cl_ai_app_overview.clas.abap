@@ -895,12 +895,13 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` f:ColumnElementData layoutData hints (cellsSmall/cellsLarge column spans on the street-number, zip-code and one employment Input) are dropped - responsive-span cosmetics with no data/behaviour. //` &&
                  ` 1.71: controller-only pieces with no view/binding equivalent are dropped: buttonIconFormatter/buttonTypeFormatter/highestSeverityMessages (the button's severity-based icon/type/count) is reduced to` &&
                  ` text={=${message>/}.length}, type=Emphasized; the MessageItem groupName/activeTitle formatters and activeTitlePress scroll-to-control navigation; core:CommandExecution (the Ctrl+Shift+M focus` &&
-                 ` shortcut); isPositionable. // SUBSET: 3 of the 8 mock form rows are kept (incl. John Miller's invalid ZIP 'AAA' that trips the Integer validation on render); the single employment row is kept 1:1.` &&
-                 ` Checkable against ui5/sap.m/MessagePopoverMessageHandling/localService/mockdata/FormsModel.json. // NOTE: the controller's handleMessagePopoverPress (this.oMP.toggle(oEvent.getSource())) becomes the` &&
-                 ` SHOW_MESSAGES event -> client->follow_up_action( cs_event-control_by_id, toggleBy ) anchored to the button's DOM ref ($event.oSource.sId), the MessagePopover carrying id=messagePopover -` &&
-                 ` open-if-closed / close-if-open, same frontend-action pattern as apps 066/067. // LIVE-TEST: confirm in a running system: the Integer/email constraint bindings auto-collect their errors into the` &&
-                 ` message> model (invalid ZIP 'AAA', >40 weekly hours, malformed email) and set the field valueState; the MessagePopover button shows/hides on {message>/} and lists them; and and Save flags each EMPTY` &&
-                 ` Name on its own row (a filled Name stays clean) via z2ui5.cc.MessageManager. Toggle + ZIP auto-collection visually confirmed 2026-07-21; the per-empty-row Save still to re-confirm live.`
+                 ` shortcut); isPositionable. // NOTE: the controller's handleMessagePopoverPress (this.oMP.toggle(oEvent.getSource())) becomes the SHOW_MESSAGES event -> client->follow_up_action(` &&
+                 ` cs_event-control_by_id, toggleBy ) anchored to the button's DOM ref ($event.oSource.sId), the MessagePopover carrying id=messagePopover - open-if-closed / close-if-open, same frontend-action pattern` &&
+                 ` as apps 066/067. // NOTE: all 8 forms of the mock FormsModel.json are loaded verbatim (Julie Armstrong, Denise Smith, Richard Wilson, Gerd Becker, John Miller with the built-in invalid ZIP AAA,` &&
+                 ` Stefan Bosch, Maria Fontes with empty email + malformed website, Antonio Ferrari) plus the single employment row - the full data set, not a subset. // LIVE-TEST: confirm in a running system: the` &&
+                 ` Integer/email constraint bindings auto-collect their errors into the message> model (invalid ZIP 'AAA', >40 weekly hours, malformed email) and set the field valueState; the MessagePopover button` &&
+                 ` shows/hides on {message>/} and lists them; and and Save flags each EMPTY Name on its own row (a filled Name stays clean) via z2ui5.cc.MessageManager. Toggle + ZIP auto-collection visually confirmed` &&
+                 ` 2026-07-21; the per-empty-row Save still to re-confirm live.`
         post171 = `two post-1.71 members are kept for the 1:1 port: Button.ariaHasPopup (since UI5 1.84) on the MessagePopover button, and MessagePopover.groupItems (since UI5 1.73).` )
       ( module = `sap.m` control = `sap.m.MessageStrip`                name = `MessageStripWithEnableFormattedText` class = `z2ui5_cl_ai_app_062` path = `src/01/b07/z2ui5_cl_ai_app_062.clas.abap`
         since = `1.30`

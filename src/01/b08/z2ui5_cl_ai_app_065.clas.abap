@@ -299,9 +299,24 @@ CLASS z2ui5_cl_ai_app_065 IMPLEMENTATION.
       ( name = `Denise Smith` street_name = `Mainstreet` street_number = `1567`
         zip_code = `12345` zip_city = `Maintown` country = `Germany`
         email = `Denise.Smith@company.com` phone_number = `+1 (610) 661-1000` phone_time = `12:00` website = `n/a` )
+      ( name = `Richard Wilson` street_name = `Mainstreet` street_number = `2984`
+        zip_code = `12345` zip_city = `Maintown` country = `Germany`
+        email = `Richard.Wilson@company.com` phone_number = `+1 (610) 661-1000` phone_time = `12:00` website = `n/a` )
+      ( name = `Gerd Becker` street_name = `Mainstreet` street_number = `3614`
+        zip_code = `12345` zip_city = `Maintown` country = `Germany`
+        email = `Gerd.Becker@company.com` phone_number = `+1 (610) 661-1000` phone_time = `12:00` website = `n/a` )
       ( name = `John Miller` street_name = `Mainstreet` street_number = `1618`
         zip_code = `AAA` zip_city = `Maintown` country = `Germany`
-        email = `John.Miller@company.com` phone_number = `+1 (610) 661-1000` phone_time = `12:00` website = `n/a` ) ).
+        email = `John.Miller@company.com` phone_number = `+1 (610) 661-1000` phone_time = `12:00` website = `n/a` )
+      ( name = `Stefan Bosch` street_name = `Mainstreet` street_number = `4864`
+        zip_code = `12345` zip_city = `Maintown` country = `Germany`
+        email = `Stefan.Bosch@company.com` phone_number = `+1 (610) 661-1000` phone_time = `12:00` website = `n/a` )
+      ( name = `Maria Fontes` street_name = `Mainstreet` street_number = `4864`
+        zip_code = `12345` zip_city = `Maintown` country = `Germany`
+        email = `` phone_number = `+1 (610) 661-1000` phone_time = `12:00` website = `MariaFontescompany.com` )
+      ( name = `Antonio Ferrari` street_name = `Mainstreet` street_number = `2598`
+        zip_code = `12345` zip_city = `Maintown` country = `Germany`
+        email = `Antonio.Ferrari@company.com` phone_number = `+1 (610) 661-1000` phone_time = `12:00` website = `n/a` ) ).
 
     t_employment = VALUE #(
       ( jobtitle = `Senior UI Developer (UIDEV-SR)` paygrade = `Salary Grade 18 (GR-14` weeklyhours = `0`
