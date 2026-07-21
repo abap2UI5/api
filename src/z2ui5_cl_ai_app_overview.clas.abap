@@ -836,15 +836,19 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` toggles it via client->follow_up_action( cs_event-control_by_id, toggleBy ) anchored to the button's DOM ref ($event.oSource.sId) - toggleBy (open-if-closed / close-if-open) was added upstream` &&
                  ` 2026-07-20 (pr/menu-toggle-openby) precisely so the client-side open state need not be mirrored server-side, making the press-to-toggle 1:1. Frontend-action pattern as golden app 016. // IMPROVISED:` &&
                  ` onMenuAction builds a breadcrumb path by walking the selected MenuItem's parent chain (e.g. 'Create New Site > Official Store'); the server cannot walk the client-side control tree, so the toast` &&
-                 ` shows only the selected item's own text, transported via ${$parameters>/item/text}. // LIVE-TEST: confirm in a running system that the Menu opens anchored to the button (openBy) and that` &&
-                 ` ${$parameters>/item/text} delivers the clicked MenuItem's text to the toast.`
+                 ` shows only the selected item's own text, transported via ${$parameters>/item}.getText(). // NOTE: the selected item's text is read with ${$parameters>/item}.getText() (a method call on the resolved` &&
+                 ` MenuItem control), NOT ${$parameters>/item/text}: the $parameters model exposes 'item' as the control object and UI5 keeps properties in mProperties, so the path .../item/text reads an undefined` &&
+                 ` direct field and the toast arrives empty. // LIVE-TEST: confirm in a running system that the Menu opens anchored to the button (openBy) and that ${$parameters>/item}.getText() delivers the clicked` &&
+                 ` MenuItem's text to the toast.`
         post171 = `Button.ariaHasPopup (since UI5 1.84) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.84 to render it.` )
       ( module = `sap.m` control = `sap.m.MenuButton`                  name = `MenuButton`                          class = `z2ui5_cl_ai_app_061` path = `src/01/b07/z2ui5_cl_ai_app_061.clas.abap`
         notes = `POST-1.71: the MenuButton ``beforeMenuOpen`` event (since UI5 1.94) is kept 1:1 on the split-mode buttons that use it. menuPosition (1.56), buttonMode and useDefaultActionOnly are <= 1.71. //` &&
                  ` IMPROVISED: onMenuAction builds a breadcrumb path by walking the selected MenuItem's parent chain (e.g. 'basic > add'); the server cannot walk the client-side control tree, so the toast shows only` &&
-                 ` the selected item's own text, transported via ${$parameters>/item/text}. // NOTE: onPress toasts the pressed MenuItem's control id (the sample's evt.getSource().getId() + ' Pressed'), transported via` &&
-                 ` $event.oSource.sId. The Edit item's core:CustomData (key=target, value=p1) is kept 1:1 as inert view metadata. // LIVE-TEST: confirm in a running system that` &&
-                 ` itemSelected/press/defaultAction/beforeMenuOpen all fire their toasts and that ${$parameters>/item/text} delivers the selected MenuItem text.`
+                 ` the selected item's own text, transported via ${$parameters>/item}.getText(). // NOTE: onPress toasts the pressed MenuItem's control id (the sample's evt.getSource().getId() + ' Pressed'),` &&
+                 ` transported via $event.oSource.sId. The Edit item's core:CustomData (key=target, value=p1) is kept 1:1 as inert view metadata. // NOTE: the selected item's text is read with` &&
+                 ` ${$parameters>/item}.getText() (a method call on the resolved MenuItem control), NOT ${$parameters>/item/text}: the $parameters model exposes 'item' as the control object and UI5 keeps properties in` &&
+                 ` mProperties, so the path .../item/text reads an undefined direct field and the toast arrives empty. // LIVE-TEST: confirm in a running system that itemSelected/press/defaultAction/beforeMenuOpen all` &&
+                 ` fire their toasts and that ${$parameters>/item}.getText() delivers the selected MenuItem text.`
         post171 = `the MenuButton ``beforeMenuOpen`` event (since UI5 1.94) is kept 1:1 on the split-mode buttons that use it. menuPosition (1.56), buttonMode and useDefaultActionOnly are <= 1.71.` )
       ( module = `sap.m` control = `sap.m.MessageBox`                  name = `MessageBoxInitialFocus`              class = `z2ui5_cl_ai_app_036` path = `src/01/b03/z2ui5_cl_ai_app_036.clas.abap`
         since = `1.21.2`
