@@ -229,6 +229,10 @@ CLASS z2ui5_cl_ai_app_065 IMPLEMENTATION.
                                     )->a( n = `subtitle`    v = `{message>additionalText}`
                                     )->a( n = `type`        v = `{message>type}`
                                     )->a( n = `description` v = `{message>message}`
+                                    )->a( n = `activeTitle` v = `true`
+                                    )->a( n = `activeTitlePress` v = client->_event(
+                                             val   = `ACTIVE_TITLE`
+                                             t_arg = VALUE #( ( `${$parameters>/item}.getBindingContext('message').getObject().getControlIds()[0]` ) ) )
 
                             )->shut(
                         )->shut(
@@ -259,6 +263,20 @@ CLASS z2ui5_cl_ai_app_065 IMPLEMENTATION.
         " original: this.oMP.toggle(oEvent.getSource()) - toggle open/close anchored to the button
         client->follow_up_action( val   = client->cs_event-control_by_id
                                   t_arg = VALUE #( ( `messagePopover` ) ( `` ) ( `toggleBy` ) ( client->get_event_arg( ) ) ) ).
+
+      WHEN `ACTIVE_TITLE`.
+        " original: activeTitlePress scrolls to the message's target control, closes the popover
+        " and focuses the control; the full control id travels from the pressed MessageItem's
+        " message object (getControlIds()[0]) and the frontend SCROLL_INTO_VIEW + SET_FOCUS act on it
+        DATA(lv_control_id) = client->get_event_arg( ).
+        IF lv_control_id IS NOT INITIAL.
+          client->follow_up_action( val   = client->cs_event-scroll_into_view
+                                    t_arg = VALUE #( ( lv_control_id ) ) ).
+          client->follow_up_action( val   = client->cs_event-control_by_id
+                                    t_arg = VALUE #( ( `messagePopover` ) ( `` ) ( `close` ) ) ).
+          client->follow_up_action( val   = client->cs_event-set_focus
+                                    t_arg = VALUE #( ( lv_control_id ) ) ).
+        ENDIF.
 
       WHEN `SAVE`.
         " original: generateInvalidUserInput() forces the required Name empty and flags exactly
