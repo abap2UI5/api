@@ -286,25 +286,25 @@ CLASS z2ui5_cl_ai_app_065 IMPLEMENTATION.
         " original generateInvalidUserInput(): force a set of fields invalid to demo the message
         " handling, then open the MessagePopover. abap2UI5 only auto-collects validation messages
         " from USER input, not from programmatically-set model values, so Save mirrors the four
-        " issues explicitly: it injects the invalid values (so the fields show them + turn red via
-        " the message targets) AND authors the four messages the original ends up with -
-        " empty required Name, non-numeric ZIP, malformed email (Errors) and weekly hours over 40
-        " (Warning) - which the z2ui5.cc.MessageManager reconciles into the message manager.
-        IF t_forms IS NOT INITIAL.
-          t_forms[ 1 ]-name     = ``.
-          t_forms[ 1 ]-zip_code = `AAA`.
-          t_forms[ 1 ]-email    = `MariaFontes.com`.
+        " issues explicitly on the SAME rows the original targets - formContainer.getItems()[4/5/6]
+        " = John Miller / Stefan Bosch / Maria Fontes, plus the employment row: it injects the
+        " invalid values and authors the matching four messages (3 Errors + 1 Warning), which the
+        " z2ui5.cc.MessageManager reconciles into the message manager.
+        IF lines( t_forms ) >= 7.
+          t_forms[ 5 ]-name     = ``.                 " John Miller  -> /T_FORMS/4/NAME
+          t_forms[ 6 ]-zip_code = `AAA`.              " Stefan Bosch -> /T_FORMS/5/ZIP_CODE
+          t_forms[ 7 ]-email    = `MariaFontes.com`.  " Maria Fontes -> /T_FORMS/6/EMAIL
         ENDIF.
         IF t_employment IS NOT INITIAL.
           t_employment[ 1 ]-weeklyhours = `400`.
         ENDIF.
         t_messages = VALUE #(
           ( message = `A mandatory field is required` type = `Error` additionaltext = `Name`
-            target = `/T_FORMS/0/NAME` )
+            target = `/T_FORMS/4/NAME` )
           ( message = `Enter a number without decimals.` type = `Error` additionaltext = `ZIP Code/City`
-            target = `/T_FORMS/0/ZIP_CODE` )
+            target = `/T_FORMS/5/ZIP_CODE` )
           ( message = `Enter a valid email address.` type = `Error` additionaltext = `Email`
-            target = `/T_FORMS/0/EMAIL` )
+            target = `/T_FORMS/6/EMAIL` )
           ( message = `The value should not exceed 40` type = `Warning` additionaltext = `Standard Weekly Hours`
             description = `The value of the working hours field should not exceed 40 hours.`
             target = `/T_EMPLOYMENT/0/WEEKLYHOURS` ) ).
