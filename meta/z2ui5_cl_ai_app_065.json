@@ -18,7 +18,7 @@
     },
     {
       "type": "IMPROVISED",
-      "what": "the controller's manual MessageManager handling is replaced by two framework mechanisms: (1) the typed value bindings with constraints (sap.ui.model.type.Integer/String, ZIP_CODE Integer, WEEKLYHOURS Integer maximum 40, EMAIL search regex) collect/clear their validation messages AUTOMATICALLY into the message> model (no app code) - replacing onChange/handleRequiredField/checkInputConstraints; (2) app-authored messages (the Save 'A mandatory field is required') go through the new z2ui5.cc.MessageManager companion control (items bound to /T_MESSAGES), which reconciles them into the message manager with a target + processor. Save stands in for generateInvalidUserInput."
+      "what": "the controller's manual MessageManager handling is replaced by two framework mechanisms: (1) the typed value bindings with constraints (sap.ui.model.type.Integer/String, ZIP_CODE Integer, WEEKLYHOURS Integer maximum 40, EMAIL search regex) collect/clear their validation messages AUTOMATICALLY into the message> model (no app code) - replacing onChange/handleRequiredField/checkInputConstraints; (2) app-authored messages go through the new z2ui5.cc.MessageManager companion control (items bound to /T_MESSAGES), which reconciles them into the message manager with a target + processor. Save stands in for generateInvalidUserInput: it walks t_forms and authors an 'A mandatory field is required' message for every EMPTY Name, each targeting its own /T_FORMS/<i>/NAME row (a filled Name is left untouched) - faithful to the original forcing the required field empty and flagging exactly it, rather than a single hardcoded target."
     },
     {
       "type": "IMPROVISED",
@@ -38,7 +38,7 @@
     },
     {
       "type": "LIVE_TEST",
-      "what": "confirm in a running system: the Integer/email constraint bindings auto-collect their errors into the message> model (invalid ZIP 'AAA', >40 weekly hours, malformed email) and set the field valueState; the MessagePopover button shows/hides on {message>/} and lists them; and the Save-authored message flows through z2ui5.cc.MessageManager into the MessagePopover 1:1."
+      "what": "confirm in a running system: the Integer/email constraint bindings auto-collect their errors into the message> model (invalid ZIP 'AAA', >40 weekly hours, malformed email) and set the field valueState; the MessagePopover button shows/hides on {message>/} and lists them; and and Save flags each EMPTY Name on its own row (a filled Name stays clean) via z2ui5.cc.MessageManager. Toggle + ZIP auto-collection visually confirmed 2026-07-21; the per-empty-row Save still to re-confirm live."
     }
   ]
 }

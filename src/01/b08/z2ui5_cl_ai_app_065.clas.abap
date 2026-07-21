@@ -261,14 +261,22 @@ CLASS z2ui5_cl_ai_app_065 IMPLEMENTATION.
                                   t_arg = VALUE #( ( `messagePopover` ) ( `` ) ( `toggleBy` ) ( client->get_event_arg( ) ) ) ).
 
       WHEN `SAVE`.
-        " original: generateInvalidUserInput() sets invalid values to trigger validation and the
-        " controller adds MessageManager messages; here the Save authors a demo app message into
-        " t_messages - the z2ui5.cc.MessageManager companion reconciles it into the message manager,
-        " so it shows in the MessagePopover next to the auto-collected binding-validation messages
-        t_messages = VALUE #( ( message        = `A mandatory field is required`
-                                type           = `Error`
-                                additionaltext = `Name`
-                                target         = `/T_FORMS/0/NAME` ) ).
+        " original: generateInvalidUserInput() forces the required Name empty and flags exactly
+        " that field; here Save validates the actual input and authors a mandatory-field message
+        " for every EMPTY Name, targeting that row - the z2ui5.cc.MessageManager companion
+        " reconciles them into the message manager next to the auto-collected binding-validation
+        " messages (a filled Name is left untouched, an empty one is flagged on its own row)
+        CLEAR t_messages.
+        DATA(lv_index) = 0.
+        LOOP AT t_forms ASSIGNING FIELD-SYMBOL(<form>).
+          IF <form>-name IS INITIAL.
+            INSERT VALUE #( message        = `A mandatory field is required`
+                            type           = `Error`
+                            additionaltext = `Name`
+                            target         = |/T_FORMS/{ lv_index }/NAME| ) INTO TABLE t_messages.
+          ENDIF.
+          lv_index = lv_index + 1.
+        ENDLOOP.
         client->view_model_update( ).
 
       WHEN `CHANGE`.
