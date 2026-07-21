@@ -221,18 +221,20 @@ CLASS z2ui5_cl_ai_app_065 IMPLEMENTATION.
 
                         )->open( `dependents`
                             )->open( `MessagePopover`
-                                )->a( n = `id`         v = `messagePopover`
-                                )->a( n = `items`      v = `{message>/}`
-                                )->a( n = `groupItems` v = `true`
+                                )->a( n = `id`              v = `messagePopover`
+                                )->a( n = `items`           v = `{message>/}`
+                                )->a( n = `groupItems`      v = `true`
+                                " activeTitlePress is a MessagePopover event (not MessageItem); it ships the
+                                " pressed message's target control id so the handler can scroll+focus it
+                                )->a( n = `activeTitlePress` v = client->_event(
+                                         val   = `ACTIVE_TITLE`
+                                         t_arg = VALUE #( ( `${$parameters>/item}.getBindingContext('message').getObject().getControlIds()[0]` ) ) )
                                 )->leaf( `MessageItem`
                                     )->a( n = `title`       v = `{message>message}`
                                     )->a( n = `subtitle`    v = `{message>additionalText}`
                                     )->a( n = `type`        v = `{message>type}`
                                     )->a( n = `description` v = `{message>message}`
                                     )->a( n = `activeTitle` v = `true`
-                                    )->a( n = `activeTitlePress` v = client->_event(
-                                             val   = `ACTIVE_TITLE`
-                                             t_arg = VALUE #( ( `${$parameters>/item}.getBindingContext('message').getObject().getControlIds()[0]` ) ) )
 
                             )->shut(
                         )->shut(
