@@ -826,8 +826,9 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` PRICE TYPE p).`
         notes = `SUBSET: the bound /ProductCollection shows a 6-row subset of the 123-row mock (ui5/mock/products.json); HT-1002 is not part of the subset.` )
       ( module = `sap.m` control = `sap.m.List`                        name = `ListCounter`                         class = `z2ui5_cl_ai_app_034` path = `src/01/b04/z2ui5_cl_ai_app_034.clas.abap`
+        checked = `CHECKED (2026-07-21): verified in a running system - human visual check 2026-07-21: the Products list renders the 11 rows with their Quantity counters (display-only app, no interaction to exercise).`
         notes = `POST-1.71: headerLevel="H2" on the List (since UI5 1.117) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.117 to render it. // SUBSET: the bound /ProductCollection` &&
-                 ` shows a 11-row subset of the 123-row mock (ui5/mock/products.json) - a full unroll adds no demo value.`
+                 ` shows the first 11 rows of the 123-row mock (ui5/mock/products.json) verbatim - Name and Quantity match the mock 1:1 (Notebook Basic 15/10 ... Comfort Senior/24); a full unroll adds no demo value.`
         post171 = `headerLevel="H2" on the List (since UI5 1.117) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.117 to render it.` )
       ( module = `sap.m` control = `sap.m.List`                        name = `ListNoData`                          class = `z2ui5_cl_ai_app_035` path = `src/01/b04/z2ui5_cl_ai_app_035.clas.abap` )
       ( module = `sap.m` control = `sap.m.Menu`                        name = `Menu`                                class = `z2ui5_cl_ai_app_060` path = `src/01/b07/z2ui5_cl_ai_app_060.clas.abap`
