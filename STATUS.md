@@ -18,6 +18,37 @@ CAPABILITIES.md._
 | Manually verified in a running system | **46 of 67 ports** — adds 060/061/066/067 (menu + MessagePopover, human live check 2026-07-22) to the 2026-07-20 checked set; the 21 remaining `generated` ports are b01–b04 apps that never carried an open question (machine-verified only) |
 | Archive | `ui5/sap.m/<SampleName>/` — full originals for the 44 ported samples (+2 cross-referenced: `FacetFilterSimple`, `Table`); mock snapshot in `ui5/mock/`. Unported samples are copied over batch by batch. |
 
+## Real-app e2e smoke — runs every port as the actual app (2026-07-22)
+
+`render-smoke` renders a *reconstructed* view; it cannot see the backend
+roundtrip, Component boot or event wiring. New heavy, on-demand harness that
+runs the **real** app:
+
+- `scripts/e2e-build.mjs` (`npm run e2e:build`) — assembles the transpiled
+  backend: copies the abap2UI5 framework src + all 94 ports + the
+  `z2ui5_cl_ai_xml` builder into a build dir, **downports a copy** to v702 with
+  the framework's own `.github/abaplint/abap_702.jsonc` rule set (the transpiler
+  rejects modern `COND … LET …`; a minimal downport produced undefined-var JS,
+  so the full `check_syntax`/`definitions_top` rules are required), then
+  transpiles with `@abaplint/transpiler` → `node/output`. The framework SOURCE
+  is never mutated (only its gitignored build dirs). Needs an abap2UI5 checkout
+  with `node_modules` (`A2UI5_HOME`, default `../abap2UI5`).
+- `scripts/e2e-smoke.mjs` (`npm run e2e`) — boots the framework's express shim
+  (`ZCL_SICF` → `z2ui5_cl_http_handler`, the same open-abap runtime as the
+  framework's own e2e), then for each port opens headless Chromium at
+  `?app_start=<class>`. UI5 is served from the local `@openui5` packages (the
+  sandbox blocks the `sdk.openui5.org` CDN, so those requests are routed to the
+  package sources). Generic assertions, no per-port authoring: **boots UI5 +
+  renders controls + no backend 4xx/5xx + no JS exception** (benign
+  theme/preload/i18n noise from unbundled source filtered by response URL). A
+  small `INTERACTIONS` map adds real click→assert checks (005 press →
+  client-composed "…​Pressed" toast).
+- Result: **94/94 ports pass** — every port runs, boots and renders as the real
+  app. Uses `playwright` core (no new dep) like render-smoke; not in the fast
+  gate set (multi-minute transpile + browser), meant for pre-release / when the
+  framework wire or runtime changes. This is the automated counterpart to the
+  manual live check that the `LIVE_TEST` deviations track.
+
 ## Live-check fixes on b09–b11 (2026-07-22) + three new pr requests
 
 Human live check surfaced six runtime issues (machine checks can't see them);
