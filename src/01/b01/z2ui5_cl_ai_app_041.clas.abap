@@ -76,8 +76,8 @@ CLASS z2ui5_cl_ai_app_041 IMPLEMENTATION.
             )->leaf( `ObjectAttribute`
                 )->a( n = `text`   v = `www.sap.com`
                 )->a( n = `active` v = `true`
-                )->a( n = `press`  v = client->_event_client( val   = client->cs_event-open_new_tab
-                                                              t_arg = VALUE #( ( `http://www.sap.com` ) ) ) ).
+                )->a( n = `press`  v = client->_event_client( val   = client->cs_event-urlhelper
+                                                              t_arg = VALUE #( ( `REDIRECT` ) ( |\{ URL: 'http://www.sap.com', NEW_WINDOW: true \}| ) ) ) ).
 
     client->view_display( view->stringify( ) ).
 

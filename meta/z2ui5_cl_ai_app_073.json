@@ -17,7 +17,7 @@
     },
     {
       "type": "IMPROVISED",
-      "what": "handleSAPLinkPressed's URLHelper.redirect becomes the open_new_tab frontend action; handleFeedbacklinkPressed's Dialog (RatingIndicator + TextArea + Submit/Cancel) is rebuilt via popup_display, the Submit button's 2s setBusy delay before the toast is dropped."
+      "what": "handleSAPLinkPressed's URLHelper.redirect maps to the URLHELPER REDIRECT frontend action (cs_event-urlhelper); handleFeedbacklinkPressed's Dialog (a RatingIndicator + TextArea with Submit/Cancel Button) is rebuilt via popup_display, the Submit button's 2s setBusy delay dropped."
     },
     {
       "type": "POST_171",

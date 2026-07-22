@@ -36,13 +36,19 @@ all fixed, all six checks still green:
 - **081** — the incremental backend load is now reproduced 1:1 (start with one
   product, each pull appends the next via `fill_all` + a `shown` counter) instead
   of binding the full 123 up front.
-- **084** — **cannot be fixed in the port**: the correct `URLHELPER` frontend
-  action exists in JS + as `cs_event-urlhelper`, but has no ABAP-callable path
-  for its params object, and `open_new_tab` is same-origin-only. Filed as a pr.
+- **084** — fixed with the real **`URLHELPER`** frontend action
+  (`cs_event-urlhelper`): `TRIGGER_TEL`/`TRIGGER_SMS` take the number as a plain
+  string param, `TRIGGER_EMAIL`/`REDIRECT` a `{ EMAIL/URL, … }` object-literal
+  `t_arg` (`get_t_arg` emits `{`-prefixed args raw as UI5 event-handler object
+  literals). An earlier claim that URLHELPER had "no ABAP path" was **wrong** —
+  it is callable; the withdrawn `urlhelper-abap-api` pr is recorded in
+  `pr/README` Declined. **`open_new_tab` is same-origin-only** (`isValidRedirectURL`),
+  so it can't open external sites/`tel:`/`mailto:` — the external links in apps
+  **041/073** were switched from `open_new_tab` to `urlhelper` REDIRECT
+  (correctness fix), and CAPABILITIES.md updated.
 
-Three new **`pr/`** requests distilled from the checks:
-[`urlhelper-abap-api`](../pr/urlhelper-abap-api/) (high — blocks 084, affects
-041/073), [`table-hidden-in-popin`](../pr/table-hidden-in-popin/) (medium, 092),
+Two **`pr/`** requests remain from the checks:
+[`table-hidden-in-popin`](../pr/table-hidden-in-popin/) (medium, 092) and
 [`popover-bind-element`](../pr/popover-bind-element/) (low, 094 enhancement).
 
 ## Batch b11 generated (2026-07-22) — pages, pickers, tables & popovers (7 ports)

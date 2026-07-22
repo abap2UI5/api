@@ -1163,8 +1163,9 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         score_tip = `Deviation from the original sample: 2 of 5 (1 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
         since = `1.12`
         notes = `NOTE: element binding kept 1:1 - the two display ObjectAttributes bind a one-record structure /S_PRODUCT instead of {/ProductCollection/0}; record 0 fields verbatim. // IMPROVISED:` &&
-                 ` handleSAPLinkPressed's URLHelper.redirect becomes the open_new_tab frontend action; handleFeedbacklinkPressed's Dialog (RatingIndicator + TextArea + Submit/Cancel) is rebuilt via popup_display, the` &&
-                 ` Submit button's 2s setBusy delay before the toast is dropped. // POST-1.71: ObjectAttribute.ariaHasPopup (since UI5 1.97) is kept 1:1 on the feedback attribute; needs UI5 >= 1.97.`
+                 ` handleSAPLinkPressed's URLHelper.redirect maps to the URLHELPER REDIRECT frontend action (cs_event-urlhelper); handleFeedbacklinkPressed's Dialog (a RatingIndicator + TextArea with Submit/Cancel` &&
+                 ` Button) is rebuilt via popup_display, the Submit button's 2s setBusy delay dropped. // POST-1.71: ObjectAttribute.ariaHasPopup (since UI5 1.97) is kept 1:1 on the feedback attribute; needs UI5 >=` &&
+                 ` 1.97.`
         post171 = `ObjectAttribute.ariaHasPopup (since UI5 1.97) is kept 1:1 on the feedback attribute; needs UI5 >= 1.97.` )
       ( module = `sap.m` control = `sap.m.ObjectHeader`                name = `ObjectHeader`                        class = `z2ui5_cl_ai_app_041` path = `src/01/b01/z2ui5_cl_ai_app_041.clas.abap`
         score = 1
@@ -1176,7 +1177,8 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         notes = `NOTE: the ObjectHeader keeps the original element binding and relative field bindings 1:1 (title, numberUnit, the ObjectAttribute composite texts and the sap.ui.model.type.Currency number binding);` &&
                  ` only the binding context path changes - a one-record structure /S_PRODUCT in the default model instead of {/ProductCollection/0}, since the port does not carry the whole collection. // NOTE: the` &&
                  ` model holds exactly the bound record /ProductCollection/0 (Notebook Basic 15) of ui5/mock/products.json, verbatim - this is the original sample's own single-record binding {/ProductCollection/0}, not` &&
-                 ` a shortened data set.` )
+                 ` a shortened data set. // NOTE: the active ObjectAttribute 'www.sap.com' opens via the URLHELPER REDIRECT frontend action (cs_event-urlhelper, { URL, NEW_WINDOW } object param) - not open_new_tab,` &&
+                 ` which is same-origin-only.` )
       ( module = `sap.m` control = `sap.m.ObjectIdentifier`            name = `ObjectIdentifier`                    class = `z2ui5_cl_ai_app_071` path = `src/01/b09/z2ui5_cl_ai_app_071.clas.abap`
         score = 1
         score_state = `Success`
@@ -1409,13 +1411,13 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         since = `1.42`
         checked = `CHECKED (2026-07-19): verified in a running system - human visual pass 2026-07-19 over all apps: the nested-table hierarchy renders as an expandable Tree like the original.` )
       ( module = `sap.m` control = `sap.m.URLHelper`                   name = `UrlHelper`                           class = `z2ui5_cl_ai_app_084` path = `src/01/b10/z2ui5_cl_ai_app_084.clas.abap`
-        score = 2
+        score = 1
         score_state = `Success`
-        score_tip = `Deviation from the original sample: 2 of 5 (1 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
         since = `1.10`
-        notes = `NOTE: element binding kept 1:1 - a one-record structure /S_SUPPLIER instead of {/SupplierCollection/0}. // IMPROVISED: URLHelper.triggerTel/triggerSms/triggerEmail and the external redirect have no` &&
-                 ` ABAP-callable path yet: the JS URLHELPER frontend action + cs_event-urlhelper exist, but its params object (URL/EMAIL/SUBJECT) cannot be passed via _event_client/follow_up_action, and open_new_tab is` &&
-                 ` same-origin-only (isValidRedirectURL). Kept as toasts; see pr/urlhelper-abap-api.` )
+        notes = `NOTE: element binding kept 1:1 - a one-record structure /S_SUPPLIER instead of {/SupplierCollection/0}. // NOTE: URLHelper.triggerTel/triggerSms/triggerEmail/redirect map 1:1 to the URLHELPER frontend` &&
+                 ` action (cs_event-urlhelper): TRIGGER_TEL/TRIGGER_SMS take the number as a plain string param, TRIGGER_EMAIL/REDIRECT take a { EMAIL/URL, ... } object-literal t_arg (get_t_arg emits {-prefixed args` &&
+                 ` raw as UI5 event-handler object literals). open_new_tab is NOT used - it is same-origin-only (isValidRedirectURL).` )
       ( module = `sap.m` control = `sap.ui.core.ContainerPadding`      name = `ContainerNoPadding`                  class = `z2ui5_cl_ai_app_087` path = `src/01/b10/z2ui5_cl_ai_app_087.clas.abap`
         score = 1
         score_state = `Success`

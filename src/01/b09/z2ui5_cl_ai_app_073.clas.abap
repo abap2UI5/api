@@ -90,8 +90,8 @@ CLASS z2ui5_cl_ai_app_073 IMPLEMENTATION.
                     )->a( n = `title`  v = `Visit our site`
                     )->a( n = `text`   v = `www.sap.com`
                     )->a( n = `active` v = `true`
-                    )->a( n = `press`  v = client->_event_client( val   = client->cs_event-open_new_tab
-                                                                  t_arg = VALUE #( ( `http://www.sap.com` ) ) )
+                    )->a( n = `press`  v = client->_event_client( val   = client->cs_event-urlhelper
+                                                                  t_arg = VALUE #( ( `REDIRECT` ) ( |\{ URL: 'http://www.sap.com', NEW_WINDOW: true \}| ) ) )
 
                 )->leaf( `Label`
                     )->a( n = `text`   v = `Active Object Attribute which has only title, therefore no link is displayed`

@@ -17,7 +17,6 @@ CLASS z2ui5_cl_ai_app_084 DEFINITION PUBLIC.
     DATA client TYPE REF TO z2ui5_if_client.
 
     METHODS view_display.
-    METHODS on_event.
     METHODS model_init.
 
   PRIVATE SECTION.
@@ -32,8 +31,6 @@ CLASS z2ui5_cl_ai_app_084 IMPLEMENTATION.
     IF client->check_on_init( ).
       model_init( ).
       view_display( ).
-    ELSEIF client->check_on_event( ).
-      on_event( ).
     ENDIF.
 
   ENDMETHOD.
@@ -54,47 +51,36 @@ CLASS z2ui5_cl_ai_app_084 IMPLEMENTATION.
             )->a( n = `binding`    v = client->_bind( s_supplier )
 
             )->open( `items`
+                " URLHelper.triggerTel/triggerSms/triggerEmail/redirect map 1:1 to the URLHELPER frontend action
                 )->leaf( `DisplayListItem`
                     )->a( n = `label` v = `Telephone`
                     )->a( n = `value` v = `{TEL}`
                     )->a( n = `type`  v = `Active`
-                    )->a( n = `press` v = client->_event( val = `TEL` t_arg = VALUE #( ( `${$source>/value}` ) ) )
+                    )->a( n = `press` v = client->_event_client( val   = client->cs_event-urlhelper
+                                                                 t_arg = VALUE #( ( `TRIGGER_TEL` ) ( s_supplier-tel ) ) )
                 )->leaf( `DisplayListItem`
                     )->a( n = `label` v = `SMS`
                     )->a( n = `value` v = `{SMS}`
                     )->a( n = `type`  v = `Active`
-                    )->a( n = `press` v = client->_event( val = `SMS` t_arg = VALUE #( ( `${$source>/value}` ) ) )
+                    )->a( n = `press` v = client->_event_client( val   = client->cs_event-urlhelper
+                                                                 t_arg = VALUE #( ( `TRIGGER_SMS` ) ( s_supplier-sms ) ) )
                 )->leaf( `DisplayListItem`
                     )->a( n = `label` v = `Email`
                     )->a( n = `value` v = `{EMAIL}`
                     )->a( n = `type`  v = `Active`
-                    )->a( n = `press` v = client->_event( val = `EMAIL` t_arg = VALUE #( ( `${$source>/value}` ) ) )
+                    )->a( n = `press` v = client->_event_client( val   = client->cs_event-urlhelper
+                                                                 t_arg = VALUE #( ( `TRIGGER_EMAIL` ) ( |\{ EMAIL: '{ s_supplier-email }', SUBJECT: 'Info Request' \}| ) ) )
                 )->leaf( `DisplayListItem`
                     )->a( n = `label` v = `Website`
                     )->a( n = `value` v = `{URL}`
                     )->a( n = `type`  v = `Active`
-                    )->a( n = `press` v = client->_event_client( val   = client->cs_event-open_new_tab
-                                                                 t_arg = VALUE #( ( `${$source>/value}` ) ) )
+                    )->a( n = `press` v = client->_event_client( val   = client->cs_event-urlhelper
+                                                                 t_arg = VALUE #( ( `REDIRECT` ) ( |\{ URL: '{ s_supplier-url }', NEW_WINDOW: true \}| ) ) )
 
             )->shut(
         )->shut( ).
 
     client->view_display( view->stringify( ) ).
-
-  ENDMETHOD.
-
-
-  METHOD on_event.
-
-    " URLHelper.triggerTel/triggerSms/triggerEmail have no server-side equivalent - shown as a toast; the website uses the open_new_tab frontend action
-    CASE client->get( )-event.
-      WHEN `TEL`.
-        client->message_toast_display( |Call: { client->get_event_arg( ) }| ).
-      WHEN `SMS`.
-        client->message_toast_display( |SMS: { client->get_event_arg( ) }| ).
-      WHEN `EMAIL`.
-        client->message_toast_display( |Email: { client->get_event_arg( ) }| ).
-    ENDCASE.
 
   ENDMETHOD.
 

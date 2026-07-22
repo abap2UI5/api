@@ -21,6 +21,10 @@
     {
       "type": "NOTE",
       "what": "the model holds exactly the bound record /ProductCollection/0 (Notebook Basic 15) of ui5/mock/products.json, verbatim - this is the original sample's own single-record binding {/ProductCollection/0}, not a shortened data set."
+    },
+    {
+      "type": "NOTE",
+      "what": "the active ObjectAttribute 'www.sap.com' opens via the URLHELPER REDIRECT frontend action (cs_event-urlhelper, { URL, NEW_WINDOW } object param) - not open_new_tab, which is same-origin-only."
     }
   ]
 }
