@@ -93,6 +93,35 @@ badge per framework-wiring fact the port uses: `_event_client` (9 apps) and its
 name in clear text (`{FIELD}` / `{/Path}`) instead of via `client->_bind`, the
 form that breaks on a variable rename.
 
+## Overview overhaul (2026-07-22) — releases, filters, Shell, split Open
+
+Further reworked `scripts/generate-overview.mjs` (all offline, baked into the
+generated class at generation time):
+
+- **Title** now carries the ported-app count — `abap2UI5 Demo Kit (94)`.
+- **Release column** (next to Sample): the direct UI5 release the whole *sample*
+  needs = the control `since` raised by any kept post-1.71 member (parsed from the
+  POST_171 deviation texts); blank = available since forever. The existing
+  **Since** column keeps showing the *control's* own since (next to Control).
+- **Deviation** rescaled 1→10 (`min(10, 1 + weighted deviations)`) and **no longer
+  coloured** (plain text).
+- **UI5 only column**: badges rows whose control is not part of OpenUI5. The
+  membership oracle is `ui5/properties.json` ∪ `@openui5` source module (`.js`) ∪
+  library.js / .library mentions — so statics (URLHelper) and CSS-class doc
+  entities (StandardMargins/ContainerPadding) count as OpenUI5; only the two
+  demo-kit-only composite *Pattern* samples (012/013) flag `ui5_only` (2).
+- **Header filter checkboxes** (default all on), filtering the table entirely on
+  the client via each row's `visible` expression (no round-trip): Hide non-OpenUI5,
+  Hide newer than 1.71 (2020) (28 apps), Hide deprecated (0). Disabled while the
+  tree is shown.
+- **Shell switch** (next to Tree view) toggles the `sap.m.Shell` letterboxing
+  (`appWidthLimited`), two-way bound, client-side.
+- **Open column split into two buttons**: the first starts the abap2UI5 app
+  directly in a new tab (`cs_event-open_new_tab` via `_event_client` — the start
+  URL is same-origin, so it passes `isValidRedirectURL`); the second opens the
+  reference-links popover, now trimmed to the four external links (OpenUI5 API,
+  source, live sample, ABAP class). The same two buttons sit on every tree leaf.
+
 ## Batch b11 generated (2026-07-22) — pages, pickers, tables & popovers (7 ports)
 
 Classes **088–094**, breadth-first NEW-CONTROL: 088 StandardMarginsAll

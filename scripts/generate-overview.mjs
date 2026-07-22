@@ -40,6 +40,49 @@ const uni = JSON.parse(fs.readFileSync(path.join(ROOT, 'ui5', 'universe.json'), 
 const uniMap = new Map();
 for (const lib of uni.libs) for (const s of lib.samples) uniMap.set(`${lib.lib}|${s.name}`, s);
 
+// OpenUI5 membership oracle: a control/entity is in OpenUI5 if it is a known
+// control (ui5/properties.json, the offline control catalog) OR has an OpenUI5
+// source module in the installed @openui5 packages (catches helpers/statics like
+// MessageBox/MessageToast/URLHelper that carry no @since members). Entities with
+// neither (demo-kit-only patterns, CSS-class doc entities) are "not in OpenUI5".
+// Resolved at generation time; the flags are baked into the generated class.
+const OPENUI5_CONTROLS = (() => {
+  try { return JSON.parse(fs.readFileSync(path.join(ROOT, 'ui5', 'properties.json'), 'utf8')).controls || {}; }
+  catch { return {}; }
+})();
+const OPENUI5_PKG = path.join(ROOT, 'node_modules', '@openui5');
+const OPENUI5_LIBS = fs.existsSync(OPENUI5_PKG) ? fs.readdirSync(OPENUI5_PKG) : [];
+// per-library text (library.js + .library manifest) - catches OpenUI5 entities
+// that have no own module: statics/helpers (sap.m.URLHelper, in library.js) and
+// CSS-class doc entities (sap.ui.core.StandardMargins/ContainerPadding, in .library)
+const libTextCache = {};
+function libText(lib) {
+  if (libTextCache[lib] !== undefined) return libTextCache[lib];
+  const base = path.join(OPENUI5_PKG, lib, 'src', lib.replace(/\./g, '/'));
+  let t = '';
+  for (const f of ['library.js', '.library']) {
+    try { t += fs.readFileSync(path.join(base, f), 'utf8'); } catch { /* absent */ }
+  }
+  return (libTextCache[lib] = t);
+}
+function inOpenUI5(entity) {
+  if (OPENUI5_CONTROLS[entity]) return true;
+  const rel = entity.replace(/\./g, '/') + '.js';
+  const wordRe = new RegExp('\\b' + entity.split('.').pop() + '\\b');
+  return OPENUI5_LIBS.some((lib) =>
+    fs.existsSync(path.join(OPENUI5_PKG, lib, 'src', rel)) || wordRe.test(libText(lib)));
+}
+// compare dotted UI5 versions ("1.86" > "1.77"); '' (unknown / since forever) is lowest
+const verCmp = (a, b) => {
+  const pa = String(a).split('.').map(Number), pb = String(b).split('.').map(Number);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const d = (pa[i] || 0) - (pb[i] || 0);
+    if (d) return d;
+  }
+  return 0;
+};
+const verMax = (a, b) => (!a ? b : !b ? a : verCmp(a, b) >= 0 ? a : b);
+
 // collect ported apps: control (entity), module (library), sample name, class,
 // and the repo-relative path of the generated class (for the ABAP GitHub link)
 const apps = [];
@@ -53,23 +96,37 @@ for (const mf of fs.readdirSync(META)) {
   const name = m.sample.slice(i + '.sample.'.length);
   const u = uniMap.get(`${module}|${name}`) || {};
   const dep = u.deprecated || null;
-  // deviation score (1-5): how far the port is from the original sample. Only the
+  // deviation score (1-10): how far the port is from the original sample. Only the
   // real behavioural divergence counts - IMPROVISED (a non-1:1 substitution) and
   // DROPPED_171 (a feature/control left out) weigh 2 each, a SUBSET_DATA row cut 1.
   // POST_171 does NOT count: keeping a member newer than 1.71 is still a 1:1 port
   // (it only needs a newer UI5). LIVE_TEST / NOTE are neutral. 1 = faithful 1:1,
-  // 5 = heavily reworked. Kept in sync with STATUS.md / AGENTS.md §5.
+  // 10 = heavily reworked (score = min(10, 1 + weighted deviation count); not
+  // coloured). Kept in sync with STATUS.md / AGENTS.md §5.
   const devs = m.deviations || [];
   const nImpr = devs.filter((d) => d.type === 'IMPROVISED').length;
   const nDrop = devs.filter((d) => d.type === 'DROPPED_171').length;
   const nSub = devs.filter((d) => d.type === 'SUBSET_DATA').length;
   const raw = 2 * nImpr + 2 * nDrop + nSub;
-  const score = raw === 0 ? 1 : raw <= 2 ? 2 : raw <= 4 ? 3 : raw <= 6 ? 4 : 5;
-  const scoreState = score <= 2 ? 'Success' : score === 3 ? 'Warning' : 'Error';
+  const score = Math.min(10, 1 + raw);
   const drivers = [`${nImpr} improvised`, `${nDrop} dropped`];
   if (nSub) drivers.push(`${nSub} subset`);
-  const scoreTip = `Deviation from the original sample: ${score} of 5 ` +
-    `(${drivers.join(', ')}). 1 = faithful 1:1, 5 = heavily reworked.`;
+  const scoreTip = `Deviation from the original sample: ${score} of 10 ` +
+    `(${drivers.join(', ')}). 1 = faithful 1:1, 10 = heavily reworked.`;
+  // sample min release: the direct UI5 release the whole sample needs = the
+  // control's since raised by any post-1.71 member the port keeps (POST_171
+  // deviations note "since X.YZ"); blank = available since forever (<= tracking).
+  let release = u.since || '';
+  for (const d of devs.filter((x) => x.type === 'POST_171')) {
+    for (const mm of d.what.matchAll(/since\s+(\d+\.\d+)/gi)) release = verMax(release, mm[1]);
+  }
+  const ui5Only = !inOpenUI5(m.entity);
+  const isDeprecated = !!dep;
+  // "newer than 1.71 (2020)": the sample needs a release above 1.71 - either a
+  // parsed release > 1.71, or (by definition) any kept POST_171 member, even when
+  // its deviation text carries no explicit "since X.YZ"
+  const nP171 = devs.filter((d) => d.type === 'POST_171').length;
+  const isPost171 = nP171 > 0 || (release !== '' && verCmp(release, '1.71') > 0);
   // audit flags - which framework wiring the port actually uses, read straight
   // from its ABAP source (always shown as badges in the overview's Audit column).
   // _event_client / follow_up_action t_arg is detected as a t_arg keyword before
@@ -102,8 +159,11 @@ for (const mf of fs.readdirSync(META)) {
     since: u.since || '',
     dep_text: dep ? `Deprecated since ${dep.since}: ${dep.text}` : '',
     score,
-    score_state: scoreState,
     score_tip: scoreTip,
+    release,
+    ui5_only: ui5Only,
+    is_post171: isPost171,
+    is_deprecated: isDeprecated,
     use_ec: useEc,
     use_ec_arg: useEcArg,
     use_fua: useFua,
@@ -153,10 +213,13 @@ const rows = apps.map((a) => {
     ` path = \`${a.file}\`${' '.repeat(wf - a.file.length)}`;
   const extras = [];
   extras.push(`score = ${a.score}`);
-  extras.push(`score_state = \`${a.score_state}\``);
   extras.push(`score_tip = ${abapStr(a.score_tip)}`);
   if (a.golden) extras.push('golden = abap_true');
   if (a.since) extras.push(`since = \`${a.since}\``);
+  if (a.release) extras.push(`release = \`${a.release}\``);
+  if (a.ui5_only) extras.push('ui5_only = abap_true');
+  if (a.is_post171) extras.push('is_post171 = abap_true');
+  if (a.is_deprecated) extras.push('is_deprecated = abap_true');
   if (a.dep_text) extras.push(`dep_text = ${abapStr(a.dep_text)}`);
   if (a.checked) extras.push(`checked = ${abapStr(a.checked)}`);
   if (a.notes) extras.push(`notes = ${abapStr(a.notes)}`);
@@ -220,9 +283,11 @@ const plainColumn = (label, attrs = []) => {
 const columnsBlock = [
   sortableColumn('Module', 'MODULE'),
   sortableColumn('Control', 'CTRL_NAME'),
-  plainColumn('Since', [['width', '6rem']]),
+  plainColumn('Since', [['width', '5rem']]),
   sortableColumn('Sample', 'NAME'),
+  plainColumn('Release', [['width', '5rem']]),
   sortableColumn('abap2UI5', 'CLASS'),
+  plainColumn('UI5 only', [['width', '6rem'], ['hAlign', 'Center']]),
   sortableColumn('Deviation', 'SCORE'),
   plainColumn('Audit', [['width', '15rem']]),
   plainColumn('Note'),
@@ -237,18 +302,28 @@ const abap = `"! Generated overview app - lists every abap2UI5 api sample app in
 "! search field filters the table on the client (binding_call Contains, no
 "! round-trip); the tree is not filtered. Each tree leaf has the same jump
 "! popover as the table's Open column.
-"! The Since column shows the UI5 release the control appeared in (from
-"! ui5/universe.json; blank when older than tracking). Text is never coloured;
-"! a deprecated control's name is struck through (FormattedText htmlText, so the
-"! strikethrough can vary per row).
-"! The Module / Control / Sample / abap2UI5 columns are plain text; every link
-"! (OpenUI5 API, OpenUI5 source, live fullscreen sample, the generated ABAP
-"! class on GitHub, and starting the app) lives in the trailing Open column: its
-"! button opens an anchored popover of all those links, each opening in a new
-"! browser tab. The Deviation column is a 1-5 score of how far the port is from
-"! the original sample (green 1-2, orange 3, red 4-5) - IMPROVISED and DROPPED_171
-"! deviations weigh 2 each, SUBSET_DATA 1, POST_171 counts as 0 (still a 1:1 port);
-"! sort it descending to surface the samples worth a closer manual look. The Audit
+"! The title carries the ported-app count in parentheses. The Since column shows
+"! the UI5 release the CONTROL appeared in (from ui5/universe.json; blank when
+"! older than tracking / since forever); the Release column, next to Sample, shows
+"! the direct release the whole SAMPLE needs (control since raised by any kept
+"! post-1.71 member). Text is never coloured; a deprecated control's name is
+"! struck through (FormattedText htmlText, so the strikethrough can vary per row).
+"! The UI5 only column badges rows whose control is not part of OpenUI5. Three
+"! header checkboxes (default all on) filter the table entirely on the client via
+"! each row's visible expression: Hide non-OpenUI5, Hide newer than 1.71 (2020),
+"! Hide deprecated. A Shell switch toggles the sap.m.Shell letterboxing
+"! (appWidthLimited), a Tree view switch toggles table vs tree - both client-side.
+"! The Module / Control / Sample / abap2UI5 columns are plain text; navigation
+"! lives in the trailing Open column, which carries two buttons: the first starts
+"! this abap2UI5 app directly in a new tab (open_new_tab; the start URL is
+"! same-origin), the second opens an anchored popover with the four reference
+"! links (OpenUI5 API, OpenUI5 source, live fullscreen sample, the generated ABAP
+"! class on GitHub), each opening in a new browser tab. The same two buttons sit
+"! on every tree sample leaf. The Deviation column is a 1-10 score of how far the port is from
+"! the original sample (not coloured) - IMPROVISED and DROPPED_171 deviations weigh
+"! 2 each, SUBSET_DATA 1, POST_171 counts as 0 (still a 1:1 port), score =
+"! min(10, 1 + that); sort it descending to surface the samples worth a closer
+"! manual look. The Audit
 "! column shows, always, one badge per framework-wiring fact the port uses (read
 "! from its ABAP source): _event_client and its t_arg form, follow_up_action and
 "! its t_arg form, whether it opens a Popup or Popover, and whether it binds a
@@ -288,10 +363,13 @@ CLASS ${CLASS} DEFINITION PUBLIC.
         has_p171  TYPE abap_bool,
         golden    TYPE abap_bool,
         since     TYPE string,
+        release       TYPE string,
+        ui5_only      TYPE abap_bool,
+        is_post171    TYPE abap_bool,
+        is_deprecated TYPE abap_bool,
         dep_text  TYPE string,
         ctrl_html TYPE string,
         score       TYPE i,
-        score_state TYPE string,
         score_tip   TYPE string,
         use_ec      TYPE abap_bool,
         use_ec_arg  TYPE abap_bool,
@@ -330,6 +408,13 @@ CLASS ${CLASS} DEFINITION PUBLIC.
     DATA t_tree TYPE ty_t_tree.
     " table/tree toggle (drives the visible expression bindings)
     DATA show_tree TYPE abap_bool.
+    " sap.m.Shell letterboxing toggle (two-way, drives Shell appWidthLimited)
+    DATA shell_on  TYPE abap_bool.
+    " header filter checkboxes (two-way; each row's visible expression binding
+    " hides it when the matching flag is set and the row carries that trait)
+    DATA hide_non_ui5   TYPE abap_bool.
+    DATA hide_post171   TYPE abap_bool.
+    DATA hide_deprecated TYPE abap_bool.
 
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
@@ -355,6 +440,12 @@ CLASS ${CLASS} IMPLEMENTATION.
 
     me->client = client.
     IF client->check_on_init( ).
+      " default filtering (all on) + Shell on, set once so later round-trips keep
+      " whatever the user toggled (the flags are two-way bound)
+      shell_on        = abap_true.
+      hide_non_ui5    = abap_true.
+      hide_post171    = abap_true.
+      hide_deprecated = abap_true.
       view_display( ).
     ELSEIF client->check_on_navigated( ).
       view_display( ).
@@ -370,13 +461,13 @@ CLASS ${CLASS} IMPLEMENTATION.
     CASE client->get( )-event.
 
       WHEN \`LINKS\`.
-        " every navigation link for the pressed row, resolved client-side and
-        " passed in via t_arg; open them in an anchored popover (by the button id)
+        " the four reference links for the pressed row (starting the app itself is
+        " the separate direct-launch button); resolved client-side and passed in
+        " via t_arg, opened in a popover anchored to the pressed button (arg 5)
         DATA(lv_api)   = client->get_event_arg( ).
         DATA(lv_js)    = client->get_event_arg( 2 ).
         DATA(lv_ui5)   = client->get_event_arg( 3 ).
         DATA(lv_abap)  = client->get_event_arg( 4 ).
-        DATA(lv_start) = client->get_event_arg( 5 ).
 
         DATA(links) = z2ui5_cl_ai_xml=>factory( ).
         links->open( n = \`FragmentDefinition\` ns = \`core\`
@@ -409,15 +500,10 @@ CLASS ${CLASS} IMPLEMENTATION.
                     )->leaf( \`Link\`
                         )->a( n = \`text\`   v = \`abap2UI5 - class on GitHub\`
                         )->a( n = \`href\`   v = lv_abap
-                        )->a( n = \`target\` v = \`_blank\`
-                        )->a( n = \`class\`  v = \`sapUiTinyMarginBottom\`
-                    )->leaf( \`Link\`
-                        )->a( n = \`text\`   v = \`abap2UI5 - start this app\`
-                        )->a( n = \`href\`   v = lv_start
                         )->a( n = \`target\` v = \`_blank\` ).
 
         client->popover_display( xml   = links->stringify( )
-                                 by_id = client->get_event_arg( 6 ) ).
+                                 by_id = client->get_event_arg( 5 ) ).
 
       WHEN \`SHOW_NOTES\`.
         " one Text per bullet of the clicked row's generation notes
@@ -491,11 +577,12 @@ CLASS ${CLASS} IMPLEMENTATION.
 
       " one blob per row, bound as the FILTER column that the table search's
       " client-side Contains filter (binding_call) matches against. Only the
-      " five VISIBLE table columns feed it - Module, Control (bare name), Since,
-      " Sample, abap2UI5 (class) - so a query like "Date" no longer matches
-      " hidden text buried in the notes/checked/post-1.71 fields
+      " VISIBLE text columns feed it - Module, Control (bare name), Since,
+      " Sample, Release, abap2UI5 (class) - so a query like "Date" no longer
+      " matches hidden text buried in the notes/checked/post-1.71 fields
       <app>-filter = <app>-module && \` \` && <app>-ctrl_name && \` \` &&
-                     <app>-since  && \` \` && <app>-name      && \` \` && <app>-class.
+                     <app>-since  && \` \` && <app>-name      && \` \` &&
+                     <app>-release && \` \` && <app>-class.
 
     ENDLOOP.
 
@@ -510,13 +597,16 @@ CLASS ${CLASS} IMPLEMENTATION.
         )->a( n = \`xmlns:core\` v = \`sap.ui.core\`
 
         )->open( \`Shell\`
+            " Shell on/off = letterboxing (limited app width); two-way bound so the
+            " header Switch toggles it live on the client
+            )->a( n = \`appWidthLimited\` v = |\\{= !!\${ client->_bind( shell_on ) } \\}|
             )->open( \`Page\`
-                )->a( n = \`title\`          v = \`abap2UI5 Demo Kit\`
+                )->a( n = \`title\`          v = |abap2UI5 Demo Kit (\{ lines( t_app ) \})|
                 )->a( n = \`navButtonPress\` v = client->_event_nav_app_leave( )
                 )->a( n = \`showNavButton\`  v = z2ui5_cl_ai_xml=>as_bool( client->check_app_prev_stack( ) )
 
                 )->open( \`subHeader\`
-                    )->open( \`Toolbar\`
+                    )->open( \`OverflowToolbar\`
                         " client-side filter over the table only: liveChange/search run
                         " a binding_call Contains filter via _event_client (no round-trip);
                         " the tree is intentionally left unfiltered
@@ -527,7 +617,31 @@ CLASS ${CLASS} IMPLEMENTATION.
                             )->a( n = \`enabled\`     v = |\\{= !\${ client->_bind( show_tree ) } \\}|
                             )->a( n = \`liveChange\`  v = ${filterCall('${$parameters>/newValue}')}
                             )->a( n = \`search\`      v = ${filterCall('${$parameters>/query}')}
+                        " default-on filter checkboxes; each is two-way bound and the row
+                        " visible expression reacts live (no round-trip). Disabled while the
+                        " tree is shown (the filters act on the table only)
+                        )->leaf( \`CheckBox\`
+                            )->a( n = \`text\`     v = \`Hide non-OpenUI5\`
+                            )->a( n = \`selected\` v = client->_bind( hide_non_ui5 )
+                            )->a( n = \`enabled\`  v = |\\{= !\${ client->_bind( show_tree ) } \\}|
+                            )->a( n = \`tooltip\`  v = \`Hide samples whose control is not part of OpenUI5\`
+                        )->leaf( \`CheckBox\`
+                            )->a( n = \`text\`     v = \`Hide newer than 1.71 (2020)\`
+                            )->a( n = \`selected\` v = client->_bind( hide_post171 )
+                            )->a( n = \`enabled\`  v = |\\{= !\${ client->_bind( show_tree ) } \\}|
+                            )->a( n = \`tooltip\`  v = \`Hide samples that need a UI5 release newer than 1.71\`
+                        )->leaf( \`CheckBox\`
+                            )->a( n = \`text\`     v = \`Hide deprecated\`
+                            )->a( n = \`selected\` v = client->_bind( hide_deprecated )
+                            )->a( n = \`enabled\`  v = |\\{= !\${ client->_bind( show_tree ) } \\}|
+                            )->a( n = \`tooltip\`  v = \`Hide samples whose control is deprecated\`
                         )->leaf( \`ToolbarSpacer\`
+                        )->leaf( \`Label\`
+                            )->a( n = \`text\` v = \`Shell\`
+                        " Shell on/off = sap.m.Shell letterboxing (two-way, drives appWidthLimited)
+                        )->leaf( \`Switch\`
+                            )->a( n = \`state\`   v = client->_bind( shell_on )
+                            )->a( n = \`tooltip\` v = \`Toggle the Shell letterboxing (limited app width)\`
                         )->leaf( \`Label\`
                             )->a( n = \`text\` v = \`Tree view\`
                         " Switch toggles table vs tree entirely on the client (two-way
@@ -551,6 +665,12 @@ ${columnsBlock}
 
                     )->open( \`items\`
                         )->open( \`ColumnListItem\`
+                            " header checkboxes filter the table entirely on the client: a
+                            " row is hidden when a hide-flag (two-way bound model-root) is set
+                            " AND the row carries that trait (UI5_ONLY / IS_POST171 /
+                            " IS_DEPRECATED). Expression binding, re-evaluated live on toggle,
+                            " no round-trip - like the tree/table Switch.
+                            )->a( n = \`visible\` v = |\\{= !(\${ client->_bind( hide_non_ui5 ) } && $\\{UI5_ONLY\\}) && !(\${ client->_bind( hide_post171 ) } && $\\{IS_POST171\\}) && !(\${ client->_bind( hide_deprecated ) } && $\\{IS_DEPRECATED\\}) \\}|
                             )->open( \`cells\`
                                 )->leaf( \`Text\`
                                     )->a( n = \`text\` v = \`{MODULE}\`
@@ -565,13 +685,24 @@ ${columnsBlock}
                                     )->a( n = \`tooltip\` v = \`{DEP_TEXT}\`
                                 )->leaf( \`Text\`
                                     )->a( n = \`text\` v = \`{NAME}\`
+                                " sample min release: the direct UI5 release the whole sample
+                                " needs (control since raised by any kept post-1.71 member);
+                                " blank = available since forever
+                                )->leaf( \`Text\`
+                                    )->a( n = \`text\` v = \`{RELEASE}\`
                                 )->leaf( \`Text\`
                                     )->a( n = \`text\` v = \`{CLASS}\`
-                                " deviation score 1-5: how far the port is from the original
-                                " (green 1-2, orange 3, red 4-5); tooltip lists the drivers
+                                " UI5 only: the control does not exist in OpenUI5 (SAPUI5- /
+                                " demo-kit-only); a badge only on those rows
                                 )->leaf( \`ObjectStatus\`
-                                    )->a( n = \`text\`    v = \`{SCORE} / 5\`
-                                    )->a( n = \`state\`   v = \`{SCORE_STATE}\`
+                                    )->a( n = \`text\`    v = \`SAPUI5\`
+                                    )->a( n = \`state\`   v = \`Warning\`
+                                    )->a( n = \`tooltip\` v = \`This control is not part of OpenUI5 - it cannot render on an OpenUI5 stack\`
+                                    )->a( n = \`visible\` v = \`{UI5_ONLY}\`
+                                " deviation score 1-10: how far the port is from the original
+                                " (not coloured); tooltip lists the drivers
+                                )->leaf( \`Text\`
+                                    )->a( n = \`text\`    v = \`{SCORE} / 10\`
                                     )->a( n = \`tooltip\` v = \`{SCORE_TIP}\`
 
                                 " audit column: one badge per framework-wiring fact the
@@ -665,14 +796,23 @@ ${columnsBlock}
                                         )->a( n = \`press\`   v = client->_event( val = \`SHOW_NOTES\` t_arg = VALUE #( ( \`\${NOTES}\` ) ) )
 
                                 )->shut(
-                                " opens an anchored popover with every link for this row (all navigation
-                                " lives here now that the table cells are plain text) - the pressed
-                                " button's runtime id (\$event.oSource.sId) anchors the popover
-                                )->leaf( \`Button\`
-                                    )->a( n = \`icon\`    v = \`sap-icon://action\`
-                                    )->a( n = \`type\`    v = \`Transparent\`
-                                    )->a( n = \`tooltip\` v = \`Open links for this sample\`
-                                    )->a( n = \`press\`   v = client->_event( val = \`LINKS\` t_arg = VALUE #( ( \`\${API_URL}\` ) ( \`\${JS_URL}\` ) ( \`\${UI5_URL}\` ) ( \`\${ABAP_URL}\` ) ( \`\${START_URL}\` ) ( \`\$event.oSource.sId\` ) ) )
+                                " Open column: two buttons. First launches the abap2UI5 app
+                                " directly in a new tab (open_new_tab - the start URL is
+                                " same-origin, so it passes isValidRedirectURL); second opens an
+                                " anchored popover with the four reference links (OpenUI5 API,
+                                " source, live sample, ABAP class), the pressed button's runtime
+                                " id (\$event.oSource.sId) anchors the popover
+                                )->open( \`HBox\`
+                                    )->leaf( \`Button\`
+                                        )->a( n = \`icon\`    v = \`sap-icon://action\`
+                                        )->a( n = \`type\`    v = \`Transparent\`
+                                        )->a( n = \`tooltip\` v = \`Start this abap2UI5 app in a new tab\`
+                                        )->a( n = \`press\`   v = client->_event_client( val = client->cs_event-open_new_tab t_arg = VALUE #( ( \`\${START_URL}\` ) ) )
+                                    )->leaf( \`Button\`
+                                        )->a( n = \`icon\`    v = \`sap-icon://chain-link\`
+                                        )->a( n = \`type\`    v = \`Transparent\`
+                                        )->a( n = \`tooltip\` v = \`Reference links: OpenUI5 API, source, live sample, ABAP class\`
+                                        )->a( n = \`press\`   v = client->_event( val = \`LINKS\` t_arg = VALUE #( ( \`\${API_URL}\` ) ( \`\${JS_URL}\` ) ( \`\${UI5_URL}\` ) ( \`\${ABAP_URL}\` ) ( \`\$event.oSource.sId\` ) ) )
 
                                 )->shut(
                             )->shut(
@@ -708,14 +848,21 @@ ${columnsBlock}
 
                                 )->leaf( \`Text\`
                                     )->a( n = \`text\` v = \`{TEXT}\`
-                                " same jump popover as the table's Open column - only on sample leaves
+                                " same two buttons as the table's Open column - only on sample
+                                " leaves: direct app launch + the reference-links popover
                                 )->leaf( \`Button\`
                                     )->a( n = \`icon\`    v = \`sap-icon://action\`
                                     )->a( n = \`type\`    v = \`Transparent\`
-                                    )->a( n = \`tooltip\` v = \`Open links for this sample\`
+                                    )->a( n = \`tooltip\` v = \`Start this abap2UI5 app in a new tab\`
                                     )->a( n = \`class\`   v = \`sapUiTinyMarginBegin\`
                                     )->a( n = \`visible\` v = \`{HAS_LINK}\`
-                                    )->a( n = \`press\`   v = client->_event( val = \`LINKS\` t_arg = VALUE #( ( \`\${API_URL}\` ) ( \`\${JS_URL}\` ) ( \`\${UI5_URL}\` ) ( \`\${ABAP_URL}\` ) ( \`\${START_URL}\` ) ( \`\$event.oSource.sId\` ) ) ) ).
+                                    )->a( n = \`press\`   v = client->_event_client( val = client->cs_event-open_new_tab t_arg = VALUE #( ( \`\${START_URL}\` ) ) )
+                                )->leaf( \`Button\`
+                                    )->a( n = \`icon\`    v = \`sap-icon://chain-link\`
+                                    )->a( n = \`type\`    v = \`Transparent\`
+                                    )->a( n = \`tooltip\` v = \`Reference links: OpenUI5 API, source, live sample, ABAP class\`
+                                    )->a( n = \`visible\` v = \`{HAS_LINK}\`
+                                    )->a( n = \`press\`   v = client->_event( val = \`LINKS\` t_arg = VALUE #( ( \`\${API_URL}\` ) ( \`\${JS_URL}\` ) ( \`\${UI5_URL}\` ) ( \`\${ABAP_URL}\` ) ( \`\$event.oSource.sId\` ) ) ) ).
 
     client->view_display( view->stringify( ) ).
 

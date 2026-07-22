@@ -6,18 +6,28 @@
 "! search field filters the table on the client (binding_call Contains, no
 "! round-trip); the tree is not filtered. Each tree leaf has the same jump
 "! popover as the table's Open column.
-"! The Since column shows the UI5 release the control appeared in (from
-"! ui5/universe.json; blank when older than tracking). Text is never coloured;
-"! a deprecated control's name is struck through (FormattedText htmlText, so the
-"! strikethrough can vary per row).
-"! The Module / Control / Sample / abap2UI5 columns are plain text; every link
-"! (OpenUI5 API, OpenUI5 source, live fullscreen sample, the generated ABAP
-"! class on GitHub, and starting the app) lives in the trailing Open column: its
-"! button opens an anchored popover of all those links, each opening in a new
-"! browser tab. The Deviation column is a 1-5 score of how far the port is from
-"! the original sample (green 1-2, orange 3, red 4-5) - IMPROVISED and DROPPED_171
-"! deviations weigh 2 each, SUBSET_DATA 1, POST_171 counts as 0 (still a 1:1 port);
-"! sort it descending to surface the samples worth a closer manual look. The Audit
+"! The title carries the ported-app count in parentheses. The Since column shows
+"! the UI5 release the CONTROL appeared in (from ui5/universe.json; blank when
+"! older than tracking / since forever); the Release column, next to Sample, shows
+"! the direct release the whole SAMPLE needs (control since raised by any kept
+"! post-1.71 member). Text is never coloured; a deprecated control's name is
+"! struck through (FormattedText htmlText, so the strikethrough can vary per row).
+"! The UI5 only column badges rows whose control is not part of OpenUI5. Three
+"! header checkboxes (default all on) filter the table entirely on the client via
+"! each row's visible expression: Hide non-OpenUI5, Hide newer than 1.71 (2020),
+"! Hide deprecated. A Shell switch toggles the sap.m.Shell letterboxing
+"! (appWidthLimited), a Tree view switch toggles table vs tree - both client-side.
+"! The Module / Control / Sample / abap2UI5 columns are plain text; navigation
+"! lives in the trailing Open column, which carries two buttons: the first starts
+"! this abap2UI5 app directly in a new tab (open_new_tab; the start URL is
+"! same-origin), the second opens an anchored popover with the four reference
+"! links (OpenUI5 API, OpenUI5 source, live fullscreen sample, the generated ABAP
+"! class on GitHub), each opening in a new browser tab. The same two buttons sit
+"! on every tree sample leaf. The Deviation column is a 1-10 score of how far the port is from
+"! the original sample (not coloured) - IMPROVISED and DROPPED_171 deviations weigh
+"! 2 each, SUBSET_DATA 1, POST_171 counts as 0 (still a 1:1 port), score =
+"! min(10, 1 + that); sort it descending to surface the samples worth a closer
+"! manual look. The Audit
 "! column shows, always, one badge per framework-wiring fact the port uses (read
 "! from its ABAP source): _event_client and its t_arg form, follow_up_action and
 "! its t_arg form, whether it opens a Popup or Popover, and whether it binds a
@@ -57,10 +67,13 @@ CLASS z2ui5_cl_ai_app_overview DEFINITION PUBLIC.
         has_p171  TYPE abap_bool,
         golden    TYPE abap_bool,
         since     TYPE string,
+        release       TYPE string,
+        ui5_only      TYPE abap_bool,
+        is_post171    TYPE abap_bool,
+        is_deprecated TYPE abap_bool,
         dep_text  TYPE string,
         ctrl_html TYPE string,
         score       TYPE i,
-        score_state TYPE string,
         score_tip   TYPE string,
         use_ec      TYPE abap_bool,
         use_ec_arg  TYPE abap_bool,
@@ -99,6 +112,13 @@ CLASS z2ui5_cl_ai_app_overview DEFINITION PUBLIC.
     DATA t_tree TYPE ty_t_tree.
     " table/tree toggle (drives the visible expression bindings)
     DATA show_tree TYPE abap_bool.
+    " sap.m.Shell letterboxing toggle (two-way, drives Shell appWidthLimited)
+    DATA shell_on  TYPE abap_bool.
+    " header filter checkboxes (two-way; each row's visible expression binding
+    " hides it when the matching flag is set and the row carries that trait)
+    DATA hide_non_ui5   TYPE abap_bool.
+    DATA hide_post171   TYPE abap_bool.
+    DATA hide_deprecated TYPE abap_bool.
 
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
@@ -124,6 +144,12 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
 
     me->client = client.
     IF client->check_on_init( ).
+      " default filtering (all on) + Shell on, set once so later round-trips keep
+      " whatever the user toggled (the flags are two-way bound)
+      shell_on        = abap_true.
+      hide_non_ui5    = abap_true.
+      hide_post171    = abap_true.
+      hide_deprecated = abap_true.
       view_display( ).
     ELSEIF client->check_on_navigated( ).
       view_display( ).
@@ -139,13 +165,13 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
     CASE client->get( )-event.
 
       WHEN `LINKS`.
-        " every navigation link for the pressed row, resolved client-side and
-        " passed in via t_arg; open them in an anchored popover (by the button id)
+        " the four reference links for the pressed row (starting the app itself is
+        " the separate direct-launch button); resolved client-side and passed in
+        " via t_arg, opened in a popover anchored to the pressed button (arg 5)
         DATA(lv_api)   = client->get_event_arg( ).
         DATA(lv_js)    = client->get_event_arg( 2 ).
         DATA(lv_ui5)   = client->get_event_arg( 3 ).
         DATA(lv_abap)  = client->get_event_arg( 4 ).
-        DATA(lv_start) = client->get_event_arg( 5 ).
 
         DATA(links) = z2ui5_cl_ai_xml=>factory( ).
         links->open( n = `FragmentDefinition` ns = `core`
@@ -178,15 +204,10 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                     )->leaf( `Link`
                         )->a( n = `text`   v = `abap2UI5 - class on GitHub`
                         )->a( n = `href`   v = lv_abap
-                        )->a( n = `target` v = `_blank`
-                        )->a( n = `class`  v = `sapUiTinyMarginBottom`
-                    )->leaf( `Link`
-                        )->a( n = `text`   v = `abap2UI5 - start this app`
-                        )->a( n = `href`   v = lv_start
                         )->a( n = `target` v = `_blank` ).
 
         client->popover_display( xml   = links->stringify( )
-                                 by_id = client->get_event_arg( 6 ) ).
+                                 by_id = client->get_event_arg( 5 ) ).
 
       WHEN `SHOW_NOTES`.
         " one Text per bullet of the clicked row's generation notes
@@ -260,11 +281,12 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
 
       " one blob per row, bound as the FILTER column that the table search's
       " client-side Contains filter (binding_call) matches against. Only the
-      " five VISIBLE table columns feed it - Module, Control (bare name), Since,
-      " Sample, abap2UI5 (class) - so a query like "Date" no longer matches
-      " hidden text buried in the notes/checked/post-1.71 fields
+      " VISIBLE text columns feed it - Module, Control (bare name), Since,
+      " Sample, Release, abap2UI5 (class) - so a query like "Date" no longer
+      " matches hidden text buried in the notes/checked/post-1.71 fields
       <app>-filter = <app>-module && ` ` && <app>-ctrl_name && ` ` &&
-                     <app>-since  && ` ` && <app>-name      && ` ` && <app>-class.
+                     <app>-since  && ` ` && <app>-name      && ` ` &&
+                     <app>-release && ` ` && <app>-class.
 
     ENDLOOP.
 
@@ -279,13 +301,16 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         )->a( n = `xmlns:core` v = `sap.ui.core`
 
         )->open( `Shell`
+            " Shell on/off = letterboxing (limited app width); two-way bound so the
+            " header Switch toggles it live on the client
+            )->a( n = `appWidthLimited` v = |\{= !!${ client->_bind( shell_on ) } \}|
             )->open( `Page`
-                )->a( n = `title`          v = `abap2UI5 Demo Kit`
+                )->a( n = `title`          v = |abap2UI5 Demo Kit ({ lines( t_app ) })|
                 )->a( n = `navButtonPress` v = client->_event_nav_app_leave( )
                 )->a( n = `showNavButton`  v = z2ui5_cl_ai_xml=>as_bool( client->check_app_prev_stack( ) )
 
                 )->open( `subHeader`
-                    )->open( `Toolbar`
+                    )->open( `OverflowToolbar`
                         " client-side filter over the table only: liveChange/search run
                         " a binding_call Contains filter via _event_client (no round-trip);
                         " the tree is intentionally left unfiltered
@@ -296,7 +321,31 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                             )->a( n = `enabled`     v = |\{= !${ client->_bind( show_tree ) } \}|
                             )->a( n = `liveChange`  v = client->_event_client( val = client->cs_event-binding_call t_arg = VALUE #( ( `idOverviewTable` ) ( `items` ) ( `filter` ) ( `FILTER` ) ( `Contains` ) ( `${$parameters>/newValue}` ) ) )
                             )->a( n = `search`      v = client->_event_client( val = client->cs_event-binding_call t_arg = VALUE #( ( `idOverviewTable` ) ( `items` ) ( `filter` ) ( `FILTER` ) ( `Contains` ) ( `${$parameters>/query}` ) ) )
+                        " default-on filter checkboxes; each is two-way bound and the row
+                        " visible expression reacts live (no round-trip). Disabled while the
+                        " tree is shown (the filters act on the table only)
+                        )->leaf( `CheckBox`
+                            )->a( n = `text`     v = `Hide non-OpenUI5`
+                            )->a( n = `selected` v = client->_bind( hide_non_ui5 )
+                            )->a( n = `enabled`  v = |\{= !${ client->_bind( show_tree ) } \}|
+                            )->a( n = `tooltip`  v = `Hide samples whose control is not part of OpenUI5`
+                        )->leaf( `CheckBox`
+                            )->a( n = `text`     v = `Hide newer than 1.71 (2020)`
+                            )->a( n = `selected` v = client->_bind( hide_post171 )
+                            )->a( n = `enabled`  v = |\{= !${ client->_bind( show_tree ) } \}|
+                            )->a( n = `tooltip`  v = `Hide samples that need a UI5 release newer than 1.71`
+                        )->leaf( `CheckBox`
+                            )->a( n = `text`     v = `Hide deprecated`
+                            )->a( n = `selected` v = client->_bind( hide_deprecated )
+                            )->a( n = `enabled`  v = |\{= !${ client->_bind( show_tree ) } \}|
+                            )->a( n = `tooltip`  v = `Hide samples whose control is deprecated`
                         )->leaf( `ToolbarSpacer`
+                        )->leaf( `Label`
+                            )->a( n = `text` v = `Shell`
+                        " Shell on/off = sap.m.Shell letterboxing (two-way, drives appWidthLimited)
+                        )->leaf( `Switch`
+                            )->a( n = `state`   v = client->_bind( shell_on )
+                            )->a( n = `tooltip` v = `Toggle the Shell letterboxing (limited app width)`
                         )->leaf( `Label`
                             )->a( n = `text` v = `Tree view`
                         " Switch toggles table vs tree entirely on the client (two-way
@@ -352,7 +401,7 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                             )->shut(
                         )->shut(
                         )->open( `Column`
-                            )->a( n = `width` v = `6rem`
+                            )->a( n = `width` v = `5rem`
 
                             )->leaf( `Text`
                                 )->a( n = `text` v = `Since`
@@ -377,6 +426,13 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                             )->shut(
                         )->shut(
                         )->open( `Column`
+                            )->a( n = `width` v = `5rem`
+
+                            )->leaf( `Text`
+                                )->a( n = `text` v = `Release`
+
+                        )->shut(
+                        )->open( `Column`
                             )->open( `HBox`
                                 )->a( n = `alignItems` v = `Center`
 
@@ -393,6 +449,14 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                                     )->a( n = `press`   v = client->_event_client( val = client->cs_event-binding_call t_arg = VALUE #( ( `idOverviewTable` ) ( `items` ) ( `sort` ) ( `CLASS` ) ( `X` ) ) )
 
                             )->shut(
+                        )->shut(
+                        )->open( `Column`
+                            )->a( n = `width` v = `6rem`
+                            )->a( n = `hAlign` v = `Center`
+
+                            )->leaf( `Text`
+                                )->a( n = `text` v = `UI5 only`
+
                         )->shut(
                         )->open( `Column`
                             )->open( `HBox`
@@ -436,6 +500,12 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
 
                     )->open( `items`
                         )->open( `ColumnListItem`
+                            " header checkboxes filter the table entirely on the client: a
+                            " row is hidden when a hide-flag (two-way bound model-root) is set
+                            " AND the row carries that trait (UI5_ONLY / IS_POST171 /
+                            " IS_DEPRECATED). Expression binding, re-evaluated live on toggle,
+                            " no round-trip - like the tree/table Switch.
+                            )->a( n = `visible` v = |\{= !(${ client->_bind( hide_non_ui5 ) } && $\{UI5_ONLY\}) && !(${ client->_bind( hide_post171 ) } && $\{IS_POST171\}) && !(${ client->_bind( hide_deprecated ) } && $\{IS_DEPRECATED\}) \}|
                             )->open( `cells`
                                 )->leaf( `Text`
                                     )->a( n = `text` v = `{MODULE}`
@@ -450,13 +520,24 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                                     )->a( n = `tooltip` v = `{DEP_TEXT}`
                                 )->leaf( `Text`
                                     )->a( n = `text` v = `{NAME}`
+                                " sample min release: the direct UI5 release the whole sample
+                                " needs (control since raised by any kept post-1.71 member);
+                                " blank = available since forever
+                                )->leaf( `Text`
+                                    )->a( n = `text` v = `{RELEASE}`
                                 )->leaf( `Text`
                                     )->a( n = `text` v = `{CLASS}`
-                                " deviation score 1-5: how far the port is from the original
-                                " (green 1-2, orange 3, red 4-5); tooltip lists the drivers
+                                " UI5 only: the control does not exist in OpenUI5 (SAPUI5- /
+                                " demo-kit-only); a badge only on those rows
                                 )->leaf( `ObjectStatus`
-                                    )->a( n = `text`    v = `{SCORE} / 5`
-                                    )->a( n = `state`   v = `{SCORE_STATE}`
+                                    )->a( n = `text`    v = `SAPUI5`
+                                    )->a( n = `state`   v = `Warning`
+                                    )->a( n = `tooltip` v = `This control is not part of OpenUI5 - it cannot render on an OpenUI5 stack`
+                                    )->a( n = `visible` v = `{UI5_ONLY}`
+                                " deviation score 1-10: how far the port is from the original
+                                " (not coloured); tooltip lists the drivers
+                                )->leaf( `Text`
+                                    )->a( n = `text`    v = `{SCORE} / 10`
                                     )->a( n = `tooltip` v = `{SCORE_TIP}`
 
                                 " audit column: one badge per framework-wiring fact the
@@ -550,14 +631,23 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                                         )->a( n = `press`   v = client->_event( val = `SHOW_NOTES` t_arg = VALUE #( ( `${NOTES}` ) ) )
 
                                 )->shut(
-                                " opens an anchored popover with every link for this row (all navigation
-                                " lives here now that the table cells are plain text) - the pressed
-                                " button's runtime id ($event.oSource.sId) anchors the popover
-                                )->leaf( `Button`
-                                    )->a( n = `icon`    v = `sap-icon://action`
-                                    )->a( n = `type`    v = `Transparent`
-                                    )->a( n = `tooltip` v = `Open links for this sample`
-                                    )->a( n = `press`   v = client->_event( val = `LINKS` t_arg = VALUE #( ( `${API_URL}` ) ( `${JS_URL}` ) ( `${UI5_URL}` ) ( `${ABAP_URL}` ) ( `${START_URL}` ) ( `$event.oSource.sId` ) ) )
+                                " Open column: two buttons. First launches the abap2UI5 app
+                                " directly in a new tab (open_new_tab - the start URL is
+                                " same-origin, so it passes isValidRedirectURL); second opens an
+                                " anchored popover with the four reference links (OpenUI5 API,
+                                " source, live sample, ABAP class), the pressed button's runtime
+                                " id ($event.oSource.sId) anchors the popover
+                                )->open( `HBox`
+                                    )->leaf( `Button`
+                                        )->a( n = `icon`    v = `sap-icon://action`
+                                        )->a( n = `type`    v = `Transparent`
+                                        )->a( n = `tooltip` v = `Start this abap2UI5 app in a new tab`
+                                        )->a( n = `press`   v = client->_event_client( val = client->cs_event-open_new_tab t_arg = VALUE #( ( `${START_URL}` ) ) )
+                                    )->leaf( `Button`
+                                        )->a( n = `icon`    v = `sap-icon://chain-link`
+                                        )->a( n = `type`    v = `Transparent`
+                                        )->a( n = `tooltip` v = `Reference links: OpenUI5 API, source, live sample, ABAP class`
+                                        )->a( n = `press`   v = client->_event( val = `LINKS` t_arg = VALUE #( ( `${API_URL}` ) ( `${JS_URL}` ) ( `${UI5_URL}` ) ( `${ABAP_URL}` ) ( `$event.oSource.sId` ) ) )
 
                                 )->shut(
                             )->shut(
@@ -593,14 +683,21 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
 
                                 )->leaf( `Text`
                                     )->a( n = `text` v = `{TEXT}`
-                                " same jump popover as the table's Open column - only on sample leaves
+                                " same two buttons as the table's Open column - only on sample
+                                " leaves: direct app launch + the reference-links popover
                                 )->leaf( `Button`
                                     )->a( n = `icon`    v = `sap-icon://action`
                                     )->a( n = `type`    v = `Transparent`
-                                    )->a( n = `tooltip` v = `Open links for this sample`
+                                    )->a( n = `tooltip` v = `Start this abap2UI5 app in a new tab`
                                     )->a( n = `class`   v = `sapUiTinyMarginBegin`
                                     )->a( n = `visible` v = `{HAS_LINK}`
-                                    )->a( n = `press`   v = client->_event( val = `LINKS` t_arg = VALUE #( ( `${API_URL}` ) ( `${JS_URL}` ) ( `${UI5_URL}` ) ( `${ABAP_URL}` ) ( `${START_URL}` ) ( `$event.oSource.sId` ) ) ) ).
+                                    )->a( n = `press`   v = client->_event_client( val = client->cs_event-open_new_tab t_arg = VALUE #( ( `${START_URL}` ) ) )
+                                )->leaf( `Button`
+                                    )->a( n = `icon`    v = `sap-icon://chain-link`
+                                    )->a( n = `type`    v = `Transparent`
+                                    )->a( n = `tooltip` v = `Reference links: OpenUI5 API, source, live sample, ABAP class`
+                                    )->a( n = `visible` v = `{HAS_LINK}`
+                                    )->a( n = `press`   v = client->_event( val = `LINKS` t_arg = VALUE #( ( `${API_URL}` ) ( `${JS_URL}` ) ( `${UI5_URL}` ) ( `${ABAP_URL}` ) ( `$event.oSource.sId` ) ) ) ).
 
     client->view_display( view->stringify( ) ).
 
@@ -612,19 +709,17 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
     result = VALUE #(
       ( module = `sap.m` control = `sap.m.ActionListItem`              name = `ActionListItem`                      class = `z2ui5_cl_ai_app_001` path = `src/01/b05/z2ui5_cl_ai_app_001.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         checked = `CHECKED (2026-07-20): verified in a running system - human pass 2026-07-20: app starts and renders like the original; no interaction paths were open for this port` )
       ( module = `sap.m` control = `sap.m.Bar`                         name = `Page`                                class = `z2ui5_cl_ai_app_002` path = `src/01/b05/z2ui5_cl_ai_app_002.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         checked = `CHECKED (2026-07-20): verified in a running system - human pass 2026-07-20: app starts and renders like the original; no interaction paths were open for this port` )
       ( module = `sap.m` control = `sap.m.Breadcrumbs`                 name = `Breadcrumbs`                         class = `z2ui5_cl_ai_app_003` path = `src/01/b01/z2ui5_cl_ai_app_003.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.34`
+        release = `1.34`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed); RESTAMP after the 2026-07-16 rework (link toast +` &&
                  ` instant separator switch confirmed)`
         notes = `NOTE: the original wires a change handler on the separator Select (SEP_CHANGE round-trip, removed 2026-07-16): selectedKey and separatorStyle share one two-way model path, so the Select.change` &&
@@ -632,8 +727,7 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.BusyDialog`                  name = `BusyDialog`                          class = `z2ui5_cl_ai_app_004` path = `src/01/b05/z2ui5_cl_ai_app_004.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `NOTE: the BusyDialog fragment is rebuilt 1:1 as a core:FragmentDefinition shown via client->popup_display (the framework's displayFragment calls .open() on the fragment root, the equivalent of the` &&
                  ` controller's Fragment.load + oBusyDialog.open()); one attribute is added vs the original fragment: id="busyDialog", needed so the backend timer event can close the dialog via the whitelisted` &&
@@ -648,13 +742,12 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_popup = abap_true )
       ( module = `sap.m` control = `sap.m.Button`                      name = `Button`                              class = `z2ui5_cl_ai_app_005` path = `src/01/b03/z2ui5_cl_ai_app_005.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         checked = `CHECKED (2026-07-15): manually verified in a running system - each press toasts the pressed button's client-side control id, read via the event arg $event.oSource.sId, exactly like the original.` )
       ( module = `sap.m` control = `sap.m.Carousel`                    name = `CarouselWithControls`                class = `z2ui5_cl_ai_app_006` path = `src/01/b04/z2ui5_cl_ai_app_006.clas.abap`
-        score = 2
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 2 of 5 (1 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 3
+        score_tip = `Deviation from the original sample: 3 of 10 (1 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
+        is_post171 = abap_true
         checked = `CHECKED (2026-07-15): manually verified in a running system - renders and scrolls like the original (see the note below on the flattened image model).`
         notes = `IMPROVISED: the three carousel images bind to a separate named model in the original (img>/products/pic1..3 from sap/ui/demo/mock/img.json); resolved here to static image URLs, as abap2UI5 serves a` &&
                  ` single default model. // POST-1.71: ariaLabelledBy on the Carousel (since UI5 1.125) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.125 to render it.`
@@ -662,21 +755,21 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.CheckBox`                    name = `CheckBoxTriState`                    class = `z2ui5_cl_ai_app_007` path = `src/01/b02/z2ui5_cl_ai_app_007.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         golden = abap_true
         checked = `CHECKED (2026-07-15): manually verified in a running system - the select-all parent checkbox and its tri-state expression bindings behave like the original.; promoted to golden 2026-07-20 (human` &&
                  ` decision) - exemplary for: expression bindings, two-way bind, boolean event arg` )
       ( module = `sap.m` control = `sap.m.ColorPalette`                name = `ColorPalette`                        class = `z2ui5_cl_ai_app_008` path = `src/01/b02/z2ui5_cl_ai_app_008.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
-        since = `1.54` )
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
+        since = `1.54`
+        release = `1.54` )
       ( module = `sap.m` control = `sap.m.Column`                      name = `Table`                               class = `z2ui5_cl_ai_app_009` path = `src/01/b05/z2ui5_cl_ai_app_009.clas.abap`
-        score = 5
-        score_state = `Error`
-        score_tip = `Deviation from the original sample: 5 of 5 (4 improvised, 1 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 10
+        score_tip = `Deviation from the original sample: 10 of 10 (4 improvised, 1 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.12`
+        release = `1.12`
+        is_post171 = abap_true
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `IMPROVISED: the shared demo kit mock model sap/ui/demo/mock/products.json (/ProductCollection, snapshotted in ui5/mock/products.json) is flattened into the default model: all 123 rows are kept` &&
                  ` verbatim, but only the bound columns (ProductId, Name, SupplierName, WeightMeasure, WeightUnit, Width, Depth, Height, DimUnit, Price, CurrencyCode) are ported - the unbound columns (Category,` &&
@@ -694,10 +787,11 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         post171 = `core:require (since UI5 1.74) on the view root loads the curated formatter module z2ui5/model/formatter for the weightState binding - the app needs a UI5 release >= 1.74 to render it.`
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.ColumnListItem`              name = `TableTest`                           class = `z2ui5_cl_ai_app_010` path = `src/01/b05/z2ui5_cl_ai_app_010.clas.abap`
-        score = 3
-        score_state = `Warning`
-        score_tip = `Deviation from the original sample: 3 of 5 (2 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 5
+        score_tip = `Deviation from the original sample: 5 of 10 (2 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.12`
+        release = `1.12`
+        is_post171 = abap_true
         checked = `CHECKED (2026-07-20): verified in a running system - human pass 2026-07-20: app starts and renders like the original; no interaction paths were open for this port`
         notes = `NOTE: the sample is an OPA-test demo: only the UI app under applicationUnderTest/ (Table.view.xml, Table.controller.js, Formatter.js, products.json) is ported 1:1; the qunit/OPA harness files` &&
                  ` (OpaTableTest.qunit.js, Test.qunit.html, testsuite.qunit.*) are test infrastructure without UI and are not ported. // IMPROVISED: the controller's onPopinLayoutChanged` &&
@@ -719,14 +813,14 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.ComboBox`                    name = `ComboBox`                            class = `z2ui5_cl_ai_app_011` path = `src/01/b02/z2ui5_cl_ai_app_011.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.22`
+        release = `1.22`
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.ComparisonPattern`           name = `ComparisonPattern`                   class = `z2ui5_cl_ai_app_012` path = `src/01/b05/z2ui5_cl_ai_app_012.clas.abap`
-        score = 5
-        score_state = `Error`
-        score_tip = `Deviation from the original sample: 5 of 5 (5 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 10
+        score_tip = `Deviation from the original sample: 10 of 10 (5 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
+        ui5_only = abap_true
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `IMPROVISED: the pattern's three views (App.view with sap.m.App id=rootControl, Main.view, Comparison.view) plus manifest routing are merged into ONE view: the App hosts the Main Page and the` &&
                  ` Comparison f:DynamicPage (id page-comparison added) directly as its pages; the router's navTo("page2") is mapped to the documented NavContainer frontend action follow_up_action(` &&
@@ -754,9 +848,9 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_fua_arg = abap_true
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.CookieSettingsDialogPattern` name = `CookieSettingsDialogPattern`         class = `z2ui5_cl_ai_app_013` path = `src/01/b05/z2ui5_cl_ai_app_013.clas.abap`
-        score = 5
-        score_state = `Error`
-        score_tip = `Deviation from the original sample: 5 of 5 (4 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 9
+        score_tip = `Deviation from the original sample: 9 of 10 (4 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
+        ui5_only = abap_true
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `IMPROVISED: the i18n> ResourceModel (i18n/i18n.properties) has no framework i18n mechanism here - all texts (dialog title, section titles/summaries/details, button labels) are inlined as the resolved` &&
                  ` English literals from the properties file; this covers every i18n>-bound text incl. the Panel headerText 'More Info'. // IMPROVISED: the cookieData> named JSON model is flattened into the default` &&
@@ -771,9 +865,8 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_fua_arg = abap_true
         use_popup = abap_true )
       ( module = `sap.m` control = `sap.m.CustomListItem`              name = `CustomListItem`                      class = `z2ui5_cl_ai_app_014` path = `src/01/b05/z2ui5_cl_ai_app_014.clas.abap`
-        score = 2
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 2 of 5 (1 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 3
+        score_tip = `Deviation from the original sample: 3 of 10 (1 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `IMPROVISED: the shared mock model /ProductCollection (ui5/mock/products.json) is flattened into the default model with only the three bound columns (ProductId, Name, ProductPicUrl); all unbound` &&
                  ` columns are dropped. The full 123-row set is kept verbatim. // NOTE: the ProductPicUrl values point at the OpenUI5 host (https://sdk.openui5.org/test-resources/...) per the asset-URL rule; they are` &&
@@ -786,9 +879,9 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.CustomTreeItem`              name = `CustomTreeItem`                      class = `z2ui5_cl_ai_app_015` path = `src/01/b05/z2ui5_cl_ai_app_015.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.48.0`
+        release = `1.48.0`
         checked = `CHECKED (2026-07-20): verified in a running system - human pass 2026-07-20: app starts and renders like the original; no interaction paths were open for this port`
         notes = `NOTE: the original binds the Tree's items to the whole JSON model root (items="{path: '/'}", the model IS the node array from Tree.json); abap2UI5 serves a single default model, so the array is` &&
                  ` flattened into it as the bound table T_TREE and the binding-info keeps its shape with the bound path substituted for '/' (nested tree binding is expressible per CAPABILITIES.md, proven by app 054).` &&
@@ -797,10 +890,11 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.DatePicker`                  name = `DatePickerHidden`                    class = `z2ui5_cl_ai_app_016` path = `src/01/b05/z2ui5_cl_ai_app_016.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         golden = abap_true
         since = `1.22.0`
+        release = `1.97`
+        is_post171 = abap_true
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed); promoted to golden 2026-07-20 (human decision) -` &&
                  ` exemplary for: frontend action (openBy/domRef), $event.oSource.sId anchor transport, POST_171 discipline`
         notes = `POST-1.71: Button.ariaHasPopup (since UI5 1.84) is newer than 1.71 but kept for the 1:1 port on both Buttons - the app needs a UI5 release >= 1.84 to render it. // POST-1.71: Link.ariaHasPopup (since` &&
@@ -814,9 +908,10 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_fua_arg = abap_true )
       ( module = `sap.m` control = `sap.m.DateRangeSelection`          name = `DateRangeSelection`                  class = `z2ui5_cl_ai_app_017` path = `src/01/b06/z2ui5_cl_ai_app_017.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.22.0`
+        release = `1.22.0`
+        is_post171 = abap_true
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `NOTE: the original controller's JSON model carries UI5Date objects; the ABAP model carries the same dates as ISO 'yyyy-MM-dd' strings, and each sap.ui.model.type.Date part of the DateInterval value` &&
                  ` bindings gets an added formatOptions.source pattern 'yyyy-MM-dd' so the strings are parsed to Dates and written back as strings (source-verified: DateInterval sets bUseInternalValues and` &&
@@ -832,10 +927,11 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         post171 = `core:require (UI5 >= 1.74) on the view root loads z2ui5/model/formatter for the DRS2 minDate/maxDate Formatter.DateCreateObject bindings - the app needs a UI5 release >= 1.74 to render it. //` &&
                  ` showCurrentDateButton (since UI5 1.95) on DRS3 is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.95 to render it.` )
       ( module = `sap.m` control = `sap.m.DateTimePicker`              name = `DateTimePicker`                      class = `z2ui5_cl_ai_app_018` path = `src/01/b06/z2ui5_cl_ai_app_018.clas.abap`
-        score = 4
-        score_state = `Error`
-        score_tip = `Deviation from the original sample: 4 of 5 (3 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 7
+        score_tip = `Deviation from the original sample: 7 of 10 (3 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.38.0`
+        release = `1.38.0`
+        is_post171 = abap_true
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `IMPROVISED: the JSON model's UI5Date instances become date strings in the flat ABAP model: the sap.ui.model.type.DateTime bindings (DTP2/3/4/5/8) get an added source pattern 'yyyy-MM-dd HH:mm:ss'` &&
                  ` format option so the type parses the model string (CAPABILITIES: Date types over ISO strings need a source pattern), and the sap.ui.model.odata.type.DateTimeOffset parts of DTP10/DTP11 get added` &&
@@ -857,8 +953,7 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` sap.ui.model.odata.type.DateTimeWithTimezone binding type of DTP10/DTP11 (since UI5 1.99) is kept 1:1 - the app needs a UI5 release >= 1.99 overall.` )
       ( module = `sap.m` control = `sap.m.Dialog`                      name = `DialogConfirm`                       class = `z2ui5_cl_ai_app_019` path = `src/01/b06/z2ui5_cl_ai_app_019.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         golden = abap_true
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed); promoted to golden 2026-07-20 (human decision) -` &&
                  ` exemplary for: fragment-popup dialogs, roundtrip-free live-enable expression, popup_close paths`
@@ -874,9 +969,8 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_ec = abap_true
         use_popup = abap_true )
       ( module = `sap.m` control = `sap.m.DisplayListItem`             name = `DisplayListItem`                     class = `z2ui5_cl_ai_app_020` path = `src/01/b06/z2ui5_cl_ai_app_020.clas.abap`
-        score = 2
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 2 of 5 (1 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 3
+        score_tip = `Deviation from the original sample: 3 of 10 (1 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         checked = `CHECKED (2026-07-20): verified in a running system - human pass 2026-07-20: app starts and renders like the original; no interaction paths were open for this port`
         notes = `IMPROVISED: the shared mock model sap/ui/demo/mock/supplier.json is flattened into the default model: the row type keeps only the six bound columns (SupplierName, Street, HouseNumber, ZIPCode, City,` &&
                  ` Country) of the single /SupplierCollection record and drops the unbound columns (Url, Twitter, Tel, Sms, Mobile, Pager, Fax, Email, Rating, Prime, Disposable); the record itself is kept verbatim. //` &&
@@ -885,10 +979,10 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` is already live-verified via app 041 (checked 2026-07-19); the /0 array-index path variant is a plain JSONModel path resolution, source-decidable, so no LIVE_TEST is carried.`
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.DraftIndicator`              name = `DraftIndicator`                      class = `z2ui5_cl_ai_app_021` path = `src/01/b06/z2ui5_cl_ai_app_021.clas.abap`
-        score = 2
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 2 of 5 (1 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 3
+        score_tip = `Deviation from the original sample: 3 of 10 (1 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.32.0`
+        release = `1.32.0`
         checked = `CHECKED (2026-07-20): verified in a running system - human pass 2026-07-20: app starts and renders like the original; no interaction paths were open for this port`
         notes = `IMPROVISED: the controller's imperative DraftIndicator calls (showDraftSaving/showDraftSaved/clearDraftState on byId('draftIndi')) are not in the FrontendAction CONTROL_METHODS whitelist; per AGENTS` &&
                  ` 'prefer a bindable property over a frontend action' the port two-way binds the control's public state property (sap.m.DraftIndicatorState, since 1.32) and sets Saving/Saved/Clear in the three event` &&
@@ -897,10 +991,10 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` same button twice in direct succession does not re-run the indicator - the model value is unchanged, so no binding change fires and setState is not called again (the original re-queues on every` &&
                  ` method call); pressing a different button in between restores the behaviour.` )
       ( module = `sap.m` control = `sap.m.FacetFilter`                 name = `FacetFilterLight`                    class = `z2ui5_cl_ai_app_022` path = `src/01/b04/z2ui5_cl_ai_app_022.clas.abap`
-        score = 4
-        score_state = `Error`
-        score_tip = `Deviation from the original sample: 4 of 5 (2 improvised, 1 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 7
+        score_tip = `Deviation from the original sample: 7 of 10 (2 improvised, 1 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         golden = abap_true
+        is_post171 = abap_true
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed); promoted to golden 2026-07-20 (human decision) -` &&
                  ` exemplary for: compound binding_call filter, curated formatter module, two-way facet selection`
         notes = `NOTE: the bound lists="{/ProductCollectionStats/Filters}" collection is represented as two static FacetFilterLists (Category, SupplierName) - the original's stats model yields exactly these two lists,` &&
@@ -931,15 +1025,15 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.FeedContent`                 name = `FeedContent`                         class = `z2ui5_cl_ai_app_023` path = `src/01/b06/z2ui5_cl_ai_app_023.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.34`
+        release = `1.34`
         checked = `CHECKED (2026-07-20): verified in a running system - human pass 2026-07-20: app starts and renders like the original; no interaction paths were open for this port` )
       ( module = `sap.m` control = `sap.m.FeedInput`                   name = `Feed`                                class = `z2ui5_cl_ai_app_024` path = `src/01/b06/z2ui5_cl_ai_app_024.clas.abap`
-        score = 2
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 2 of 5 (1 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 3
+        score_tip = `Deviation from the original sample: 3 of 10 (1 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.22`
+        release = `1.22`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `IMPROVISED: the controller's client-side DateFormat.getDateTimeInstance({ style: 'medium' }).format(new Date()) for the new entry's Date is rebuilt server-side in ABAP from sy-datum/sy-uzeit as an` &&
                  ` English medium-style timestamp (e.g. 'Jul 20, 2026, 1:23:45 PM') - the locale-dependent client formatter is not available in the backend round-trip; the value is a plain model string exactly like in` &&
@@ -948,9 +1042,9 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.FeedListItem`                name = `FeedListItem`                        class = `z2ui5_cl_ai_app_025` path = `src/01/b06/z2ui5_cl_ai_app_025.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.12`
+        release = `1.12`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `NOTE: the original's removeItem derives the entry index from the item's binding-context path (getBindingContext().getPath().split('/').pop()); the port transports the List's indexOfItem(item) instead` &&
                  ` - the aggregation index equals the model index for this bound list, so the spliced row is the same. // NOTE: feed.json entries 2 and 4 have no Actions property; the flat ABAP row type serializes` &&
@@ -959,27 +1053,28 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.FlexBox`                     name = `FlexBoxNested`                       class = `z2ui5_cl_ai_app_026` path = `src/01/b04/z2ui5_cl_ai_app_026.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         checked = `CHECKED (2026-07-19): verified in a running system - human visual pass 2026-07-19 over all apps: the six flex items and the h2 headings render with their injected-CSS background colours like the` &&
                  ` original.`
         notes = `NOTE: the original colours .item1..item6 and the h2 headings via a separate style.css; here it is injected as a core:HTML content attribute (a style tag, minified - see CAPABILITIES.md; the EXTRA` &&
                  ` core:HTML control vs the original view). Confirmed rendering via the human visual pass 2026-07-19.` )
       ( module = `sap.m` control = `sap.m.GenericTag`                  name = `GenericTag`                          class = `z2ui5_cl_ai_app_027` path = `src/01/b06/z2ui5_cl_ai_app_027.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.62.0`
+        release = `1.62.0`
+        is_post171 = abap_true
         checked = `CHECKED (2026-07-20): verified in a running system - human pass 2026-07-20: app starts and renders like the original; no interaction paths were open for this port`
         notes = `POST-1.71: ariaLabelledBy (since UI5 1.97) on the labeled GenericTag is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.97 to render it. // NOTE: the sample's` &&
                  ` Page.controller.js defines a press handler (MessageToast 'The GenericTag is pressed.') that is not referenced anywhere in Page.view.xml - no GenericTag carries a press attribute - so the port wires` &&
                  ` no event; the rendered view is a faithful 1:1 rebuild.`
         post171 = `ariaLabelledBy (since UI5 1.97) on the labeled GenericTag is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.97 to render it.` )
       ( module = `sap.m` control = `sap.m.GenericTile`                 name = `GenericTileAsKPITile`                class = `z2ui5_cl_ai_app_028` path = `src/01/b01/z2ui5_cl_ai_app_028.clas.abap`
-        score = 2
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 2 of 5 (1 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 3
+        score_tip = `Deviation from the original sample: 3 of 10 (1 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.34.0`
+        release = `1.34.0`
+        is_post171 = abap_true
         checked = `CHECKED (2026-07-19): verified in a running system - human visual pass 2026-07-19 over all apps: the KPI tiles float left via the injected tileLayout CSS and render like the original.`
         notes = `POST-1.71: frameType values OneByHalf / TwoByHalf (since UI5 1.83) are newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.83 to render them; OneByOne / TwoByOne (1.71) were` &&
                  ` never affected. // POST-1.71: systemInfo and appShortcut (since UI5 1.92) are newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.92 to render them. // POST-1.71: url on the` &&
@@ -991,9 +1086,9 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.76 to render it.` )
       ( module = `sap.m` control = `sap.m.HeaderContainer`             name = `HeaderContainer`                     class = `z2ui5_cl_ai_app_029` path = `src/01/b06/z2ui5_cl_ai_app_029.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.44.0`
+        release = `1.44.0`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `NOTE: the Select's literal selectedKey="1" is replaced by a two-way binding {SELECTED_KEY} (seeded with '1') so the SCROLL_CHANGED handler can read the chosen key on the backend - the` &&
                  ` CAPABILITIES-approved controller-read-selection pattern (bind selectedKey two-way; the incoming model is applied before on_event runs). The original controller reads` &&
@@ -1003,36 +1098,34 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` the initial arrow scroll is one item, exactly the original's untouched state; selecting px sets 0 (px stepping via scrollStep), like the controller.` )
       ( module = `sap.m` control = `sap.m.IconTabBar`                  name = `IconTabBarStretchContent`            class = `z2ui5_cl_ai_app_030` path = `src/01/b04/z2ui5_cl_ai_app_030.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed); incl. the phone-emulation device> check`
         notes = `NOTE: the original binds expanded="{device>/isNoPhone}" (a demo-kit helper model); expressed over the framework's device> model as the expression {= !${device>/system/phone} } - same truth value,` &&
                  ` different binding text. Confirmed on desktop and phone emulation in the 2026-07-20 live check.`
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.IconTabHeader`               name = `IconTabHeader`                       class = `z2ui5_cl_ai_app_055` path = `src/01/b07/z2ui5_cl_ai_app_055.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
-        since = `1.15` )
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
+        since = `1.15`
+        release = `1.15` )
       ( module = `sap.m` control = `sap.m.Image`                       name = `ImageModeBackground`                 class = `z2ui5_cl_ai_app_031` path = `src/01/b01/z2ui5_cl_ai_app_031.clas.abap`
-        score = 2
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 2 of 5 (1 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 3
+        score_tip = `Deviation from the original sample: 3 of 10 (1 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed); incl. the phone-emulation device> check`
         notes = `IMPROVISED: the original binds src/mode to a JSONModel (img>/products, /imageMode); these fixed sample values are inlined here as literals (mode Background, the HT-7777 / HT-6100 demo images).` &&
                  ` height/width are restored over the device> model, see below. // NOTE: the custom CSS class imageContainer (light blue background) of the box4 HBox is kept and the sample's styles.css injected via a` &&
                  ` core:HTML content attribute (CAPABILITIES.md CSS row, as apps 028/026; the EXTRA core:HTML control vs the original view). Confirmed rendering via the human visual pass 2026-07-19.` )
       ( module = `sap.m` control = `sap.m.ImageContent`                name = `ImageContent`                        class = `z2ui5_cl_ai_app_056` path = `src/01/b07/z2ui5_cl_ai_app_056.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.38`
+        release = `1.38`
         notes = `NOTE: the profile-image and logo ImageContent keep the sample's original demokit test-resources asset paths (test-resources/sap/m/demokit/sample/ImageContent/images/*.png) as the src literal 1:1;` &&
                  ` abap2UI5 does not serve those static assets, so only the first (sap-icon://area-chart) icon renders offline. The images are archived under ui5/sap.m/ImageContent/images/.` )
       ( module = `sap.m` control = `sap.m.Input`                       name = `InputValueState`                     class = `z2ui5_cl_ai_app_032` path = `src/01/b02/z2ui5_cl_ai_app_032.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
+        is_post171 = abap_true
         notes = `POST-1.71: showClearIcon (since UI5 1.94) on three inputs is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.94 to render it. // POST-1.71: the two formattedValueStateText` &&
                  ` aggregations (a FormattedText carrying Links, since UI5 1.78) are newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.78 to render them. // NOTE: the Links' press` &&
                  ` (.onFormattedTextLinkPress) round-trips as event LINK_PRESS and shows the controller's toast text, docked at CenterCenter 1:1 via message_toast_display( my = 'center center' at = 'center center' )` &&
@@ -1042,48 +1135,44 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` FormattedText carrying Links, since UI5 1.78) are newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.78 to render them.` )
       ( module = `sap.m` control = `sap.m.InputListItem`               name = `InputListItem`                       class = `z2ui5_cl_ai_app_057` path = `src/01/b07/z2ui5_cl_ai_app_057.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.` )
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.` )
       ( module = `sap.m` control = `sap.m.Label`                       name = `LabelProperties`                     class = `z2ui5_cl_ai_app_058` path = `src/01/b07/z2ui5_cl_ai_app_058.clas.abap`
-        score = 2
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 2 of 5 (1 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 3
+        score_tip = `Deviation from the original sample: 3 of 10 (1 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         notes = `IMPROVISED: the four controller handlers (onDisplayOnlyChange/onWrappingChange/onHyphenationChange/onWidthChange) are replaced by a roundtrip-free binding model, so the Switch ``change`` and Slider` &&
                  ` ``liveChange`` event attributes are dropped: the three Switches bind their ``state`` two-way to display_only/wrapping/hyphenation, the two result Labels bind ``displayOnly`` and ``wrapping`` to the` &&
                  ` same variables, and ``wrappingType`` (added on the two Labels, not present in the sample view) plus both container ``width`` values derive live via ``{= }`` expression bindings (wrappingType =` &&
                  ` hyphenation ? 'Hyphenated' : 'Normal'; width = slider_value + '%'). Same technique as app 007.` )
       ( module = `sap.m` control = `sap.m.LightBox`                    name = `LightBox`                            class = `z2ui5_cl_ai_app_059` path = `src/01/b07/z2ui5_cl_ai_app_059.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         notes = `NOTE: the Image src and LightBoxItem imageSrc keep the sample's original demokit sdk asset paths (test-resources/sap/ui/documentation/sdk/images/...) as literals 1:1; abap2UI5 does not serve those` &&
                  ` static assets, so the thumbnails/large images do not display offline. The LightBox still opens on image click (built-in Image.detailBox behaviour, no controller). The last item deliberately points` &&
                  ` imageSrc at a non-existent file to show the LightBox load-error state, exactly as in the sample. // NOTE: the six identical filler paragraphs use the same ABAP literal via a local ``lorem`` variable;` &&
                  ` XML attribute whitespace (newlines/tabs in the sample's indented multi-line text) is normalised to single spaces (visually identical).` )
       ( module = `sap.m` control = `sap.m.Link`                        name = `LinkEmphasized`                      class = `z2ui5_cl_ai_app_033` path = `src/01/b01/z2ui5_cl_ai_app_033.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.12`
+        release = `1.12`
         checked = `CHECKED (2026-07-19): verified in a running system - human visual pass 2026-07-19 over all apps: the Currency composite binding renders the formatted price per currency (raw binding-info string over` &&
                  ` PRICE TYPE p).`
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.List`                        name = `ListCounter`                         class = `z2ui5_cl_ai_app_034` path = `src/01/b04/z2ui5_cl_ai_app_034.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
+        is_post171 = abap_true
         checked = `CHECKED (2026-07-21): verified in a running system - human visual check 2026-07-21: the Products list renders the 11 rows with their Quantity counters (display-only app, no interaction to exercise).`
         notes = `POST-1.71: headerLevel="H2" on the List (since UI5 1.117) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.117 to render it.`
         post171 = `headerLevel="H2" on the List (since UI5 1.117) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.117 to render it.`
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.List`                        name = `ListNoData`                          class = `z2ui5_cl_ai_app_035` path = `src/01/b04/z2ui5_cl_ai_app_035.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.` )
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.` )
       ( module = `sap.m` control = `sap.m.Menu`                        name = `Menu`                                class = `z2ui5_cl_ai_app_060` path = `src/01/b07/z2ui5_cl_ai_app_060.clas.abap`
-        score = 3
-        score_state = `Warning`
-        score_tip = `Deviation from the original sample: 3 of 5 (2 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 5
+        score_tip = `Deviation from the original sample: 5 of 10 (2 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
+        is_post171 = abap_true
         checked = `CHECKED (2026-07-22): verified in a running system 2026-07-22: the Menu opens anchored to the button (openBy) and the selected item text resolves via ${$parameters>/item}.getText().`
         notes = `POST-1.71: Button.ariaHasPopup (since UI5 1.84) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.84 to render it. // IMPROVISED: the sample loads the Menu from` &&
                  ` Menu.fragment.xml on first press and toggles it in the controller (oMenu.isOpen() ? close() : openBy(button)). The port declares the Menu 1:1 inside the Button's ``dependents`` aggregation and` &&
@@ -1098,9 +1187,9 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_fua = abap_true
         use_fua_arg = abap_true )
       ( module = `sap.m` control = `sap.m.MenuButton`                  name = `MenuButton`                          class = `z2ui5_cl_ai_app_061` path = `src/01/b07/z2ui5_cl_ai_app_061.clas.abap`
-        score = 2
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 2 of 5 (1 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 3
+        score_tip = `Deviation from the original sample: 3 of 10 (1 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
+        is_post171 = abap_true
         checked = `CHECKED (2026-07-22): verified in a running system 2026-07-22: itemSelected/press/defaultAction/beforeMenuOpen all fire their toasts and the item text resolves.`
         notes = `POST-1.71: the MenuButton ``beforeMenuOpen`` event (since UI5 1.94) is kept 1:1 on the split-mode buttons that use it. menuPosition (1.56), buttonMode and useDefaultActionOnly are <= 1.71. //` &&
                  ` IMPROVISED: onMenuAction builds a breadcrumb path by walking the selected MenuItem's parent chain (e.g. 'basic > add'); the server cannot walk the client-side control tree, so the toast shows only` &&
@@ -1112,9 +1201,10 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         post171 = `the MenuButton ``beforeMenuOpen`` event (since UI5 1.94) is kept 1:1 on the split-mode buttons that use it. menuPosition (1.56), buttonMode and useDefaultActionOnly are <= 1.71.` )
       ( module = `sap.m` control = `sap.m.MessageBox`                  name = `MessageBoxInitialFocus`              class = `z2ui5_cl_ai_app_036` path = `src/01/b03/z2ui5_cl_ai_app_036.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.21.2`
+        release = `1.21.2`
+        is_post171 = abap_true
         notes = `NOTE: the sample opens a sap.m.MessageBox from its controller; there is no such control in the view. It is driven by two buttons wired to events that call client->message_box_display - the documented` &&
                  ` 1:1 path (CAPABILITIES.md marks sap.m.MessageBox as expressible with app 036 as its evidence port), not a workaround. // POST-1.71: ariaHasPopup="Dialog" on both buttons (since UI5 1.84) is newer` &&
                  ` than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.84 to render it. // POST-1.71: the MessageBox emphasizedAction option (since UI5 1.75) is newer than 1.71 but kept for the 1:1` &&
@@ -1124,10 +1214,11 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` UI5 1.75) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.75 to render it. // the MessageBox dependentOn option (since UI5 1.124) is restored via message_box_display's` &&
                  ` dependenton parameter, pointing at the view layout (id messageBoxHost); the app needs a UI5 release >= 1.124 to render it.` )
       ( module = `sap.m` control = `sap.m.MessagePopover`              name = `MessagePopover`                      class = `z2ui5_cl_ai_app_066` path = `src/01/b08/z2ui5_cl_ai_app_066.clas.abap`
-        score = 2
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 2 of 5 (1 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 3
+        score_tip = `Deviation from the original sample: 3 of 10 (1 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.28`
+        release = `1.73`
+        is_post171 = abap_true
         checked = `CHECKED (2026-07-22): verified in a running system 2026-07-22: the button toggles the MessagePopover open/closed (toggleBy) and lists the five messages.`
         notes = `POST-1.71: Button.ariaHasPopup (since UI5 1.84) kept on the message-popover button. The Button.type value 'Negative' (a sap.m.ButtonType value since 1.73) is what the sample's buttonTypeFormatter` &&
                  ` returns for the highest-severity Error message. // IMPROVISED: the MessagePopover (built in the controller and addDependent'ed to the button) is declared 1:1 in the button's ``dependents``` &&
@@ -1142,10 +1233,11 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_fua_arg = abap_true
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.MessagePopover`              name = `MessagePopoverAsyncMessageHandling`  class = `z2ui5_cl_ai_app_067` path = `src/01/b08/z2ui5_cl_ai_app_067.clas.abap`
-        score = 3
-        score_state = `Warning`
-        score_tip = `Deviation from the original sample: 3 of 5 (2 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 5
+        score_tip = `Deviation from the original sample: 5 of 10 (2 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.28`
+        release = `1.73`
+        is_post171 = abap_true
         checked = `CHECKED (2026-07-22): verified in a running system 2026-07-22: the button toggles the MessagePopover (toggleBy) and the first Error message renders its HTML markupDescription.`
         notes = `POST-1.71: Button.ariaHasPopup (since UI5 1.84) kept on the message-popover button; the Button.type value 'Negative' is a sap.m.ButtonType value since 1.73. MessageItem.markupDescription (renders the` &&
                  ` HTML description) is kept for the async sample's rich-text messages. // IMPROVISED: the MessagePopover (built in the controller) is declared 1:1 in the button's ``dependents``; the controller's` &&
@@ -1160,10 +1252,11 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_fua_arg = abap_true
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.MessagePopover`              name = `MessagePopoverMessageHandling`       class = `z2ui5_cl_ai_app_065` path = `src/01/b08/z2ui5_cl_ai_app_065.clas.abap`
-        score = 4
-        score_state = `Error`
-        score_tip = `Deviation from the original sample: 4 of 5 (2 improvised, 1 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 7
+        score_tip = `Deviation from the original sample: 7 of 10 (2 improvised, 1 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.28`
+        release = `1.28`
+        is_post171 = abap_true
         checked = `CHECKED (2026-07-21): verified in a running system - human live check 2026-07-21: startup toast at native height; Save opens the MessagePopover with 3 Errors + 1 Warning marking John Miller (Name) /` &&
                  ` Stefan Bosch (ZIP) / Maria Fontes (Email) + employment weekly hours; group headers Personal, Information / Personal, Contact; message-title press scrolls to and focuses the field; toggleBy` &&
                  ` opens/closes. Known cosmetic gap: the injected non-numeric ZIP shows empty (not "AAA") because the Integer-typed field cannot format it via the model->view path.`
@@ -1195,9 +1288,10 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.MessageStrip`                name = `MessageStripWithEnableFormattedText` class = `z2ui5_cl_ai_app_062` path = `src/01/b07/z2ui5_cl_ai_app_062.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.30`
+        release = `1.50`
+        is_post171 = abap_true
         notes = `POST-1.71: the MessageStrip ``controls`` aggregation (since UI5 1.129) is kept 1:1 for the fifth strip's %%0/%%1/%%2 multi-link formatted text (three sap.m.Link). enableFormattedText itself is since` &&
                  ` 1.50 (<= 1.71). // POST-1.71: core:require="{Formatter: 'z2ui5/model/formatter'}" wires the curated formatter module (since UI5 1.74) so the inlineIconsHelper strip can use` &&
                  ` Formatter.expandInlineIcons; the two added namespace decls (xmlns:core, core:require on the view root) are not in the sample view. // NOTE: the sample's controller builds inlineIconsHelper from` &&
@@ -1211,14 +1305,14 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` namespace decls (xmlns:core, core:require on the view root) are not in the sample view.` )
       ( module = `sap.m` control = `sap.m.MessageToast`                name = `MessageToast`                        class = `z2ui5_cl_ai_app_037` path = `src/01/b03/z2ui5_cl_ai_app_037.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
-        since = `1.9.2` )
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
+        since = `1.9.2`
+        release = `1.9.2` )
       ( module = `sap.m` control = `sap.m.MessageView`                 name = `MessageViewMessageManager`           class = `z2ui5_cl_ai_app_038` path = `src/01/b03/z2ui5_cl_ai_app_038.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.46`
+        release = `1.46`
         notes = `NOTE: the original registers its four messages on the sap.ui.core.message.MessageManager and the MessageView binds them via the message> model. abap2UI5 DOES carry the message> model on every view` &&
                  ` slot since pr/message-model (2026-07-18, auto-collecting control validation messages), but there is no ABAP API to push an arbitrary static message set into it - so for this render-only sample the` &&
                  ` messages are bound as a plain ABAP table on MessageView items with a MessageItem template (client->_bind( t_messages )), the path CAPABILITIES.md explicitly endorses for static message sets. Same` &&
@@ -1226,9 +1320,9 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.MultiComboBox`               name = `MultiComboBoxGrouping`               class = `z2ui5_cl_ai_app_039` path = `src/01/b02/z2ui5_cl_ai_app_039.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.22.0`
+        release = `1.22.0`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `NOTE: the custom groupHeaderFactory '.getGroupHeader' (controller code) is replaced by UI5's default group headers - the sample's factory builds a SeparatorItem with the group key, which is exactly` &&
                  ` what the default renders anyway (CAPABILITIES.md group-sorter row, source-verified on both sides), so this is a faithful 1:1, not a workaround. The items are a bound template with the original's` &&
@@ -1236,9 +1330,9 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.MultiInput`                  name = `MultiInput`                          class = `z2ui5_cl_ai_app_040` path = `src/01/b02/z2ui5_cl_ai_app_040.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         golden = abap_true
+        is_post171 = abap_true
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed); promoted to golden 2026-07-20 (human decision) -` &&
                  ` exemplary for: cc control (MultiInputExt), bound aggregation, tokens, sorter binding-info`
         notes = `NOTE: the controller's onInit pre-sets the tokens on both MultiInputs (Token 1..6 and one long token); they are declared statically in the view's tokens aggregation instead - same rendering` &&
@@ -1252,35 +1346,36 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.NewsContent`                 name = `NewsContent`                         class = `z2ui5_cl_ai_app_063` path = `src/01/b07/z2ui5_cl_ai_app_063.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
-        since = `1.34` )
-      ( module = `sap.m` control = `sap.m.NotificationListGroup`       name = `NotificationListGroup`               class = `z2ui5_cl_ai_app_077` path = `src/01/b09/z2ui5_cl_ai_app_077.clas.abap`
-        score = 2
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 2 of 5 (1 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.34`
+        release = `1.34` )
+      ( module = `sap.m` control = `sap.m.NotificationListGroup`       name = `NotificationListGroup`               class = `z2ui5_cl_ai_app_077` path = `src/01/b09/z2ui5_cl_ai_app_077.clas.abap`
+        score = 3
+        score_tip = `Deviation from the original sample: 3 of 10 (1 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
+        since = `1.34`
+        release = `1.34`
         notes = `IMPROVISED: static notifications: onItemClose's client-side removeItem is not mirrored (toast only); group 3's onAcceptErrors is simplified to the accept toast. // NOTE: the original's` &&
                  ` showCloseButton="falseue" typo on two items is corrected to false, otherwise UI5 boolean parsing rejects it.` )
       ( module = `sap.m` control = `sap.m.NotificationListItem`        name = `NotificationListItem`                class = `z2ui5_cl_ai_app_076` path = `src/01/b09/z2ui5_cl_ai_app_076.clas.abap`
-        score = 2
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 2 of 5 (1 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 3
+        score_tip = `Deviation from the original sample: 3 of 10 (1 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.34`
+        release = `1.34`
         notes = `IMPROVISED: the notifications are static (not model-bound), so onItemClose's client-side removeItem is not mirrored (close fires a toast only); onErrorPress's setProcessingMessage MessageStrip on the` &&
                  ` item is shown as a toast.` )
       ( module = `sap.m` control = `sap.m.NumericContent`              name = `NumericContentIcon`                  class = `z2ui5_cl_ai_app_064` path = `src/01/b07/z2ui5_cl_ai_app_064.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.34`
+        release = `1.34`
         notes = `NOTE: the second NumericContent keeps the sample's original demokit test-resources image path (test-resources/sap/m/demokit/sample/NumericContentIcon/images/grass.jpg) as the icon literal 1:1;` &&
                  ` abap2UI5 does not serve that static asset, so it does not render offline (the first tile's sap-icon://travel-expense does). The image is archived under ui5/sap.m/NumericContentIcon/images/.` )
       ( module = `sap.m` control = `sap.m.ObjectAttribute`             name = `ObjectAttributes`                    class = `z2ui5_cl_ai_app_073` path = `src/01/b09/z2ui5_cl_ai_app_073.clas.abap`
-        score = 2
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 2 of 5 (1 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 3
+        score_tip = `Deviation from the original sample: 3 of 10 (1 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.12`
+        release = `1.12`
+        is_post171 = abap_true
         notes = `NOTE: element binding kept 1:1 - the two display ObjectAttributes bind a one-record structure /S_PRODUCT instead of {/ProductCollection/0}; record 0 fields verbatim. // IMPROVISED:` &&
                  ` handleSAPLinkPressed's URLHelper.redirect maps to the URLHELPER REDIRECT frontend action (cs_event-urlhelper); handleFeedbacklinkPressed's Dialog (a RatingIndicator + TextArea with Submit/Cancel` &&
                  ` Button) is rebuilt via popup_display, the Submit button's 2s setBusy delay dropped. // POST-1.71: ObjectAttribute.ariaHasPopup (since UI5 1.97) is kept 1:1 on the feedback attribute; needs UI5 >=` &&
@@ -1292,9 +1387,9 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.ObjectHeader`                name = `ObjectHeader`                        class = `z2ui5_cl_ai_app_041` path = `src/01/b01/z2ui5_cl_ai_app_041.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.12`
+        release = `1.12`
         checked = `CHECKED (2026-07-19): verified in a running system - human visual pass 2026-07-19 over all apps: the element binding {/S_PRODUCT} resolves all relative field bindings incl. the Currency number - the` &&
                  ` ObjectHeader renders fully populated.`
         notes = `NOTE: the ObjectHeader keeps the original element binding and relative field bindings 1:1 (title, numberUnit, the ObjectAttribute composite texts and the sap.ui.model.type.Currency number binding);` &&
@@ -1307,24 +1402,25 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.ObjectIdentifier`            name = `ObjectIdentifier`                    class = `z2ui5_cl_ai_app_071` path = `src/01/b09/z2ui5_cl_ai_app_071.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.12`
+        release = `1.12`
         notes = `NOTE: element binding kept 1:1 - the VerticalLayout binds a one-record structure /S_PRODUCT in the default model instead of {/ProductCollection/0}; titleClicked's MessageBox.alert becomes` &&
                  ` message_box_display. // NOTE: the model holds exactly the bound record /ProductCollection/0 (Notebook Basic 15) of ui5/mock/products.json, verbatim - the original's own single-record binding.`
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.ObjectListItem`              name = `ObjectListItem`                      class = `z2ui5_cl_ai_app_074` path = `src/01/b09/z2ui5_cl_ai_app_074.clas.abap`
-        score = 2
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 2 of 5 (1 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 3
+        score_tip = `Deviation from the original sample: 3 of 10 (1 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.12`
+        release = `1.12`
         notes = `IMPROVISED: the ObjectStatus '.formatter.status' (Status -> ValueState) is precomputed into the STATUS_STATE model field (Available->Success, Out of Stock->Warning, Discontinued->Error, else None).`
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.ObjectNumber`                name = `ObjectNumber`                        class = `z2ui5_cl_ai_app_072` path = `src/01/b09/z2ui5_cl_ai_app_072.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.12`
+        release = `1.12`
+        is_post171 = abap_true
         notes = `NOTE: the original binds records {/ProductCollection/0..5} of the shared mock; the port carries exactly those 6 records as a default-model table T_PRODUCTS and element-binds each ObjectNumber to` &&
                  ` /T_PRODUCTS/0..5 (index binding), Price+CurrencyCode verbatim. // POST-1.71: ObjectNumber.inverted, ObjectNumber.active and ObjectNumber.press (all since UI5 1.86) are kept 1:1 for the` &&
                  ` inverted/interactive variants; needs UI5 >= 1.86.`
@@ -1332,8 +1428,8 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.ObjectStatus`                name = `ObjectStatus`                        class = `z2ui5_cl_ai_app_042` path = `src/01/b01/z2ui5_cl_ai_app_042.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
+        is_post171 = abap_true
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `POST-1.71: the ObjectStatus state values Indication06-Indication08 (since UI5 1.75) and Indication09-Indication20 (since UI5 1.120) are newer than 1.71 but kept for the 1:1 port - the app needs a UI5` &&
                  ` release >= 1.120 to render them all (>= 1.75 for Indication06-Indication08). // NOTE: the active status press opens the controller-built Dialog 1:1 (core:FragmentDefinition + popup_display): the` &&
@@ -1344,24 +1440,23 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_ec = abap_true
         use_popup = abap_true )
       ( module = `sap.m` control = `sap.m.OverflowToolbar`             name = `ToolbarDesign`                       class = `z2ui5_cl_ai_app_086` path = `src/01/b10/z2ui5_cl_ai_app_086.clas.abap`
-        score = 2
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 2 of 5 (1 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 3
+        score_tip = `Deviation from the original sample: 3 of 10 (1 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.28`
+        release = `1.28`
         notes = `IMPROVISED: the Select ``change`` handlers onSelectDesign/onSelectStyle (setDesign/setStyle) become two-way bound design/style; bActionContext (design != Info) becomes an expression binding on the` &&
                  ` Buttons' visible.`
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.Page`                        name = `PageStandardClasses`                 class = `z2ui5_cl_ai_app_089` path = `src/01/b11/z2ui5_cl_ai_app_089.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         notes = `NOTE: element binding kept 1:1 - a one-record structure /S_PRODUCT instead of {/ProductCollection/0}; the IconTabBar expanded stays bound to {device>/isNoPhone} (runtime device model).`
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.Panel`                       name = `PanelExpanded`                       class = `z2ui5_cl_ai_app_043` path = `src/01/b04/z2ui5_cl_ai_app_043.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.16`
+        release = `1.16`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `NOTE: the original controller toggles the third panel imperatively (onOverflowToolbarPress -> oPanel.setExpanded(!oPanel.getExpanded())). Reproduced 1:1 since the whitelist extension (2026-07-18, see` &&
                  ` pr/control-call-whitelist): the TOOLBAR_PRESSED handler inverts a server-side mirror of the state and calls the whitelisted setExpanded on the panel via client->follow_up_action(` &&
@@ -1369,10 +1464,11 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_fua = abap_true
         use_fua_arg = abap_true )
       ( module = `sap.m` control = `sap.m.PDFViewer`                   name = `PDFViewerPopup`                      class = `z2ui5_cl_ai_app_044` path = `src/01/b03/z2ui5_cl_ai_app_044.clas.abap`
-        score = 2
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 2 of 5 (1 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 3
+        score_tip = `Deviation from the original sample: 3 of 10 (1 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.48`
+        release = `1.48`
+        is_post171 = abap_true
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `NOTE: the original onInit creates a popup-mode sap.m.PDFViewer and adds it as a view dependent; it is declared 1:1 in the view's mvc:dependents aggregation (an extra PDFViewer element vs the original` &&
                  ` view.xml, which never carries it - there it lives in the controller). onPress' setSource/setTitle/open() becomes a bound source updated per click, the constant title declared in the view, and the` &&
@@ -1386,9 +1482,10 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_fua = abap_true
         use_fua_arg = abap_true )
       ( module = `sap.m` control = `sap.m.Popover`                     name = `PopoverControllingCloseBehavior`     class = `z2ui5_cl_ai_app_094` path = `src/01/b11/z2ui5_cl_ai_app_094.clas.abap`
-        score = 2
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 2 of 5 (1 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 3
+        score_tip = `Deviation from the original sample: 3 of 10 (1 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
+        release = `1.86`
+        is_post171 = abap_true
         notes = `POST-1.71: Link.ariaHasPopup (since 1.86) is kept 1:1 on the popover link; needs UI5 >= 1.86. // IMPROVISED: the row Popover reproduces the original bindElement: it is built per-press with relative` &&
                  ` bindings ({PRODUCT_ID} title, {NAME}, {PRODUCT_PIC_URL}) and follow_up_action( cs_event-bind_element, view=cs_view-popover ) element-binds the popover slot to t_products/<index>, where the index` &&
                  ` comes from the pressed row's binding context ($event.oSource.getBindingContext().getPath()); the popover is anchored by $event.oSource.sId and the Action button reproduces handleActionPress 1:1 (a` &&
@@ -1399,106 +1496,101 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_popover = abap_true
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.ProgressIndicator`           name = `ProgressIndicator`                   class = `z2ui5_cl_ai_app_070` path = `src/01/b09/z2ui5_cl_ai_app_070.clas.abap`
-        score = 2
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 2 of 5 (1 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 3
+        score_tip = `Deviation from the original sample: 3 of 10 (1 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.13.1`
+        release = `1.13.1`
+        is_post171 = abap_true
         notes = `IMPROVISED: the two interactive ProgressIndicators (pi-with-animation / pi-without-animation) are set to 0/100 via two-way bound percentValue/displayValue fields updated in a SET event, replacing the` &&
                  ` original's controller byId(...).setPercentValue/setDisplayValue calls. // POST-1.71: ProgressIndicator.displayAnimation (since UI5 1.73) is kept 1:1 on the no-animation ProgressIndicator; needs UI5` &&
                  ` >= 1.73.`
         post171 = `ProgressIndicator.displayAnimation (since UI5 1.73) is kept 1:1 on the no-animation ProgressIndicator; needs UI5 >= 1.73.` )
       ( module = `sap.m` control = `sap.m.PullToRefresh`               name = `PullToRefresh`                       class = `z2ui5_cl_ai_app_081` path = `src/01/b10/z2ui5_cl_ai_app_081.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.9.2`
+        release = `1.9.2`
         notes = `NOTE: the incremental backend load is reproduced 1:1: the model starts with the first product and each pull-to-refresh (REFRESH) appends the next until the full /ProductCollection is shown (fill_all +` &&
                  ` shown counter).`
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.RadioButton`                 name = `RadioButton`                         class = `z2ui5_cl_ai_app_069` path = `src/01/b09/z2ui5_cl_ai_app_069.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
+        is_post171 = abap_true
         notes = `POST-1.71: RadioButton.wrapping and RadioButton.wrappingType (both since UI5 1.126) are kept 1:1 on the wrapping-demo group; the app needs a UI5 release >= 1.126 to render them.`
         post171 = `RadioButton.wrapping and RadioButton.wrappingType (both since UI5 1.126) are kept 1:1 on the wrapping-demo group; the app needs a UI5 release >= 1.126 to render them.` )
       ( module = `sap.m` control = `sap.m.RangeSlider`                 name = `RangeSlider`                         class = `z2ui5_cl_ai_app_045` path = `src/01/b02/z2ui5_cl_ai_app_045.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.38`
+        release = `1.38`
         notes = `NOTE: the sample binds the composite RangeSlider "range" property (an array [low, high] - range="{/RS1}" / range="0,100"). abap2UI5 binds scalar ABAP fields, so each range is expressed as the` &&
                  ` equivalent value / value2 properties the control keeps in sync - identical rendering.` )
       ( module = `sap.m` control = `sap.m.ScrollContainer`             name = `ScrollContainer`                     class = `z2ui5_cl_ai_app_046` path = `src/01/b04/z2ui5_cl_ai_app_046.clas.abap`
-        score = 2
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 2 of 5 (1 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 3
+        score_tip = `Deviation from the original sample: 3 of 10 (1 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed); incl. the phone-emulation device> check`
         notes = `IMPROVISED: the Image src binds {img>/products/pic1} in the original, a JSON image model not available server-side; a static demo image URL is used instead.` )
       ( module = `sap.m` control = `sap.m.SearchField`                 name = `DialogSearch`                        class = `z2ui5_cl_ai_app_090` path = `src/01/b11/z2ui5_cl_ai_app_090.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         notes = `NOTE: the Dialog (loaded from a fragment in the original) is built and shown via popup_display on the button press; its content is static text, so the bindElement /ProductCollection/0 is a no-op and` &&
                  ` dropped.`
         use_ec = abap_true
         use_popup = abap_true )
       ( module = `sap.m` control = `sap.m.SegmentedButton`             name = `SegmentedButton`                     class = `z2ui5_cl_ai_app_047` path = `src/01/b03/z2ui5_cl_ai_app_047.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `NOTE: the original reads the selected item via oEvent.getParameter("item").getText() / getSelectedItem(). Here the items get keys (one/two/three - an addition, SB1 has none in the sample) and` &&
                  ` selectedKey is two-way bound, so the selection arrives with the event and no private event path is needed - the documented 1:1 path for controller-read selection (CAPABILITIES.md), not a workaround.` )
       ( module = `sap.m` control = `sap.m.Select`                      name = `Select`                              class = `z2ui5_cl_ai_app_048` path = `src/01/b02/z2ui5_cl_ai_app_048.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.SelectList`                  name = `SelectList`                          class = `z2ui5_cl_ai_app_075` path = `src/01/b09/z2ui5_cl_ai_app_075.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.26.0`
+        release = `1.26.0`
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.Slider`                      name = `Slider`                              class = `z2ui5_cl_ai_app_068` path = `src/01/b09/z2ui5_cl_ai_app_068.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.` )
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.` )
       ( module = `sap.m` control = `sap.m.SlideTile`                   name = `SlideTile`                           class = `z2ui5_cl_ai_app_082` path = `src/01/b10/z2ui5_cl_ai_app_082.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.34`
+        release = `1.34`
         notes = `NOTE: the sample's demo-kit backgroundImage paths are resolved to absolute sdk.openui5.org URLs.` )
       ( module = `sap.m` control = `sap.m.StandardListItem`            name = `StandardListItemAvatar`              class = `z2ui5_cl_ai_app_083` path = `src/01/b10/z2ui5_cl_ai_app_083.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         notes = `NOTE: the List element binding {/ProductCollection} and the items' index paths ({0/Name}..{3/Name}) are kept 1:1 against the default-model table /T_PRODUCTS (full 123-row mock inlined).` )
       ( module = `sap.m` control = `sap.m.StepInput`                   name = `StepInput`                           class = `z2ui5_cl_ai_app_049` path = `src/01/b02/z2ui5_cl_ai_app_049.clas.abap`
-        score = 2
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 2 of 5 (1 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 3
+        score_tip = `Deviation from the original sample: 3 of 10 (1 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.40`
+        release = `1.40`
         notes = `IMPROVISED: the sample binds a List to the JSON model /modelData and renders one templated CustomListItem per row. The rows are unrolled into static list items here because every row sets a different` &&
                  ` subset of the StepInput properties - an empty ABAP model field would bind as "" instead of leaving the property at its default, so a bound template would not render 1:1. Template properties no row` &&
                  ` ever sets (valueState) are dropped with it.` )
       ( module = `sap.m` control = `sap.m.Switch`                      name = `Switch`                              class = `z2ui5_cl_ai_app_050` path = `src/01/b02/z2ui5_cl_ai_app_050.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.` )
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.` )
       ( module = `sap.m` control = `sap.m.TabContainer`                name = `TabContainer`                        class = `z2ui5_cl_ai_app_093` path = `src/01/b11/z2ui5_cl_ai_app_093.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.34`
+        release = `1.34`
         notes = `NOTE: addNewButtonPress appends an empty employee (bound /T_EMPLOYEES); itemClose in the original calls preventDefault (keeps the tab) and would confirm - here it toasts and the tab is kept.`
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.Table`                       name = `TableAutoPopin`                      class = `z2ui5_cl_ai_app_092` path = `src/01/b11/z2ui5_cl_ai_app_092.clas.abap`
-        score = 2
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 2 of 5 (1 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 3
+        score_tip = `Deviation from the original sample: 3 of 10 (1 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.16`
+        release = `1.77`
+        is_post171 = abap_true
         notes = `POST-1.71: Table.popinChanged (since 1.77) and Column.importance (since 1.76), the core of the auto-pop-in demo, are kept 1:1; needs UI5 >= 1.77. // IMPROVISED: onSelectionFinish` &&
                  ` (setHiddenInPopin(getSelectedKeys())) is reproduced 1:1: the MultiComboBox selectedKeys are two-way bound to t_hidden and the selectionFinish round-trip forwards them as a JSON Priority array through` &&
                  ` follow_up_action( cs_event-control_by_id, setHiddenInPopin ), so the matching columns hide while in pop-in. The added selectedKeys binding has no counterpart in the original (the controller reads` &&
@@ -1510,23 +1602,23 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.Text`                        name = `Text`                                class = `z2ui5_cl_ai_app_051` path = `src/01/b01/z2ui5_cl_ai_app_051.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.` )
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.` )
       ( module = `sap.m` control = `sap.m.TextArea`                    name = `TextArea`                            class = `z2ui5_cl_ai_app_052` path = `src/01/b01/z2ui5_cl_ai_app_052.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
-        since = `1.9.0` )
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
+        since = `1.9.0`
+        release = `1.9.0` )
       ( module = `sap.m` control = `sap.m.TileContent`                 name = `TileContent`                         class = `z2ui5_cl_ai_app_078` path = `src/01/b10/z2ui5_cl_ai_app_078.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
-        since = `1.34.0` )
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
+        since = `1.34.0`
+        release = `1.34.0` )
       ( module = `sap.m` control = `sap.m.TimePicker`                  name = `TimePickerHidden`                    class = `z2ui5_cl_ai_app_091` path = `src/01/b11/z2ui5_cl_ai_app_091.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.32`
+        release = `1.97`
+        is_post171 = abap_true
         notes = `NOTE: openTimePicker (byId('HiddenTP').openBy(source.getDomRef())) is the app-016 openBy pattern: the source sId is transported via $event.oSource.sId and replayed as a control_by_id/openBy follow-up` &&
                  ` action. // POST-1.71: Button.ariaHasPopup (since 1.84), Link.ariaHasPopup (since 1.86) and TimePicker.hideInput (since 1.97) are kept 1:1; needs a UI5 release providing them.`
         post171 = `Button.ariaHasPopup (since 1.84), Link.ariaHasPopup (since 1.86) and TimePicker.hideInput (since 1.97) are kept 1:1; needs a UI5 release providing them.`
@@ -1534,44 +1626,43 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_fua_arg = abap_true )
       ( module = `sap.m` control = `sap.m.Title`                       name = `TitleLink`                           class = `z2ui5_cl_ai_app_079` path = `src/01/b10/z2ui5_cl_ai_app_079.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.27.0`
+        release = `1.27.0`
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.ToggleButton`                name = `ToggleButton`                        class = `z2ui5_cl_ai_app_080` path = `src/01/b10/z2ui5_cl_ai_app_080.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         notes = `NOTE: onPress toasts the source control id + Pressed/Unpressed; both arrive via $event.oSource (sId and getPressed()) - the earlier ${$source>/pressed} binding did not resolve at runtime.` )
       ( module = `sap.m` control = `sap.m.Tokenizer`                   name = `TokenizerBasic`                      class = `z2ui5_cl_ai_app_085` path = `src/01/b10/z2ui5_cl_ai_app_085.clas.abap`
-        score = 2
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 2 of 5 (1 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score = 3
+        score_tip = `Deviation from the original sample: 3 of 10 (1 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.22`
+        release = `1.22`
         notes = `IMPROVISED: the first Tokenizer's tokens are now model-bound (t_tokens): onAddToken appends the input value, onTokenDelete removes by key (the deleted key arrives via` &&
                  ` $event.getParameter('tokens')[0].getKey()); the second, disabled Tokenizer keeps its 3 static tokens, so the port shows one bound Token template + 3 static Token vs the original's 3+3. // NOTE: the` &&
                  ` CheckBox select handler becomes a live two-way selected/editable bind on the first Tokenizer.`
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.Toolbar`                     name = `ToolbarShrinkable`                   class = `z2ui5_cl_ai_app_053` path = `src/01/b03/z2ui5_cl_ai_app_053.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.16`
+        release = `1.16`
         checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
         notes = `NOTE: the sample's controller onSliderLiveChange resizes the toolbars in JS; there is no width in the source XML (the port adds the width attribute, the original wires liveChange instead). Rebuilt as` &&
                  ` a client-side expression binding {= slider + '%' } on each Toolbar width - no event round-trip, resizes instantly like the original; the documented preferred path (CAPABILITIES.md), not a workaround.` )
       ( module = `sap.m` control = `sap.m.Tree`                        name = `Tree`                                class = `z2ui5_cl_ai_app_054` path = `src/01/b04/z2ui5_cl_ai_app_054.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.42`
+        release = `1.42`
         checked = `CHECKED (2026-07-19): verified in a running system - human visual pass 2026-07-19 over all apps: the nested-table hierarchy renders as an expandable Tree like the original.`
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.URLHelper`                   name = `UrlHelper`                           class = `z2ui5_cl_ai_app_084` path = `src/01/b10/z2ui5_cl_ai_app_084.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.10`
+        release = `1.10`
         notes = `NOTE: element binding kept 1:1 - a one-record structure /S_SUPPLIER instead of {/SupplierCollection/0}. // NOTE: URLHelper.triggerTel/triggerSms/triggerEmail/redirect map 1:1 to the URLHELPER frontend` &&
                  ` action (cs_event-urlhelper): TRIGGER_TEL/TRIGGER_SMS take the number as a plain string param, TRIGGER_EMAIL/REDIRECT take a { EMAIL/URL, ... } object-literal t_arg (get_t_arg emits {-prefixed args` &&
                  ` raw as UI5 event-handler object literals). open_new_tab is NOT used - it is same-origin-only (isValidRedirectURL).`
@@ -1580,13 +1671,11 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_name = abap_true )
       ( module = `sap.m` control = `sap.ui.core.ContainerPadding`      name = `ContainerNoPadding`                  class = `z2ui5_cl_ai_app_087` path = `src/01/b10/z2ui5_cl_ai_app_087.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.`
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         notes = `NOTE: the /ProductCollectionStats/Counts values are flattened to the default model fields /TOTAL, /OK, /HEAVY, /OVERWEIGHT (verbatim counts).` )
       ( module = `sap.m` control = `sap.ui.core.StandardMargins`       name = `StandardMarginsAll`                  class = `z2ui5_cl_ai_app_088` path = `src/01/b11/z2ui5_cl_ai_app_088.clas.abap`
         score = 1
-        score_state = `Success`
-        score_tip = `Deviation from the original sample: 1 of 5 (0 improvised, 0 dropped). 1 = faithful 1:1, 5 = heavily reworked.` ) ).
+        score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.` ) ).
 
   ENDMETHOD.
 
