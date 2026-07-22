@@ -27,16 +27,12 @@
       "what": "the controller-built sap.m.Dialog of onMessageDialogPress (title Message, type Message, a Text 'Success' as content, an OK beginButton Button that closes it) is rebuilt 1:1 as a core:FragmentDefinition shown via client->popup_display on the ColumnListItem press event; the OK Button closes roundtrip-free via the frontend action _event_client( cs_event-popup_close ), and the original's afterClose destroy is the framework's popup lifecycle. The Dialog, its Text and its Button are extra controls vs the original view.xml (controller-created there)."
     },
     {
-      "type": "NOTE",
-      "what": "the sample's local Formatter.weightState is byte-identical in behavior to the framework formatter module's weightState (sap.m.sample.Table shape, source-verified in abap2UI5 app/webapp/model/formatter.js), so the state binding string formatter: 'Formatter.weightState' stays 1:1; only the view root's core:require value points at z2ui5/model/formatter instead of the sample's own Formatter module path."
-    },
-    {
-      "type": "POST_171",
-      "what": "core:require on the view root (since UI5 1.74) wires the formatter module - the app needs a UI5 release >= 1.74 to render it (pre-1.74 the published global z2ui5.Formatter.weightState would be the fallback)."
-    },
-    {
       "type": "IMPROVISED",
       "what": "model flattening: the sample's LOCAL applicationUnderTest/products.json (123 rows) is moved into the default model verbatim, unbound columns dropped. Note: the local file is NOT identical to the shared mock ui5/mock/products.json - same 123 ProductIds, but HT-9995 differs in content (local: Smartphone Cover / 15 EUR vs mock: Tablet Pouch / 20 EUR); the port follows the local file, the sample's actual model source."
+    },
+    {
+      "type": "NOTE",
+      "what": "the original derives the ObjectNumber weight state in its frontend Formatter.js (weightState: KG conversion + Success/Warning/Error thresholds). That is business logic, so - abap2UI5 being a thin frontend - it is computed in ABAP model_init into a WEIGHT_STATE field and bound state=\"{WEIGHT_STATE}\", not via a frontend formatter (core:require dropped). Visually 1:1 with the original."
     }
   ]
 }

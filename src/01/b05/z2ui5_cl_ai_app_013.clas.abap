@@ -235,7 +235,7 @@ CLASS z2ui5_cl_ai_app_013 IMPLEMENTATION.
                 )->leaf( `Button`
                     )->a( n = `text`    v = `Cancel`
                     )->a( n = `press`   v = client->_event( `CANCEL_PRESS` )
-                    )->a( n = `visible` v = |\{= ${ client->_bind( show_cookie_details ) } \}| ).
+                    )->a( n = `visible` v = client->_bind( show_cookie_details ) ).
 
     client->popup_display( popup->stringify( ) ).
 

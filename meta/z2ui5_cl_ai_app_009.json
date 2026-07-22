@@ -31,16 +31,12 @@
       "what": "the controller's onSelect (imperative oTable.setSticky array maintenance from the CheckBox text + selected parameter) becomes a sticky property on the Table bound to a plain string table: each CheckBox select event round-trips ${$source>/text} and ${$parameters>/selected}, the ABAP handler inserts/removes that option and pushes the model back via view_model_update."
     },
     {
-      "type": "POST_171",
-      "what": "core:require (since UI5 1.74) on the view root loads the curated formatter module z2ui5/model/formatter for the weightState binding - the app needs a UI5 release >= 1.74 to render it."
+      "type": "DROPPED_171",
+      "what": "the p:ColumnAIAction column plugin (sap.m.plugins, since UI5 1.136 - far newer than 1.71) is dropped with its dependents aggregation, the xmlns:p namespace and the press toast - the plugin class does not exist on a 1.71 runtime, so keeping it would break view creation there (same decision as app 022)."
     },
     {
       "type": "NOTE",
-      "what": "the original's local Formatter.js is referenced as formatter: '.formatter.weightState'; the port keeps the identical parts binding but references the framework's curated formatter module as 'Formatter.weightState' (same thresholds/logic, source-verified in abap2UI5 app/webapp/model/formatter.js)."
-    },
-    {
-      "type": "DROPPED_171",
-      "what": "the p:ColumnAIAction column plugin (sap.m.plugins, since UI5 1.136 - far newer than 1.71) is dropped with its dependents aggregation, the xmlns:p namespace and the press toast - the plugin class does not exist on a 1.71 runtime, so keeping it would break view creation there (same decision as app 022)."
+      "what": "the original derives the ObjectNumber weight state in its frontend Formatter.js (weightState: KG conversion + Success/Warning/Error thresholds). That is business logic, so - abap2UI5 being a thin frontend - it is computed in ABAP model_init into a WEIGHT_STATE field and bound state=\"{WEIGHT_STATE}\", not via a frontend formatter (core:require dropped). Visually 1:1 with the original."
     }
   ]
 }

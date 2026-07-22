@@ -5,6 +5,21 @@ Single source of truth for agents working on **abap2UI5-api**.
 > These instructions OVERRIDE any default behavior and must be followed exactly.
 > This entire project is in **English** — code, comments, commit messages, PRs.
 
+> **Core principle — abap2UI5 is a THIN FRONTEND.** As much logic as possible
+> lives in the **ABAP backend**; the frontend only renders and forwards events.
+> **Never put business logic in the frontend** — no computation, unit
+> conversion, thresholds, classification or validation in a frontend formatter,
+> expression binding or custom JS. Compute the result in ABAP and bind the
+> finished value. A *formatter* is presentation-only (a date/number format, an
+> icon glyph); a value like an `ObjectNumber` `state` derived from a measure +
+> thresholds **is business logic** and must be computed server-side into a model
+> field, then bound directly (`state="{WEIGHT_STATE}"`). When a UI5 sample does
+> such logic in its `Formatter.js`, the faithful abap2UI5 port moves it to
+> `model_init` and declares the difference — a *more* correct architecture, not a
+> deviation from intent. (Prompted this: `Formatter.weightState` did KG
+> conversion + Success/Warning/Error thresholds in the frontend — moved to ABAP
+> `WEIGHT_STATE` in apps 009/010/022/092, 2026-07-22.)
+
 ---
 
 ## 1. Mission — an automated repository
@@ -142,7 +157,7 @@ source of truth:
   "batch":   "b02",
   "audit":   { "frontend_action": false,        // uses _event_client? (note: which)
                "event_t_arg": true },           // passes event args via t_arg?
-  "status":  "generated",                       // generated|reviewed|checked|golden
+  "status":  "generated",                       // generated|reviewed|checked
   "checked": { "date": "2026-07-15", "note": "verified in a running system - ..." },
   "deviations": [ { "type": "IMPROVISED", "what": "..." } ]
 }
@@ -152,7 +167,9 @@ source of truth:
   and coverage read only `meta/` (§7). `node scripts/validate-meta.mjs` checks
   schema + referential integrity (file/batch/template exist) and runs in CI.
 - A human live check promotes `status` to `checked` and fills `checked`
-  directly in the sidecar; `reviewed`/`golden` are manual promotions too.
+  directly in the sidecar; `reviewed` is a manual promotion too. (There is no
+  `golden` status — the category was retired 2026-07-22; former golden ports are
+  plain `checked`, and any port may be refactored to the current conventions.)
 - The abapGit `<DESCRIPT>` follows `<entity> - <demo kit description>`
   (e.g. `sap.m.Switch - Some say it is only a switch...`), truncated to 60 chars.
 - The **control** must exist since UI5 1.71 and not be deprecated — samples
@@ -254,8 +271,14 @@ ENDMETHOD.
 The sample's JSON model becomes ABAP: one `ty_s_`/`ty_t_` type per JSON array,
 filled with `VALUE #( ( … ) ( … ) )`. Field names are the JSON keys, upper-cased
 by ABAP; bindings reference them in braces (`{TITLE}`, `{PRODUCT_ID}`). Keep the
-data verbatim from the sample (same rows, same text); a row subset needs an
-IMPROVISED note (checkable against `ui5/mock/`). See app 040.
+data verbatim from the sample — **the full row set, no subsetting**: inline every
+row of the referenced mock array (e.g. all 123 `/ProductCollection` rows of
+`ui5/mock/products.json`), byte-identical to the mock (`SUBSET_DATA` is no longer
+an accepted deviation — user decision 2026-07-22). Where the original itself
+binds a single record (`{/ProductCollection/0}`) or a precomputed stats array
+(`/ProductCollectionStats/Filters`), reproduce exactly that — that is the 1:1
+data, not a shortening. A packed field must carry enough `DECIMALS` for the mock
+(e.g. `Price` has 2-decimal values, so `TYPE p … DECIMALS 2`).
 
 **abap2UI5 serves a single default model — there are no named models.** A sample
 that binds against a named model (`img>/products/pic1`, a separate `JSONModel`,
@@ -361,6 +384,22 @@ client->view_display( view->stringify( ) ).
 
 #### Data binding & events
 
+- **A binding path always comes from a binding method — never hard-code it as
+  text.** `client->_bind( var )` (and `client->_bind( val = var path = abap_true )`
+  for the raw path) derives the model path *from the ABAP variable*, so renaming
+  the variable moves the binding with it. Writing the path literally instead
+  (`'/T_ITEMS'`, `` `{/T_ITEMS}` ``, `items = '{/T_ITEMS}'`, `path: '/T_ITEMS'`)
+  silently breaks on the next rename and is not allowed. This holds **everywhere a
+  method can produce the path**: the aggregation / model-root path
+  (`_bind( … path = abap_true )`), a slot element binding
+  (`follow_up_action( val = cs_event-bind_element … t_arg = VALUE #( ( idx ) ( client->_bind( tab ) ) ) )`
+  — pass `client->_bind( tab )`, never the text path), a `binding_call` target, etc.
+  The overview's **Audit** column carries a `literal binding` badge that flags ports
+  still writing a binding by name. The **one unavoidable exception** is a *relative
+  child property* inside a bound aggregation template — `` `{TITLE}` `` /
+  `` `{PRODUCT_ID}` `` referencing an upper-cased model field, which has no `_bind`
+  form (see the next bullet); keep those, but never write the absolute / model-root
+  path by hand.
 - `client->_bind( var )` — bind an ABAP `DATA` member two-way (the value
   flows back into `var` on the next round-trip), e.g.
   `)->a( n = `items` v = client->_bind( t_items )`. **`client->_bind_edit( )`
@@ -454,8 +493,9 @@ with a closed `type` vocabulary so deviations stay countable:
   app 044 shows the 1:1 way (`popup_display`).
 - `DROPPED_171` — a control / property / enum value newer than 1.71 was
   dropped or downgraded (app 042's `Indication06`+ states set to `None`).
-- `SUBSET_DATA` — the port binds a row subset of the sample's mock data
-  (checkable against `ui5/mock/`).
+- `SUBSET_DATA` — **retired (2026-07-22): no longer accepted.** Ports inline the
+  full mock row set (see `model_init` above); `validate-meta` now rejects this
+  type. Kept in the vocabulary only so historical diffs stay readable.
 - `NOTE` — anything else worth flagging.
 
 The `what` text carries the full explanation. Keep the array **empty** for a
@@ -466,9 +506,9 @@ these entries.
 
 #### Worked references
 
-Read the 2–3 nearest ones before writing a new port. Since 2026-07-20 the
-repo has `golden` ports (live-checked + exemplary, the only ports allowed
-as prompt references per TRAINING.md):
+Read the 2–3 nearest ones before writing a new port. Prefer `checked` ports
+(live-verified) as references — several were previously flagged `golden`
+(a category retired 2026-07-22; they stay good examples, just without the label):
 
 | App | Sample | Shows |
 |-----|--------|-------|
@@ -521,7 +561,8 @@ A fourth workflow, `checks`, runs three deterministic gates on every PR:
 |-----|---------|------------|
 | `pattern_lint` | `node scripts/pattern-lint.mjs` | a known-bad pattern reappears (each rule encodes a distilled §10 lesson; known open findings live in the script's BASELINE and in STATUS.md) |
 | `structural_diff` | `node scripts/structural-diff.mjs --strict` | a port's rendered view deviates from the original `view.xml` — control multiset, attribute names or simple **binding values** — without a declared deviation |
-| `render_smoke` | `node scripts/render-smoke.mjs --strict` (`npm run smoke`) | a port's reconstructed view fails a real headless `XMLView.create` against the OpenUI5 runtime (invalid XML, unknown control/property, strict property-type violation, broken expression binding). A helper-method-built view (handle-based re-entry the single-stack reconstructor cannot rebuild) must declare `"render_smoke": { "skip": true, "reason": "…" }` in its sidecar — an **undeclared** non-reconstructable port FAILS, and so does a **stale** declaration (a port that reconstructs but still declares skip), so the skip set can never drift |
+| `render_smoke` | `node scripts/render-smoke.mjs --strict` (`npm run smoke`) | a port's reconstructed view fails a real headless `XMLView.create` against the OpenUI5 runtime (invalid XML, unknown control/property, strict property-type violation, broken expression binding). Helper-method-built views (a captured node handle passed into a builder-returning helper and chained out — app 049) are reconstructed by the handle-aware path (`extractDocsWithHelpers`; a handle is a stack snapshot, each helper call inlined re-anchored to its argument). A port the reconstructor still cannot rebuild must declare `"render_smoke": { "skip": true, "reason": "…" }` in its sidecar — an **undeclared** non-reconstructable port FAILS, and so does a **stale** declaration (a port that reconstructs but still declares skip), so the skip set can never drift |
+| `e2e_smoke` (heavy, on-demand) | `npm run e2e:build` then `npm run e2e` (`scripts/e2e-build.mjs` + `e2e-smoke.mjs`) | a port fails to run as the **real app**: it starts the transpiled abap2UI5 backend (framework + all ports via `?app_start=<class>`, needs an abap2UI5 checkout — `A2UI5_HOME`), boots each port in headless Chromium (UI5 served from the local `@openui5` packages), and fails if it does not boot+render or if a backend request 4xx/5xx or a JS exception fires. Unlike `render_smoke` (static view reconstruction) this exercises the actual backend roundtrip, Component boot and event wiring. Not in the fast gate set (multi-minute transpile + browser); run before a release or when touching the framework wire/runtime. A small `INTERACTIONS` map adds real click→assert checks (e.g. 005 press→client-composed toast) |
 | `meta_valid` | `validate-meta.mjs` + regenerate overview & coverage, `git diff --exit-code -- src README.md api.md` | an invalid sidecar, or a change forgot to regenerate the overview app / coverage docs |
 | `property_gate` | `node scripts/property-check.mjs` | a port uses a control member introduced after UI5 1.71 (per-member `@since` from `ui5/properties.json`) without declaring it in a `POST_171` deviation — this covers both `a( n = … )` attributes **and** event parameters consumed via `${$parameters>/<name>}` in a `t_arg` |
 
@@ -574,7 +615,7 @@ scripts.**
   sorted by module → control → sample. Columns (all plain text — links moved to
   the trailing **Open** column): **Module** · **Control** · **Since** (the UI5
   release the control appeared in) · **Sample** · **abap2UI5** (class name) ·
-  **Note** (gold star for `golden` ports; green check when live-verified; hint
+  **Note** (green check when live-verified; hint
   button opens the deviations popup) · **Open** (a button that opens an anchored
   popover of every link: OpenUI5 API, OpenUI5 source, live fullscreen sample,
   the generated class on GitHub, and starting the app). The **Control** name and
@@ -649,11 +690,27 @@ the `<!-- last-run -->` timestamp into `README.md`, and opens a pull request. Th
 
 ## 8. ABAP code conventions
 
-Follow the [SAP Clean ABAP style guide](https://github.com/SAP/styleguides/blob/main/clean-abap/CleanABAP.md)
-and the detailed conventions in the
+The two authoritative ABAP style references for this repo are:
+
+- **[SAP Clean ABAP](https://github.com/SAP/styleguides/tree/main/clean-abap)**
+  (`clean-abap/CleanABAP.md`) — SAP's official style guide.
+- **[DSAG ABAP-Leitfaden](https://github.com/1DSAG/ABAP-Leitfaden)** (1DSAG) —
+  the German-community ABAP best-practice guide.
+
+Plus the detailed conventions in the
 [abap2UI5/samples AGENTS.md](https://github.com/abap2UI5/samples/blob/main/AGENTS.md)
 (§7 code conventions, §9 app lifecycle, §10 view building, §11 app structure) —
-the ports share that style. Essentials:
+the ports share that style. When these disagree, prefer Clean ABAP, then the
+DSAG Leitfaden, then the samples style. Essentials:
+
+- **Booleans use `abap_true` / `abap_false`, never the character literals `'X'` /
+  `' '`** (Clean ABAP "Use abap_true and abap_false"); build them with
+  `xsdbool( )`, feed a bound view attribute through `z2ui5_cl_ai_xml=>as_bool( )`.
+  The **one deliberate exception is a positional `t_arg` element** (`t_arg TYPE
+  string_table`): those are wire-protocol string tokens, so the descending flag of
+  a `binding_call` sort etc. may be written as the plain string `` `X` `` — though
+  `( abap_true )` (implicitly `c → string` = `'X'`) is preferred where it reads as
+  the boolean it is (the framework defines that arg as "abap_bool as `X`/space").
 
 - **Always the simplest possible notation**: omit parameters that equal the
   default (`get_event_arg( )`, not `get_event_arg( 1 )`), no pass-through

@@ -4,13 +4,11 @@ CLASS z2ui5_cl_ai_app_029 DEFINITION PUBLIC.
     INTERFACES z2ui5_if_app.
 
     DATA selected_key TYPE string.
-    DATA scroll_step_by_item TYPE i.
 
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
 
     METHODS view_display.
-    METHODS on_event.
     METHODS model_init.
 
   PRIVATE SECTION.
@@ -25,8 +23,6 @@ CLASS z2ui5_cl_ai_app_029 IMPLEMENTATION.
     IF client->check_on_init( ).
       model_init( ).
       view_display( ).
-    ELSEIF client->check_on_event( ).
-      on_event( ).
     ENDIF.
 
   ENDMETHOD.
@@ -39,17 +35,17 @@ CLASS z2ui5_cl_ai_app_029 IMPLEMENTATION.
     view->open( n = `View` ns = `mvc`
         )->a( n = `xmlns`      v = `sap.m`
         )->a( n = `xmlns:core` v = `sap.ui.core`
-        )->a( n = `xmlns:l`    v = `sap.ui.layout`
         )->a( n = `xmlns:mvc`  v = `sap.ui.core.mvc`
 
         )->open( `Toolbar`
             )->leaf( `Label`
                 )->a( n = `text` v = `Scroll options`
 
-            " selectedKey bound two-way (original: literal "1") so the change handler can read the key
+            " selectedKey bound two-way (original: literal "1"); scrollStepByItem is a
+            " pure function of it (px -> 0, else the number), so the change round-trip
+            " is dropped in favour of the expression binding below
             )->open( `Select`
                 )->a( n = `selectedKey` v = client->_bind( selected_key )
-                )->a( n = `change`      v = client->_event( `SCROLL_CHANGED` )
 
                 )->leaf( n = `Item` ns = `core`
                     )->a( n = `text` v = `1 item`
@@ -69,8 +65,9 @@ CLASS z2ui5_cl_ai_app_029 IMPLEMENTATION.
         )->open( `HeaderContainer`
             )->a( n = `scrollStep`       v = `200`
             )->a( n = `id`               v = `container1`
-            " the controller's setScrollStepByItem call, expressed as a two-way property binding
-            )->a( n = `scrollStepByItem` v = client->_bind( scroll_step_by_item )
+            " the controller's setScrollStepByItem(0 | Number(key)) expressed as an
+            " expression binding over the two-way selectedKey - no round-trip
+            )->a( n = `scrollStepByItem` v = |\{= ${ client->_bind( selected_key ) } === 'px' ? 0 : +${ client->_bind( selected_key ) } \}|
 
             )->leaf( `FeedContent`
                 )->a( n = `contentText` v = `@@notify Great outcome of the Presentation today. The new functionality and the new design was well received.`
@@ -81,13 +78,13 @@ CLASS z2ui5_cl_ai_app_029 IMPLEMENTATION.
                 )->a( n = `value`      v = `1.75`
                 )->a( n = `valueColor` v = `Good`
                 )->a( n = `indicator`  v = `Up`
-                )->a( n = `press`      v = client->_event( `PRESS` )
+                )->a( n = `press`      v = client->_event_client( val   = client->cs_event-control_global t_arg = VALUE #( ( `MESSAGE_TOAST` ) ( `show` ) ( `Fire press` ) ) )
             )->leaf( `NumericContent`
                 )->a( n = `scale`      v = `M`
                 )->a( n = `value`      v = `0.57`
                 )->a( n = `valueColor` v = `Error`
                 )->a( n = `indicator`  v = `Down`
-                )->a( n = `press`      v = client->_event( `PRESS` )
+                )->a( n = `press`      v = client->_event_client( val   = client->cs_event-control_global t_arg = VALUE #( ( `MESSAGE_TOAST` ) ( `show` ) ( `Fire press` ) ) )
             )->leaf( `NumericContent`
                 )->a( n = `value` v = `1762`
                 )->a( n = `icon`  v = `sap-icon://line-charts`
@@ -99,13 +96,13 @@ CLASS z2ui5_cl_ai_app_029 IMPLEMENTATION.
                 )->a( n = `value`      v = `1.04`
                 )->a( n = `valueColor` v = `Neutral`
                 )->a( n = `indicator`  v = `Up`
-                )->a( n = `press`      v = client->_event( `PRESS` )
+                )->a( n = `press`      v = client->_event_client( val   = client->cs_event-control_global t_arg = VALUE #( ( `MESSAGE_TOAST` ) ( `show` ) ( `Fire press` ) ) )
             )->leaf( `NumericContent`
                 )->a( n = `scale`      v = `M`
                 )->a( n = `value`      v = `3.65`
                 )->a( n = `valueColor` v = `Good`
                 )->a( n = `indicator`  v = `Up`
-                )->a( n = `press`      v = client->_event( `PRESS` )
+                )->a( n = `press`      v = client->_event_client( val   = client->cs_event-control_global t_arg = VALUE #( ( `MESSAGE_TOAST` ) ( `show` ) ( `Fire press` ) ) )
             )->leaf( `NumericContent`
                 )->a( n = `value` v = `1762`
                 )->a( n = `icon`  v = `sap-icon://bar-chart`
@@ -114,14 +111,14 @@ CLASS z2ui5_cl_ai_app_029 IMPLEMENTATION.
                 )->a( n = `value`      v = `0.73`
                 )->a( n = `valueColor` v = `Error`
                 )->a( n = `indicator`  v = `Down`
-                )->a( n = `press`      v = client->_event( `PRESS` )
+                )->a( n = `press`      v = client->_event_client( val   = client->cs_event-control_global t_arg = VALUE #( ( `MESSAGE_TOAST` ) ( `show` ) ( `Fire press` ) ) )
 
         )->shut(
         )->open( `HeaderContainer`
             )->a( n = `id`               v = `container2`
             )->a( n = `scrollStep`       v = `200`
-            " same two-way scrollStepByItem binding as on container1
-            )->a( n = `scrollStepByItem` v = client->_bind( scroll_step_by_item )
+            " same scrollStepByItem expression binding as on container1
+            )->a( n = `scrollStepByItem` v = |\{= ${ client->_bind( selected_key ) } === 'px' ? 0 : +${ client->_bind( selected_key ) } \}|
 
             )->open( `TileContent`
                 )->a( n = `unit`   v = `EUR`
@@ -132,7 +129,7 @@ CLASS z2ui5_cl_ai_app_029 IMPLEMENTATION.
                         )->a( n = `value`      v = `1.96`
                         )->a( n = `valueColor` v = `Error`
                         )->a( n = `indicator`  v = `Down`
-                        )->a( n = `press`      v = client->_event( `PRESS` )
+                        )->a( n = `press`      v = client->_event_client( val   = client->cs_event-control_global t_arg = VALUE #( ( `MESSAGE_TOAST` ) ( `show` ) ( `Fire press` ) ) )
 
                 )->shut(
             )->shut(
@@ -183,31 +180,9 @@ CLASS z2ui5_cl_ai_app_029 IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD on_event.
-
-    CASE client->get( )-event.
-
-      WHEN `PRESS`.
-        client->message_toast_display( `Fire press` ).
-
-      WHEN `SCROLL_CHANGED`.
-        IF selected_key = `px`.
-          scroll_step_by_item = 0.
-        ELSE.
-          scroll_step_by_item = selected_key.
-        ENDIF.
-        client->view_model_update( ).
-
-    ENDCASE.
-
-  ENDMETHOD.
-
-
   METHOD model_init.
 
     selected_key = `1`.
-    " the UI5 property default is 1 (scroll by one item), matching the Select's initial "1 item"
-    scroll_step_by_item = 1.
 
   ENDMETHOD.
 

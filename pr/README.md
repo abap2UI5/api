@@ -17,14 +17,30 @@ on the details live upstream and in CAPABILITIES.md/STATUS.md.
 
 ## Open
 
+Genuinely open — not yet implemented.
+
 | Request | Summary | Priority |
 |---------|---------|----------|
-| [`menu-item-selected-path`](menu-item-selected-path/) | A resolvable payload for the selected menu item's ancestor-text breadcrumb (`Create New Site > Official Store`), or a documented capability boundary. From b07 apps 060/061; today only the leaf `${$parameters>/item/text}` is transportable. **Deferred** (2026-07-20, user decision) — cosmetic (toast text) and likely resolves as a documented boundary rather than a framework change; kept for a later call | low — deferred |
+| [`messagepopover-async-url`](messagepopover-async-url/) | A declarable async URL-validation hook for `sap.m.MessagePopover.setAsyncURLHandler` (allow relative links, gate absolute ones before navigation). From app 067; the messages render fine without it, so **low priority / niche** — filed for the record. | low |
+| [`menu-item-selected-path`](menu-item-selected-path/) | A resolvable payload for the selected menu item's ancestor-text breadcrumb (`Create New Site > Official Store`), or a documented capability boundary. From b07 apps 060/061; today only the leaf `${$parameters>/item}.getText()` is transportable. **Deferred** (2026-07-20, user decision) — cosmetic (toast text) and likely resolves as a documented boundary rather than a framework change; kept for a later call. | low — deferred |
+
+## Implemented on this branch (`claude/ai-demokit-edge-cases-ftv30b`, pending upstream merge)
+
+Folders kept until merged upstream; then they move to the "Implemented (folders
+removed)" table below.
+
+| Request | What it adds | From |
+|---------|--------------|------|
+| [`message-toast-format`](message-toast-format/) | A `control_global` single-string method (MessageToast.show, MessageBox.*) composes its text from a template + client-resolved args (`{0}`,`{1}`,… filled by `$event.*`/`${$parameters>/…}`), so a dynamic toast is roundtrip-free — 1:1 with the demo-kit `MessageToast.show("…" + evt.…)`. `get_t_arg` quotes a leading `{0}` placeholder; lone strings unchanged. | apps 005, 060, 061, 077 (init-only) |
+| [`popover-bind-element`](popover-bind-element/) | A `BIND_ELEMENT` `follow_up_action` (popup + popover) — `follow_up_action( val = cs_event-bind_element, view = popup/popover, t_arg = ( idx ) ( client->_bind( mt_tab ) ) )`. The binding comes from `_bind` (registered + rename-safe), never text; the action strips `{ }`, appends `/idx` and sets the slot's element binding. Fits the existing signature, no new method params. | app 094 |
+| [`table-hidden-in-popin`](table-hidden-in-popin/) | Whitelist `setHiddenInPopin` in `CONTROL_METHODS`, like the `openBy`/`setActivePage`/`toggleBy` family, so the auto-pop-in demo's MultiComboBox works. `setContextualWidth`/Slider `setWidth` still open. | app 092 |
+| [`style-class-toggle`](style-class-toggle/) | Whitelist `addStyleClass`/`removeStyleClass`/`toggleStyleClass` (`["string"]`) in `CONTROL_METHODS` — the client-side equivalent of the controller's `oControl.toggleStyleClass('x')`. Motivated by app 013 (its CSS is not shipped, so 013 stays as-is, but the capability is available). | app 013 |
 
 ## Declined / deferred (folder removed 2026-07-19)
 
 | Request | Decision |
 |---------|----------|
+| urlhelper-abap-api | **Withdrawn 2026-07-22 — the premise was wrong.** The `URLHELPER` frontend action *is* callable from ABAP: `cs_event-urlhelper` with `TRIGGER_TEL`/`TRIGGER_SMS` (number as a plain string param) and `TRIGGER_EMAIL`/`REDIRECT` (a `{ EMAIL/URL, … }` object-literal `t_arg` — `get_t_arg` emits `{`-prefixed args raw as UI5 event-handler object literals). App 084 ported 1:1 this way; apps 041/073's external links switched from the (same-origin-only) `open_new_tab` to `urlhelper` REDIRECT. Captured as a CAPABILITIES.md convention instead of a framework change |
 | named-json-models | **Too complicated with the current abap2UI5 approach** — every view slot serializes exactly one ABAP-fed default JSONModel per roundtrip; a second named model would have to be carried through bind, serialization and model-update on every slot. Declined for now, possibly worth re-discussing in the future if the model layer changes. Workaround stays: flatten into the default model or resolve statically (IMPROVISED deviation, apps 006/031/046, same family app 044) |
 | message-manager-binding | **Half already covered, half implemented** — first recorded (b07) as "not filed, already covered": reading messages IS covered by the `message>` auto-collection (2026-07-18) and the plain-table MessagePopover (app 038). But porting `MessagePopoverMessageHandling` (b08) showed the **write** half — the controller's `MessageManager.addMessages` with custom text/target — was not expressible. Implemented 2026-07-20 as the `z2ui5.cc.MessageManager` companion control (see Implemented table) |
 

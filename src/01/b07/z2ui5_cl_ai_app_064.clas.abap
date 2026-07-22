@@ -7,7 +7,6 @@ CLASS z2ui5_cl_ai_app_064 DEFINITION PUBLIC.
     DATA client TYPE REF TO z2ui5_if_client.
 
     METHODS view_display.
-    METHODS on_event.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -20,8 +19,6 @@ CLASS z2ui5_cl_ai_app_064 IMPLEMENTATION.
     me->client = client.
     IF client->check_on_init( ).
       view_display( ).
-    ELSEIF client->check_on_event( ).
-      on_event( ).
     ENDIF.
 
   ENDMETHOD.
@@ -42,7 +39,8 @@ CLASS z2ui5_cl_ai_app_064 IMPLEMENTATION.
             )->a( n = `indicator`  v = `Down`
             )->a( n = `icon`       v = `sap-icon://travel-expense`
             )->a( n = `class`      v = `sapUiSmallMargin`
-            )->a( n = `press`      v = client->_event( `PRESS` )
+            )->a( n = `press`      v = client->_event_client( val   = client->cs_event-control_global
+                                                              t_arg = VALUE #( ( `MESSAGE_TOAST` ) ( `show` ) ( `The numeric content is pressed.` ) ) )
         )->leaf( `NumericContent`
             )->a( n = `value`      v = `11`
             )->a( n = `scale`      v = `MM`
@@ -50,21 +48,10 @@ CLASS z2ui5_cl_ai_app_064 IMPLEMENTATION.
             )->a( n = `indicator`  v = `Up`
             )->a( n = `icon`       v = `test-resources/sap/m/demokit/sample/NumericContentIcon/images/grass.jpg`
             )->a( n = `class`      v = `sapUiSmallMargin`
-            )->a( n = `press`      v = client->_event( `PRESS` ) ).
+            )->a( n = `press`      v = client->_event_client( val   = client->cs_event-control_global
+                                                              t_arg = VALUE #( ( `MESSAGE_TOAST` ) ( `show` ) ( `The numeric content is pressed.` ) ) ) ).
 
     client->view_display( view->stringify( ) ).
-
-  ENDMETHOD.
-
-
-  METHOD on_event.
-
-    CASE client->get( )-event.
-
-      WHEN `PRESS`.
-        client->message_toast_display( `The numeric content is pressed.` ).
-
-    ENDCASE.
 
   ENDMETHOD.
 

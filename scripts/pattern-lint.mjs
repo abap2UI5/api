@@ -51,6 +51,29 @@ const RULES = [
     },
   },
   {
+    id: 'control-by-id-empty-view-slot',
+    level: 'error',
+    doc: 'control_by_id t_arg carries an obsolete empty view slot as its 2nd element — the view now goes via the `view` parameter (get_event_client inserts it at index 2). Drop the ( `` ): otherwise it shifts the method into the wrong slot and the frontend logs "CONTROL_BY_ID: method \'\' not allowed". Correct form: ( `id` ) ( `method` ) ( params… ).',
+    find(content) {
+      const out = [];
+      const re = /control_by_id/g;
+      let m;
+      while ((m = re.exec(content))) {
+        const vi = content.indexOf('VALUE', re.lastIndex);
+        // only look inside the same call: bail if another statement starts first
+        if (vi === -1 || vi - re.lastIndex > 200) continue;
+        const open = content.indexOf('(', vi);
+        if (open === -1) continue;
+        const region = parenRegion(content, open);
+        const elems = [...region.matchAll(/\(\s*`([^`]*)`\s*\)/g)];
+        if (elems.length >= 2 && elems[1][1] === '') {
+          out.push({ line: lineOf(content, open), text: '( `' + elems[0][1] + '` ) ( `` ) …' });
+        }
+      }
+      return out;
+    },
+  },
+  {
     id: 'event-arg-bare-brace',
     level: 'error',
     doc: 'event t_arg uses a bare `{COL}` — not resolved by get_event_arg; use the $-prefixed form (${COL}) — AGENTS §5, bit us in app 005',
@@ -63,7 +86,12 @@ const RULES = [
         if (open === -1) continue;
         const region = parenRegion(content, open);
         for (const lit of region.matchAll(/`([^`]*)`/g)) {
-          if (/^\{/.test(lit[1])) {
+          // a bare leading `{COL}` is the bug (unresolved binding); a pure
+          // positional placeholder `{0}` / conditional `{0?a:b}` is legitimate —
+          // it is the client-composed MessageToast/MessageBox template arg,
+          // filled from the following client-resolved values (a field name is
+          // never digits).
+          if (/^\{/.test(lit[1]) && !/^\{\d+[?}]/.test(lit[1])) {
             out.push({ line: lineOf(content, open + lit.index), text: '`' + lit[1] + '`' });
           }
         }
@@ -82,6 +110,23 @@ const RULES = [
     level: 'error',
     doc: 'client->_bind_edit( is obsolete — always use _bind (two-way) — AGENTS §5',
     find: grepLines(/->_bind_edit\(/),
+  },
+  {
+    id: 'hardcoded-binding-path',
+    level: 'error',
+    portsOnly: true,
+    doc: "an absolute binding path is hard-coded as text (`{/PATH}` or `path: '/PATH'`) — derive it from client->_bind( var ) (raw path: _bind( val = var path = abap_true )) so it moves with a variable rename; relative field bindings (`{FIELD}`) are the allowed exception (AGENTS §5 'Data binding & events')",
+    find(content) {
+      const out = [];
+      content.split('\n').forEach((l, i) => {
+        const t = l.trimStart();
+        if (t.startsWith('"') || t.startsWith('*')) return; // ABAP comment line
+        if (/\{\//.test(l) || /\bpath\s*:\s*'\//.test(l)) {
+          out.push({ line: i + 1, text: l.trim().slice(0, 90) });
+        }
+      });
+      return out;
+    },
   },
   {
     id: 'event-arg-default-index',
@@ -167,6 +212,14 @@ const RULES = [
           any = true;
           if (!/^-?\d+(\.\d+)?$/.test(a[1].trim())) { allNumeric = false; break; }
         }
+        // string evidence beyond ABAP assignments: a non-numeric comparison in a
+        // UI5 { = } expression over the field (e.g. a selectedKey field compared
+        // `${ _bind( key ) } === 'px'`) proves it is genuinely a string, not a
+        // numeric property bound to a string. Without this the rule false-positives
+        // on a Select selectedKey whose only ABAP seed happens to be numeric.
+        const cmp = new RegExp(`_bind(?:_edit)?\\(\\s*${name}\\s*\\)[^|]*?===\\s*'([^']*)'`);
+        const cm = cmp.exec(content);
+        if (cm && !/^-?\d+(\.\d+)?$/.test(cm[1].trim())) allNumeric = false;
         if (any && allNumeric) {
           out.push({ line: lineOf(content, m.index), text: `${name} TYPE string, bound, only numeric literals assigned` });
         }

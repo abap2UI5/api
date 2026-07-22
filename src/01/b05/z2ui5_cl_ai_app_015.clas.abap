@@ -42,7 +42,6 @@ CLASS z2ui5_cl_ai_app_015 DEFINITION PUBLIC.
     DATA client TYPE REF TO z2ui5_if_client.
 
     METHODS view_display.
-    METHODS on_event.
     METHODS model_init.
 
   PRIVATE SECTION.
@@ -57,8 +56,6 @@ CLASS z2ui5_cl_ai_app_015 IMPLEMENTATION.
     IF client->check_on_init( ).
       model_init( ).
       view_display( ).
-    ELSEIF client->check_on_event( ).
-      on_event( ).
     ENDIF.
 
   ENDMETHOD.
@@ -87,7 +84,8 @@ CLASS z2ui5_cl_ai_app_015 IMPLEMENTATION.
                     )->open( `items`
                         )->leaf( `Button`
                             )->a( n = `icon`  v = `{REF}`
-                            )->a( n = `press` v = client->_event( `BUTTON_PRESS` )
+                            )->a( n = `press` v = client->_event_client( val   = client->cs_event-control_global
+                                                                         t_arg = VALUE #( ( `MESSAGE_TOAST` ) ( `show` ) ( `Button pressed` ) ) )
                             )->a( n = `class` v = `sapUiSmallMarginEnd`
 
                         )->open( `Input`
@@ -98,18 +96,6 @@ CLASS z2ui5_cl_ai_app_015 IMPLEMENTATION.
                                     )->a( n = `growFactor` v = `1` ).
 
     client->view_display( view->stringify( ) ).
-
-  ENDMETHOD.
-
-
-  METHOD on_event.
-
-    CASE client->get( )-event.
-
-      WHEN `BUTTON_PRESS`.
-        client->message_toast_display( `Button pressed` ).
-
-    ENDCASE.
 
   ENDMETHOD.
 

@@ -9,10 +9,10 @@
     "event_t_arg": false,
     "note": "follow_up_action cs_event-binding_call: compound filter groups on the items binding (apply_filter)"
   },
-  "status": "golden",
+  "status": "checked",
   "checked": {
     "date": "2026-07-20",
-    "note": "verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed); promoted to golden 2026-07-20 (human decision) - exemplary for: compound binding_call filter, curated formatter module, two-way facet selection"
+    "note": "verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed); live-checked reference example for: compound binding_call filter, curated formatter module, two-way facet selection"
   },
   "deviations": [
     {
@@ -26,14 +26,6 @@
     {
       "type": "IMPROVISED",
       "what": "the original controller appends the sap.m.sample.Table component's table with its first cell swapped for an ObjectIdentifier {Name}/{Category}; that table is rebuilt inline. The price column keeps the original sap.ui.model.type.Currency composite binding 1:1 (raw binding-info string over a numeric PRICE field)."
-    },
-    {
-      "type": "NOTE",
-      "what": "the weight column keeps the original parts+formatter binding 1:1: the framework ships the sample's weightState in its curated formatter module (standard app layout model/formatter.js, a served script, CSP-clean - see pr/formatter-registry, implemented 2026-07-18 after an eval-based register_formatter was rejected for security). The view requires it like the original controller requires './Formatter': core:require=\"{Formatter: 'z2ui5/model/formatter'}\" on the view root, state binds { parts: [WEIGHT_MEASURE, WEIGHT_UNIT], formatter: 'Formatter.weightState' } - the alias reference mirrors the original's '.formatter.weightState'. The earlier precomputed WEIGHT_STATE column stays gone."
-    },
-    {
-      "type": "POST_171",
-      "what": "core:require on the view root (since UI5 1.74) is newer than 1.71 but used for the formatter wiring - the app needs a UI5 release >= 1.74; on older releases reference the published global instead (formatter: 'z2ui5.Formatter.weightState')."
     },
     {
       "type": "NOTE",
@@ -52,8 +44,8 @@
       "what": "the original's nested items-binding filter (ORs inside each facet group, AND across the groups, model untouched) is expressed 1:1 as a declarative compound filter: apply_filter builds the groups JSON from the two-way bound selected flags and schedules follow_up_action cs_event-binding_call filter on idProductsTable/items (compound groups implemented upstream 2026-07-20, pr/binding-call-compound-filters); the earlier ABAP-side model rebuild and the t_products_all mirror are gone."
     },
     {
-      "type": "SUBSET_DATA",
-      "what": "data is a 10-row subset of the mock /ProductCollection (ui5/mock/products.json), facet counters recomputed for the subset."
+      "type": "NOTE",
+      "what": "the original derives the ObjectNumber weight state in its frontend Formatter.js (weightState: KG conversion + Success/Warning/Error thresholds). That is business logic, so - abap2UI5 being a thin frontend - it is computed in ABAP model_init into a WEIGHT_STATE field and bound state=\"{WEIGHT_STATE}\", not via a frontend formatter (core:require dropped). Visually 1:1 with the original."
     }
   ]
 }

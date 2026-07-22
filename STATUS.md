@@ -9,14 +9,325 @@ CAPABILITIES.md._
 
 | Aspect | State |
 |---|---|
-| Ports | 67 / **403 in-scope** `sap.m` samples (16.6 %) — in scope = control exists since UI5 1.71 and is not deprecated; 43 of 446 samples are out of scope (16 deprecated, 21 newer, 6 without control metadata) |
+| Ports | 94 / **403 in-scope** `sap.m` samples (23.3 %) — in scope = control exists since UI5 1.71 and is not deprecated; 43 of 446 samples are out of scope (16 deprecated, 21 newer, 6 without control metadata) |
 | CI | ABAP_STANDARD, ABAP_CLOUD, ABAP_702 all green |
 | Structural view diff | **0 undeclared differences** across all 64 ports (`node scripts/structural-diff.mjs --strict`) — including simple **binding values** and, since 2026-07-19, **`id` attributes** (name-level per control type; dropped original ids must be restored or declared) |
-| Render smoke | **0 failing / 1 skipped** (`npm run smoke`): every reconstructable port's view loads in a real headless `XMLView.create`; app 049's skip is now a **declared, CI-enforced** `render_smoke.skip` (helper-method view building is not statically reconstructable — an undeclared non-reconstructable port now FAILS); harness carries `sap.f` and mocks scalar-row tables as empty arrays since b05 |
+| Render smoke | **0 failing / 0 skipped** (`npm run smoke`): every port's view loads in a real headless `XMLView.create` — incl. app 049, now reconstructed by the **handle-aware path** (`extractDocsWithHelpers`: a builder handle is a stack snapshot, a captured handle passed into a builder-returning helper is inlined re-anchored per call). The declared-skip mechanism stays as a CI-enforced safety net for any future idiom the reconstructor cannot rebuild (undeclared non-reconstructable = FAIL, stale declaration = FAIL); harness carries `sap.f` and mocks scalar-row tables as empty arrays since b05 |
 | Pattern lint | **0 errors, 0 warnings, empty baseline** (`node scripts/pattern-lint.mjs`) |
-| Meta sidecars | 67 in `meta/` — status: 27 `generated`, 35 `checked`, **5 `golden`** (401, 421, 454, 540, 543 — promoted 2026-07-20 after the full live check); deviations: 35 IMPROVISED, 30 POST_171, 2 LIVE_TEST (b07 apps 060/061 menu item args), 9 SUBSET_DATA, 66 NOTE, 2 DROPPED_171 (the `p:ColumnAIAction` plugin in apps 022 and 534 — a whole control newer than 1.71, unlike the restorable members). `audit` is a structured object since 2026-07-18 |
-| Manually verified in a running system | **40 of 64 ports** — 2026-07-20 human live check per the interaction checklist (all b05/b06 + every port that carried an open question, incl. the 530 restamp); previously: 420/421/526 interactive, 404/431/440/460/487 visual 2026-07-19. The 24 remaining `generated` ports are the b01–b04 apps that never carried an open question plus the 10 fresh b07 ports (machine-verified only) |
+| Meta sidecars | 67 in `meta/` — status: 21 `generated`, 41 `checked`, **5 `golden`** (401, 421, 454, 540, 543 — promoted 2026-07-20 after the full live check); deviations: 39 IMPROVISED, 34 POST_171, 81 NOTE, 3 DROPPED_171 (the `p:ColumnAIAction` plugin in apps 009/022/534 — a whole control newer than 1.71, unlike the restorable members). **0 LIVE_TEST** (b07/b08 menu + message-popover paths live-checked 2026-07-22) and **0 SUBSET_DATA** (retired 2026-07-22 — every port now inlines the full mock row set). `audit` is a structured object since 2026-07-18 |
+| Manually verified in a running system | **46 of 67 ports** — adds 060/061/066/067 (menu + MessagePopover, human live check 2026-07-22) to the 2026-07-20 checked set; the 21 remaining `generated` ports are b01–b04 apps that never carried an open question (machine-verified only) |
 | Archive | `ui5/sap.m/<SampleName>/` — full originals for the 44 ported samples (+2 cross-referenced: `FacetFilterSimple`, `Table`); mock snapshot in `ui5/mock/`. Unported samples are copied over batch by batch. |
+
+## Real-app e2e smoke — runs every port as the actual app (2026-07-22)
+
+`render-smoke` renders a *reconstructed* view; it cannot see the backend
+roundtrip, Component boot or event wiring. New heavy, on-demand harness that
+runs the **real** app:
+
+- `scripts/e2e-build.mjs` (`npm run e2e:build`) — assembles the transpiled
+  backend: copies the abap2UI5 framework src + all 94 ports + the
+  `z2ui5_cl_ai_xml` builder into a build dir, **downports a copy** to v702 with
+  the framework's own `.github/abaplint/abap_702.jsonc` rule set (the transpiler
+  rejects modern `COND … LET …`; a minimal downport produced undefined-var JS,
+  so the full `check_syntax`/`definitions_top` rules are required), then
+  transpiles with `@abaplint/transpiler` → `node/output`. The framework SOURCE
+  is never mutated (only its gitignored build dirs). Needs an abap2UI5 checkout
+  with `node_modules` (`A2UI5_HOME`, default `../abap2UI5`).
+- `scripts/e2e-smoke.mjs` (`npm run e2e`) — boots the framework's express shim
+  (`ZCL_SICF` → `z2ui5_cl_http_handler`, the same open-abap runtime as the
+  framework's own e2e), then for each port opens headless Chromium at
+  `?app_start=<class>`. UI5 is served from the local `@openui5` packages (the
+  sandbox blocks the `sdk.openui5.org` CDN, so those requests are routed to the
+  package sources). Generic assertions, no per-port authoring: **boots UI5 +
+  renders controls + no backend 4xx/5xx + no JS exception** (benign
+  theme/preload/i18n noise from unbundled source filtered by response URL). A
+  small `INTERACTIONS` map adds real click→assert checks (005 press →
+  client-composed "…​Pressed" toast).
+- Result: **94/94 ports pass** — every port runs, boots and renders as the real
+  app. Uses `playwright` core (no new dep) like render-smoke; not in the fast
+  gate set (multi-minute transpile + browser), meant for pre-release / when the
+  framework wire or runtime changes. This is the automated counterpart to the
+  manual live check that the `LIVE_TEST` deviations track.
+
+## Live-check fixes on b09–b11 (2026-07-22) + three new pr requests
+
+Human live check surfaced six runtime issues (machine checks can't see them);
+all fixed, all six checks still green:
+
+- **094** — the popover's Action button used `cs_event-popup_close` (destroys
+  the `POPUP` slot), so a `POPOVER` never closed → **`cs_event-popover_close`**.
+- **080** — `${$source>/pressed}` did not resolve at runtime; the source id +
+  pressed state now arrive via **`$event.oSource.sId`** and
+  **`$event.oSource.getPressed()`** (the proven `$event.oSource.*` path).
+- **092** — the `Slider.liveChange` / `MultiComboBox.selectionFinish` server
+  round-trips returned an empty response and **blanked the view**; both were
+  dropped at the time. **Superseded 2026-07-22**: `selectionFinish` is now wired
+  1:1 through the new `setHiddenInPopin` control method (see the framework
+  section below); only the `Slider.liveChange` (`setWidth`) stays inert.
+  `popinChanged` still toasts.
+- **085** — the first Tokenizer's tokens are now **model-bound** (`t_tokens`);
+  add appends, delete removes by key (`$event.getParameter('tokens')[0].getKey()`).
+- **081** — the incremental backend load is now reproduced 1:1 (start with one
+  product, each pull appends the next via `fill_all` + a `shown` counter) instead
+  of binding the full 123 up front.
+- **084** — fixed with the real **`URLHELPER`** frontend action
+  (`cs_event-urlhelper`): `TRIGGER_TEL`/`TRIGGER_SMS` take the number as a plain
+  string param, `TRIGGER_EMAIL`/`REDIRECT` a `{ EMAIL/URL, … }` object-literal
+  `t_arg` (`get_t_arg` emits `{`-prefixed args raw as UI5 event-handler object
+  literals). An earlier claim that URLHELPER had "no ABAP path" was **wrong** —
+  it is callable; the withdrawn `urlhelper-abap-api` pr is recorded in
+  `pr/README` Declined. **`open_new_tab` is same-origin-only** (`isValidRedirectURL`),
+  so it can't open external sites/`tel:`/`mailto:` — the external links in apps
+  **041/073** were switched from `open_new_tab` to `urlhelper` REDIRECT
+  (correctness fix), and CAPABILITIES.md updated.
+
+Both **`pr/`** requests from the checks —
+[`table-hidden-in-popin`](../pr/table-hidden-in-popin/) (092) and
+[`popover-bind-element`](../pr/popover-bind-element/) (094) — are now
+**implemented** in the framework (see the next section).
+
+## Framework features implemented (2026-07-22) — `setHiddenInPopin` + `BIND_ELEMENT`
+
+Both were carried into abap2UI5 (branch `claude/ai-demokit-edge-cases-ftv30b`)
+and the two demokit apps rewired to use them:
+
+- **`setHiddenInPopin`** — new `sap.m.Table` entry in `CONTROL_METHODS`
+  (`["object"]`), in both `app/webapp/core/FrontendAction.js` and the ABAP
+  generator mirror `z2ui5_cl_app_frontendaction_js`. **App 092** now reproduces
+  `onSelectionFinish` 1:1: the `MultiComboBox` `selectedKeys` are two-way bound
+  to `t_hidden`, and `selectionFinish` forwards them as a JSON Priority array via
+  `follow_up_action( cs_event-control_by_id, setHiddenInPopin )`.
+- **`BIND_ELEMENT`** — new `cs_event-bind_element` constant + `evBindElement`
+  action (both JS files) + brace-stripping arg formatting in
+  `get_event_client`, so a whole view slot can be element-bound to a table row
+  through `follow_up_action`. **App 094** now reproduces the original
+  `oPopover.bindElement(...)`: the popover uses relative bindings
+  (`{PRODUCT_ID}` / `{NAME}` / `{PRODUCT_PIC_URL}`) and
+  `follow_up_action( val = cs_event-bind_element, view = cs_view-popover,
+  t_arg = VALUE #( ( idx ) ( client->_bind( t_products ) ) ) )` binds the
+  popover slot to `t_products/<index>`, the index taken from the pressed row's
+  binding context. 3 node tests added (29 pass, abaplint clean).
+
+Both apps stay machine-green (abaplint against the updated framework,
+validate-meta, pattern-lint, structural-diff `--strict`, property-check,
+render-smoke `--strict` — 094 now renders 2 docs incl. the popover). Their
+sidecars' `IMPROVISED` deviations were rewritten from "dropped/inert" to the
+faithful wiring. **LIVE-TEST pending** on both.
+
+## Overview: always-shown Audit column (2026-07-22)
+
+The overview table gained an **Audit** column (`scripts/generate-overview.mjs`,
+computed from each port's ABAP source at generation time, always visible). One
+badge per framework-wiring fact the port uses: `_event_client` (9 apps) and its
+`t_arg` form (3), `follow_up_action` (14) and its `t_arg` form (14), opens a
+`Popup` (8) or `Popover` (1), and **literal binding** (40) — a path written by
+name in clear text (`{FIELD}` / `{/Path}`) instead of via `client->_bind`, the
+form that breaks on a variable rename.
+
+## Overview overhaul (2026-07-22) — releases, filters, Shell, split Open
+
+Further reworked `scripts/generate-overview.mjs` (all offline, baked into the
+generated class at generation time):
+
+- **Title** now carries the ported-app count — `abap2UI5 Demo Kit (94)`.
+- **Release column** (next to Sample): the direct UI5 release the whole *sample*
+  needs = the control `since` raised by any kept post-1.71 member (parsed from the
+  POST_171 deviation texts); blank = available since forever. The existing
+  **Since** column keeps showing the *control's* own since (next to Control).
+- **Deviation** rescaled 1→10 (`min(10, 1 + weighted deviations)`) and **no longer
+  coloured** (plain text).
+- **UI5 only column**: badges rows whose control is not part of OpenUI5. The
+  membership oracle is `ui5/properties.json` ∪ `@openui5` source module (`.js`) ∪
+  library.js / .library mentions — so statics (URLHelper) and CSS-class doc
+  entities (StandardMargins/ContainerPadding) count as OpenUI5; only the two
+  demo-kit-only composite *Pattern* samples (012/013) flag `ui5_only` (2).
+- **Header filter checkboxes** (default all on), filtering the table entirely on
+  the client via each row's `visible` expression (no round-trip): Hide non-OpenUI5,
+  Hide newer than 1.71 (2020) (28 apps), Hide deprecated (0). Disabled while the
+  tree is shown.
+- **Shell switch** (next to Tree view) toggles the `sap.m.Shell` letterboxing
+  (`appWidthLimited`), two-way bound, client-side.
+- **Open column split into two buttons**: the first starts the abap2UI5 app
+  directly in a new tab (`cs_event-open_new_tab` via `_event_client` — the start
+  URL is same-origin, so it passes `isValidRedirectURL`); the second opens the
+  reference-links popover, now trimmed to the four external links (OpenUI5 API,
+  source, live sample, ABAP class). The same two buttons sit on every tree leaf.
+
+Follow-up refinements (2026-07-22): the **Release** column is renamed **Since**
+and only shows a value when higher than the control's own since (otherwise it
+just repeats it); **both Since columns are sortable and coloured orange**
+(`ObjectStatus` Warning via a `{= … ? 'Warning' : 'None' }` expression) when newer
+than 1.71. **UI5 only → Version** (still the orange SAPUI5 badge). The **Note
+column is removed**; its info (checked status, post-1.71 note, generation notes)
+moved **into the links popover**, which also carries the four reference links. The
+two Open buttons are **swapped** (links-popover first, app-launch second), on the
+table and the tree. The `Tree`-nested-in-`Table` startup crash from the first cut
+is fixed (missing `shut()` restored). The popover's generation notes render as an
+**HTML bullet list** (`FormattedText`, one `<li>` per bullet, the type label in
+bold; the note text is HTML-escaped, then the builder's `xml_escape` + UI5's
+single un-escape show it verbatim). The **sample-since version parser** was fixed:
+it now takes the max of *all* version tokens in the POST_171 texts (the old
+`since X.Y` regex missed the common `since UI5 1.84` phrasing, so the column was
+nearly always blank); 28 rows now carry a sample-since (matching the 28 post-1.71
+ports).
+
+## Batch b11 generated (2026-07-22) — pages, pickers, tables & popovers (7 ports)
+
+Classes **088–094**, breadth-first NEW-CONTROL: 088 StandardMarginsAll
+(`sap.ui.core.StandardMargins`), 089 PageStandardClasses (`sap.m.Page`),
+090 DialogSearch (`sap.m.SearchField`), 091 TimePickerHidden (`sap.m.TimePicker`),
+092 TableAutoPopin (`sap.m.Table`), 093 TabContainer, 094
+PopoverControllingCloseBehavior (`sap.m.Popover`). Machine-verified green
+(abaplint, validate-meta, pattern-lint, structural-diff `--strict`,
+property-check, render-smoke `--strict`); status `generated`.
+
+Notables: **091** reuses the app-016 openBy pattern (source `sId` via
+`$event.oSource.sId` → `control_by_id`/`openBy` follow-up); **092** keeps the
+declarative `autoPopinMode` + `Column.importance` 1:1 (the imperative
+setWidth/setHiddenInPopin handlers dropped) and reuses the curated
+`Formatter.weightState`; **090** and **094** build their dialog/popover via
+`popup_display`/`popover_display` in `on_event` (094 passes the row values as
+event args and anchors by `sId`). **This batch is 7 ports, not 10**: the three
+remaining backlog-top controls were **deferred** as too lossy for a 1:1 port
+(AGENTS §5) — **SemanticPage** (semantic-page landmark aggregations),
+**QuickView/QuickViewCard** (multi-page card navigation + navOrigin), and
+**ViewSettingsDialog** (custom sort/filter/group tabs). They stay NEW-CONTROL in
+the backlog for a dedicated effort, alongside the calendar family
+(PlanningCalendar / SinglePlanningCalendar) and SplitApp/SplitContainer that now
+dominate the backlog top.
+
+## Batch b10 generated (2026-07-22) — toolbars, tiles & lists (10 ports)
+
+Classes **078–087**, breadth-first NEW-CONTROL: 078 TileContent,
+079 TitleLink (`sap.m.Title`), 080 ToggleButton, 081 PullToRefresh,
+082 SlideTile, 083 StandardListItemAvatar (`sap.m.StandardListItem`),
+084 UrlHelper (`sap.m.URLHelper`), 085 TokenizerBasic (`sap.m.Tokenizer`),
+086 ToolbarDesign (`sap.m.OverflowToolbar`), 087 ContainerNoPadding
+(`sap.ui.core.ContainerPadding`, an IconTabBar demo). Machine-verified green
+(abaplint, validate-meta, pattern-lint, structural-diff `--strict`,
+property-check, render-smoke `--strict`); status `generated`.
+
+Notables: **083** keeps the original's `{/ProductCollection}` List element
+binding + `{0/Name}..{3/Name}` index item bindings against the full 123-row
+default-model table; **084** flattens `/SupplierCollection/0` to a `/S_SUPPLIER`
+record and maps the URLHelper tel/sms/email triggers to toasts (website →
+open_new_tab); **086** turns the Select `change` design/style handlers into
+two-way binds + an expression-binding `visible`; **087** flattens the
+`/ProductCollectionStats/Counts` to `/TOTAL /OK /HEAVY /OVERWEIGHT`.
+The two heaviest OverflowToolbar samples (OverflowToolbarFooter, full table +
+menu; OverflowToolbarTokenizer, many tokenizers + DateTimePicker/SegmentedButton)
+were left in the backlog for a dedicated effort rather than forced in.
+
+## Batch b09 generated (2026-07-22) — objects, inputs & notifications (10 ports)
+
+The next 10 backlog-top NEW-CONTROL samples, breadth-first (one port per
+uncovered control), classes **068–077**: 068 Slider, 069 RadioButton,
+070 ProgressIndicator, 071 ObjectIdentifier, 072 ObjectNumber,
+073 ObjectAttributes (`sap.m.ObjectAttribute`), 074 ObjectListItem,
+075 SelectList, 076 NotificationListItem, 077 NotificationListGroup.
+Machine-verified to green (abaplint ×STANDARD, validate-meta, pattern-lint,
+structural-diff `--strict`, property-check, render-smoke `--strict`). Status
+`generated` (no human live check yet).
+
+Notables: the list ports (**074**, **075**) inline the full 123-row mock
+per the 2026-07-22 no-subset rule; **074** precomputes the `.formatter.status`
+ValueState into a `STATUS_STATE` field (the app-038/545 pattern). The
+single-record display ports (**071**, **073**) reproduce the original's
+`{/ProductCollection/0}` element binding as a one-record `/S_PRODUCT` structure
+(the 041 pattern); **072** carries records 0–5 as a 6-row table and
+element-binds each ObjectNumber to `/T_PRODUCTS/0..5` (index binding, inlined
+`_bind` per control). **070**'s two interactive ProgressIndicators are set via
+two-way bound percentValue/displayValue + a SET event (replacing the
+controller's byId setters). New POST_171 firsts: `RadioButton.wrapping`/
+`wrappingType` (1.126), `ProgressIndicator.displayAnimation` (1.73),
+`ObjectNumber.inverted`/`active`/`press` (1.86), `ObjectAttribute.ariaHasPopup`
+(1.97). The notification ports are static declarations (close's client-side
+`removeItem` is not mirrored → toast; declared). Open LIVE_TESTs (machine-only):
+the `${$source>/title}` event args (076/077), the interactive PI SET round-trip
+(070), the feedback popup + open_new_tab (073), the ObjectNumber index bindings
+(072).
+
+## Full mock data + deviation score (2026-07-22)
+
+Two user decisions this day:
+
+- **No more data subsetting.** The nine `SUBSET_DATA` ports were rebuilt to
+  inline the **full mock row set** (all 123 `/ProductCollection` rows of
+  `ui5/mock/products.json`), byte-identical to the mock: **006, 030, 033, 034,
+  039, 040** (product lists), **012** (all 123 rows loaded, the table binding
+  still filters to `Category = Laptops` as the original does client-side; `price`
+  bumped to `DECIMALS 2` so the 19 non-integer prices stay exact) and **022**
+  (full products + the precomputed `/ProductCollectionStats/Filters` counters —
+  16 categories / 12 suppliers — which is what the original binds). **041** keeps
+  its single `/ProductCollection/0` binding (that is the original's own
+  single-record binding, not a subset) — its tag was relabelled `NOTE`. The
+  `SUBSET_DATA` deviation type is **retired**: `validate-meta` now rejects it and
+  `AGENTS.md §model_init` requires the full row set. All checks stay green
+  (abaplint, structural-diff `--strict`, validate-meta, pattern-lint,
+  property-check, render-smoke `--strict`).
+- **Rating (1–5) in the overview app.** A sortable **Rating** column in
+  `z2ui5_cl_ai_app_overview` scores, "by feel", how much attention a port
+  deserves — not a strict deviation count. Four things push it up (all
+  additive): **complexity** (a big view / rich interaction — LOC, `_event*`/
+  `follow_up_action` count, control count), **rework** (every non-1:1
+  substitution `IMPROVISED`/`DROPPED_171`/`SUBSET_DATA` or documented `NOTE`
+  subtlety), **discussed** (a port reviewed together — it carries a `checked`
+  block), and **test-priority** (pending `LIVE_TEST`s, roundtrip-free/runtime
+  wiring, popups/popovers, a needs-newer-than-1.71 render). `score =
+  min(5, max(1, round(1 + Σweights)))`; 1 = simple faithful 1:1, 5 = complex /
+  reworked / worth a close look. Sort descending to find the samples worth a
+  closer manual look. Computed in `scripts/generate-overview.mjs`. Current
+  spread: **6×1, 32×2, 24×3, 15×4, 17×5** (was briefly rescaled to 1–10, taken
+  back to 1–5 with the richer heuristic on user request 2026-07-22).
+- **Four LIVE_TESTs closed.** 060 Menu, 061 MenuButton, 066 MessagePopover,
+  067 MessagePopoverAsync were human live-checked (open/toggle + item paths) and
+  promoted `generated → checked`; their `LIVE_TEST` entries became live-verified
+  `NOTE`s. (Later that day the client-composed-toast conversions — 005, 060, 061,
+  077, see below — re-opened a few `LIVE_TEST`s for the new roundtrip-free
+  mechanism.)
+
+## Client-composed toasts (2026-07-22)
+
+The abap2UI5 branch gained `pr/message-toast-format`: a `control_global`
+single-string method (`MessageToast.show`, `MessageBox.*`) composes its text
+from a template + client-resolved args (`{0}`,`{1}`,… filled by `$event.*` /
+`${$parameters>/…}`), so a **dynamic** toast is roundtrip-free — 1:1 with the
+demo-kit `MessageToast.show("…" + evt.…)`. `get_t_arg` quotes a leading `{0}`
+placeholder so a value-first template survives; a lone string is unchanged.
+Ports **005** (Button, 12 presses), **060** (Menu), **061** (MenuButton) and
+**077** (NotificationListGroup) converted — each loses its `on_event` entirely
+and becomes **init-only**. Toasts whose text is computed server-side (019, 024,
+…) correctly keep their round-trip. All gates green; the four converted ports
+carry a `LIVE_TEST` for the new mechanism.
+
+Follow-ups (same day): **003, 016, 074, 076, 091** converted (all init-only;
+016 also moved its openBy from a round-trip to `_event_client`). Then two
+framework additions closed the last gaps — a **conditional placeholder**
+`{N?trueText:falseText}` (truthiness of the value) and **single-quote escaping**
+in `get_t_arg` (`'` → `\'`) — which unblocked **080** (ToggleButton,
+`{0} {1?Pressed:Unpressed}` from `getPressed()`), **049** (StepInput,
+`Value changed to '{0}'`) and **008** (ColorPalette, two args incl. a `\n`).
+Twelve ports total are now client-composed/init-only. Kept on their round-trip
+by design: server-computed or model-mutating toasts (019, 024, 025's action
+branch, 047, 085).
+
+## control_by_id view-slot fix + golden category retired (2026-07-22)
+
+- **Runtime bug fixed.** After the framework moved the view to its own `view`
+  parameter (`get_event_client` inserts it at `t_arg` index 2 for
+  `control_by_id`), the ports that still carried an explicit empty `( `` )` view
+  slot ended up with `[id, '', '', method, …]`, so the frontend read
+  `method = ''` and logged `CONTROL_BY_ID: method '' not allowed` (openBy/
+  toggleBy never fired). Dropped the empty slot in **060, 065, 066, 067, 091**
+  and in the overview generator's tree Expand-all/Collapse-all buttons; correct
+  form is `( id ) ( method ) ( params )`. New pattern-lint rule
+  `control-by-id-empty-view-slot` guards it.
+- **`golden` status retired** (user decision — "erstmal keine golden kategorie").
+  The five golden ports (007, 016, 019, 022, 040) are now plain `checked`;
+  `validate-meta` drops `golden` from the status vocabulary; the overview
+  generator drops the `golden` flag (it fed only the rating's "discussed"
+  signal, now `checked`-only); AGENTS.md / TRAINING.md updated. Former golden
+  ports may now be refactored to the current conventions like any other.
 
 ## Batches
 
@@ -33,7 +344,10 @@ The 34 existing ports are retro-grouped into review batches — one subpackage
 | `b05` | Backlog top: bars, tables, custom items & patterns | 531, 532, 533, 534, 535, 536, 537, 538, 539, 540 | all (2026-07-20) |
 | `b06` | Date pickers, dialogs, feeds & tiles | 541, 542, 543, 544, 545, 546, 547, 548, 549, 550 | all (2026-07-20) |
 | `b07` | Icon tabs, tile content, menus, list items & message strips | IconTabHeader, ImageContent, InputListItem, LabelProperties, LightBox, Menu, MenuButton, MessageStrip, NewsContent, NumericContent (classes 055–064) | — (machine-verified only) |
-| `b08` | Message popover (all three MessagePopover samples) | MessagePopoverMessageHandling (065), MessagePopover (066), MessagePopoverAsyncMessageHandling (067) | — (machine-verified only) |
+| `b08` | Message popover (all three MessagePopover samples) | MessagePopoverMessageHandling (065), MessagePopover (066), MessagePopoverAsyncMessageHandling (067) | 065–067 (2026-07-22) |
+| `b09` | Objects, inputs & notifications | Slider, RadioButton, ProgressIndicator, ObjectIdentifier, ObjectNumber, ObjectAttributes, ObjectListItem, SelectList, NotificationListItem, NotificationListGroup (classes 068–077) | — (machine-verified only) |
+| `b10` | Toolbars, tiles & lists | TileContent, TitleLink, ToggleButton, PullToRefresh, SlideTile, StandardListItemAvatar, UrlHelper, TokenizerBasic, ToolbarDesign, ContainerNoPadding (classes 078–087) | — (machine-verified only) |
+| `b11` | Pages, pickers, tables & popovers | StandardMarginsAll, PageStandardClasses, DialogSearch, TimePickerHidden, TableAutoPopin, TabContainer, PopoverControllingCloseBehavior (classes 088–094) | — (machine-verified only) |
 
 New generation batches continue as `b08`, `b09`, … per the process in
 TRAINING.md.
@@ -110,7 +424,7 @@ default model), and **MessagePopoverMessageHandling** (built on the UI5
 MessageManager / message model). They stay `NEW-CONTROL` in the backlog for a
 later dedicated effort.
 
-Techniques worth noting: **060 Menu** reuses the golden app-016 openBy
+Techniques worth noting: **060 Menu** reuses the app-016 openBy
 frontend action — the Menu is declared in the Button's `dependents`
 aggregation and opened via `control_by_id`/`openBy` anchored to
 `$event.oSource.sId`. **058 LabelProperties** is roundtrip-free: the four
@@ -750,8 +1064,19 @@ Infrastructure:
   builder calls with no declaration) *and* FAILS a stale declaration (a port
   that reconstructs but still declares skip). Skips can no longer grow
   silently — a new helper-built port fails CI until a human consciously
-  declares or reconstructs it. app 049 carries the declaration; run stays
-  **0 failing / 1 skipped**.
+  declares or reconstructs it.
+  **Update 2026-07-22 — the handle-tracking interpreter was actually built**
+  (`extractDocsWithHelpers` in render-smoke.mjs). A builder handle is now a
+  stack snapshot (root..cursor); `DATA(list) = view->…->open( List )` saves it,
+  a builder-returning helper (`METHODS … RETURNING VALUE(result) TYPE REF TO
+  z2ui5_cl_ai_xml`) is parsed once into a relative op-chain, and every
+  `render_item( list = list … )->leaf( … )` call is inlined re-anchored to its
+  argument handle with the non-entry params (`label`) substituted string-aware.
+  app 049 reconstructs faithfully (14 CustomListItems, each `HBox` → label
+  VBox + StepInput VBox) and renders for real — **not** a wrong-but-rendering
+  false pass: the tree is byte-correct. The declared-skip mechanism stays as the
+  safety net for a future idiom the interpreter still can't rebuild. Its own
+  skip declaration was removed; run is now **0 failing / 0 skipped**.
 - [x] ~~render-smoke harness gaps found by the 2026-07-19 hold-out probe~~ —
   fixed same day: (a) the inline formatter mirror had only `weightState`
   while upstream `model/formatter.js` had grown the date helpers + demo kit

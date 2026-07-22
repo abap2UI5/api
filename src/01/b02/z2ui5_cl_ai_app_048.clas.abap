@@ -8,9 +8,7 @@ CLASS z2ui5_cl_ai_app_048 DEFINITION PUBLIC.
         product_id TYPE string,
         name       TYPE string,
       END OF ty_s_product.
-    DATA t_products  TYPE STANDARD TABLE OF ty_s_product WITH EMPTY KEY.
-    DATA t_products2 TYPE STANDARD TABLE OF ty_s_product WITH EMPTY KEY.
-    DATA t_products3 TYPE STANDARD TABLE OF ty_s_product WITH EMPTY KEY.
+    DATA t_products TYPE STANDARD TABLE OF ty_s_product WITH EMPTY KEY.
 
     DATA selected_product  TYPE string.
     DATA selected_product2 TYPE string.
@@ -80,7 +78,7 @@ CLASS z2ui5_cl_ai_app_048 IMPLEMENTATION.
                         )->a( n = `editable`       v = client->_bind( editable )
                         )->a( n = `forceSelection` v = `false`
                         )->a( n = `selectedKey`    v = client->_bind( selected_product2 )
-                        )->a( n = `items`          v = |\{ path: '{ client->_bind( val = t_products2 path = abap_true ) }', sorter: \{ path: 'NAME' \} \}|
+                        )->a( n = `items`          v = |\{ path: '{ client->_bind( val = t_products path = abap_true ) }', sorter: \{ path: 'NAME' \} \}|
 
                         )->leaf( n = `Item` ns = `core`
                             )->a( n = `key`  v = `{PRODUCT_ID}`
@@ -124,7 +122,7 @@ CLASS z2ui5_cl_ai_app_048 IMPLEMENTATION.
                         )->a( n = `type`            v = `IconOnly`
                         )->a( n = `icon`            v = `sap-icon://filter`
                         )->a( n = `autoAdjustWidth` v = `true`
-                        )->a( n = `items`           v = |\{ path: '{ client->_bind( val = t_products3 path = abap_true ) }', sorter: \{ path: 'NAME' \} \}|
+                        )->a( n = `items`           v = |\{ path: '{ client->_bind( val = t_products path = abap_true ) }', sorter: \{ path: 'NAME' \} \}|
 
                         )->leaf( n = `Item` ns = `core`
                             )->a( n = `key`  v = `{PRODUCT_ID}`
@@ -144,21 +142,9 @@ CLASS z2ui5_cl_ai_app_048 IMPLEMENTATION.
     enabled  = abap_true.
     editable = abap_true.
 
+    " one shared product list feeds all three Selects (the original binds them to
+    " the same /ProductCollection); each Select keeps its own selectedKey
     t_products = VALUE #(
-      ( product_id = `HT-1000` name = `Notebook Basic 15` )
-      ( product_id = `HT-1001` name = `Notebook Basic 17` )
-      ( product_id = `HT-1002` name = `Notebook Basic 18` )
-      ( product_id = `HT-1003` name = `Notebook Basic 19` )
-      ( product_id = `HT-1007` name = `ITelO Vault` ) ).
-
-    t_products2 = VALUE #(
-      ( product_id = `HT-1000` name = `Notebook Basic 15` )
-      ( product_id = `HT-1001` name = `Notebook Basic 17` )
-      ( product_id = `HT-1002` name = `Notebook Basic 18` )
-      ( product_id = `HT-1003` name = `Notebook Basic 19` )
-      ( product_id = `HT-1007` name = `ITelO Vault` ) ).
-
-    t_products3 = VALUE #(
       ( product_id = `HT-1000` name = `Notebook Basic 15` )
       ( product_id = `HT-1001` name = `Notebook Basic 17` )
       ( product_id = `HT-1002` name = `Notebook Basic 18` )

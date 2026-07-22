@@ -7,7 +7,6 @@ CLASS z2ui5_cl_ai_app_060 DEFINITION PUBLIC.
     DATA client TYPE REF TO z2ui5_if_client.
 
     METHODS view_display.
-    METHODS on_event.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -20,8 +19,6 @@ CLASS z2ui5_cl_ai_app_060 IMPLEMENTATION.
     me->client = client.
     IF client->check_on_init( ).
       view_display( ).
-    ELSEIF client->check_on_event( ).
-      on_event( ).
     ENDIF.
 
   ENDMETHOD.
@@ -42,14 +39,19 @@ CLASS z2ui5_cl_ai_app_060 IMPLEMENTATION.
                 )->a( n = `id`           v = `button`
                 )->a( n = `text`         v = `Open Menu`
                 )->a( n = `ariaHasPopup` v = `Menu`
-                )->a( n = `press`        v = client->_event( val   = `OPEN_MENU`
-                                                             t_arg = VALUE #( ( `$event.oSource.sId` ) ) )
+                " toggle the menu anchored to the pressed button, roundtrip-free
+                " (1:1 with the sample's client-side isOpen()/openBy/close)
+                )->a( n = `press`        v = client->_event_client( val   = client->cs_event-control_by_id
+                                                                    t_arg = VALUE #( ( `theMenu` ) ( `toggleBy` ) ( `$event.oSource.sId` ) ) )
 
                 )->open( `dependents`
                     )->open( `Menu`
                         )->a( n = `id`           v = `theMenu`
-                        )->a( n = `itemSelected` v = client->_event( val   = `MENU_ACTION`
-                                                                     t_arg = VALUE #( ( `${$parameters>/item}.getText()` ) ) )
+                        " compose the toast on the frontend (1:1 with the sample's
+                        " MessageToast.show("Action triggered on item: " + item.getText())),
+                        " roundtrip-free - {0} is filled by the client-resolved item text
+                        )->a( n = `itemSelected` v = client->_event_client( val   = client->cs_event-control_global
+                                                                            t_arg = VALUE #( ( `MESSAGE_TOAST` ) ( `show` ) ( `Action triggered on item: {0}` ) ( `${$parameters>/item}.getText()` ) ) )
 
                         )->leaf( `MenuItem`
                             )->a( n = `text` v = `Hide Existing Sites`
@@ -81,23 +83,6 @@ CLASS z2ui5_cl_ai_app_060 IMPLEMENTATION.
         )->shut( ).
 
     client->view_display( view->stringify( ) ).
-
-  ENDMETHOD.
-
-
-  METHOD on_event.
-
-    CASE client->get( )-event.
-
-      WHEN `OPEN_MENU`.
-        " toggle: open the menu anchored to the button if closed, close it if open (1:1 with the sample's isOpen() check)
-        client->follow_up_action( val   = client->cs_event-control_by_id
-                                  t_arg = VALUE #( ( `theMenu` ) ( `toggleBy` ) ( client->get_event_arg( ) ) ) ).
-
-      WHEN `MENU_ACTION`.
-        client->message_toast_display( |Action triggered on item: { client->get_event_arg( ) }| ).
-
-    ENDCASE.
 
   ENDMETHOD.
 

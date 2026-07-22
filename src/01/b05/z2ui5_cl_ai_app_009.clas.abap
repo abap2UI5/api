@@ -10,6 +10,7 @@ CLASS z2ui5_cl_ai_app_009 DEFINITION PUBLIC.
         supplier_name  TYPE string,
         weight_measure TYPE p LENGTH 8 DECIMALS 3,
         weight_unit    TYPE string,
+        weight_state   TYPE string,
         price          TYPE p LENGTH 8 DECIMALS 2,
         currency_code  TYPE string,
         width          TYPE p LENGTH 4 DECIMALS 1,
@@ -56,8 +57,6 @@ CLASS z2ui5_cl_ai_app_009 IMPLEMENTATION.
         )->a( n = `xmlns`        v = `sap.m`
         )->a( n = `xmlns:mvc`    v = `sap.ui.core.mvc`
         )->a( n = `xmlns:core`   v = `sap.ui.core`
-        " the original's local Formatter.js weightState is the framework's curated formatter module (see the NOTE + POST_171 deviations)
-        )->a( n = `core:require` v = |\{Formatter: 'z2ui5/model/formatter'\}|
 
         " sticky + popinLayout are set imperatively by the original controller (onSelect / onPopinLayoutChanged) - bound properties here
         )->open( `Table`
@@ -184,9 +183,9 @@ CLASS z2ui5_cl_ai_app_009 IMPLEMENTATION.
                         )->leaf( `ObjectNumber`
                             )->a( n = `number` v = `{WEIGHT_MEASURE}`
                             )->a( n = `unit`   v = `{WEIGHT_UNIT}`
-                            )->a( n = `state`  v = |\{ parts: [ \{ path: 'WEIGHT_MEASURE' \}, \{ path: 'WEIGHT_UNIT' \} ], formatter: 'Formatter.weightState' \}|
+                            )->a( n = `state`  v = `{WEIGHT_STATE}`
                         )->leaf( `ObjectNumber`
-                            )->a( n = `number` v = |\{ parts: [ \{ path: 'PRICE' \}, \{ path: 'CURRENCY_CODE' \} ], type: 'sap.ui.model.type.Currency', formatOptions: \{ showMeasure: false \} \}|
+                            )->a( n = `number` v = `{ parts: [{path: 'PRICE'}, {path: 'CURRENCY_CODE'}], type: 'sap.ui.model.type.Currency', formatOptions: {showMeasure: false} }`
                             )->a( n = `unit`   v = `{CURRENCY_CODE}` ).
 
     client->view_display( view->stringify( ) ).
@@ -465,6 +464,22 @@ CLASS z2ui5_cl_ai_app_009 IMPLEMENTATION.
         weight_measure = '3.8' weight_unit = `KG` price = '749' currency_code = `EUR` width = '48' depth = '31' height = '4.5' dim_unit = `cm` )
       ( product_id = `PF-1000` name = `Flyer` supplier_name = `Titanium`
         weight_measure = '0.01' weight_unit = `KG` price = '0' currency_code = `EUR` width = '46' depth = '30' height = '3' dim_unit = `cm` ) ).
+
+
+    " weightState is business logic (KG conversion + Success/Warning/Error
+    " thresholds), not presentation - abap2UI5 is a thin frontend, so the
+    " ObjectNumber state is computed here in the backend (the original does it in
+    " its frontend Formatter.js, which a faithful port moves server-side).
+    LOOP AT t_products REFERENCE INTO DATA(lr_product).
+      DATA(weight_kg) = lr_product->weight_measure.
+      IF lr_product->weight_unit = `G`.
+        weight_kg = weight_kg / 1000.
+      ENDIF.
+      lr_product->weight_state = COND #( WHEN weight_kg < 0 THEN `None`
+                                         WHEN weight_kg < 1 THEN `Success`
+                                         WHEN weight_kg < 5 THEN `Warning`
+                                         ELSE `Error` ).
+    ENDLOOP.
 
   ENDMETHOD.
 

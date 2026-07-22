@@ -85,7 +85,7 @@ CLASS z2ui5_cl_ai_app_025 IMPLEMENTATION.
                             )->a( n = `key`   v = `{KEY}`
                             )->a( n = `press` v = client->_event( val   = `ACTION_PRESSED`
                                                                   t_arg = VALUE #( ( `${KEY}` )
-                                                                                   ( `${$parameters>/item/oParent}.indexOfItem(${$parameters>/item})` ) ) ) ).
+                                                                                   ( `${$parameters>/item}.getParent().indexOfItem(${$parameters>/item})` ) ) ) ).
 
     client->view_display( view->stringify( ) ).
 
