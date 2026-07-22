@@ -184,9 +184,9 @@ CLASS z2ui5_cl_ai_app_009 IMPLEMENTATION.
                         )->leaf( `ObjectNumber`
                             )->a( n = `number` v = `{WEIGHT_MEASURE}`
                             )->a( n = `unit`   v = `{WEIGHT_UNIT}`
-                            )->a( n = `state`  v = |\{ parts: [ \{ path: 'WEIGHT_MEASURE' \}, \{ path: 'WEIGHT_UNIT' \} ], formatter: 'Formatter.weightState' \}|
+                            )->a( n = `state`  v = `{ parts: [{path: 'WEIGHT_MEASURE'}, {path: 'WEIGHT_UNIT'}], formatter: 'Formatter.weightState' }`
                         )->leaf( `ObjectNumber`
-                            )->a( n = `number` v = |\{ parts: [ \{ path: 'PRICE' \}, \{ path: 'CURRENCY_CODE' \} ], type: 'sap.ui.model.type.Currency', formatOptions: \{ showMeasure: false \} \}|
+                            )->a( n = `number` v = `{ parts: [{path: 'PRICE'}, {path: 'CURRENCY_CODE'}], type: 'sap.ui.model.type.Currency', formatOptions: {showMeasure: false} }`
                             )->a( n = `unit`   v = `{CURRENCY_CODE}` ).
 
     client->view_display( view->stringify( ) ).

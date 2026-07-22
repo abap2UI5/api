@@ -1609,8 +1609,10 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         notes = `POST-1.71: Table.popinChanged (since 1.77) and Column.importance (since 1.76), the core of the auto-pop-in demo, are kept 1:1; needs UI5 >= 1.77. // IMPROVISED: onSelectionFinish` &&
                  ` (setHiddenInPopin(getSelectedKeys())) is reproduced 1:1: the MultiComboBox selectedKeys are two-way bound to t_hidden and the selectionFinish round-trip forwards them as a JSON Priority array through` &&
                  ` follow_up_action( cs_event-control_by_id, setHiddenInPopin ), so the matching columns hide while in pop-in. The added selectedKeys binding has no counterpart in the original (the controller reads` &&
-                 ` getSelectedKeys imperatively). onSliderMoved (setWidth) has no bound equivalent, so the Slider liveChange round-trip is dropped and the Slider renders but is inert. autoPopinMode + Column.importance` &&
-                 ` stay declarative and 1:1; popinChanged still toasts. // NOTE: the ObjectNumber weight state uses the curated formatter module (Formatter.weightState, core:require) - the same wiring as app 022.`
+                 ` getSelectedKeys imperatively). onSliderMoved (byId(idProductsTable).setWidth(value + '%')) is now reproduced 1:1 without a round-trip: the Slider value is two-way bound to width_pct and the Table` &&
+                 ` gains a width expression binding width={= ${width_pct} + '%' }, so moving the Slider shrinks the table live and drives the auto-pop-in (the added Table width attribute and the Slider value binding` &&
+                 ` have no counterpart in the original view, where setWidth is imperative; the original Slider liveChange handler is dropped). autoPopinMode + Column.importance stay declarative and 1:1; popinChanged` &&
+                 ` still toasts. // NOTE: the ObjectNumber weight state uses the curated formatter module (Formatter.weightState, core:require) - the same wiring as app 022.`
         post171 = `Table.popinChanged (since 1.77) and Column.importance (since 1.76), the core of the auto-pop-in demo, are kept 1:1; needs UI5 >= 1.77.`
         use_fua = abap_true
         use_fua_arg = abap_true

@@ -92,7 +92,7 @@ CLASS z2ui5_cl_ai_app_016 IMPLEMENTATION.
     CASE client->get( )-event.
 
       WHEN `OPEN_DATE_PICKER`.
-        " original: byId('HiddenDP').openBy(evt.getSource().getDomRef()) - openBy is not in the CONTROL_METHODS whitelist yet, the frontend rejects the call
+        " original: byId('HiddenDP').openBy(evt.getSource().getDomRef()) - openBy is whitelisted in CONTROL_METHODS (domRef arg kind), so the anchor id resolves to its DOM element client-side
         client->follow_up_action( val   = client->cs_event-control_by_id
                                   t_arg = VALUE #( ( `HiddenDP` ) ( `openBy` ) ( client->get_event_arg( ) ) ) ).
 

@@ -99,8 +99,8 @@ CLASS z2ui5_cl_ai_app_003 IMPLEMENTATION.
                             )->a( n = `items`       v = client->_bind( t_items )
 
                             )->leaf( n = `Item` ns = `core`
-                                )->a( n = `key`  v = `{TEXT}`
-                                )->a( n = `text` v = `{KEY}` ).
+                                )->a( n = `key`  v = `{KEY}`
+                                )->a( n = `text` v = `{TEXT}` ).
 
     client->view_display( view->stringify( ) ).
 

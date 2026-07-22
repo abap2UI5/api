@@ -23,6 +23,7 @@ CLASS z2ui5_cl_ai_app_092 DEFINITION PUBLIC.
       END OF ty_s_product.
     DATA t_products TYPE STANDARD TABLE OF ty_s_product WITH EMPTY KEY.
     DATA t_hidden   TYPE string_table.
+    DATA width_pct  TYPE i.
 
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
@@ -71,12 +72,13 @@ CLASS z2ui5_cl_ai_app_092 IMPLEMENTATION.
 
         )->leaf( `Slider`
             )->a( n = `id`         v = `widthSlider`
-            )->a( n = `value`      v = `100`
+            )->a( n = `value`      v = client->_bind( width_pct )
 
         )->open( `Table`
             )->a( n = `id`              v = `idProductsTable`
             )->a( n = `autoPopinMode`   v = `true`
             )->a( n = `contextualWidth` v = `Auto`
+            )->a( n = `width`           v = |\{= ${ client->_bind( width_pct ) } + '%' \}|
             )->a( n = `popinChanged`    v = client->_event( `POPIN` )
             )->a( n = `items`           v = |\{ path: '{ client->_bind( val = t_products path = abap_true ) }', sorter: \{ path: 'NAME' \} \}|
 
@@ -243,6 +245,9 @@ CLASS z2ui5_cl_ai_app_092 IMPLEMENTATION.
 
 
   METHOD model_init.
+
+    " Slider starts at 100 (%) - the table fills its container, like the original
+    width_pct = 100.
 
     " full mock /ProductCollection (sap/ui/demo/mock/products.json), verbatim
     t_products = VALUE #(

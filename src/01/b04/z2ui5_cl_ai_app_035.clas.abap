@@ -29,7 +29,6 @@ CLASS z2ui5_cl_ai_app_035 IMPLEMENTATION.
     DATA(view) = z2ui5_cl_ai_xml=>factory( ).
 
     view->open( n = `View` ns = `mvc`
-        )->a( n = `xmlns:l`   v = `sap.ui.layout`
         )->a( n = `xmlns:mvc` v = `sap.ui.core.mvc`
         )->a( n = `xmlns`     v = `sap.m`
 

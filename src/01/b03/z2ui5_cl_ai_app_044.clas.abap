@@ -7,6 +7,8 @@ CLASS z2ui5_cl_ai_app_044 DEFINITION PUBLIC.
     DATA pdf_source TYPE string.
 
   PROTECTED SECTION.
+    " images and PDF files of the original sample sap/m/demokit/sample/PDFViewerPopup
+    CONSTANTS c_base_url TYPE string VALUE `https://sdk.openui5.org/test-resources/sap/m/demokit/sample/PDFViewerPopup/`.
     DATA client TYPE REF TO z2ui5_if_client.
 
     METHODS view_display.
@@ -32,9 +34,6 @@ CLASS z2ui5_cl_ai_app_044 IMPLEMENTATION.
 
   METHOD view_display.
 
-    " images and PDF files of the original sample sap/m/demokit/sample/PDFViewerPopup
-    DATA(base_url) = `https://sdk.openui5.org/test-resources/sap/m/demokit/sample/PDFViewerPopup/`.
-
     DATA(view) = z2ui5_cl_ai_xml=>factory( ).
 
     view->open( n = `View` ns = `mvc`
@@ -59,12 +58,12 @@ CLASS z2ui5_cl_ai_app_044 IMPLEMENTATION.
             )->open( `pages`
                 )->leaf( `Image`
                     )->a( n = `id`    v = `image1`
-                    )->a( n = `src`   v = base_url && `sample1.jpg`
+                    )->a( n = `src`   v = c_base_url && `sample1.jpg`
                     )->a( n = `alt`   v = `Example Picture 1`
                     )->a( n = `press` v = client->_event( val = `SHOW_PDF` t_arg = VALUE #( ( `sample1.pdf` ) ) )
                 )->leaf( `Image`
                     )->a( n = `id`    v = `image2`
-                    )->a( n = `src`   v = base_url && `sample2.jpg`
+                    )->a( n = `src`   v = c_base_url && `sample2.jpg`
                     )->a( n = `alt`   v = `Example Picture 2`
                     )->a( n = `press` v = client->_event( val = `SHOW_PDF` t_arg = VALUE #( ( `sample2.pdf` ) ) ) ).
 
@@ -79,7 +78,7 @@ CLASS z2ui5_cl_ai_app_044 IMPLEMENTATION.
 
       WHEN `SHOW_PDF`.
         " original onPress setSource + open(): update the bound source, then the whitelisted open runs after render (t_arg positional: id, method; the view defaults to cs_view-main)
-        pdf_source = `https://sdk.openui5.org/test-resources/sap/m/demokit/sample/PDFViewerPopup/` && client->get_event_arg( ).
+        pdf_source = c_base_url && client->get_event_arg( ).
         client->view_model_update( ).
         client->follow_up_action( val   = z2ui5_if_client=>cs_event-control_by_id
                                   t_arg = VALUE #( ( `pdfViewer` )
