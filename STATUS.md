@@ -150,7 +150,7 @@ PopoverControllingCloseBehavior (`sap.m.Popover`). Machine-verified green
 (abaplint, validate-meta, pattern-lint, structural-diff `--strict`,
 property-check, render-smoke `--strict`); status `generated`.
 
-Notables: **091** reuses the golden app-016 openBy pattern (source `sId` via
+Notables: **091** reuses the app-016 openBy pattern (source `sId` via
 `$event.oSource.sId` → `control_by_id`/`openBy` follow-up); **092** keeps the
 declarative `autoPopinMode` + `Column.importance` 1:1 (the imperative
 setWidth/setHiddenInPopin handlers dropped) and reuses the curated
@@ -240,8 +240,8 @@ Two user decisions this day:
   additive): **complexity** (a big view / rich interaction — LOC, `_event*`/
   `follow_up_action` count, control count), **rework** (every non-1:1
   substitution `IMPROVISED`/`DROPPED_171`/`SUBSET_DATA` or documented `NOTE`
-  subtlety), **discussed** (a port reviewed together — a `checked` block or
-  golden), and **test-priority** (pending `LIVE_TEST`s, roundtrip-free/runtime
+  subtlety), **discussed** (a port reviewed together — it carries a `checked`
+  block), and **test-priority** (pending `LIVE_TEST`s, roundtrip-free/runtime
   wiring, popups/popovers, a needs-newer-than-1.71 render). `score =
   min(5, max(1, round(1 + Σweights)))`; 1 = simple faithful 1:1, 5 = complex /
   reworked / worth a close look. Sort descending to find the samples worth a
@@ -268,6 +268,24 @@ Ports **005** (Button, 12 presses), **060** (Menu), **061** (MenuButton) and
 and becomes **init-only**. Toasts whose text is computed server-side (019, 024,
 …) correctly keep their round-trip. All gates green; the four converted ports
 carry a `LIVE_TEST` for the new mechanism.
+
+## control_by_id view-slot fix + golden category retired (2026-07-22)
+
+- **Runtime bug fixed.** After the framework moved the view to its own `view`
+  parameter (`get_event_client` inserts it at `t_arg` index 2 for
+  `control_by_id`), the ports that still carried an explicit empty `( `` )` view
+  slot ended up with `[id, '', '', method, …]`, so the frontend read
+  `method = ''` and logged `CONTROL_BY_ID: method '' not allowed` (openBy/
+  toggleBy never fired). Dropped the empty slot in **060, 065, 066, 067, 091**
+  and in the overview generator's tree Expand-all/Collapse-all buttons; correct
+  form is `( id ) ( method ) ( params )`. New pattern-lint rule
+  `control-by-id-empty-view-slot` guards it.
+- **`golden` status retired** (user decision — "erstmal keine golden kategorie").
+  The five golden ports (007, 016, 019, 022, 040) are now plain `checked`;
+  `validate-meta` drops `golden` from the status vocabulary; the overview
+  generator drops the `golden` flag (it fed only the rating's "discussed"
+  signal, now `checked`-only); AGENTS.md / TRAINING.md updated. Former golden
+  ports may now be refactored to the current conventions like any other.
 
 ## Batches
 
@@ -364,7 +382,7 @@ default model), and **MessagePopoverMessageHandling** (built on the UI5
 MessageManager / message model). They stay `NEW-CONTROL` in the backlog for a
 later dedicated effort.
 
-Techniques worth noting: **060 Menu** reuses the golden app-016 openBy
+Techniques worth noting: **060 Menu** reuses the app-016 openBy
 frontend action — the Menu is declared in the Button's `dependents`
 aggregation and opened via `control_by_id`/`openBy` anchored to
 `$event.oSource.sId`. **058 LabelProperties** is roundtrip-free: the four

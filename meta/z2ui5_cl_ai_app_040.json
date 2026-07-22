@@ -8,10 +8,10 @@
     "frontend_action": false,
     "event_t_arg": false
   },
-  "status": "golden",
+  "status": "checked",
   "checked": {
     "date": "2026-07-20",
-    "note": "verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed); promoted to golden 2026-07-20 (human decision) - exemplary for: cc control (MultiInputExt), bound aggregation, tokens, sorter binding-info"
+    "note": "verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed); live-checked reference example for: cc control (MultiInputExt), bound aggregation, tokens, sorter binding-info"
   },
   "deviations": [
     {

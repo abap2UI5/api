@@ -24,7 +24,7 @@ const SRC = path.join(ROOT, 'src');
 const META = path.join(ROOT, 'meta');
 const UI5 = path.join(ROOT, 'ui5');
 
-const STATUS = ['generated', 'reviewed', 'checked', 'golden'];
+const STATUS = ['generated', 'reviewed', 'checked'];
 const DEV_TYPES = ['IMPROVISED', 'POST_171', 'DROPPED_171', 'LIVE_TEST', 'SUBSET_DATA', 'NOTE'];
 
 let errors = 0;
@@ -89,7 +89,7 @@ for (const sf of sidecars.sort()) {
   }
   if (m.class && m.class !== name) err(`${sf}: class "${m.class}" does not match filename`);
   if (m.status && !STATUS.includes(m.status)) err(`${sf}: unknown status "${m.status}"`);
-  if (['checked', 'golden'].includes(m.status) && !m.checked?.date) {
+  if (m.status === 'checked' && !m.checked?.date) {
     err(`${sf}: status "${m.status}" requires a checked {date, note}`);
   }
   if (m.checked && !/^\d{4}-\d{2}-\d{2}$/.test(m.checked.date || '')) {

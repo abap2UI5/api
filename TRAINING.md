@@ -6,7 +6,7 @@ no ABAP Doc header at all (stage-2 inversion done 2026-07-16, enforced by
 pattern-lint), and the structural view diff (`scripts/structural-diff.mjs`)
 runs clean. This file describes how the repo is meant to make the generating
 agent better over time. "Training" here means improving the system around the
-agent — rules, golden examples, verification loops — not (yet) fine-tuning
+agent — rules, reference examples, verification loops — not (yet) fine-tuning
 model weights.
 
 ## The flywheel
@@ -15,7 +15,7 @@ The agent improves through three artifacts, all versioned in this repo:
 
 1. **Rules** — `AGENTS.md` (conventions, gotchas) and `CAPABILITIES.md` (what
    abap2UI5 can express, with proving ports). These are the agent's memory.
-2. **Golden examples** — verified sample↔port pairs the generation prompt
+2. **Reference examples** — verified sample↔port pairs the generation prompt
    receives as references. One good example outweighs ten rules.
 3. **Verification loops** — everything that catches an error before a human
    has to: abaplint ×3, validate-meta, the structural view diff, pattern-lint,
@@ -27,11 +27,11 @@ The cycle per batch:
 generate  →  verify (CI + structural diff)  →  AI review  →  live check (human)
     ↑                                                             │
     └──── distill: every fix becomes a rule (AGENTS/CAPABILITIES) ┘
-                   + the corrected port stays as a golden example
+                   + the corrected port stays as a reference example
 ```
 
 **Distillation is a mandatory step, not a habit.** A manual correction that does
-not flow back as (a) a rule and (b) a golden example is wasted training signal.
+not flow back as (a) a rule and (b) a reference example is wasted training signal.
 
 ## The batch process
 
@@ -43,7 +43,7 @@ PR. Per batch:
    backlog (`node scripts/generate-coverage.mjs --backlog` — only controls that
    exist since UI5 1.71 and are not deprecated, see AGENTS §1) and ports them
    into a new `b<nn>` folder, prompt fed with AGENTS.md, CAPABILITIES.md and
-   the 2–3 nearest `golden` ports. Pick **breadth-first**: `NEW-CONTROL` rows
+   the 2–3 nearest `checked` ports. Pick **breadth-first**: `NEW-CONTROL` rows
    (control not covered by any port yet) before further samples of covered
    controls, and never rows marked `HOLDOUT` (see below) — one port per
    control maximizes gap discovery per port (AGENTS §1).
@@ -60,10 +60,10 @@ PR. Per batch:
    rule in AGENTS/CAPABILITIES **and, where greppable, a deterministic check**
    (structural diff / pattern lint), style → convention update, new technique →
    CAPABILITIES row, framework limitation → forwardable request under `pr/`
-   (one folder per request). Corrected ports become `checked`/`golden`;
+   (one folder per request). Corrected ports become `checked`;
    STATUS.md is updated in the same change.
 5. **Regression probe** (every few batches) — re-generate a handful of
-   `golden` ports plus the hold-out set from scratch with the current setup
+   `checked` reference ports plus the hold-out set from scratch with the current setup
    and diff: a re-appearing old mistake means the rule was too weak.
    Corrections-per-batch is the improvement curve; it must trend down.
 
@@ -83,7 +83,7 @@ generating or reviewing):
   A live check remains the final confirmation for rendering/UX.
 - **`abap2UI5/samples` (branch `cloud`)** — the truth about what is
   *idiomatic*. Its `src/01/08/*` tree is the direct analogue of our ports
-  (all ABAP-Cloud-ready, 1.71+, non-deprecated). Golden external references
+  (all ABAP-Cloud-ready, 1.71+, non-deprecated). Canonical external references
   for generation prompts:
   `src/01/08/00/z2ui5_cl_demo_app_022` (lifecycle + scalar state),
   `…_app_038` (popup/popover), `…_app_375` (full dispatcher + event args).
@@ -106,18 +106,22 @@ generating or reviewing):
 
 ## Quality ladder
 
-Every port sits on exactly one rung; only `golden` ports may be used as prompt
-references and only they graduate to the curated samples repo.
+Every port sits on exactly one rung; `checked` ports may be used as prompt
+references and are the ones that graduate to the curated samples repo.
 
 | Status | Meaning | Gate |
 |---|---|---|
 | `generated` | fresh from the pipeline | abaplint ×3 green |
 | `reviewed` | AI review found nothing undeclared | review pass with zero open findings |
 | `checked` | manually verified in a running system | `checked {date, note}` set in the sidecar |
-| `golden` | checked + exemplary style, safe to imitate | human judgement |
+
+> The `golden` rung (checked + exemplary, human-picked) was **retired
+> 2026-07-22** — there is no separate golden category for now; former golden
+> ports are plain `checked` and, like any port, may be refactored to the current
+> conventions. A `checked` port that reads as an exemplar just stays `checked`.
 
 A promotion certifies the **code at check time**: any behavioral rework of a
-`checked`/`golden` port drops it back to `generated` (keep the old check as
+`checked` port drops it back to `generated` (keep the old check as
 context in a `LIVE_TEST` deviation) until a fresh live run restamps it —
 see the AGENTS §10 gotcha (app 003, 2026-07-19).
 
@@ -128,7 +132,7 @@ generator writes it together with the class, the port classes carry **no**
 ABAP Doc header (pattern-lint blocks `"!` lines in ports), and the overview
 app + coverage tables are generated from the sidecars.
 `scripts/validate-meta.mjs` guards schema and referential integrity in CI.
-Status promotions (`checked` after a live check, `reviewed`/`golden`) are
+Status promotions (`checked` after a live check, or `reviewed`) are
 edited directly in the sidecar. The shape:
 
 ```jsonc
@@ -139,7 +143,7 @@ edited directly in the sidecar. The shape:
   "file":    "src/01/b02/z2ui5_cl_ai_app_040.clas.abap",
   "batch":   "b02",
   "audit":   { "frontend_action": false, "event_t_arg": false },
-  "status":  "generated",              // generated | reviewed | checked | golden
+  "status":  "generated",              // generated | reviewed | checked
   "checked": { "date": "2026-07-15", "note": "verified in a running system - ..." },
   "deviations": [
     { "type": "POST_171",    "what": "showClearIcon (since UI5 1.94) kept for the 1:1 port ..." },
@@ -177,7 +181,7 @@ looped controls. Values are not compared — that stays with review/live checks.
   25 samples spread across control families and complexity (display, input,
   lists/tables, popups, navigation). Rules: they are **never used as prompt
   references**, they stay **out of regular batch planning** (`--backlog`
-  marks them `HOLDOUT`), and a hold-out port is never promoted to `golden`.
+  marks them `HOLDOUT`), and a hold-out port is never promoted to `checked`.
   A regeneration probe = generate them from scratch with the current
   rules/references and score: CI green on first try, structural-diff
   violations, render-smoke failures, review findings per app. Improvement
@@ -190,7 +194,7 @@ looped controls. Values are not compared — that stays with review/live checks.
   the protocol identically for every future probe and compare against that
   file.
 - **Regeneration diff:** re-run old ports with the improved setup and diff
-  against their golden version.
+  against their checked version.
 
 ## Preconditions on data quality
 
@@ -211,4 +215,4 @@ Training signal is only as good as the stored pairs:
 The pair structure (sample files + capability context → ABAP + typed
 deviations) is exactly the JSONL shape a supervised fine-tune would need. With
 ~34 pairs this is far below any useful volume — revisit at a few hundred
-`golden` pairs; until then the flywheel above is where the gains are.
+`checked` reference pairs; until then the flywheel above is where the gains are.

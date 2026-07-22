@@ -7,7 +7,7 @@
   "audit": {
     "frontend_action": true,
     "event_t_arg": true,
-    "note": "control_by_id toggleBy anchored to the button (same as golden app 016) for open/close; control_global MESSAGE_TOAST.show composes the item-selected toast on the frontend (template `Action triggered on item: {0}`, {0} filled by ${$parameters>/item}.getText()) - both roundtrip-free, so the app is init-only"
+    "note": "control_by_id toggleBy anchored to the button (same as app 016) for open/close; control_global MESSAGE_TOAST.show composes the item-selected toast on the frontend (template `Action triggered on item: {0}`, {0} filled by ${$parameters>/item}.getText()) - both roundtrip-free, so the app is init-only"
   },
   "status": "checked",
   "checked": {
@@ -21,7 +21,7 @@
     },
     {
       "type": "IMPROVISED",
-      "what": "the sample loads the Menu from Menu.fragment.xml on first press and toggles it in the controller (oMenu.isOpen() ? close() : openBy(button)). The port declares the Menu 1:1 inside the Button's `dependents` aggregation and toggles it via client->roundtrip-free _event_client( cs_event-control_by_id, toggleBy ) anchored to the button's DOM ref ($event.oSource.sId) - toggleBy (open-if-closed / close-if-open) was added upstream 2026-07-20 (pr/menu-toggle-openby) precisely so the client-side open state need not be mirrored server-side, making the press-to-toggle 1:1. Frontend-action pattern as golden app 016."
+      "what": "the sample loads the Menu from Menu.fragment.xml on first press and toggles it in the controller (oMenu.isOpen() ? close() : openBy(button)). The port declares the Menu 1:1 inside the Button's `dependents` aggregation and toggles it via client->roundtrip-free _event_client( cs_event-control_by_id, toggleBy ) anchored to the button's DOM ref ($event.oSource.sId) - toggleBy (open-if-closed / close-if-open) was added upstream 2026-07-20 (pr/menu-toggle-openby) precisely so the client-side open state need not be mirrored server-side, making the press-to-toggle 1:1. Frontend-action pattern as app 016."
     },
     {
       "type": "IMPROVISED",

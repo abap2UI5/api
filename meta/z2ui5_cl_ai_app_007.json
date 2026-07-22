@@ -8,10 +8,10 @@
     "frontend_action": false,
     "event_t_arg": true
   },
-  "status": "golden",
+  "status": "checked",
   "checked": {
     "date": "2026-07-15",
-    "note": "manually verified in a running system - the select-all parent checkbox and its tri-state expression bindings behave like the original.; promoted to golden 2026-07-20 (human decision) - exemplary for: expression bindings, two-way bind, boolean event arg"
+    "note": "manually verified in a running system - the select-all parent checkbox and its tri-state expression bindings behave like the original.; live-checked reference example for: expression bindings, two-way bind, boolean event arg"
   },
   "deviations": []
 }

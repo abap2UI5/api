@@ -153,7 +153,7 @@ for (const mf of fs.readdirSync(META)) {
   //   * rework        - every non-1:1 substitution (IMPROVISED / DROPPED_171 /
   //                     SUBSET_DATA) or documented subtlety (NOTE) is something
   //                     we had to correct or reason about
-  //   * discussed     - a port we reviewed together (a `checked` block, or golden)
+  //   * discussed     - a port we reviewed together (it carries a `checked` block)
   //                     earned a closer look, so it weighs a little more
   //   * test-priority - pending LIVE_TESTs, roundtrip-free/runtime-only wiring,
   //                     popups/popovers and a needs-newer-than-1.71 render are all
@@ -164,7 +164,7 @@ for (const mf of fs.readdirSync(META)) {
   const loc = src ? src.split('\n').length : 0;
   const nInteract = (src.match(/_event(_client)?\s*\(|follow_up_action\s*\(/g) || []).length;
   const nControls = (src.match(/->\s*(open|leaf)\s*\(/g) || []).length;
-  const discussed = !!m.checked || m.status === 'golden';
+  const discussed = !!m.checked;
   const cxComplexity =
       (loc > 220 ? 1 : loc > 120 ? 0.6 : loc > 60 ? 0.3 : 0) +
       (nInteract >= 8 ? 0.7 : nInteract >= 3 ? 0.4 : nInteract >= 1 ? 0.2 : 0) +
@@ -197,7 +197,6 @@ for (const mf of fs.readdirSync(META)) {
     checked: m.checked ? `CHECKED (${m.checked.date}): ${m.checked.note}` : '',
     notes: (m.deviations || []).map((d) => `${DEV_LABEL[d.type] ?? d.type}: ${d.what}`).join(' // '),
     post171: (m.deviations || []).filter((d) => d.type === 'POST_171').map((d) => d.what).join(' // '),
-    golden: m.status === 'golden',
     since,
     since_post171: overOneSeven(since),
     dep_text: dep ? `Deprecated since ${dep.since}: ${dep.text}` : '',
@@ -258,7 +257,6 @@ const rows = apps.map((a) => {
   const extras = [];
   extras.push(`score = ${a.score}`);
   extras.push(`score_tip = ${abapStr(a.score_tip)}`);
-  if (a.golden) extras.push('golden = abap_true');
   if (a.since) extras.push(`since = \`${a.since}\``);
   if (a.since_post171) extras.push('since_post171 = abap_true');
   if (a.release) extras.push(`release = \`${a.release}\``);
@@ -371,7 +369,7 @@ const abap = `"! Generated overview app - lists every abap2UI5 api sample app in
 "! the tree model carries no info). The Rating column is a 1-5 "by feel" score of
 "! how much attention a port deserves (not coloured): app complexity, how heavily
 "! it was reworked/corrected (IMPROVISED/DROPPED_171/SUBSET_DATA/NOTE), whether it
-"! was reviewed/discussed (a checked or golden port), and how important a live
+"! was reviewed/discussed (it carries a checked block), and how important a live
 "! re-test is (pending LIVE_TESTs, roundtrip-free wiring, popups, needs-newer-UI5);
 "! 1 = simple faithful 1:1, 5 = complex/reworked/worth a close look. Sort it
 "! descending to surface the samples worth a closer manual look. The Audit
@@ -409,7 +407,6 @@ CLASS ${CLASS} DEFINITION PUBLIC.
         has_notes TYPE abap_bool,
         post171   TYPE string,
         has_p171  TYPE abap_bool,
-        golden    TYPE abap_bool,
         since         TYPE string,
         since_post171 TYPE abap_bool,
         release       TYPE string,

@@ -142,7 +142,7 @@ source of truth:
   "batch":   "b02",
   "audit":   { "frontend_action": false,        // uses _event_client? (note: which)
                "event_t_arg": true },           // passes event args via t_arg?
-  "status":  "generated",                       // generated|reviewed|checked|golden
+  "status":  "generated",                       // generated|reviewed|checked
   "checked": { "date": "2026-07-15", "note": "verified in a running system - ..." },
   "deviations": [ { "type": "IMPROVISED", "what": "..." } ]
 }
@@ -152,7 +152,9 @@ source of truth:
   and coverage read only `meta/` (§7). `node scripts/validate-meta.mjs` checks
   schema + referential integrity (file/batch/template exist) and runs in CI.
 - A human live check promotes `status` to `checked` and fills `checked`
-  directly in the sidecar; `reviewed`/`golden` are manual promotions too.
+  directly in the sidecar; `reviewed` is a manual promotion too. (There is no
+  `golden` status — the category was retired 2026-07-22; former golden ports are
+  plain `checked`, and any port may be refactored to the current conventions.)
 - The abapGit `<DESCRIPT>` follows `<entity> - <demo kit description>`
   (e.g. `sap.m.Switch - Some say it is only a switch...`), truncated to 60 chars.
 - The **control** must exist since UI5 1.71 and not be deprecated — samples
@@ -489,9 +491,9 @@ these entries.
 
 #### Worked references
 
-Read the 2–3 nearest ones before writing a new port. Since 2026-07-20 the
-repo has `golden` ports (live-checked + exemplary, the only ports allowed
-as prompt references per TRAINING.md):
+Read the 2–3 nearest ones before writing a new port. Prefer `checked` ports
+(live-verified) as references — several were previously flagged `golden`
+(a category retired 2026-07-22; they stay good examples, just without the label):
 
 | App | Sample | Shows |
 |-----|--------|-------|
@@ -597,7 +599,7 @@ scripts.**
   sorted by module → control → sample. Columns (all plain text — links moved to
   the trailing **Open** column): **Module** · **Control** · **Since** (the UI5
   release the control appeared in) · **Sample** · **abap2UI5** (class name) ·
-  **Note** (gold star for `golden` ports; green check when live-verified; hint
+  **Note** (green check when live-verified; hint
   button opens the deviations popup) · **Open** (a button that opens an anchored
   popover of every link: OpenUI5 API, OpenUI5 source, live fullscreen sample,
   the generated class on GitHub, and starting the app). The **Control** name and
