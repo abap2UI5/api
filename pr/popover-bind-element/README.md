@@ -1,7 +1,7 @@
-# popover-bind-element — open a popover/dialog bound to an aggregation item's context
+# popover-bind-element — element-bind a popup/popover to a row via `follow_up_action`
 
-**Priority: low** — an ergonomics/elegance enhancement, not a blocker: the
-event-arg workaround already renders correctly (verified live in app 094).
+**Priority: medium** — concretely designed with the maintainer; an ergonomics
+enhancement (the event-arg workaround already renders correctly in app 094).
 
 ## Motivation
 
@@ -14,48 +14,71 @@ resolve against the pressed row. UI5 samples do:
 oPopover.bindElement(oEvent.getSource().getBindingContext().getPath());
 ```
 
-Seen in `sap.m.sample.PopoverControllingCloseBehavior` (port app **094**), and
-the same shape recurs for any row → detail-popover.
+Seen in `sap.m.sample.PopoverControllingCloseBehavior` (port app **094**); the
+same shape recurs for any row → detail popover/dialog.
 
 ## Current behavior (works, but manual)
 
-abap2UI5 has no "bind this popup to the pressed item's context" step. The port
-works around it by transporting the row's fields as event args and rebuilding
-the popover from them:
+abap2UI5 has no "bind this popup to a row's context" step. app 094 works around
+it by transporting the row's fields as event args and rebuilding the popover
+from them (`t_arg = ( ${PRODUCT_ID} ) ( ${NAME} ) ( ${PRODUCT_PIC_URL} ) …`,
+then `popover_display( … by_id = … )`). It **renders correctly** (live-checked),
+but every field the detail view shows must be listed and threaded through by
+hand.
+
+## Proposed change — a `BIND_ELEMENT` `follow_up_action` (popup **and** popover)
+
+Fits the existing `follow_up_action( val, view, t_arg )` signature — no new
+method parameters, just a new frontend action value:
 
 ```abap
-" Link press: carry the row values out
-)->a( n = `press` v = client->_event( val   = `POPOVER`
-                                      t_arg = VALUE #( ( `${PRODUCT_ID}` ) ( `${NAME}` ) ( `${PRODUCT_PIC_URL}` ) ( `$event.oSource.sId` ) ) )
-...
-" on_event: build the popover from the args, anchor by sId
-client->popover_display( xml = ... by_id = client->get_event_arg( 4 ) ).
+client->follow_up_action(
+    val   = client->cs_event-bind_element               " new frontend action
+    view  = client->cs_view-popover                     " or cs_view-popup
+    t_arg = VALUE #( ( idx )                                                     " model-row index
+                     ( client->_bind( val = mt_tab path = abap_true ) ) ) ).     " registered path
 ```
 
-This **renders correctly** (live-checked: title, name and image are right, the
-popover anchors to the link). The cost is boilerplate: every field the detail
-view shows must be listed as an event arg and threaded through, instead of the
-fragment simply binding `{Name}` against the row.
-
-## Proposed change
-
-An optional `bind_element` path on `popover_display` / `popup_display`, e.g.
+Then the fragment simply binds relative:
 
 ```abap
-client->popover_display( xml         = frag->stringify( )
-                         by_id       = client->get_event_arg( )       " anchor
-                         bind_element = |/T_PRODUCTS/{ idx }| ).       " row context
+)->leaf( `Title` )->a( n = `text` v = `{NAME}` )
+)->leaf( `Image` )->a( n = `src`  v = `{PRODUCT_PIC_URL}` )
 ```
 
-so the fragment can use relative bindings (`{NAME}`, `{PRODUCT_PIC_URL}`)
-resolved against the given path — the direct analogue of `oPopover.bindElement`.
-The pressed row index/path is already transportable (`$event.oSource.sId`, or a
-row index arg), so no new client plumbing beyond setting the popup's binding
-context after creation.
+### Why this shape
+
+The second `t_arg` is **`client->_bind( val = mt_tab path = abap_true )`**, not a
+hand-written `|/T_PRODUCTS/{ idx }|`. That call already:
+
+- **registers** `mt_tab` into the model (so the popup/popover slot actually
+  carries the table), and
+- **returns its model path as a value**, derived from the ABAP variable —
+  rename-safe and model-consistent (the whole reason `_bind` exists instead of
+  writing `{/VAR}` by hand). Renaming `mt_tab` moves the path with it; a text
+  binding would silently break.
+
+The `BIND_ELEMENT` action then builds `<path>/<idx>` and sets it as the target
+slot's element binding (`bindElement` / `setBindingContext`), routed to the
+`popup` / `popover` slot via the existing `view` parameter (the same slot
+routing `control_by_id` already uses in `get_event_client`).
+
+## Implementation sketch (framework)
+
+- ABAP: add `cs_event-bind_element VALUE 'BIND_ELEMENT'`; no new client method.
+- JS `FrontendAction.js`: `BIND_ELEMENT: (c, args) => resolveSlotView(args).bindElement(path + '/' + idx)`,
+  reading the slot from the injected `view` arg and `idx` + `path` from `t_arg`.
+
+## Note — `idx` is the model index
+
+`idx` indexes `mt_tab` (the model row), not the visible position: app 094's
+table has `sorter: { path: 'NAME' }`, so the displayed order differs from
+`mt_tab`'s order. Pass the model index of the pressed row.
 
 ## Result once implemented
 
 - app 094 drops the per-field event-arg transport and binds the fragment
-  directly (fewer args, closer to the original), IMPROVISED note softened to a
-  NOTE.
-- benefits every future row → detail-popover/dialog port.
+  directly (fewer args, closer to the original); the `IMPROVISED` note softens
+  to a `NOTE`.
+- benefits every future row → detail-popover/dialog port, for both the popup
+  and popover slots.
