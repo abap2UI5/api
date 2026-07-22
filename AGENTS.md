@@ -367,6 +367,22 @@ client->view_display( view->stringify( ) ).
 
 #### Data binding & events
 
+- **A binding path always comes from a binding method — never hard-code it as
+  text.** `client->_bind( var )` (and `client->_bind( val = var path = abap_true )`
+  for the raw path) derives the model path *from the ABAP variable*, so renaming
+  the variable moves the binding with it. Writing the path literally instead
+  (`'/T_ITEMS'`, `` `{/T_ITEMS}` ``, `items = '{/T_ITEMS}'`, `path: '/T_ITEMS'`)
+  silently breaks on the next rename and is not allowed. This holds **everywhere a
+  method can produce the path**: the aggregation / model-root path
+  (`_bind( … path = abap_true )`), a slot element binding
+  (`follow_up_action( val = cs_event-bind_element … t_arg = VALUE #( ( idx ) ( client->_bind( tab ) ) ) )`
+  — pass `client->_bind( tab )`, never the text path), a `binding_call` target, etc.
+  The overview's **Audit** column carries a `literal binding` badge that flags ports
+  still writing a binding by name. The **one unavoidable exception** is a *relative
+  child property* inside a bound aggregation template — `` `{TITLE}` `` /
+  `` `{PRODUCT_ID}` `` referencing an upper-cased model field, which has no `_bind`
+  form (see the next bullet); keep those, but never write the absolute / model-root
+  path by hand.
 - `client->_bind( var )` — bind an ABAP `DATA` member two-way (the value
   flows back into `var` on the next round-trip), e.g.
   `)->a( n = `items` v = client->_bind( t_items )`. **`client->_bind_edit( )`
