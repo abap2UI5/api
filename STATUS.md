@@ -234,17 +234,40 @@ Two user decisions this day:
   `AGENTS.md §model_init` requires the full row set. All checks stay green
   (abaplint, structural-diff `--strict`, validate-meta, pattern-lint,
   property-check, render-smoke `--strict`).
-- **Deviation score (1–5) in the overview app.** A new sortable **Deviation**
-  column in `z2ui5_cl_ai_app_overview` scores how far each port is from its
-  original — `IMPROVISED` and `DROPPED_171` weigh 2 each, `SUBSET_DATA` 1,
-  `POST_171` 0 (a newer member is still a 1:1 port); `raw=0→1, ≤2→2, ≤4→3, ≤6→4,
-  else 5`, shown green/orange/red with a tooltip listing the drivers. Sort it
-  descending to find the samples worth a closer manual look. Computed in
-  `scripts/generate-overview.mjs`. Current spread: **45×1, 13×2, 3×3, 3×4, 3×5**.
+- **Rating (1–5) in the overview app.** A sortable **Rating** column in
+  `z2ui5_cl_ai_app_overview` scores, "by feel", how much attention a port
+  deserves — not a strict deviation count. Four things push it up (all
+  additive): **complexity** (a big view / rich interaction — LOC, `_event*`/
+  `follow_up_action` count, control count), **rework** (every non-1:1
+  substitution `IMPROVISED`/`DROPPED_171`/`SUBSET_DATA` or documented `NOTE`
+  subtlety), **discussed** (a port reviewed together — a `checked` block or
+  golden), and **test-priority** (pending `LIVE_TEST`s, roundtrip-free/runtime
+  wiring, popups/popovers, a needs-newer-than-1.71 render). `score =
+  min(5, max(1, round(1 + Σweights)))`; 1 = simple faithful 1:1, 5 = complex /
+  reworked / worth a close look. Sort descending to find the samples worth a
+  closer manual look. Computed in `scripts/generate-overview.mjs`. Current
+  spread: **6×1, 32×2, 24×3, 15×4, 17×5** (was briefly rescaled to 1–10, taken
+  back to 1–5 with the richer heuristic on user request 2026-07-22).
 - **Four LIVE_TESTs closed.** 060 Menu, 061 MenuButton, 066 MessagePopover,
   067 MessagePopoverAsync were human live-checked (open/toggle + item paths) and
   promoted `generated → checked`; their `LIVE_TEST` entries became live-verified
-  `NOTE`s. **0 open LIVE_TESTs** remain.
+  `NOTE`s. (Later that day the client-composed-toast conversions — 005, 060, 061,
+  077, see below — re-opened a few `LIVE_TEST`s for the new roundtrip-free
+  mechanism.)
+
+## Client-composed toasts (2026-07-22)
+
+The abap2UI5 branch gained `pr/message-toast-format`: a `control_global`
+single-string method (`MessageToast.show`, `MessageBox.*`) composes its text
+from a template + client-resolved args (`{0}`,`{1}`,… filled by `$event.*` /
+`${$parameters>/…}`), so a **dynamic** toast is roundtrip-free — 1:1 with the
+demo-kit `MessageToast.show("…" + evt.…)`. `get_t_arg` quotes a leading `{0}`
+placeholder so a value-first template survives; a lone string is unchanged.
+Ports **005** (Button, 12 presses), **060** (Menu), **061** (MenuButton) and
+**077** (NotificationListGroup) converted — each loses its `on_event` entirely
+and becomes **init-only**. Toasts whose text is computed server-side (019, 024,
+…) correctly keep their round-trip. All gates green; the four converted ports
+carry a `LIVE_TEST` for the new mechanism.
 
 ## Batches
 

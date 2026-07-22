@@ -96,23 +96,13 @@ for (const mf of fs.readdirSync(META)) {
   const name = m.sample.slice(i + '.sample.'.length);
   const u = uniMap.get(`${module}|${name}`) || {};
   const dep = u.deprecated || null;
-  // deviation score (1-10): how far the port is from the original sample. Only the
-  // real behavioural divergence counts - IMPROVISED (a non-1:1 substitution) and
-  // DROPPED_171 (a feature/control left out) weigh 2 each, a SUBSET_DATA row cut 1.
-  // POST_171 does NOT count: keeping a member newer than 1.71 is still a 1:1 port
-  // (it only needs a newer UI5). LIVE_TEST / NOTE are neutral. 1 = faithful 1:1,
-  // 10 = heavily reworked (score = min(10, 1 + weighted deviation count); not
-  // coloured). Kept in sync with STATUS.md / AGENTS.md §5.
+  // the rating (1-5) is computed further down, once the audit flags are known.
   const devs = m.deviations || [];
   const nImpr = devs.filter((d) => d.type === 'IMPROVISED').length;
   const nDrop = devs.filter((d) => d.type === 'DROPPED_171').length;
   const nSub = devs.filter((d) => d.type === 'SUBSET_DATA').length;
-  const raw = 2 * nImpr + 2 * nDrop + nSub;
-  const score = Math.min(10, 1 + raw);
-  const drivers = [`${nImpr} improvised`, `${nDrop} dropped`];
-  if (nSub) drivers.push(`${nSub} subset`);
-  const scoreTip = `Deviation from the original sample: ${score} of 10 ` +
-    `(${drivers.join(', ')}). 1 = faithful 1:1, 10 = heavily reworked.`;
+  const nNote = devs.filter((d) => d.type === 'NOTE').length;
+  const nLive = devs.filter((d) => d.type === 'LIVE_TEST').length;
   // two "Since" columns: the control's own since (next to Control) and the
   // sample's required release (next to Sample). The sample release = the control
   // since raised by any post-1.71 member the port keeps (POST_171 deviations note
@@ -156,6 +146,48 @@ for (const mf of fs.readdirSync(META)) {
   const useName    = /\{[A-Z][A-Z0-9_]*\}/.test(src)
                   || /\{\/[A-Za-z]/.test(src)
                   || /\bpath\s*:\s*'[A-Za-z/]/.test(srcNoBind);
+
+  // rating (1-5): a "by feel" score for how much attention a port deserves -
+  // NOT a strict deviation count. Four things push it up (all additive):
+  //   * complexity    - a big view / rich interaction is simply more to get right
+  //   * rework        - every non-1:1 substitution (IMPROVISED / DROPPED_171 /
+  //                     SUBSET_DATA) or documented subtlety (NOTE) is something
+  //                     we had to correct or reason about
+  //   * discussed     - a port we reviewed together (a `checked` block, or golden)
+  //                     earned a closer look, so it weighs a little more
+  //   * test-priority - pending LIVE_TESTs, roundtrip-free/runtime-only wiring,
+  //                     popups/popovers and a needs-newer-than-1.71 render are all
+  //                     reasons to re-verify it in a running system
+  // A faithful, simple, untouched static port stays at 1; a large, reworked,
+  // much-discussed, live-test-pending port reaches 5. Sort descending to surface
+  // the ports worth a closer manual look. Kept in sync with STATUS.md / AGENTS.md.
+  const loc = src ? src.split('\n').length : 0;
+  const nInteract = (src.match(/_event(_client)?\s*\(|follow_up_action\s*\(/g) || []).length;
+  const nControls = (src.match(/->\s*(open|leaf)\s*\(/g) || []).length;
+  const discussed = !!m.checked || m.status === 'golden';
+  const cxComplexity =
+      (loc > 220 ? 1 : loc > 120 ? 0.6 : loc > 60 ? 0.3 : 0) +
+      (nInteract >= 8 ? 0.7 : nInteract >= 3 ? 0.4 : nInteract >= 1 ? 0.2 : 0) +
+      (nControls > 45 ? 0.3 : 0);
+  const cxRework = 1.0 * nImpr + 1.0 * nDrop + 0.5 * nSub + 0.3 * nNote;
+  const cxDiscussed = discussed ? 0.5 : 0;
+  const cxTest =
+      0.6 * nLive +
+      ((useEc || useFua) ? 0.4 : 0) +
+      ((usePopup || usePopover) ? 0.3 : 0) +
+      (isPost171 ? 0.3 : 0);
+  const rawScore = cxComplexity + cxRework + cxDiscussed + cxTest;
+  const score = Math.min(5, Math.max(1, Math.round(1 + rawScore)));
+  const scoreDrivers = [];
+  if (cxComplexity >= 0.5) scoreDrivers.push('complex');
+  if (cxRework >= 1) scoreDrivers.push(`${nImpr + nDrop + nSub} reworked`);
+  else if (nNote) scoreDrivers.push(`${nNote} noted`);
+  if (discussed) scoreDrivers.push('reviewed');
+  if (cxTest >= 0.6) scoreDrivers.push('live-test');
+  const scoreTip = `Rating ${score} of 5 - how much attention this port deserves ` +
+    `(complexity + rework + review + test-priority${scoreDrivers.length ? ': ' + scoreDrivers.join(', ') : ''}). ` +
+    `1 = simple faithful 1:1, 5 = complex / reworked / worth a close look.`;
+
   apps.push({
     module,
     control: m.entity,
@@ -303,7 +335,7 @@ const columnsBlock = [
   sortableColumn('Since', 'RELEASE'),
   sortableColumn('abap2UI5', 'CLASS'),
   plainColumn('Version', [['width', '6rem'], ['hAlign', 'Center']]),
-  sortableColumn('Deviation', 'SCORE'),
+  sortableColumn('Rating', 'SCORE'),
   plainColumn('Audit', [['width', '15rem']]),
   plainColumn('Open', [['width', '7rem'], ['hAlign', 'Center']]),
 ].join('\n');
@@ -336,11 +368,13 @@ const abap = `"! Generated overview app - lists every abap2UI5 api sample app in
 "! checked status, a post-1.71 note, and the generation notes; the second starts
 "! this abap2UI5 app directly in a new tab (open_new_tab; the start URL is
 "! same-origin). The same two buttons sit on every tree sample leaf (links only,
-"! the tree model carries no info). The Deviation column is a 1-10 score of how far
-"! the port is from the original sample (not coloured) - IMPROVISED and DROPPED_171
-"! deviations weigh 2 each, SUBSET_DATA 1, POST_171 counts as 0 (still a 1:1 port),
-"! score = min(10, 1 + that); sort it descending to surface the samples worth a
-"! closer manual look. The Audit
+"! the tree model carries no info). The Rating column is a 1-5 "by feel" score of
+"! how much attention a port deserves (not coloured): app complexity, how heavily
+"! it was reworked/corrected (IMPROVISED/DROPPED_171/SUBSET_DATA/NOTE), whether it
+"! was reviewed/discussed (a checked or golden port), and how important a live
+"! re-test is (pending LIVE_TESTs, roundtrip-free wiring, popups, needs-newer-UI5);
+"! 1 = simple faithful 1:1, 5 = complex/reworked/worth a close look. Sort it
+"! descending to surface the samples worth a closer manual look. The Audit
 "! column shows, always, one badge per framework-wiring fact the port uses (read
 "! from its ABAP source): _event_client and its t_arg form, follow_up_action and
 "! its t_arg form, whether it opens a Popup or Popover, and whether it binds a
@@ -737,10 +771,11 @@ ${columnsBlock}
                                     )->a( n = \`state\`   v = \`Warning\`
                                     )->a( n = \`tooltip\` v = \`This control is not part of OpenUI5 - it cannot render on an OpenUI5 stack\`
                                     )->a( n = \`visible\` v = \`{UI5_ONLY}\`
-                                " deviation score 1-10: how far the port is from the original
+                                " rating 1-5 (by feel): how much attention the port
+                                " deserves - complexity, rework, review, test-priority
                                 " (not coloured); tooltip lists the drivers
                                 )->leaf( \`Text\`
-                                    )->a( n = \`text\`    v = \`{SCORE} / 10\`
+                                    )->a( n = \`text\`    v = \`{SCORE} / 5\`
                                     )->a( n = \`tooltip\` v = \`{SCORE_TIP}\`
 
                                 " audit column: one badge per framework-wiring fact the

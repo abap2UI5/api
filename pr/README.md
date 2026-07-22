@@ -17,14 +17,24 @@ on the details live upstream and in CAPABILITIES.md/STATUS.md.
 
 ## Open
 
+Genuinely open — not yet implemented.
+
 | Request | Summary | Priority |
 |---------|---------|----------|
-| [`table-hidden-in-popin`](table-hidden-in-popin/) | **IMPLEMENTED on branch `claude/ai-demokit-edge-cases-ftv30b`, pending upstream merge** (folder kept until merged). Whitelist `setHiddenInPopin` (+ optionally `setContextualWidth`) in `CONTROL_METHODS`, like the `openBy`/`setActivePage`/`toggleBy` family, so the auto-pop-in demo's MultiComboBox works. From app 092 (now wired). `setContextualWidth`/Slider `setWidth` still open. | medium |
-| [`popover-bind-element`](popover-bind-element/) | **IMPLEMENTED on branch `claude/ai-demokit-edge-cases-ftv30b`, pending upstream merge** (folder kept until merged). A `BIND_ELEMENT` `follow_up_action` (popup + popover) — `follow_up_action( val = cs_event-bind_element, view = popup/popover, t_arg = ( idx ) ( client->_bind( mt_tab ) ) )`. The binding comes from `_bind` (registered + rename-safe), never text; the action strips `{ }`, appends `/idx` and sets the slot's element binding. Fits the existing signature, no new method params. Enhancement (app 094, now wired). | medium |
-| [`menu-item-selected-path`](menu-item-selected-path/) | A resolvable payload for the selected menu item's ancestor-text breadcrumb (`Create New Site > Official Store`), or a documented capability boundary. From b07 apps 060/061; today only the leaf `${$parameters>/item/text}` is transportable. **Deferred** (2026-07-20, user decision) — cosmetic (toast text) and likely resolves as a documented boundary rather than a framework change; kept for a later call | low — deferred |
-| [`style-class-toggle`](style-class-toggle/) | **IMPLEMENTED on branch `claude/ai-demokit-edge-cases-ftv30b`, pending upstream merge** (folder kept until merged). Whitelist `addStyleClass`/`removeStyleClass`/`toggleStyleClass` (`["string"]`) in `CONTROL_METHODS` — the client-side equivalent of the controller's `oControl.toggleStyleClass('x')`. Motivated by app 013 (`cookiesDetailedView` toggle); the class's CSS is not shipped with that sample, so 013 stays as-is, but the capability is now available. | medium |
 | [`messagepopover-async-url`](messagepopover-async-url/) | A declarable async URL-validation hook for `sap.m.MessagePopover.setAsyncURLHandler` (allow relative links, gate absolute ones before navigation). From app 067; the messages render fine without it, so **low priority / niche** — filed for the record. | low |
-| [`message-toast-format`](message-toast-format/) | **IMPLEMENTED on branch `claude/ai-demokit-edge-cases-ftv30b`, pending upstream merge** (folder kept until merged). A `control_global` single-string method (MessageToast.show, MessageBox.*) composes its text from a template + client-resolved args (`{0}`,`{1}`,… filled by `$event.*`/`${$parameters>/…}`), so a dynamic toast is roundtrip-free — 1:1 with the demo-kit `MessageToast.show("…" + evt.…)`. `get_t_arg` quotes a leading `{0}` placeholder; lone strings unchanged. Ports 005, 060 converted (init-only). | medium |
+| [`menu-item-selected-path`](menu-item-selected-path/) | A resolvable payload for the selected menu item's ancestor-text breadcrumb (`Create New Site > Official Store`), or a documented capability boundary. From b07 apps 060/061; today only the leaf `${$parameters>/item}.getText()` is transportable. **Deferred** (2026-07-20, user decision) — cosmetic (toast text) and likely resolves as a documented boundary rather than a framework change; kept for a later call. | low — deferred |
+
+## Implemented on this branch (`claude/ai-demokit-edge-cases-ftv30b`, pending upstream merge)
+
+Folders kept until merged upstream; then they move to the "Implemented (folders
+removed)" table below.
+
+| Request | What it adds | From |
+|---------|--------------|------|
+| [`message-toast-format`](message-toast-format/) | A `control_global` single-string method (MessageToast.show, MessageBox.*) composes its text from a template + client-resolved args (`{0}`,`{1}`,… filled by `$event.*`/`${$parameters>/…}`), so a dynamic toast is roundtrip-free — 1:1 with the demo-kit `MessageToast.show("…" + evt.…)`. `get_t_arg` quotes a leading `{0}` placeholder; lone strings unchanged. | apps 005, 060, 061, 077 (init-only) |
+| [`popover-bind-element`](popover-bind-element/) | A `BIND_ELEMENT` `follow_up_action` (popup + popover) — `follow_up_action( val = cs_event-bind_element, view = popup/popover, t_arg = ( idx ) ( client->_bind( mt_tab ) ) )`. The binding comes from `_bind` (registered + rename-safe), never text; the action strips `{ }`, appends `/idx` and sets the slot's element binding. Fits the existing signature, no new method params. | app 094 |
+| [`table-hidden-in-popin`](table-hidden-in-popin/) | Whitelist `setHiddenInPopin` in `CONTROL_METHODS`, like the `openBy`/`setActivePage`/`toggleBy` family, so the auto-pop-in demo's MultiComboBox works. `setContextualWidth`/Slider `setWidth` still open. | app 092 |
+| [`style-class-toggle`](style-class-toggle/) | Whitelist `addStyleClass`/`removeStyleClass`/`toggleStyleClass` (`["string"]`) in `CONTROL_METHODS` — the client-side equivalent of the controller's `oControl.toggleStyleClass('x')`. Motivated by app 013 (its CSS is not shipped, so 013 stays as-is, but the capability is available). | app 013 |
 
 ## Declined / deferred (folder removed 2026-07-19)
 
