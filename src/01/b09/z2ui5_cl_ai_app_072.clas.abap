@@ -14,7 +14,6 @@ CLASS z2ui5_cl_ai_app_072 DEFINITION PUBLIC.
     DATA client TYPE REF TO z2ui5_if_client.
 
     METHODS view_display.
-    METHODS on_event.
     METHODS model_init.
 
   PRIVATE SECTION.
@@ -29,8 +28,6 @@ CLASS z2ui5_cl_ai_app_072 IMPLEMENTATION.
     IF client->check_on_init( ).
       model_init( ).
       view_display( ).
-    ELSEIF client->check_on_event( ).
-      on_event( ).
     ENDIF.
 
   ENDMETHOD.
@@ -150,14 +147,16 @@ CLASS z2ui5_cl_ai_app_072 IMPLEMENTATION.
                     )->a( n = `class`   v = `sapUiSmallMarginBottom`
                     )->a( n = `active`  v = `true`
                     )->a( n = `binding` v = |\{{ client->_bind( val = t_products path = abap_true ) }/0\}|
-                    )->a( n = `press`   v = client->_event( `PRESS` )
+                    )->a( n = `press`   v = client->_event_client( val   = client->cs_event-control_global
+                                                                   t_arg = VALUE #( ( `MESSAGE_TOAST` ) ( `show` ) ( `PRESS fired!` ) ) )
                     )->a( n = `number`  v = num
                     )->a( n = `unit`    v = `{CURRENCY_CODE}`
                 )->leaf( `ObjectNumber`
                     )->a( n = `class`   v = `sapUiSmallMarginBottom`
                     )->a( n = `active`  v = `true`
                     )->a( n = `binding` v = |\{{ client->_bind( val = t_products path = abap_true ) }/1\}|
-                    )->a( n = `press`   v = client->_event( `PRESS` )
+                    )->a( n = `press`   v = client->_event_client( val   = client->cs_event-control_global
+                                                                   t_arg = VALUE #( ( `MESSAGE_TOAST` ) ( `show` ) ( `PRESS fired!` ) ) )
                     )->a( n = `number`  v = num
                     )->a( n = `unit`    v = `{CURRENCY_CODE}`
                     )->a( n = `state`   v = `Error`
@@ -165,7 +164,8 @@ CLASS z2ui5_cl_ai_app_072 IMPLEMENTATION.
                     )->a( n = `class`   v = `sapUiSmallMarginBottom`
                     )->a( n = `active`  v = `true`
                     )->a( n = `binding` v = |\{{ client->_bind( val = t_products path = abap_true ) }/2\}|
-                    )->a( n = `press`   v = client->_event( `PRESS` )
+                    )->a( n = `press`   v = client->_event_client( val   = client->cs_event-control_global
+                                                                   t_arg = VALUE #( ( `MESSAGE_TOAST` ) ( `show` ) ( `PRESS fired!` ) ) )
                     )->a( n = `number`  v = num
                     )->a( n = `unit`    v = `{CURRENCY_CODE}`
                     )->a( n = `state`   v = `Warning`
@@ -173,7 +173,8 @@ CLASS z2ui5_cl_ai_app_072 IMPLEMENTATION.
                     )->a( n = `class`   v = `sapUiSmallMarginBottom`
                     )->a( n = `active`  v = `true`
                     )->a( n = `binding` v = |\{{ client->_bind( val = t_products path = abap_true ) }/3\}|
-                    )->a( n = `press`   v = client->_event( `PRESS` )
+                    )->a( n = `press`   v = client->_event_client( val   = client->cs_event-control_global
+                                                                   t_arg = VALUE #( ( `MESSAGE_TOAST` ) ( `show` ) ( `PRESS fired!` ) ) )
                     )->a( n = `number`  v = num
                     )->a( n = `unit`    v = `{CURRENCY_CODE}`
                     )->a( n = `state`   v = `Success`
@@ -181,7 +182,8 @@ CLASS z2ui5_cl_ai_app_072 IMPLEMENTATION.
                     )->a( n = `class`   v = `sapUiSmallMarginBottom`
                     )->a( n = `active`  v = `true`
                     )->a( n = `binding` v = |\{{ client->_bind( val = t_products path = abap_true ) }/4\}|
-                    )->a( n = `press`   v = client->_event( `PRESS` )
+                    )->a( n = `press`   v = client->_event_client( val   = client->cs_event-control_global
+                                                                   t_arg = VALUE #( ( `MESSAGE_TOAST` ) ( `show` ) ( `PRESS fired!` ) ) )
                     )->a( n = `number`  v = num
                     )->a( n = `unit`    v = `{CURRENCY_CODE}`
                     )->a( n = `state`   v = `Information`
@@ -203,7 +205,8 @@ CLASS z2ui5_cl_ai_app_072 IMPLEMENTATION.
                     )->a( n = `active`   v = `true`
                     )->a( n = `inverted` v = `true`
                     )->a( n = `binding`  v = |\{{ client->_bind( val = t_products path = abap_true ) }/0\}|
-                    )->a( n = `press`    v = client->_event( `PRESS` )
+                    )->a( n = `press`    v = client->_event_client( val   = client->cs_event-control_global
+                                                                    t_arg = VALUE #( ( `MESSAGE_TOAST` ) ( `show` ) ( `PRESS fired!` ) ) )
                     )->a( n = `number`   v = num
                     )->a( n = `unit`     v = `{CURRENCY_CODE}`
                 )->leaf( `ObjectNumber`
@@ -211,7 +214,8 @@ CLASS z2ui5_cl_ai_app_072 IMPLEMENTATION.
                     )->a( n = `active`   v = `true`
                     )->a( n = `inverted` v = `true`
                     )->a( n = `binding`  v = |\{{ client->_bind( val = t_products path = abap_true ) }/1\}|
-                    )->a( n = `press`    v = client->_event( `PRESS` )
+                    )->a( n = `press`    v = client->_event_client( val   = client->cs_event-control_global
+                                                                    t_arg = VALUE #( ( `MESSAGE_TOAST` ) ( `show` ) ( `PRESS fired!` ) ) )
                     )->a( n = `number`   v = num
                     )->a( n = `unit`     v = `{CURRENCY_CODE}`
                     )->a( n = `state`    v = `Error`
@@ -220,7 +224,8 @@ CLASS z2ui5_cl_ai_app_072 IMPLEMENTATION.
                     )->a( n = `active`   v = `true`
                     )->a( n = `inverted` v = `true`
                     )->a( n = `binding`  v = |\{{ client->_bind( val = t_products path = abap_true ) }/2\}|
-                    )->a( n = `press`    v = client->_event( `PRESS` )
+                    )->a( n = `press`    v = client->_event_client( val   = client->cs_event-control_global
+                                                                    t_arg = VALUE #( ( `MESSAGE_TOAST` ) ( `show` ) ( `PRESS fired!` ) ) )
                     )->a( n = `number`   v = num
                     )->a( n = `unit`     v = `{CURRENCY_CODE}`
                     )->a( n = `state`    v = `Warning`
@@ -229,7 +234,8 @@ CLASS z2ui5_cl_ai_app_072 IMPLEMENTATION.
                     )->a( n = `active`   v = `true`
                     )->a( n = `inverted` v = `true`
                     )->a( n = `binding`  v = |\{{ client->_bind( val = t_products path = abap_true ) }/3\}|
-                    )->a( n = `press`    v = client->_event( `PRESS` )
+                    )->a( n = `press`    v = client->_event_client( val   = client->cs_event-control_global
+                                                                    t_arg = VALUE #( ( `MESSAGE_TOAST` ) ( `show` ) ( `PRESS fired!` ) ) )
                     )->a( n = `number`   v = num
                     )->a( n = `unit`     v = `{CURRENCY_CODE}`
                     )->a( n = `state`    v = `Success`
@@ -238,7 +244,8 @@ CLASS z2ui5_cl_ai_app_072 IMPLEMENTATION.
                     )->a( n = `active`   v = `true`
                     )->a( n = `inverted` v = `true`
                     )->a( n = `binding`  v = |\{{ client->_bind( val = t_products path = abap_true ) }/4\}|
-                    )->a( n = `press`    v = client->_event( `PRESS` )
+                    )->a( n = `press`    v = client->_event_client( val   = client->cs_event-control_global
+                                                                    t_arg = VALUE #( ( `MESSAGE_TOAST` ) ( `show` ) ( `PRESS fired!` ) ) )
                     )->a( n = `number`   v = num
                     )->a( n = `unit`     v = `{CURRENCY_CODE}`
                     )->a( n = `state`    v = `Information`
@@ -270,7 +277,8 @@ CLASS z2ui5_cl_ai_app_072 IMPLEMENTATION.
                 )->a( n = `class`      v = `sapMObjectNumberLarge`
                 )->a( n = `active`     v = `true`
                 )->a( n = `binding`    v = |\{{ client->_bind( val = t_products path = abap_true ) }/5\}|
-                )->a( n = `press`      v = client->_event( `PRESS` )
+                )->a( n = `press`      v = client->_event_client( val   = client->cs_event-control_global
+                                                                  t_arg = VALUE #( ( `MESSAGE_TOAST` ) ( `show` ) ( `PRESS fired!` ) ) )
                 )->a( n = `number`     v = num
                 )->a( n = `unit`       v = `{CURRENCY_CODE}`
                 )->a( n = `emphasized` v = `false`
@@ -288,7 +296,8 @@ CLASS z2ui5_cl_ai_app_072 IMPLEMENTATION.
                         )->a( n = `class`      v = `sapMObjectNumberLongText`
                         )->a( n = `active`     v = `true`
                         )->a( n = `binding`    v = |\{{ client->_bind( val = t_products path = abap_true ) }/5\}|
-                        )->a( n = `press`      v = client->_event( `PRESS` )
+                        )->a( n = `press`      v = client->_event_client( val   = client->cs_event-control_global
+                                                                          t_arg = VALUE #( ( `MESSAGE_TOAST` ) ( `show` ) ( `PRESS fired!` ) ) )
                         )->a( n = `number`     v = `12345678901234567890`
                         )->a( n = `unit`       v = `{CURRENCY_CODE}`
                         )->a( n = `emphasized` v = `false`
@@ -299,17 +308,6 @@ CLASS z2ui5_cl_ai_app_072 IMPLEMENTATION.
         )->shut( ).
 
     client->view_display( view->stringify( ) ).
-
-  ENDMETHOD.
-
-
-  METHOD on_event.
-
-    CASE client->get( )-event.
-      WHEN `PRESS`.
-        " the original's onPress - MessageToast.show('PRESS fired!')
-        client->message_toast_display( `PRESS fired!` ).
-    ENDCASE.
 
   ENDMETHOD.
 

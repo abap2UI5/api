@@ -14,7 +14,6 @@ CLASS z2ui5_cl_ai_app_079 DEFINITION PUBLIC.
     DATA client TYPE REF TO z2ui5_if_client.
 
     METHODS view_display.
-    METHODS on_event.
     METHODS model_init.
 
   PRIVATE SECTION.
@@ -29,8 +28,6 @@ CLASS z2ui5_cl_ai_app_079 IMPLEMENTATION.
     IF client->check_on_init( ).
       model_init( ).
       view_display( ).
-    ELSEIF client->check_on_event( ).
-      on_event( ).
     ENDIF.
 
   ENDMETHOD.
@@ -67,7 +64,8 @@ CLASS z2ui5_cl_ai_app_079 IMPLEMENTATION.
                         )->leaf( `ToolbarSpacer`
                         )->leaf( `Button`
                             )->a( n = `icon`  v = `sap-icon://settings`
-                            )->a( n = `press` v = client->_event( `PRESS` )
+                            )->a( n = `press` v = client->_event_client( val   = client->cs_event-control_global
+                                                                         t_arg = VALUE #( ( `MESSAGE_TOAST` ) ( `show` ) ( `Header toolbar button pressed.` ) ) )
 
                     )->shut(
                 )->shut(
@@ -80,16 +78,6 @@ CLASS z2ui5_cl_ai_app_079 IMPLEMENTATION.
         )->shut( ).
 
     client->view_display( view->stringify( ) ).
-
-  ENDMETHOD.
-
-
-  METHOD on_event.
-
-    CASE client->get( )-event.
-      WHEN `PRESS`.
-        client->message_toast_display( `Header toolbar button pressed.` ).
-    ENDCASE.
 
   ENDMETHOD.
 

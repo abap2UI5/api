@@ -896,6 +896,8 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` flattened into it as the bound table T_TREE and the binding-info keeps its shape with the bound path substituted for '/' (nested tree binding is expressible per CAPABILITIES.md, proven by app 054).` &&
                  ` // NOTE: the flat ABAP row types serialize an empty NODES array on leaf rows where the original Tree.json simply omits the 'nodes' property (levels 1-4; the level-5 row type carries no NODES field at` &&
                  ` all); ClientTreeBinding treats an empty child array as a childless node, so the rendered tree matches. TEXT and REF are present on every original node - no absent-property/empty-string enum risk.`
+        use_ec = abap_true
+        use_ec_arg = abap_true
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.DatePicker`                  name = `DatePickerHidden`                    class = `z2ui5_cl_ai_app_016` path = `src/01/b05/z2ui5_cl_ai_app_016.clas.abap`
         score = 1
@@ -1040,7 +1042,9 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         score = 1
         score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.34`
-        checked = `CHECKED (2026-07-20): verified in a running system - human pass 2026-07-20: app starts and renders like the original; no interaction paths were open for this port` )
+        checked = `CHECKED (2026-07-20): verified in a running system - human pass 2026-07-20: app starts and renders like the original; no interaction paths were open for this port`
+        use_ec = abap_true
+        use_ec_arg = abap_true )
       ( module = `sap.m` control = `sap.m.FeedInput`                   name = `Feed`                                class = `z2ui5_cl_ai_app_024` path = `src/01/b06/z2ui5_cl_ai_app_024.clas.abap`
         score = 3
         score_tip = `Deviation from the original sample: 3 of 10 (1 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
@@ -1095,18 +1099,24 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` attribute (see CAPABILITIES.md; the EXTRA core:HTML control vs the original view). Confirmed rendering via the human visual pass 2026-07-19.`
         post171 = `frameType values OneByHalf / TwoByHalf (since UI5 1.83) are newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.83 to render them; OneByOne / TwoByOne (1.71) were never` &&
                  ` affected. // systemInfo and appShortcut (since UI5 1.92) are newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.92 to render them. // url on the link tiles (since UI5 1.76)` &&
-                 ` is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.76 to render it.` )
+                 ` is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.76 to render it.`
+        use_ec = abap_true
+        use_ec_arg = abap_true )
       ( module = `sap.m` control = `sap.m.HeaderContainer`             name = `HeaderContainer`                     class = `z2ui5_cl_ai_app_029` path = `src/01/b06/z2ui5_cl_ai_app_029.clas.abap`
         score = 1
         score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.44.0`
-        checked = `CHECKED (2026-07-20): verified in a running system - human live check 2026-07-20 following the interaction checklist (all listed checks passed)`
-        notes = `NOTE: the Select's literal selectedKey="1" is replaced by a two-way binding {SELECTED_KEY} (seeded with '1') so the SCROLL_CHANGED handler can read the chosen key on the backend - the` &&
-                 ` CAPABILITIES-approved controller-read-selection pattern (bind selectedKey two-way; the incoming model is applied before on_event runs). The original controller reads` &&
-                 ` oEvent.getParameter('selectedItem').getKey(), which has no public $parameters path (selectedItem is a control; reading private control internals is banned). // NOTE: the controller's` &&
-                 ` setScrollStepByItem(0 | Number(key)) calls on both containers expressed as a shared two-way scrollStepByItem binding (typed i for a real JSON number; the method is not in the CONTROL_METHODS` &&
-                 ` whitelist and the prefer-a-bindable-property rule applies). Seeded 1 - the UI5 property default (HeaderContainer.js defaultValue: 1; the property carries no @since, present since the control) - so` &&
-                 ` the initial arrow scroll is one item, exactly the original's untouched state; selecting px sets 0 (px stepping via scrollStep), like the controller.` )
+        notes = `NOTE: the Select's literal selectedKey="1" is replaced by a two-way binding {SELECTED_KEY} (seeded '1'); scrollStepByItem on both HeaderContainers is now a pure client-side expression binding over it` &&
+                 ` ({= ${SELECTED_KEY} === 'px' ? 0 : +${SELECTED_KEY} }), so the original Select's change handler (onScrollByItemChange) is dropped - no round-trip. This is the prefer-a-bindable-property/expression` &&
+                 ` pattern (like the golden app 019). The original controller reads oEvent.getParameter('selectedItem').getKey(), which has no public $parameters path (selectedItem is a control; reading private control` &&
+                 ` internals is banned). // NOTE: the controller's setScrollStepByItem(0 | Number(key)) on both containers is reproduced by the scrollStepByItem expression binding above (px -> 0, else the number);` &&
+                 ` seeded via SELECTED_KEY='1' it matches the UI5 property default (HeaderContainer.js defaultValue: 1), so the initial arrow scroll is one item and selecting px sets 0 (px stepping via scrollStep),` &&
+                 ` exactly like the controller - all client-side, no scroll_step_by_item field. // NOTE: the NumericContent press ('Fire press' MessageToast) is wired roundtrip-free via client->_event_client(` &&
+                 ` cs_event-control_global, MESSAGE_TOAST/show ) - the original's client-side MessageToast.show 1:1; the app is now init-only (no on_event). An unused xmlns:l namespace was dropped. // LIVE-TEST: the` &&
+                 ` scroll-step selection and the tile-press toast were switched from server round-trips to client-side expression binding / _event_client( control_global ) on 2026-07-22 - re-verify in a running system` &&
+                 ` that selecting an item/px still changes the arrow scroll step on both containers and that pressing a NumericContent still toasts 'Fire press'.`
+        use_ec = abap_true
+        use_ec_arg = abap_true )
       ( module = `sap.m` control = `sap.m.IconTabBar`                  name = `IconTabBarStretchContent`            class = `z2ui5_cl_ai_app_030` path = `src/01/b04/z2ui5_cl_ai_app_030.clas.abap`
         score = 1
         score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
@@ -1130,7 +1140,9 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.38`
         notes = `NOTE: the profile-image and logo ImageContent keep the sample's original demokit test-resources asset paths (test-resources/sap/m/demokit/sample/ImageContent/images/*.png) as the src literal 1:1;` &&
-                 ` abap2UI5 does not serve those static assets, so only the first (sap-icon://area-chart) icon renders offline. The images are archived under ui5/sap.m/ImageContent/images/.` )
+                 ` abap2UI5 does not serve those static assets, so only the first (sap-icon://area-chart) icon renders offline. The images are archived under ui5/sap.m/ImageContent/images/.`
+        use_ec = abap_true
+        use_ec_arg = abap_true )
       ( module = `sap.m` control = `sap.m.Input`                       name = `InputValueState`                     class = `z2ui5_cl_ai_app_032` path = `src/01/b02/z2ui5_cl_ai_app_032.clas.abap`
         score = 1
         score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
@@ -1240,15 +1252,18 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         checked = `CHECKED (2026-07-22): verified in a running system 2026-07-22: the button toggles the MessagePopover open/closed (toggleBy) and lists the five messages.`
         notes = `POST-1.71: Button.ariaHasPopup (since UI5 1.84) kept on the message-popover button. The Button.type value 'Negative' (a sap.m.ButtonType value since 1.73) is what the sample's buttonTypeFormatter` &&
                  ` returns for the highest-severity Error message. // IMPROVISED: the MessagePopover (built in the controller and addDependent'ed to the button) is declared 1:1 in the button's ``dependents``` &&
-                 ` aggregation; the controller's oMessagePopover.toggle(button) becomes client->follow_up_action( cs_event-control_by_id, toggleBy ) anchored to the button's DOM ref ($event.oSource.sId) -` &&
-                 ` open-if-closed / close-if-open. // NOTE: the sample's three severity formatters (buttonIconFormatter/buttonTypeFormatter/highestSeverityMessages) compute the button icon/type/count from the` &&
-                 ` highest-severity message; the mock data is static, so the results are precomputed in ABAP (error icon, Negative type, count 2 for the two Error messages) and bound as scalars. The sample's root-array` &&
-                 ` JSON model (items path '/') is carried under a /T_MESSAGES field of the single default model. // NOTE: live-verified 2026-07-22 - confirm in a running system that the button toggles the` &&
-                 ` MessagePopover open/closed (toggleBy) and lists the five messages with their MessageItem link, and that activeTitlePress toasts on the active (first Error) title.`
+                 ` aggregation; the controller's oMessagePopover.toggle(button) becomes a roundtrip-free client->_event_client( cs_event-control_by_id, toggleBy ) on the button press (anchored by id), and` &&
+                 ` onActiveTitlePress's MessageToast.show becomes a roundtrip-free client->_event_client( cs_event-control_global, MESSAGE_TOAST/show ); the app is now init-only (no on_event). Previously` &&
+                 ` client->follow_up_action( cs_event-control_by_id, toggleBy ) anchored to the button's DOM ref ($event.oSource.sId) - open-if-closed / close-if-open. // NOTE: the sample's three severity formatters` &&
+                 ` (buttonIconFormatter/buttonTypeFormatter/highestSeverityMessages) compute the button icon/type/count from the highest-severity message; the mock data is static, so the results are precomputed in ABAP` &&
+                 ` (error icon, Negative type, count 2 for the two Error messages) and bound as scalars. The sample's root-array JSON model (items path '/') is carried under a /T_MESSAGES field of the single default` &&
+                 ` model. // NOTE: live-verified 2026-07-22 - confirm in a running system that the button toggles the MessagePopover open/closed (toggleBy) and lists the five messages with their MessageItem link, and` &&
+                 ` that activeTitlePress toasts on the active (first Error) title. // LIVE-TEST: the toggle and the active-title toast were switched from server round-trips to roundtrip-free _event_client(` &&
+                 ` control_global / control_by_id ) on 2026-07-22 - re-verify in a running system that the button still toggles the MessagePopover and that pressing an active title still toasts.`
         post171 = `Button.ariaHasPopup (since UI5 1.84) kept on the message-popover button. The Button.type value 'Negative' (a sap.m.ButtonType value since 1.73) is what the sample's buttonTypeFormatter returns for the` &&
                  ` highest-severity Error message.`
-        use_fua = abap_true
-        use_fua_arg = abap_true
+        use_ec = abap_true
+        use_ec_arg = abap_true
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.MessagePopover`              name = `MessagePopoverAsyncMessageHandling`  class = `z2ui5_cl_ai_app_067` path = `src/01/b08/z2ui5_cl_ai_app_067.clas.abap`
         score = 5
@@ -1260,15 +1275,17 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         checked = `CHECKED (2026-07-22): verified in a running system 2026-07-22: the button toggles the MessagePopover (toggleBy) and the first Error message renders its HTML markupDescription.`
         notes = `POST-1.71: Button.ariaHasPopup (since UI5 1.84) kept on the message-popover button; the Button.type value 'Negative' is a sap.m.ButtonType value since 1.73. MessageItem.markupDescription (renders the` &&
                  ` HTML description) is kept for the async sample's rich-text messages. // IMPROVISED: the MessagePopover (built in the controller) is declared 1:1 in the button's ``dependents``; the controller's` &&
-                 ` toggle(button) becomes client->follow_up_action( cs_event-control_by_id, toggleBy ) anchored to $event.oSource.sId. // IMPROVISED: the sample's oMessagePopover.setAsyncURLHandler(...) - a client-side` &&
-                 ` JS callback that asynchronously validates each link URL (disabling absolute http links, allowing relative ones) before navigation - has no abap2UI5 equivalent and is dropped; the messages and their` &&
-                 ` markupDescription HTML (with the two demo <a> links) render, but the async URL-validation gate is not reproduced. // NOTE: the three severity formatters are precomputed in ABAP from the static mock` &&
-                 ` (error icon, Negative type, count 2); the root-array JSON model is carried under /T_MESSAGES on the single default model. // NOTE: live-verified 2026-07-22 - confirm the button toggles the` &&
-                 ` MessagePopover (toggleBy) and the first Error message renders its HTML markupDescription (h2/p/ul/ol + links); activeTitlePress toasts.`
+                 ` toggle(button) becomes a roundtrip-free client->_event_client( cs_event-control_by_id, toggleBy ) on the button press (anchored by id), and onActiveTitlePress's MessageToast.show becomes` &&
+                 ` roundtrip-free client->_event_client( cs_event-control_global, MESSAGE_TOAST/show ); the app is now init-only. Anchored to $event.oSource.sId. // IMPROVISED: the sample's` &&
+                 ` oMessagePopover.setAsyncURLHandler(...) - a client-side JS callback that asynchronously validates each link URL (disabling absolute http links, allowing relative ones) before navigation - has no` &&
+                 ` abap2UI5 equivalent and is dropped; the messages and their markupDescription HTML (with the two demo <a> links) render, but the async URL-validation gate is not reproduced. // NOTE: the three` &&
+                 ` severity formatters are precomputed in ABAP from the static mock (error icon, Negative type, count 2); the root-array JSON model is carried under /T_MESSAGES on the single default model. // NOTE:` &&
+                 ` live-verified 2026-07-22 - confirm the button toggles the MessagePopover (toggleBy) and the first Error message renders its HTML markupDescription (h2/p/ul/ol + links); activeTitlePress toasts. //` &&
+                 ` LIVE-TEST: the toggle and the active-title toast were switched to roundtrip-free _event_client on 2026-07-22 - re-verify the button toggles the MessagePopover and an active title toasts.`
         post171 = `Button.ariaHasPopup (since UI5 1.84) kept on the message-popover button; the Button.type value 'Negative' is a sap.m.ButtonType value since 1.73. MessageItem.markupDescription (renders the HTML` &&
                  ` description) is kept for the async sample's rich-text messages.`
-        use_fua = abap_true
-        use_fua_arg = abap_true
+        use_ec = abap_true
+        use_ec_arg = abap_true
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.MessagePopover`              name = `MessagePopoverMessageHandling`       class = `z2ui5_cl_ai_app_065` path = `src/01/b08/z2ui5_cl_ai_app_065.clas.abap`
         score = 7
@@ -1291,18 +1308,21 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` one default model; the bindings use the flattened field names. The three f:ColumnElementData layoutData hints (cellsSmall/cellsLarge column spans on the street-number, zip-code and one employment` &&
                  ` Input) are dropped - responsive-span cosmetics with no data/behaviour. // 1.71: controller-only pieces with no view/binding equivalent are dropped:` &&
                  ` buttonIconFormatter/buttonTypeFormatter/highestSeverityMessages (the button's severity-based icon/type/count) is reduced to text={=${message>/}.length}, type=Emphasized; core:CommandExecution (the` &&
-                 ` Ctrl+Shift+M focus shortcut); isPositionable. // NOTE: the controller's handleMessagePopoverPress (this.oMP.toggle(oEvent.getSource())) becomes the SHOW_MESSAGES event -> client->follow_up_action(` &&
-                 ` cs_event-control_by_id, toggleBy ) anchored to the button's DOM ref ($event.oSource.sId), the MessagePopover carrying id=messagePopover - open-if-closed / close-if-open, same frontend-action pattern` &&
-                 ` as apps 066/067. // NOTE: all 8 forms of the mock FormsModel.json are loaded verbatim (Julie Armstrong, Denise Smith, Richard Wilson, Gerd Becker, John Miller with the built-in invalid ZIP AAA,` &&
-                 ` Stefan Bosch, Maria Fontes with empty email + malformed website, Antonio Ferrari) plus the single employment row - the full data set, not a subset. // NOTE: activeTitlePress scroll-to-control` &&
-                 ` navigation is RESTORED (activeTitle=true): pressing a message title fires ACTIVE_TITLE with the message's target control id` &&
-                 ` (${$parameters>/item}.getBindingContext('message').getObject().getControlIds()[0]), and the handler runs follow_up_action( scroll_into_view ) + control_by_id close + set_focus on it - the 1:1` &&
-                 ` equivalent of the sample's scrollToElement + close + focus. Needs the upstream fix that lets SET_FOCUS/SCROLL_INTO_VIEW resolve a fully-qualified control id (resolveById), since a UI5 Message carries` &&
-                 ` the view-prefixed id. // NOTE: onInit's MessageToast.show('Press "Save" to trigger validation.') is ported as client->message_toast_display( ... ) in the check_on_init branch. // NOTE: MessageItem` &&
-                 ` grouping (groupItems=true + the 'Personal, <section>' group headers) is RESTORED: the original derives groupName by walking the control tree (getGroupName -> form title + group subtitle), which the` &&
-                 ` server cannot do, so groupName is derived data-driven via an expression binding on the field label ({= ${message>additionalText} === 'Email' ? 'Personal, Contact' : 'Personal, Information' }) - only` &&
-                 ` Email sits in the Contact group, all others in Information, matching the original's headers (verified headless).`
+                 ` Ctrl+Shift+M focus shortcut); isPositionable. // NOTE: the controller's handleMessagePopoverPress (this.oMP.toggle(oEvent.getSource())) becomes a roundtrip-free client->_event_client(` &&
+                 ` cs_event-control_by_id, toggleBy ) wired on the button press (anchored to the button by its id 'messagePopoverBtn'), matching the original's client-side toggle 1:1 - no SHOW_MESSAGES round-trip's DOM` &&
+                 ` ref ($event.oSource.sId), the MessagePopover carrying id=messagePopover - open-if-closed / close-if-open, same frontend-action pattern as apps 066/067. // NOTE: all 8 forms of the mock` &&
+                 ` FormsModel.json are loaded verbatim (Julie Armstrong, Denise Smith, Richard Wilson, Gerd Becker, John Miller with the built-in invalid ZIP AAA, Stefan Bosch, Maria Fontes with empty email + malformed` &&
+                 ` website, Antonio Ferrari) plus the single employment row - the full data set, not a subset. // NOTE: activeTitlePress scroll-to-control navigation is RESTORED (activeTitle=true): pressing a message` &&
+                 ` title fires ACTIVE_TITLE with the message's target control id (${$parameters>/item}.getBindingContext('message').getObject().getControlIds()[0]), and the handler runs follow_up_action(` &&
+                 ` scroll_into_view ) + control_by_id close + set_focus on it - the 1:1 equivalent of the sample's scrollToElement + close + focus. Needs the upstream fix that lets SET_FOCUS/SCROLL_INTO_VIEW resolve a` &&
+                 ` fully-qualified control id (resolveById), since a UI5 Message carries the view-prefixed id. // NOTE: onInit's MessageToast.show('Press "Save" to trigger validation.') is ported as` &&
+                 ` client->message_toast_display( ... ) in the check_on_init branch. // NOTE: MessageItem grouping (groupItems=true + the 'Personal, <section>' group headers) is RESTORED: the original derives groupName` &&
+                 ` by walking the control tree (getGroupName -> form title + group subtitle), which the server cannot do, so groupName is derived data-driven via an expression binding on the field label ({=` &&
+                 ` ${message>additionalText} === 'Email' ? 'Personal, Contact' : 'Personal, Information' }) - only Email sits in the Contact group, all others in Information, matching the original's headers (verified` &&
+                 ` headless).`
         post171 = `two post-1.71 members are kept for the 1:1 port: Button.ariaHasPopup (since UI5 1.84) on the MessagePopover button, and MessagePopover.groupItems (since UI5 1.73).`
+        use_ec = abap_true
+        use_ec_arg = abap_true
         use_fua = abap_true
         use_fua_arg = abap_true
         use_name = abap_true )
@@ -1367,7 +1387,9 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
       ( module = `sap.m` control = `sap.m.NewsContent`                 name = `NewsContent`                         class = `z2ui5_cl_ai_app_063` path = `src/01/b07/z2ui5_cl_ai_app_063.clas.abap`
         score = 1
         score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
-        since = `1.34` )
+        since = `1.34`
+        use_ec = abap_true
+        use_ec_arg = abap_true )
       ( module = `sap.m` control = `sap.m.NotificationListGroup`       name = `NotificationListGroup`               class = `z2ui5_cl_ai_app_077` path = `src/01/b09/z2ui5_cl_ai_app_077.clas.abap`
         score = 3
         score_tip = `Deviation from the original sample: 3 of 10 (1 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
@@ -1385,7 +1407,9 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.34`
         notes = `NOTE: the second NumericContent keeps the sample's original demokit test-resources image path (test-resources/sap/m/demokit/sample/NumericContentIcon/images/grass.jpg) as the icon literal 1:1;` &&
-                 ` abap2UI5 does not serve that static asset, so it does not render offline (the first tile's sap-icon://travel-expense does). The image is archived under ui5/sap.m/NumericContentIcon/images/.` )
+                 ` abap2UI5 does not serve that static asset, so it does not render offline (the first tile's sap-icon://travel-expense does). The image is archived under ui5/sap.m/NumericContentIcon/images/.`
+        use_ec = abap_true
+        use_ec_arg = abap_true )
       ( module = `sap.m` control = `sap.m.ObjectAttribute`             name = `ObjectAttributes`                    class = `z2ui5_cl_ai_app_073` path = `src/01/b09/z2ui5_cl_ai_app_073.clas.abap`
         score = 3
         score_tip = `Deviation from the original sample: 3 of 10 (1 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
@@ -1440,6 +1464,8 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` /T_PRODUCTS/0..5 (index binding), Price+CurrencyCode verbatim. // POST-1.71: ObjectNumber.inverted, ObjectNumber.active and ObjectNumber.press (all since UI5 1.86) are kept 1:1 for the` &&
                  ` inverted/interactive variants; needs UI5 >= 1.86.`
         post171 = `ObjectNumber.inverted, ObjectNumber.active and ObjectNumber.press (all since UI5 1.86) are kept 1:1 for the inverted/interactive variants; needs UI5 >= 1.86.`
+        use_ec = abap_true
+        use_ec_arg = abap_true
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.ObjectStatus`                name = `ObjectStatus`                        class = `z2ui5_cl_ai_app_042` path = `src/01/b01/z2ui5_cl_ai_app_042.clas.abap`
         score = 1
@@ -1644,6 +1670,8 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         score = 1
         score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
         since = `1.27.0`
+        use_ec = abap_true
+        use_ec_arg = abap_true
         use_name = abap_true )
       ( module = `sap.m` control = `sap.m.ToggleButton`                name = `ToggleButton`                        class = `z2ui5_cl_ai_app_080` path = `src/01/b10/z2ui5_cl_ai_app_080.clas.abap`
         score = 1

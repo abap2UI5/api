@@ -184,6 +184,14 @@ const RULES = [
           any = true;
           if (!/^-?\d+(\.\d+)?$/.test(a[1].trim())) { allNumeric = false; break; }
         }
+        // string evidence beyond ABAP assignments: a non-numeric comparison in a
+        // UI5 { = } expression over the field (e.g. a selectedKey field compared
+        // `${ _bind( key ) } === 'px'`) proves it is genuinely a string, not a
+        // numeric property bound to a string. Without this the rule false-positives
+        // on a Select selectedKey whose only ABAP seed happens to be numeric.
+        const cmp = new RegExp(`_bind(?:_edit)?\\(\\s*${name}\\s*\\)[^|]*?===\\s*'([^']*)'`);
+        const cm = cmp.exec(content);
+        if (cm && !/^-?\d+(\.\d+)?$/.test(cm[1].trim())) allNumeric = false;
         if (any && allNumeric) {
           out.push({ line: lineOf(content, m.index), text: `${name} TYPE string, bound, only numeric literals assigned` });
         }

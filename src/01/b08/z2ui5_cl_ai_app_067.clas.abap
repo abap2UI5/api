@@ -22,7 +22,6 @@ CLASS z2ui5_cl_ai_app_067 DEFINITION PUBLIC.
     DATA client TYPE REF TO z2ui5_if_client.
 
     METHODS view_display.
-    METHODS on_event.
     METHODS model_init.
 
   PRIVATE SECTION.
@@ -37,8 +36,6 @@ CLASS z2ui5_cl_ai_app_067 IMPLEMENTATION.
     IF client->check_on_init( ).
       model_init( ).
       view_display( ).
-    ELSEIF client->check_on_event( ).
-      on_event( ).
     ENDIF.
 
   ENDMETHOD.
@@ -65,14 +62,15 @@ CLASS z2ui5_cl_ai_app_067 IMPLEMENTATION.
                         )->a( n = `type`         v = client->_bind( highest_type )
                         )->a( n = `text`         v = client->_bind( highest_count )
                         )->a( n = `ariaHasPopup` v = `Dialog`
-                        )->a( n = `press`        v = client->_event( val   = `SHOW_MESSAGES`
-                                                                     t_arg = VALUE #( ( `$event.oSource.sId` ) ) )
+                        )->a( n = `press`        v = client->_event_client( val   = client->cs_event-control_by_id
+                                                                            t_arg = VALUE #( ( `messagePopover` ) ( `` ) ( `toggleBy` ) ( `messagePopoverBtn` ) ) )
 
                         )->open( `dependents`
                             )->open( `MessagePopover`
                                 )->a( n = `id`               v = `messagePopover`
                                 )->a( n = `items`            v = client->_bind( t_messages )
-                                )->a( n = `activeTitlePress` v = client->_event( `ACTIVE_TITLE` )
+                                )->a( n = `activeTitlePress` v = client->_event_client( val   = client->cs_event-control_global
+                                                                                        t_arg = VALUE #( ( `MESSAGE_TOAST` ) ( `show` ) ( `Active title is pressed` ) ) )
 
                                 )->open( `MessageItem`
                                     )->a( n = `type`              v = `{TYPE}`
@@ -102,22 +100,6 @@ CLASS z2ui5_cl_ai_app_067 IMPLEMENTATION.
         )->shut( ).
 
     client->view_display( view->stringify( ) ).
-
-  ENDMETHOD.
-
-
-  METHOD on_event.
-
-    CASE client->get( )-event.
-
-      WHEN `SHOW_MESSAGES`.
-        client->follow_up_action( val   = client->cs_event-control_by_id
-                                  t_arg = VALUE #( ( `messagePopover` ) ( `toggleBy` ) ( client->get_event_arg( ) ) ) ).
-
-      WHEN `ACTIVE_TITLE`.
-        client->message_toast_display( `Active title is pressed` ).
-
-    ENDCASE.
 
   ENDMETHOD.
 

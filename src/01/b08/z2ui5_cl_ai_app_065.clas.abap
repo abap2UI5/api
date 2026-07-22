@@ -218,8 +218,10 @@ CLASS z2ui5_cl_ai_app_065 IMPLEMENTATION.
                         )->a( n = `text`         v = |\{= $\{message>/\}.length \}|
                         )->a( n = `type`         v = `Emphasized`
                         )->a( n = `ariaHasPopup` v = `Dialog`
-                        )->a( n = `press`        v = client->_event( val   = `SHOW_MESSAGES`
-                                                                     t_arg = VALUE #( ( `$event.oSource.sId` ) ) )
+                        " original: this.oMP.toggle(oEvent.getSource()) - a pure client-side toggle, so
+                        " wired roundtrip-free (no on_event) anchored to the button by its own id
+                        )->a( n = `press`        v = client->_event_client( val   = client->cs_event-control_by_id
+                                                                            t_arg = VALUE #( ( `messagePopover` ) ( `` ) ( `toggleBy` ) ( `messagePopoverBtn` ) ) )
 
                         )->open( `dependents`
                             )->open( `MessagePopover`
@@ -266,11 +268,6 @@ CLASS z2ui5_cl_ai_app_065 IMPLEMENTATION.
   METHOD on_event.
 
     CASE client->get( )-event.
-
-      WHEN `SHOW_MESSAGES`.
-        " original: this.oMP.toggle(oEvent.getSource()) - toggle open/close anchored to the button
-        client->follow_up_action( val   = client->cs_event-control_by_id
-                                  t_arg = VALUE #( ( `messagePopover` ) ( `toggleBy` ) ( client->get_event_arg( ) ) ) ).
 
       WHEN `ACTIVE_TITLE`.
         " original: activeTitlePress scrolls to the message's target control, closes the popover

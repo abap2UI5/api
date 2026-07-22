@@ -7,7 +7,6 @@ CLASS z2ui5_cl_ai_app_023 DEFINITION PUBLIC.
     DATA client TYPE REF TO z2ui5_if_client.
 
     METHODS view_display.
-    METHODS on_event.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -20,8 +19,6 @@ CLASS z2ui5_cl_ai_app_023 IMPLEMENTATION.
     me->client = client.
     IF client->check_on_init( ).
       view_display( ).
-    ELSEIF client->check_on_event( ).
-      on_event( ).
     ENDIF.
 
   ENDMETHOD.
@@ -39,27 +36,17 @@ CLASS z2ui5_cl_ai_app_023 IMPLEMENTATION.
             )->a( n = `contentText` v = `@@notify Great outcome of the Presentation today. The new functionality and the new design was well received.`
             )->a( n = `subheader`   v = `about 1 minute ago in Computer Market`
             )->a( n = `class`       v = `sapUiSmallMargin`
-            )->a( n = `press`       v = client->_event( `PRESS` )
+            )->a( n = `press`       v = client->_event_client( val   = client->cs_event-control_global
+                                                               t_arg = VALUE #( ( `MESSAGE_TOAST` ) ( `show` ) ( `The feed content is pressed.` ) ) )
         )->leaf( `FeedContent`
             )->a( n = `contentText` v = `@@notify Great outcome of the Presentation today. The new functionality and the new design was well received.`
             )->a( n = `subheader`   v = `about 1 minute ago in Computer Market`
             )->a( n = `value`       v = `999`
             )->a( n = `class`       v = `sapUiSmallMargin`
-            )->a( n = `press`       v = client->_event( `PRESS` ) ).
+            )->a( n = `press`       v = client->_event_client( val   = client->cs_event-control_global
+                                                               t_arg = VALUE #( ( `MESSAGE_TOAST` ) ( `show` ) ( `The feed content is pressed.` ) ) ) ).
 
     client->view_display( view->stringify( ) ).
-
-  ENDMETHOD.
-
-
-  METHOD on_event.
-
-    CASE client->get( )-event.
-
-      WHEN `PRESS`.
-        client->message_toast_display( `The feed content is pressed.` ).
-
-    ENDCASE.
 
   ENDMETHOD.
 

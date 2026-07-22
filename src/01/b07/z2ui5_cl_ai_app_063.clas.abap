@@ -7,7 +7,6 @@ CLASS z2ui5_cl_ai_app_063 DEFINITION PUBLIC.
     DATA client TYPE REF TO z2ui5_if_client.
 
     METHODS view_display.
-    METHODS on_event.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -20,8 +19,6 @@ CLASS z2ui5_cl_ai_app_063 IMPLEMENTATION.
     me->client = client.
     IF client->check_on_init( ).
       view_display( ).
-    ELSEIF client->check_on_event( ).
-      on_event( ).
     ENDIF.
 
   ENDMETHOD.
@@ -42,21 +39,10 @@ CLASS z2ui5_cl_ai_app_063 IMPLEMENTATION.
                 )->leaf( `NewsContent`
                     )->a( n = `contentText` v = `SAP Unveils Powerful New Player Comparison Tool Exclusively on NFL.com`
                     )->a( n = `subheader`   v = `August 21, 2013`
-                    )->a( n = `press`       v = client->_event( `PRESS` ) ).
+                    )->a( n = `press`       v = client->_event_client( val   = client->cs_event-control_global
+                                                                       t_arg = VALUE #( ( `MESSAGE_TOAST` ) ( `show` ) ( `The news content is pressed.` ) ) ) ).
 
     client->view_display( view->stringify( ) ).
-
-  ENDMETHOD.
-
-
-  METHOD on_event.
-
-    CASE client->get( )-event.
-
-      WHEN `PRESS`.
-        client->message_toast_display( `The news content is pressed.` ).
-
-    ENDCASE.
 
   ENDMETHOD.
 
