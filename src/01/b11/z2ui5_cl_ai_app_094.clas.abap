@@ -119,7 +119,7 @@ CLASS z2ui5_cl_ai_app_094 IMPLEMENTATION.
                                         )->leaf( `Link`
                                             )->a( n = `text`         v = `{PRODUCT_ID}`
                                             )->a( n = `press`        v = client->_event( val   = `POPOVER`
-                                                                                         t_arg = VALUE #( ( `${PRODUCT_ID}` ) ( `${NAME}` ) ( `${PRODUCT_PIC_URL}` ) ( `$event.oSource.sId` ) ) )
+                                                                                         t_arg = VALUE #( ( `$event.oSource.getBindingContext().getPath().split('/').pop()` ) ( `$event.oSource.sId` ) ) )
                                             )->a( n = `ariaHasPopup` v = `Dialog`
                                         )->leaf( `Input`
                                             )->a( n = `value`       v = `{QUANTITY}`
@@ -153,17 +153,19 @@ CLASS z2ui5_cl_ai_app_094 IMPLEMENTATION.
       WHEN `DRILL`.
         client->message_toast_display( `Drill down activated.` ).
       WHEN `POPOVER`.
-        " the original opens a Popover bound to the row (title=ProductId, Name + Image); the row values arrive as event args
-        DATA(product_id) = client->get_event_arg( ).
-        DATA(name)       = client->get_event_arg( 2 ).
-        DATA(pic)        = client->get_event_arg( 3 ).
+        " the original opens a Popover bound to the pressed row (title=ProductId,
+        " Name + Image). Instead of copying each field into an event arg, the
+        " popover uses relative bindings and follow_up_action element-binds the
+        " popover slot to t_products/<index>; the row index and the Link's control
+        " id arrive as the two event args.
+        DATA(idx) = client->get_event_arg( ).
         DATA(popup) = z2ui5_cl_ai_xml=>factory( ).
         popup->open( n = `FragmentDefinition` ns = `core`
             )->a( n = `xmlns`      v = `sap.m`
             )->a( n = `xmlns:core` v = `sap.ui.core`
             )->open( `Popover`
                 )->a( n = `id`        v = `myPopover`
-                )->a( n = `title`     v = product_id
+                )->a( n = `title`     v = `{PRODUCT_ID}`
                 )->a( n = `class`     v = `sapUiContentPadding`
                 )->a( n = `placement` v = `Right`
                 )->a( n = `initialFocus` v = `action`
@@ -179,16 +181,19 @@ CLASS z2ui5_cl_ai_app_094 IMPLEMENTATION.
                 )->shut(
                 )->open( `VBox`
                     )->leaf( `Title`
-                        )->a( n = `text` v = name
+                        )->a( n = `text` v = `{NAME}`
                     )->leaf( `Image`
-                        )->a( n = `src`          v = pic
+                        )->a( n = `src`          v = `{PRODUCT_PIC_URL}`
                         )->a( n = `width`        v = `15em`
                         )->a( n = `densityAware` v = `false`
 
                 )->shut(
             )->shut( ).
         client->popover_display( xml   = popup->stringify( )
-                                 by_id = client->get_event_arg( 4 ) ).
+                                 by_id = client->get_event_arg( 2 ) ).
+        client->follow_up_action( val   = client->cs_event-bind_element
+                                  view  = client->cs_view-popover
+                                  t_arg = VALUE #( ( idx ) ( client->_bind( t_products ) ) ) ).
     ENDCASE.
 
   ENDMETHOD.

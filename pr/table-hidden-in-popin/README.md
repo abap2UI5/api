@@ -3,6 +3,15 @@
 **Priority: medium** — makes the auto-pop-in demo interactive; matches the
 established `CONTROL_METHODS` extension pattern.
 
+> **Status: IMPLEMENTED.** `setHiddenInPopin` is whitelisted in
+> `CONTROL_METHODS` (`["object"]`, both the webapp `FrontendAction.js` and the
+> ABAP generator mirror) on branch `claude/ai-demokit-edge-cases-ftv30b` of
+> abap2UI5. App 092 is wired: the `MultiComboBox` `selectedKeys` are two-way
+> bound to `t_hidden` and its `selectionFinish` forwards them as a JSON
+> Priority array through `follow_up_action( cs_event-control_by_id,
+> setHiddenInPopin )`. The `Slider` `setWidth` (`setContextualWidth`) part is
+> not implemented — the Slider still renders inert.
+
 ## Motivation
 
 `sap.m.sample.TableAutoPopin` (port app **092**) demonstrates a responsive

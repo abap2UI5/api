@@ -22,6 +22,7 @@ CLASS z2ui5_cl_ai_app_092 DEFINITION PUBLIC.
         currency_code  TYPE string,
       END OF ty_s_product.
     DATA t_products TYPE STANDARD TABLE OF ty_s_product WITH EMPTY KEY.
+    DATA t_hidden   TYPE string_table.
 
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
@@ -91,6 +92,8 @@ CLASS z2ui5_cl_ai_app_092 IMPLEMENTATION.
                     )->open( `MultiComboBox`
                         )->a( n = `id`              v = `idMultiComboBox`
                         )->a( n = `width`           v = `10rem`
+                        )->a( n = `selectedKeys`    v = client->_bind( t_hidden )
+                        )->a( n = `selectionFinish` v = client->_event( `HIDE` )
                         )->open( `items`
                             )->leaf( n = `Item` ns = `core`
                                 )->a( n = `key`  v = `None`
@@ -222,6 +225,18 @@ CLASS z2ui5_cl_ai_app_092 IMPLEMENTATION.
       WHEN `POPIN`.
         " popinChanged: report the number of columns currently in pop-in
         client->message_toast_display( `Pop-in layout changed` ).
+      WHEN `HIDE`.
+        " selectionFinish: the MultiComboBox keys arrive two-way bound in
+        " t_hidden; forward them as a JSON Priority array to the table's
+        " setHiddenInPopin so columns of those importances are hidden while
+        " in pop-in (1:1 with the sample's setHiddenInPopin(getSelectedKeys())).
+        DATA(json) = ``.
+        LOOP AT t_hidden INTO DATA(prio).
+          json = |{ json }{ COND string( WHEN sy-tabix > 1 THEN `,` ) }"{ prio }"|.
+        ENDLOOP.
+        json = |[{ json }]|.
+        client->follow_up_action( val   = client->cs_event-control_by_id
+                                  t_arg = VALUE #( ( `idProductsTable` ) ( `setHiddenInPopin` ) ( json ) ) ).
     ENDCASE.
 
   ENDMETHOD.

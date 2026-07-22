@@ -5,8 +5,8 @@
   "file": "src/01/b11/z2ui5_cl_ai_app_092.clas.abap",
   "batch": "b11",
   "audit": {
-    "frontend_action": false,
-    "event_t_arg": false
+    "frontend_action": true,
+    "event_t_arg": true
   },
   "status": "generated",
   "checked": null,
@@ -17,7 +17,7 @@
     },
     {
       "type": "IMPROVISED",
-      "what": "onSliderMoved (setWidth) and onSelectionFinish (setHiddenInPopin) are imperative controller calls with no bound equivalent; the Slider liveChange and MultiComboBox selectionFinish server round-trips are dropped (they returned an empty response and blanked the view), so both controls render but are inert. autoPopinMode + Column.importance stay declarative and 1:1; popinChanged still toasts."
+      "what": "onSelectionFinish (setHiddenInPopin(getSelectedKeys())) is reproduced 1:1: the MultiComboBox selectedKeys are two-way bound to t_hidden and the selectionFinish round-trip forwards them as a JSON Priority array through follow_up_action( cs_event-control_by_id, setHiddenInPopin ), so the matching columns hide while in pop-in. The added selectedKeys binding has no counterpart in the original (the controller reads getSelectedKeys imperatively). onSliderMoved (setWidth) has no bound equivalent, so the Slider liveChange round-trip is dropped and the Slider renders but is inert. autoPopinMode + Column.importance stay declarative and 1:1; popinChanged still toasts."
     },
     {
       "type": "NOTE",

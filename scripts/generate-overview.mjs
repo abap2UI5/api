@@ -70,6 +70,25 @@ for (const mf of fs.readdirSync(META)) {
   if (nSub) drivers.push(`${nSub} subset`);
   const scoreTip = `Deviation from the original sample: ${score} of 5 ` +
     `(${drivers.join(', ')}). 1 = faithful 1:1, 5 = heavily reworked.`;
+  // audit flags - which framework wiring the port actually uses, read straight
+  // from its ABAP source (always shown as badges in the overview's Audit column).
+  // _event_client / follow_up_action t_arg is detected as a t_arg keyword before
+  // the call's first ")" (val/view args carry no ")", so this is reliable here).
+  // "literal binding" = a binding path written by name in clear text ({FIELD} or
+  // {/Path}, or a path:'name' inside a { } template) instead of via client->_bind,
+  // which is what breaks on a variable rename.
+  const srcPath = path.join(ROOT, m.file);
+  const src = fs.existsSync(srcPath) ? fs.readFileSync(srcPath, 'utf8') : '';
+  const srcNoBind = src.replace(/\{\s*client->_bind[\s\S]*?\}/g, '');
+  const useEc      = /_event_client\s*\(/.test(src);
+  const useEcArg   = /_event_client\s*\([^)]*\bt_arg\b/.test(src);
+  const useFua     = /follow_up_action\s*\(/.test(src);
+  const useFuaArg  = /follow_up_action\s*\([^)]*\bt_arg\b/.test(src);
+  const usePopup   = /popup_display\s*\(/.test(src);
+  const usePopover = /popover_display\s*\(/.test(src);
+  const useName    = /\{[A-Z][A-Z0-9_]*\}/.test(src)
+                  || /\{\/[A-Za-z]/.test(src)
+                  || /\bpath\s*:\s*'[A-Za-z/]/.test(srcNoBind);
   apps.push({
     module,
     control: m.entity,
@@ -85,6 +104,13 @@ for (const mf of fs.readdirSync(META)) {
     score,
     score_state: scoreState,
     score_tip: scoreTip,
+    use_ec: useEc,
+    use_ec_arg: useEcArg,
+    use_fua: useFua,
+    use_fua_arg: useFuaArg,
+    use_popup: usePopup,
+    use_popover: usePopover,
+    use_name: useName,
   });
 }
 // order by module, then control, then sample name (case-insensitive)
@@ -135,6 +161,13 @@ const rows = apps.map((a) => {
   if (a.checked) extras.push(`checked = ${abapStr(a.checked)}`);
   if (a.notes) extras.push(`notes = ${abapStr(a.notes)}`);
   if (a.post171) extras.push(`post171 = ${abapStr(a.post171)}`);
+  if (a.use_ec) extras.push('use_ec = abap_true');
+  if (a.use_ec_arg) extras.push('use_ec_arg = abap_true');
+  if (a.use_fua) extras.push('use_fua = abap_true');
+  if (a.use_fua_arg) extras.push('use_fua_arg = abap_true');
+  if (a.use_popup) extras.push('use_popup = abap_true');
+  if (a.use_popover) extras.push('use_popover = abap_true');
+  if (a.use_name) extras.push('use_name = abap_true');
   return extras.length ? `${base}\n        ${extras.join('\n        ')} )` : `${base} )`;
 });
 
@@ -191,6 +224,7 @@ const columnsBlock = [
   sortableColumn('Sample', 'NAME'),
   sortableColumn('abap2UI5', 'CLASS'),
   sortableColumn('Deviation', 'SCORE'),
+  plainColumn('Audit', [['width', '15rem']]),
   plainColumn('Note'),
   plainColumn('Open', [['width', '5rem'], ['hAlign', 'Center']]),
 ].join('\n');
@@ -214,7 +248,11 @@ const abap = `"! Generated overview app - lists every abap2UI5 api sample app in
 "! browser tab. The Deviation column is a 1-5 score of how far the port is from
 "! the original sample (green 1-2, orange 3, red 4-5) - IMPROVISED and DROPPED_171
 "! deviations weigh 2 each, SUBSET_DATA 1, POST_171 counts as 0 (still a 1:1 port);
-"! sort it descending to surface the samples worth a closer manual look. The Note
+"! sort it descending to surface the samples worth a closer manual look. The Audit
+"! column shows, always, one badge per framework-wiring fact the port uses (read
+"! from its ABAP source): _event_client and its t_arg form, follow_up_action and
+"! its t_arg form, whether it opens a Popup or Popover, and whether it binds a
+"! path by literal name in clear text ({FIELD}/{/Path}) rather than via _bind. The Note
 "! column shows a gold star for golden ports (live-checked
 "! and exemplary), a green check when the port was manually verified in a
 "! running system, and a hint icon that opens a popup with the port's generation
@@ -255,6 +293,13 @@ CLASS ${CLASS} DEFINITION PUBLIC.
         score       TYPE i,
         score_state TYPE string,
         score_tip   TYPE string,
+        use_ec      TYPE abap_bool,
+        use_ec_arg  TYPE abap_bool,
+        use_fua     TYPE abap_bool,
+        use_fua_arg TYPE abap_bool,
+        use_popup   TYPE abap_bool,
+        use_popover TYPE abap_bool,
+        use_name    TYPE abap_bool,
         filter    TYPE string,
       END OF ty_s_app.
     TYPES ty_t_app TYPE STANDARD TABLE OF ty_s_app WITH EMPTY KEY.
@@ -528,6 +573,60 @@ ${columnsBlock}
                                     )->a( n = \`text\`    v = \`{SCORE} / 5\`
                                     )->a( n = \`state\`   v = \`{SCORE_STATE}\`
                                     )->a( n = \`tooltip\` v = \`{SCORE_TIP}\`
+
+                                " audit column: one badge per framework-wiring fact the
+                                " port uses (read from its ABAP source at generation time),
+                                " always shown so the table shows at a glance which apps use
+                                " _event_client / follow_up_action (and their t_arg form),
+                                " open a Popup or Popover, or bind a path by literal name
+                                )->open( \`HBox\`
+                                    )->a( n = \`wrap\`       v = \`Wrap\`
+                                    )->a( n = \`alignItems\` v = \`Center\`
+
+                                    )->leaf( \`ObjectStatus\`
+                                        )->a( n = \`text\`    v = \`_event_client\`
+                                        )->a( n = \`state\`   v = \`Information\`
+                                        )->a( n = \`tooltip\` v = \`Uses _event_client - a roundtrip-free client event wired directly in the view\`
+                                        )->a( n = \`visible\` v = \`{USE_EC}\`
+                                        )->a( n = \`class\`   v = \`sapUiTinyMarginEnd\`
+                                    )->leaf( \`ObjectStatus\`
+                                        )->a( n = \`text\`    v = \`_event_client t_arg\`
+                                        )->a( n = \`state\`   v = \`Information\`
+                                        )->a( n = \`tooltip\` v = \`Uses _event_client with t_arg (passes positional arguments to the client event)\`
+                                        )->a( n = \`visible\` v = \`{USE_EC_ARG}\`
+                                        )->a( n = \`class\`   v = \`sapUiTinyMarginEnd\`
+                                    )->leaf( \`ObjectStatus\`
+                                        )->a( n = \`text\`    v = \`follow_up_action\`
+                                        )->a( n = \`state\`   v = \`Success\`
+                                        )->a( n = \`tooltip\` v = \`Uses follow_up_action - a frontend action scheduled after the backend response\`
+                                        )->a( n = \`visible\` v = \`{USE_FUA}\`
+                                        )->a( n = \`class\`   v = \`sapUiTinyMarginEnd\`
+                                    )->leaf( \`ObjectStatus\`
+                                        )->a( n = \`text\`    v = \`follow_up_action t_arg\`
+                                        )->a( n = \`state\`   v = \`Success\`
+                                        )->a( n = \`tooltip\` v = \`Uses follow_up_action with t_arg (passes positional arguments to the follow-up action)\`
+                                        )->a( n = \`visible\` v = \`{USE_FUA_ARG}\`
+                                        )->a( n = \`class\`   v = \`sapUiTinyMarginEnd\`
+                                    )->leaf( \`ObjectStatus\`
+                                        )->a( n = \`text\`    v = \`Popup\`
+                                        )->a( n = \`state\`   v = \`Warning\`
+                                        )->a( n = \`tooltip\` v = \`Opens a Popup (popup_display)\`
+                                        )->a( n = \`visible\` v = \`{USE_POPUP}\`
+                                        )->a( n = \`class\`   v = \`sapUiTinyMarginEnd\`
+                                    )->leaf( \`ObjectStatus\`
+                                        )->a( n = \`text\`    v = \`Popover\`
+                                        )->a( n = \`state\`   v = \`Warning\`
+                                        )->a( n = \`tooltip\` v = \`Opens a Popover (popover_display)\`
+                                        )->a( n = \`visible\` v = \`{USE_POPOVER}\`
+                                        )->a( n = \`class\`   v = \`sapUiTinyMarginEnd\`
+                                    )->leaf( \`ObjectStatus\`
+                                        )->a( n = \`text\`    v = \`literal binding\`
+                                        )->a( n = \`state\`   v = \`Error\`
+                                        )->a( n = \`tooltip\` v = \`Binds a path by literal name in clear text ({FIELD} or {/Path}) instead of via client->_bind - breaks on a variable rename\`
+                                        )->a( n = \`visible\` v = \`{USE_NAME}\`
+                                        )->a( n = \`class\`   v = \`sapUiTinyMarginEnd\`
+
+                                )->shut(
 
                                 )->open( \`HBox\`
                                     )->a( n = \`alignItems\` v = \`Center\`

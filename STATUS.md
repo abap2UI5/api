@@ -29,8 +29,11 @@ all fixed, all six checks still green:
   pressed state now arrive via **`$event.oSource.sId`** and
   **`$event.oSource.getPressed()`** (the proven `$event.oSource.*` path).
 - **092** — the `Slider.liveChange` / `MultiComboBox.selectionFinish` server
-  round-trips returned an empty response and **blanked the view**; those events
-  are dropped (controls render inert, declared), `popinChanged` still toasts.
+  round-trips returned an empty response and **blanked the view**; both were
+  dropped at the time. **Superseded 2026-07-22**: `selectionFinish` is now wired
+  1:1 through the new `setHiddenInPopin` control method (see the framework
+  section below); only the `Slider.liveChange` (`setWidth`) stays inert.
+  `popinChanged` still toasts.
 - **085** — the first Tokenizer's tokens are now **model-bound** (`t_tokens`);
   add appends, delete removes by key (`$event.getParameter('tokens')[0].getKey()`).
 - **081** — the incremental backend load is now reproduced 1:1 (start with one
@@ -47,9 +50,48 @@ all fixed, all six checks still green:
   **041/073** were switched from `open_new_tab` to `urlhelper` REDIRECT
   (correctness fix), and CAPABILITIES.md updated.
 
-Two **`pr/`** requests remain from the checks:
-[`table-hidden-in-popin`](../pr/table-hidden-in-popin/) (medium, 092) and
-[`popover-bind-element`](../pr/popover-bind-element/) (low, 094 enhancement).
+Both **`pr/`** requests from the checks —
+[`table-hidden-in-popin`](../pr/table-hidden-in-popin/) (092) and
+[`popover-bind-element`](../pr/popover-bind-element/) (094) — are now
+**implemented** in the framework (see the next section).
+
+## Framework features implemented (2026-07-22) — `setHiddenInPopin` + `BIND_ELEMENT`
+
+Both were carried into abap2UI5 (branch `claude/ai-demokit-edge-cases-ftv30b`)
+and the two demokit apps rewired to use them:
+
+- **`setHiddenInPopin`** — new `sap.m.Table` entry in `CONTROL_METHODS`
+  (`["object"]`), in both `app/webapp/core/FrontendAction.js` and the ABAP
+  generator mirror `z2ui5_cl_app_frontendaction_js`. **App 092** now reproduces
+  `onSelectionFinish` 1:1: the `MultiComboBox` `selectedKeys` are two-way bound
+  to `t_hidden`, and `selectionFinish` forwards them as a JSON Priority array via
+  `follow_up_action( cs_event-control_by_id, setHiddenInPopin )`.
+- **`BIND_ELEMENT`** — new `cs_event-bind_element` constant + `evBindElement`
+  action (both JS files) + brace-stripping arg formatting in
+  `get_event_client`, so a whole view slot can be element-bound to a table row
+  through `follow_up_action`. **App 094** now reproduces the original
+  `oPopover.bindElement(...)`: the popover uses relative bindings
+  (`{PRODUCT_ID}` / `{NAME}` / `{PRODUCT_PIC_URL}`) and
+  `follow_up_action( val = cs_event-bind_element, view = cs_view-popover,
+  t_arg = VALUE #( ( idx ) ( client->_bind( t_products ) ) ) )` binds the
+  popover slot to `t_products/<index>`, the index taken from the pressed row's
+  binding context. 3 node tests added (29 pass, abaplint clean).
+
+Both apps stay machine-green (abaplint against the updated framework,
+validate-meta, pattern-lint, structural-diff `--strict`, property-check,
+render-smoke `--strict` — 094 now renders 2 docs incl. the popover). Their
+sidecars' `IMPROVISED` deviations were rewritten from "dropped/inert" to the
+faithful wiring. **LIVE-TEST pending** on both.
+
+## Overview: always-shown Audit column (2026-07-22)
+
+The overview table gained an **Audit** column (`scripts/generate-overview.mjs`,
+computed from each port's ABAP source at generation time, always visible). One
+badge per framework-wiring fact the port uses: `_event_client` (9 apps) and its
+`t_arg` form (3), `follow_up_action` (14) and its `t_arg` form (14), opens a
+`Popup` (8) or `Popover` (1), and **literal binding** (40) — a path written by
+name in clear text (`{FIELD}` / `{/Path}`) instead of via `client->_bind`, the
+form that breaks on a variable rename.
 
 ## Batch b11 generated (2026-07-22) — pages, pickers, tables & popovers (7 ports)
 

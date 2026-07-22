@@ -3,6 +3,16 @@
 **Priority: medium** — concretely designed with the maintainer; an ergonomics
 enhancement (the event-arg workaround already renders correctly in app 094).
 
+> **Status: IMPLEMENTED.** `BIND_ELEMENT` is wired through `follow_up_action`
+> on branch `claude/ai-demokit-edge-cases-ftv30b` of abap2UI5: a new
+> `cs_event-bind_element` constant, the `evBindElement` action in both
+> `FrontendAction.js` and the ABAP generator mirror, and the brace-stripping
+> arg formatting in `get_event_client`. App 094 is wired to the final design —
+> `follow_up_action( val = cs_event-bind_element, view = cs_view-popover,
+> t_arg = VALUE #( ( idx ) ( client->_bind( t_products ) ) ) )` — with the row
+> index taken from the pressed row's binding context and the popover using
+> relative bindings. 3 node tests added (29 pass).
+
 ## Motivation
 
 A very common master-detail pattern: a list/table row has a control (link,
