@@ -17,6 +17,7 @@ CLASS z2ui5_cl_ai_app_092 DEFINITION PUBLIC.
         dim_unit       TYPE string,
         weight_measure TYPE string,
         weight_unit    TYPE string,
+        weight_state   TYPE string,
         quantity       TYPE string,
         price          TYPE p LENGTH 8 DECIMALS 2,
         currency_code  TYPE string,
@@ -60,7 +61,6 @@ CLASS z2ui5_cl_ai_app_092 IMPLEMENTATION.
         )->a( n = `xmlns:core` v = `sap.ui.core`
         )->a( n = `xmlns`      v = `sap.m`
         )->a( n = `height`     v = `100%`
-        )->a( n = `core:require` v = `{Formatter: 'z2ui5/model/formatter'}`
 
         )->leaf( `MessageStrip`
             )->a( n = `id`              v = `idMessageStrip`
@@ -204,7 +204,7 @@ CLASS z2ui5_cl_ai_app_092 IMPLEMENTATION.
                         )->leaf( `ObjectNumber`
                             )->a( n = `number` v = `{WEIGHT_MEASURE}`
                             )->a( n = `unit`   v = `{WEIGHT_UNIT}`
-                            )->a( n = `state`  v = |\{ parts: [\{path: 'WEIGHT_MEASURE'\}, \{path: 'WEIGHT_UNIT'\}], formatter: 'Formatter.weightState' \}|
+                            )->a( n = `state`  v = `{WEIGHT_STATE}`
                         )->leaf( `ObjectNumber`
                             )->a( n = `number` v = `{QUANTITY}`
                         )->leaf( `ObjectNumber`
@@ -743,6 +743,22 @@ CLASS z2ui5_cl_ai_app_092 IMPLEMENTATION.
         description = `Flyer for our product palette`
         width = `46` depth = `30` height = `3` dim_unit = `cm` weight_measure = `0.01` weight_unit = `KG`
         quantity = `33` price = '0.00' currency_code = `EUR` ) ).
+
+
+    " weightState is business logic (KG conversion + Success/Warning/Error
+    " thresholds), not presentation - abap2UI5 is a thin frontend, so the
+    " ObjectNumber state is computed here in the backend (the original does it in
+    " its frontend Formatter.js, which a faithful port moves server-side).
+    LOOP AT t_products REFERENCE INTO DATA(lr_product).
+      DATA(weight_kg) = lr_product->weight_measure.
+      IF lr_product->weight_unit = `G`.
+        weight_kg = weight_kg / 1000.
+      ENDIF.
+      lr_product->weight_state = COND #( WHEN weight_kg < 0 THEN `None`
+                                         WHEN weight_kg < 1 THEN `Success`
+                                         WHEN weight_kg < 5 THEN `Warning`
+                                         ELSE `Error` ).
+    ENDLOOP.
 
   ENDMETHOD.
 

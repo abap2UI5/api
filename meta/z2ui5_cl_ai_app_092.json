@@ -21,7 +21,7 @@
     },
     {
       "type": "NOTE",
-      "what": "the ObjectNumber weight state uses the curated formatter module (Formatter.weightState, core:require) - the same wiring as app 022."
+      "what": "the original derives the ObjectNumber weight state in its frontend Formatter.js (weightState: KG conversion + Success/Warning/Error thresholds). That is business logic, so - abap2UI5 being a thin frontend - it is computed in ABAP model_init into a WEIGHT_STATE field and bound state=\"{WEIGHT_STATE}\", not via a frontend formatter (core:require dropped). Visually 1:1 with the original."
     }
   ]
 }

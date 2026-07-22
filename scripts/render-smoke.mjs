@@ -706,22 +706,9 @@ const HARNESS = `<!DOCTYPE html>
         var p = parseYmd(d);
         return new Date(p[0], p[1], p[2], Number(t.slice(0, 2)), Number(t.slice(2, 4)), Number(t.slice(4, 6)));
       },
-      weightState: function (measure, unit) {
-        var adjusted = parseFloat(measure);
-        if (isNaN(adjusted)) return 'None';
-        if (unit === 'G') adjusted = measure / 1000;
-        if (adjusted < 0) return 'None';
-        if (adjusted < 1) return 'Success';
-        if (adjusted < 5) return 'Warning';
-        return 'Error';
-      },
-      weightStateByValue: function (value) {
-        var adjusted = parseFloat(value);
-        if (isNaN(adjusted) || adjusted < 0) return 'None';
-        if (adjusted < 1000) return 'Success';
-        if (adjusted < 2000) return 'Warning';
-        return 'Error';
-      },
+      // weightState/weightStateByValue removed: deriving a state from a raw
+      // measure (thresholds + unit conversion) is business logic and now lives
+      // in the ABAP backend (thin-frontend principle) — no port binds it.
       stockStatusState: function (status) {
         return (STOCK_STATUS[status] || {}).state || 'None';
       },

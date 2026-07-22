@@ -9,6 +9,7 @@ CLASS z2ui5_cl_ai_app_010 DEFINITION PUBLIC.
         supplier_name  TYPE string,
         weight_measure TYPE p LENGTH 8 DECIMALS 3,
         weight_unit    TYPE string,
+        weight_state   TYPE string,
         name           TYPE string,
         currency_code  TYPE string,
         price          TYPE p LENGTH 8 DECIMALS 2,
@@ -55,7 +56,6 @@ CLASS z2ui5_cl_ai_app_010 IMPLEMENTATION.
         )->a( n = `xmlns:mvc`    v = `sap.ui.core.mvc`
         )->a( n = `xmlns:core`   v = `sap.ui.core`
         )->a( n = `xmlns`        v = `sap.m`
-        )->a( n = `core:require` v = `{Formatter:'z2ui5/model/formatter'}`
 
         )->open( `Table`
             )->a( n = `id`          v = `idProductsTable`
@@ -152,7 +152,7 @@ CLASS z2ui5_cl_ai_app_010 IMPLEMENTATION.
                         )->leaf( `ObjectNumber`
                             )->a( n = `number` v = `{WEIGHT_MEASURE}`
                             )->a( n = `unit`   v = `{WEIGHT_UNIT}`
-                            )->a( n = `state`  v = `{ parts: [{path: 'WEIGHT_MEASURE'}, {path: 'WEIGHT_UNIT'}], formatter: 'Formatter.weightState' }`
+                            )->a( n = `state`  v = `{WEIGHT_STATE}`
                         )->leaf( `ObjectNumber`
                             )->a( n = `number` v = `{ parts: [{path: 'PRICE'}, {path: 'CURRENCY_CODE'}], type: 'sap.ui.model.type.Currency', formatOptions: {showMeasure: false} }`
                             )->a( n = `unit`   v = `{CURRENCY_CODE}` ).
@@ -328,6 +328,22 @@ CLASS z2ui5_cl_ai_app_010 IMPLEMENTATION.
       ( product_id = `HT-1256` supplier_name = `Ultrasonic United` weight_measure = '0.75' weight_unit = `KG` name = `Cerdik Phone 7` currency_code = `EUR` price = '549' width = '9' depth = '15' height = '1.5' dim_unit = `cm` )
       ( product_id = `HT-1257` supplier_name = `Ultrasonic United` weight_measure = '2.8' weight_unit = `KG` name = `Cepat Tablet 10.5` currency_code = `EUR` price = '549' width = '48' depth = '31' height = '4.5' dim_unit = `cm` )
       ( product_id = `HT-1258` supplier_name = `Ultrasonic United` weight_measure = '2.5' weight_unit = `KG` name = `Cepat Tablet 8` currency_code = `EUR` price = '529' width = '38' depth = '21' height = '3.5' dim_unit = `cm` ) ).
+
+
+    " weightState is business logic (KG conversion + Success/Warning/Error
+    " thresholds), not presentation - abap2UI5 is a thin frontend, so the
+    " ObjectNumber state is computed here in the backend (the original does it in
+    " its frontend Formatter.js, which a faithful port moves server-side).
+    LOOP AT t_products REFERENCE INTO DATA(lr_product).
+      DATA(weight_kg) = lr_product->weight_measure.
+      IF lr_product->weight_unit = `G`.
+        weight_kg = weight_kg / 1000.
+      ENDIF.
+      lr_product->weight_state = COND #( WHEN weight_kg < 0 THEN `None`
+                                         WHEN weight_kg < 1 THEN `Success`
+                                         WHEN weight_kg < 5 THEN `Warning`
+                                         ELSE `Error` ).
+    ENDLOOP.
 
   ENDMETHOD.
 

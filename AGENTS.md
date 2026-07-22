@@ -5,6 +5,21 @@ Single source of truth for agents working on **abap2UI5-api**.
 > These instructions OVERRIDE any default behavior and must be followed exactly.
 > This entire project is in **English** — code, comments, commit messages, PRs.
 
+> **Core principle — abap2UI5 is a THIN FRONTEND.** As much logic as possible
+> lives in the **ABAP backend**; the frontend only renders and forwards events.
+> **Never put business logic in the frontend** — no computation, unit
+> conversion, thresholds, classification or validation in a frontend formatter,
+> expression binding or custom JS. Compute the result in ABAP and bind the
+> finished value. A *formatter* is presentation-only (a date/number format, an
+> icon glyph); a value like an `ObjectNumber` `state` derived from a measure +
+> thresholds **is business logic** and must be computed server-side into a model
+> field, then bound directly (`state="{WEIGHT_STATE}"`). When a UI5 sample does
+> such logic in its `Formatter.js`, the faithful abap2UI5 port moves it to
+> `model_init` and declares the difference — a *more* correct architecture, not a
+> deviation from intent. (Prompted this: `Formatter.weightState` did KG
+> conversion + Success/Warning/Error thresholds in the frontend — moved to ABAP
+> `WEIGHT_STATE` in apps 009/010/022/092, 2026-07-22.)
+
 ---
 
 ## 1. Mission — an automated repository

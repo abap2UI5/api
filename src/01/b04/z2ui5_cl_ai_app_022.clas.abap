@@ -14,6 +14,7 @@ CLASS z2ui5_cl_ai_app_022 DEFINITION PUBLIC.
         dim_unit       TYPE string,
         weight_measure TYPE string,
         weight_unit    TYPE string,
+        weight_state   TYPE string,
         price          TYPE p LENGTH 14 DECIMALS 2,
         currency_code  TYPE string,
       END OF ty_s_product.
@@ -67,8 +68,6 @@ CLASS z2ui5_cl_ai_app_022 IMPLEMENTATION.
         )->a( n = `xmlns`      v = `sap.m`
         )->a( n = `xmlns:mvc`  v = `sap.ui.core.mvc`
         )->a( n = `xmlns:core` v = `sap.ui.core`
-        " the framework's curated formatter module, wired like the original wires './Formatter' (core:require needs UI5 >= 1.74)
-        )->a( n = `core:require` v = `{Formatter: 'z2ui5/model/formatter'}`
 
         )->open( `VBox`
             )->a( n = `id` v = `idVBox`
@@ -215,11 +214,10 @@ CLASS z2ui5_cl_ai_app_022 IMPLEMENTATION.
                                 )->a( n = `text` v = `{SUPPLIER_NAME}`
                             )->leaf( `Text`
                                 )->a( n = `text` v = `{WIDTH} x {DEPTH} x {HEIGHT} {DIM_UNIT}`
-                            " parts+formatter binding kept 1:1 - the curated formatter module is required into the view (core:require above)
                             )->leaf( `ObjectNumber`
                                 )->a( n = `number` v = `{WEIGHT_MEASURE}`
                                 )->a( n = `unit`   v = `{WEIGHT_UNIT}`
-                                )->a( n = `state`  v = |\{ parts: [\{path: 'WEIGHT_MEASURE'\}, \{path: 'WEIGHT_UNIT'\}], formatter: 'Formatter.weightState' \}|
+                                )->a( n = `state`  v = `{WEIGHT_STATE}`
                             )->leaf( `ObjectNumber`
                                 )->a( n = `number` v = |\{ parts:[\{path:'PRICE'\},\{path:'CURRENCY_CODE'\}], type:'sap.ui.model.type.Currency', formatOptions:\{showMeasure:false\} \}|
                                 )->a( n = `unit`   v = `{CURRENCY_CODE}` ).
@@ -572,6 +570,22 @@ CLASS z2ui5_cl_ai_app_022 IMPLEMENTATION.
         ( text = `Ultrasonic United` count = 15 )
         ( text = `Speaker Experts` count = 3 )
         ( text = `Brainsoft` count = 3 ) ).
+
+
+    " weightState is business logic (KG conversion + Success/Warning/Error
+    " thresholds), not presentation - abap2UI5 is a thin frontend, so the
+    " ObjectNumber state is computed here in the backend (the original does it in
+    " its frontend Formatter.js, which a faithful port moves server-side).
+    LOOP AT t_products REFERENCE INTO DATA(lr_product).
+      DATA(weight_kg) = lr_product->weight_measure.
+      IF lr_product->weight_unit = `G`.
+        weight_kg = weight_kg / 1000.
+      ENDIF.
+      lr_product->weight_state = COND #( WHEN weight_kg < 0 THEN `None`
+                                         WHEN weight_kg < 1 THEN `Success`
+                                         WHEN weight_kg < 5 THEN `Warning`
+                                         ELSE `Error` ).
+    ENDLOOP.
 
   ENDMETHOD.
 
