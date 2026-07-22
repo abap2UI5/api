@@ -101,7 +101,15 @@ pr/control-call-whitelist —, since 2026-07-19 `goToStep` plus the
 optional `to`/`open` args — pr/control-method-args — and since
 2026-07-20 `openBy [anchorId→domRef]` + `setActivePage` —
 pr/control-methods-openby-setactivepage),
-client-side after render, without adding a dedicated action constant per case;
+client-side after render, without adding a dedicated action constant per case.
+Since 2026-07-22 a `control_global` single-string method (MessageToast.show,
+MessageBox.*) also **composes its text from a template + client-resolved args**
+(pr/message-toast-format): the first `t_arg` after the method is a template and
+its `{0}`,`{1}`,… placeholders are filled by the following values (each a
+`$event.*` / `${$parameters>/…}` expression resolved on the frontend), so a
+dynamic "Action triggered on item: X" toast is roundtrip-free — 1:1 with the
+demo-kit controllers that do `MessageToast.show("…" + evt.getParameter(…))`
+(apps 005, 060). A lone string is unchanged.
 and the sibling **`cs_event-binding_call`** (pr/binding-call) — apply a
 declarative filter/sorter to an aggregation binding. All three are scheduled
 via `follow_up_action` with positional `t_arg` (`control_by_id`:

@@ -751,7 +751,11 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
       ( module = `sap.m` control = `sap.m.Button`                      name = `Button`                              class = `z2ui5_cl_ai_app_005` path = `src/01/b03/z2ui5_cl_ai_app_005.clas.abap`
         score = 1
         score_tip = `Deviation from the original sample: 1 of 10 (0 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
-        checked = `CHECKED (2026-07-15): manually verified in a running system - each press toasts the pressed button's client-side control id, read via the event arg $event.oSource.sId, exactly like the original.` )
+        checked = `CHECKED (2026-07-15): manually verified in a running system - each press toasts the pressed button's client-side control id, read via the event arg $event.oSource.sId, exactly like the original.`
+        notes = `LIVE-TEST: the toast was switched from a message_toast_display round-trip to a roundtrip-free client-composed toast on 2026-07-22 (control_global MESSAGE_TOAST.show, template ``{0} Pressed`` filled by` &&
+                 ` $event.oSource.sId; the app is now init-only) - re-verify each button still toasts "<id> Pressed".`
+        use_ec = abap_true
+        use_ec_arg = abap_true )
       ( module = `sap.m` control = `sap.m.Carousel`                    name = `CarouselWithControls`                class = `z2ui5_cl_ai_app_006` path = `src/01/b04/z2ui5_cl_ai_app_006.clas.abap`
         score = 3
         score_tip = `Deviation from the original sample: 3 of 10 (1 improvised, 0 dropped). 1 = faithful 1:1, 10 = heavily reworked.`
@@ -1210,8 +1214,11 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` resolved MenuItem control), NOT ${$parameters>/item/text}: the $parameters model exposes 'item' as the control object and UI5 keeps properties in the control's internal property store, so the path` &&
                  ` .../item/text reads an undefined direct field and the toast arrives empty. // NOTE: live-verified 2026-07-22 - confirm in a running system that the Menu opens anchored to the button (openBy) and that` &&
                  ` ${$parameters>/item}.getText() delivers the clicked MenuItem's text to the toast. // NOTE: the Menu open/close is wired roundtrip-free via client->_event_client( cs_event-control_by_id, toggleBy ) on` &&
-                 ` the button press (anchored by $event.oSource.sId) - the original's client-side toggle 1:1; only the item-selected toast keeps its round-trip (dynamic text). // LIVE-TEST: the menu toggle was switched` &&
-                 ` from a follow_up_action round-trip to roundtrip-free _event_client on 2026-07-22 - re-verify the button opens/closes the Menu.`
+                 ` the button press (anchored by $event.oSource.sId) - the original's client-side toggle 1:1; the item-selected toast is now roundtrip-free too, composed on the frontend via control_global` &&
+                 ` MESSAGE_TOAST.show (template + ${$parameters>/item}.getText()), so the app has no on_event at all (init-only). // LIVE-TEST: the menu toggle was switched from a follow_up_action round-trip to` &&
+                 ` roundtrip-free _event_client on 2026-07-22 - re-verify the button opens/closes the Menu. // LIVE-TEST: the item-selected toast was switched from a message_toast_display round-trip to a roundtrip-free` &&
+                 ` client-composed toast on 2026-07-22 (control_global MESSAGE_TOAST.show, template ``Action triggered on item: {0}`` filled by ${$parameters>/item}.getText()) - re-verify selecting a menu item toasts` &&
+                 ` "Action triggered on item: <text>".`
         post171 = `Button.ariaHasPopup (since UI5 1.84) is newer than 1.71 but kept for the 1:1 port - the app needs a UI5 release >= 1.84 to render it.`
         use_ec = abap_true
         use_ec_arg = abap_true )
