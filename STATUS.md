@@ -12,7 +12,7 @@ CAPABILITIES.md._
 | Ports | 94 / **403 in-scope** `sap.m` samples (23.3 %) — in scope = control exists since UI5 1.71 and is not deprecated; 43 of 446 samples are out of scope (16 deprecated, 21 newer, 6 without control metadata) |
 | CI | ABAP_STANDARD, ABAP_CLOUD, ABAP_702 all green |
 | Structural view diff | **0 undeclared differences** across all 64 ports (`node scripts/structural-diff.mjs --strict`) — including simple **binding values** and, since 2026-07-19, **`id` attributes** (name-level per control type; dropped original ids must be restored or declared) |
-| Render smoke | **0 failing / 1 skipped** (`npm run smoke`): every reconstructable port's view loads in a real headless `XMLView.create`; app 049's skip is now a **declared, CI-enforced** `render_smoke.skip` (helper-method view building is not statically reconstructable — an undeclared non-reconstructable port now FAILS); harness carries `sap.f` and mocks scalar-row tables as empty arrays since b05 |
+| Render smoke | **0 failing / 0 skipped** (`npm run smoke`): every port's view loads in a real headless `XMLView.create` — incl. app 049, now reconstructed by the **handle-aware path** (`extractDocsWithHelpers`: a builder handle is a stack snapshot, a captured handle passed into a builder-returning helper is inlined re-anchored per call). The declared-skip mechanism stays as a CI-enforced safety net for any future idiom the reconstructor cannot rebuild (undeclared non-reconstructable = FAIL, stale declaration = FAIL); harness carries `sap.f` and mocks scalar-row tables as empty arrays since b05 |
 | Pattern lint | **0 errors, 0 warnings, empty baseline** (`node scripts/pattern-lint.mjs`) |
 | Meta sidecars | 67 in `meta/` — status: 21 `generated`, 41 `checked`, **5 `golden`** (401, 421, 454, 540, 543 — promoted 2026-07-20 after the full live check); deviations: 39 IMPROVISED, 34 POST_171, 81 NOTE, 3 DROPPED_171 (the `p:ColumnAIAction` plugin in apps 009/022/534 — a whole control newer than 1.71, unlike the restorable members). **0 LIVE_TEST** (b07/b08 menu + message-popover paths live-checked 2026-07-22) and **0 SUBSET_DATA** (retired 2026-07-22 — every port now inlines the full mock row set). `audit` is a structured object since 2026-07-18 |
 | Manually verified in a running system | **46 of 67 ports** — adds 060/061/066/067 (menu + MessagePopover, human live check 2026-07-22) to the 2026-07-20 checked set; the 21 remaining `generated` ports are b01–b04 apps that never carried an open question (machine-verified only) |
@@ -1033,8 +1033,19 @@ Infrastructure:
   builder calls with no declaration) *and* FAILS a stale declaration (a port
   that reconstructs but still declares skip). Skips can no longer grow
   silently — a new helper-built port fails CI until a human consciously
-  declares or reconstructs it. app 049 carries the declaration; run stays
-  **0 failing / 1 skipped**.
+  declares or reconstructs it.
+  **Update 2026-07-22 — the handle-tracking interpreter was actually built**
+  (`extractDocsWithHelpers` in render-smoke.mjs). A builder handle is now a
+  stack snapshot (root..cursor); `DATA(list) = view->…->open( List )` saves it,
+  a builder-returning helper (`METHODS … RETURNING VALUE(result) TYPE REF TO
+  z2ui5_cl_ai_xml`) is parsed once into a relative op-chain, and every
+  `render_item( list = list … )->leaf( … )` call is inlined re-anchored to its
+  argument handle with the non-entry params (`label`) substituted string-aware.
+  app 049 reconstructs faithfully (14 CustomListItems, each `HBox` → label
+  VBox + StepInput VBox) and renders for real — **not** a wrong-but-rendering
+  false pass: the tree is byte-correct. The declared-skip mechanism stays as the
+  safety net for a future idiom the interpreter still can't rebuild. Its own
+  skip declaration was removed; run is now **0 failing / 0 skipped**.
 - [x] ~~render-smoke harness gaps found by the 2026-07-19 hold-out probe~~ —
   fixed same day: (a) the inline formatter mirror had only `weightState`
   while upstream `model/formatter.js` had grown the date helpers + demo kit

@@ -16,14 +16,19 @@
  * renderer crashes. What it cannot catch: event round-trips, visual/UX
  * fidelity — those stay with the human live check.
  *
- * Reconstructability: the reconstructor follows the linear factory-chain idiom
- * (one descend/ascend stack). A port that builds view parts in HELPER methods
- * — passing a held node handle in and chaining a returned handle out (app 049)
- * — is not statically reconstructable this way. Such a port must DECLARE the
- * skip in its sidecar (`"render_smoke": { "skip": true, "reason": "…" }`);
- * an UNDECLARED non-reconstructable port is a FAILURE, not a silent skip, and
- * a declaration that has gone stale (the port now reconstructs) is a FAILURE
- * too — so the skip set can never drift.
+ * Reconstructability: most ports use the linear factory-chain idiom (one
+ * descend/ascend stack, extractDocs). A port that builds view parts in HELPER
+ * methods — capturing a node handle (`DATA(list) = view->…->open( List )`),
+ * passing it into a builder-returning helper and chaining the returned handle
+ * out (`render_item( list = list … )->leaf( StepInput )`, app 049) — is
+ * reconstructed by the handle-aware path (extractDocsWithHelpers): a handle is
+ * a stack snapshot, a capture saves it, and each helper call is inlined
+ * re-anchored to its argument handle. A port that still cannot be reconstructed
+ * (a new idiom the handle path does not cover) must DECLARE the skip in its
+ * sidecar (`"render_smoke": { "skip": true, "reason": "…" }`); an UNDECLARED
+ * non-reconstructable port is a FAILURE, not a silent skip, and a declaration
+ * that has gone stale (the port now reconstructs) is a FAILURE too — so the
+ * skip set can never drift.
  *
  * Substitutions while reconstructing (the harness controls both sides, so
  * exact framework path names do not matter):
@@ -305,6 +310,190 @@ function extractDocs(content, resolveExpr, notes) {
   return { docs, helperTokens };
 }
 
+// ---------------------------------------------------------------------------
+// 3b. Handle-aware reconstruction — the helper-method / node-handle idiom
+//     (app 049). The builder is really node-handle based: `DATA(list) = view->
+//     …->open( List )` captures a handle to the List node; a helper method
+//     `render_item( list = list … )` re-descends from that node and RETURNS a
+//     handle the caller keeps chaining on (`…->leaf( StepInput )`). A single
+//     descend/ascend stack can't model that (the helper body lives in another
+//     method, and each call re-anchors to `list`, not to the previous cursor).
+//     Here a handle IS a stack snapshot (root..cursor); a capture saves it, a
+//     builder-returning helper is inlined at the call site re-anchored to its
+//     argument handle. Only ports that declare such a helper take this path;
+//     the 90-odd linear ports keep extractDocs untouched.
+// ---------------------------------------------------------------------------
+
+// split an ABAP method body into statements, string- and paren-aware (the
+// terminator '.' inside `…`/|…| strings or ( ) is not a split point)
+function splitStatements(src) {
+  const out = [];
+  let depth = 0, str = null, start = 0;
+  for (let i = 0; i < src.length; i++) {
+    const c = src[i];
+    if (str === '`') { if (c === '`') str = null; continue; }
+    if (str === '|') { if (c === '\\') { i++; continue; } if (c === '|') str = null; continue; }
+    if (c === '`' || c === '|') { str = c; continue; }
+    else if (c === '(') depth++;
+    else if (c === ')') depth--;
+    else if (c === '.' && depth === 0) { out.push(src.slice(start, i)); start = i + 1; }
+  }
+  if (src.slice(start).trim()) out.push(src.slice(start));
+  return out;
+}
+
+// apply one ->open/leaf/a/shut( ) token to a live stack (mutates the tree).
+// Same node/attr semantics as extractDocs, factored for the handle path.
+function applyToken(verb, body, stack, resolveExpr, notes) {
+  if (verb === 'shut') { if (stack.length > 1) stack.pop(); return; }
+  if (verb === 'a') {
+    const nm = body.match(/(?:^|\s)n\s*=\s*`([^`]*)`/);
+    const vm = body.match(/(?:^|\s)v\s*=\s*([\s\S]+)$/);
+    if (!nm || !vm) { notes.push(`unparsed a( ) call: ${body.slice(0, 60)}`); return; }
+    const val = resolveExpr(vm[1]);
+    if (val === SKIP) return;
+    const cur = stack[stack.length - 1];
+    const target = cur.children.length ? cur.children[cur.children.length - 1] : cur;
+    target.attrs.push([nm[1], val]);
+    return;
+  }
+  const nm = body.match(/(?:^|\s)n\s*=\s*`([^`]*)`/) || body.match(/^\s*`([^`]*)`/);
+  if (!nm) { notes.push(`unparsed ${verb}( ) call: ${body.slice(0, 60)}`); return; }
+  const nsm = body.match(/(?:^|\s)ns\s*=\s*`([^`]*)`/);
+  const node = { name: nm[1], ns: nsm ? nsm[1] : null, attrs: [], children: [] };
+  const am = body.match(/(?:^|\s)a\s*=\s*VALUE #\s*\(/);
+  if (am) {
+    const region = parenRegion(body, body.indexOf('(', am.index + am[0].length - 1)).body;
+    for (const kv of region.matchAll(/`((?:[^`]|``)*)`/g)) {
+      const s = kv[1].replace(/``/g, '`');
+      const eq = s.indexOf('=');
+      if (eq > 0) node.attrs.push([s.slice(0, eq).trim(), s.slice(eq + 1)]);
+    }
+  }
+  const cur = stack[stack.length - 1];
+  cur.children.push(node);
+  if (verb === 'open') stack.push(node);
+}
+
+// process a chain of ->open/leaf/a/shut( ) calls against `stack` (mutates it)
+function processChain(chain, stack, resolveExpr, notes) {
+  const tokenRe = /->\s*(open|leaf|a|shut|stringify)\s*\(/g;
+  let m;
+  while ((m = tokenRe.exec(chain)) !== null) {
+    const verb = m[1];
+    if (verb === 'stringify') continue;
+    if (verb === 'shut') { applyToken('shut', '', stack, resolveExpr, notes); continue; }
+    const open = chain.indexOf('(', m.index + m[0].length - 1);
+    const { body, end } = parenRegion(chain, open);
+    if (verb === 'a') tokenRe.lastIndex = end;
+    applyToken(verb, body, stack, resolveExpr, notes);
+  }
+}
+
+// parse `name = value  name2 = value2` into { name: value }, string- and
+// paren-aware so a `=` inside a `…` value (e.g. label = `Step = 1 …`) is not a
+// boundary
+function parseNamedArgs(argBody) {
+  const marks = [];
+  let depth = 0, str = null, i = 0;
+  while (i < argBody.length) {
+    const c = argBody[i];
+    if (str) {
+      if (str === '`' && c === '`') str = null;
+      else if (str === '|') { if (c === '\\') { i += 2; continue; } if (c === '|') str = null; }
+      i++; continue;
+    }
+    if (c === '`' || c === '|') { str = c; i++; continue; }
+    if (c === '(') { depth++; i++; continue; }
+    if (c === ')') { depth--; i++; continue; }
+    if (depth === 0 && (i === 0 || /\s/.test(argBody[i - 1]))) {
+      const mm = argBody.slice(i).match(/^(\w+)\s*=\s*/);
+      if (mm) { marks.push({ name: mm[1], nameStart: i, vstart: i + mm[0].length }); i += mm[0].length; continue; }
+    }
+    i++;
+  }
+  const args = {};
+  for (let k = 0; k < marks.length; k++) {
+    const end = k + 1 < marks.length ? marks[k + 1].nameStart : argBody.length;
+    args[marks[k].name] = argBody.slice(marks[k].vstart, end).trim();
+  }
+  return args;
+}
+
+// helper methods that take a handle and RETURN one: { name -> {entryParam,
+// bodyChain, params} }, where bodyChain is the ->…-chain of `result = entry->…`
+function parseHelpers(content) {
+  const helpers = new Map();
+  const defRe = /METHODS\s+(\w+)\s+IMPORTING([\s\S]*?)RETURNING\s+VALUE\(\w+\)\s+TYPE REF TO z2ui5_cl_ai_xml\s*\./g;
+  let d;
+  while ((d = defRe.exec(content)) !== null) {
+    const name = d[1];
+    const params = [...d[2].matchAll(/(\w+)\s+TYPE\b/g)].map((x) => x[1]);
+    const implM = content.match(new RegExp('METHOD\\s+' + name + '\\s*\\.([\\s\\S]*?)\\bENDMETHOD\\b'));
+    if (!implM) continue;
+    const resStmt = splitStatements(implM[1]).find((s) => /^\s*result\s*=/.test(s));
+    if (!resStmt) continue;
+    const rm = resStmt.match(/^\s*result\s*=\s*(\w+)\s*(->[\s\S]*)$/);
+    if (!rm) continue;
+    helpers.set(name, { entryParam: rm[1], bodyChain: rm[2], params });
+  }
+  return helpers;
+}
+
+function extractDocsWithHelpers(content, resolveExpr, notes) {
+  const helpers = parseHelpers(content);
+  const vdM = content.match(/METHOD\s+\w+\s*\.([\s\S]*?z2ui5_cl_ai_xml=>factory[\s\S]*?)\bENDMETHOD\b/);
+  if (!vdM) return { docs: [], helperTokens: 1 };
+  const handles = new Map(); // var -> stack (array of node refs, root..cursor)
+  const docs = [];
+  let helperTokens = 0;
+  for (const raw of splitStatements(vdM[1])) {
+    const s = raw.trim();
+    if (!s) continue;
+    let m;
+    // DATA(v) = z2ui5_cl_ai_xml=>factory( ) [ ->chain ]
+    if ((m = s.match(/^(?:DATA\()?(\w+)\)?\s*=\s*z2ui5_cl_ai_xml=>factory\(\s*\)\s*(->[\s\S]*)?$/))) {
+      const stack = [{ name: null, ns: null, attrs: [], children: [] }];
+      if (m[2]) processChain(m[2], stack, resolveExpr, notes);
+      handles.set(m[1], stack);
+      continue;
+    }
+    // DATA(v) = <handleVar>->chain   (capture a handle mid-chain)
+    if ((m = s.match(/^(?:DATA\()?(\w+)\)?\s*=\s*(\w+)\s*(->[\s\S]*)$/)) && handles.has(m[2])) {
+      const stack = handles.get(m[2]).slice();
+      processChain(m[3], stack, resolveExpr, notes);
+      handles.set(m[1], stack);
+      continue;
+    }
+    // client->view_display( <var>->stringify( ) )   -> emit the doc
+    if ((m = s.match(/view_display\(\s*(\w+)\s*->\s*stringify/)) && handles.has(m[1])) {
+      docs.push(handles.get(m[1])[0]);
+      continue;
+    }
+    // <helper>( args )->chain   (inline the helper, re-anchored to its arg handle)
+    if ((m = s.match(/^(\w+)\s*\(/)) && helpers.has(m[1])) {
+      const h = helpers.get(m[1]);
+      const open = s.indexOf('(', m[1].length);
+      const { body: argBody, end } = parenRegion(s, open);
+      const args = parseNamedArgs(argBody);
+      const entryVar = (args[h.entryParam] || '').trim();
+      if (!handles.has(entryVar)) { helperTokens++; continue; }
+      const stack = handles.get(entryVar).slice();
+      let hchain = h.bodyChain;
+      for (const p of h.params) {
+        if (p === h.entryParam || args[p] === undefined) continue;
+        hchain = hchain.replace(new RegExp('\\b' + p + '\\b', 'g'), () => args[p]);
+      }
+      processChain(hchain, stack, resolveExpr, notes);
+      const cont = s.slice(end + 1);
+      if (cont.trim()) processChain(cont, stack, resolveExpr, notes);
+      continue;
+    }
+    // any other statement (local DATA, model calls) is not builder-relevant
+  }
+  return { docs, helperTokens };
+}
+
 const XML_ESC = (v) => String(v)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
   .replace(/\n/g, '&#xA;').replace(/\r/g, '&#xD;').replace(/\t/g, '&#x9;');
@@ -459,7 +648,12 @@ function preparePort(meta) {
   const notes = [];
   const boundVars = new Set();
   const resolveExpr = makeResolver(content, boundVars, notes);
-  const { docs: nodes, helperTokens } = extractDocs(content, resolveExpr, notes);
+  // a port that builds view parts in a handle-returning helper method needs the
+  // handle-aware reconstruction; the linear ports keep the single-stack path.
+  const hasBuilderHelper = /RETURNING\s+VALUE\(\w+\)\s+TYPE REF TO z2ui5_cl_ai_xml/.test(content);
+  const { docs: nodes, helperTokens } = hasBuilderHelper
+    ? extractDocsWithHelpers(content, resolveExpr, notes)
+    : extractDocs(content, resolveExpr, notes);
   const types = parseTypes(content);
   const vars = parseData(content);
   const docs = nodes.map(toXml).filter(Boolean);
