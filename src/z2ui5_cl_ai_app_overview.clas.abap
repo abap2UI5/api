@@ -399,7 +399,7 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                                 )->leaf( `core:Icon`
                                     )->a( n = `src`     v = `sap-icon://sort-descending`
                                     )->a( n = `tooltip` v = `Sort by Module descending`
-                                    )->a( n = `press`   v = client->_event_client( val = client->cs_event-binding_call t_arg = VALUE #( ( `idOverviewTable` ) ( `items` ) ( `sort` ) ( `MODULE` ) ( `X` ) ) )
+                                    )->a( n = `press`   v = client->_event_client( val = client->cs_event-binding_call t_arg = VALUE #( ( `idOverviewTable` ) ( `items` ) ( `sort` ) ( `MODULE` ) ( abap_true ) ) )
 
                             )->shut(
                         )->shut(
@@ -417,7 +417,7 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                                 )->leaf( `core:Icon`
                                     )->a( n = `src`     v = `sap-icon://sort-descending`
                                     )->a( n = `tooltip` v = `Sort by Control descending`
-                                    )->a( n = `press`   v = client->_event_client( val = client->cs_event-binding_call t_arg = VALUE #( ( `idOverviewTable` ) ( `items` ) ( `sort` ) ( `CTRL_NAME` ) ( `X` ) ) )
+                                    )->a( n = `press`   v = client->_event_client( val = client->cs_event-binding_call t_arg = VALUE #( ( `idOverviewTable` ) ( `items` ) ( `sort` ) ( `CTRL_NAME` ) ( abap_true ) ) )
 
                             )->shut(
                         )->shut(
@@ -435,7 +435,7 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                                 )->leaf( `core:Icon`
                                     )->a( n = `src`     v = `sap-icon://sort-descending`
                                     )->a( n = `tooltip` v = `Sort by Since descending`
-                                    )->a( n = `press`   v = client->_event_client( val = client->cs_event-binding_call t_arg = VALUE #( ( `idOverviewTable` ) ( `items` ) ( `sort` ) ( `SINCE` ) ( `X` ) ) )
+                                    )->a( n = `press`   v = client->_event_client( val = client->cs_event-binding_call t_arg = VALUE #( ( `idOverviewTable` ) ( `items` ) ( `sort` ) ( `SINCE` ) ( abap_true ) ) )
 
                             )->shut(
                         )->shut(
@@ -453,7 +453,7 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                                 )->leaf( `core:Icon`
                                     )->a( n = `src`     v = `sap-icon://sort-descending`
                                     )->a( n = `tooltip` v = `Sort by Sample descending`
-                                    )->a( n = `press`   v = client->_event_client( val = client->cs_event-binding_call t_arg = VALUE #( ( `idOverviewTable` ) ( `items` ) ( `sort` ) ( `NAME` ) ( `X` ) ) )
+                                    )->a( n = `press`   v = client->_event_client( val = client->cs_event-binding_call t_arg = VALUE #( ( `idOverviewTable` ) ( `items` ) ( `sort` ) ( `NAME` ) ( abap_true ) ) )
 
                             )->shut(
                         )->shut(
@@ -471,7 +471,7 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                                 )->leaf( `core:Icon`
                                     )->a( n = `src`     v = `sap-icon://sort-descending`
                                     )->a( n = `tooltip` v = `Sort by Since descending`
-                                    )->a( n = `press`   v = client->_event_client( val = client->cs_event-binding_call t_arg = VALUE #( ( `idOverviewTable` ) ( `items` ) ( `sort` ) ( `RELEASE` ) ( `X` ) ) )
+                                    )->a( n = `press`   v = client->_event_client( val = client->cs_event-binding_call t_arg = VALUE #( ( `idOverviewTable` ) ( `items` ) ( `sort` ) ( `RELEASE` ) ( abap_true ) ) )
 
                             )->shut(
                         )->shut(
@@ -489,7 +489,7 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                                 )->leaf( `core:Icon`
                                     )->a( n = `src`     v = `sap-icon://sort-descending`
                                     )->a( n = `tooltip` v = `Sort by abap2UI5 descending`
-                                    )->a( n = `press`   v = client->_event_client( val = client->cs_event-binding_call t_arg = VALUE #( ( `idOverviewTable` ) ( `items` ) ( `sort` ) ( `CLASS` ) ( `X` ) ) )
+                                    )->a( n = `press`   v = client->_event_client( val = client->cs_event-binding_call t_arg = VALUE #( ( `idOverviewTable` ) ( `items` ) ( `sort` ) ( `CLASS` ) ( abap_true ) ) )
 
                             )->shut(
                         )->shut(
@@ -515,7 +515,7 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                                 )->leaf( `core:Icon`
                                     )->a( n = `src`     v = `sap-icon://sort-descending`
                                     )->a( n = `tooltip` v = `Sort by Deviation descending`
-                                    )->a( n = `press`   v = client->_event_client( val = client->cs_event-binding_call t_arg = VALUE #( ( `idOverviewTable` ) ( `items` ) ( `sort` ) ( `SCORE` ) ( `X` ) ) )
+                                    )->a( n = `press`   v = client->_event_client( val = client->cs_event-binding_call t_arg = VALUE #( ( `idOverviewTable` ) ( `items` ) ( `sort` ) ( `SCORE` ) ( abap_true ) ) )
 
                             )->shut(
                         )->shut(

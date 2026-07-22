@@ -260,10 +260,11 @@ const ID_TABLE = 'idOverviewTable';
 const filterCall = (valExpr) =>
   'client->_event_client( val = client->cs_event-binding_call' +
   ` t_arg = VALUE #( ( \`${ID_TABLE}\` ) ( \`items\` ) ( \`filter\` ) ( \`FILTER\` ) ( \`Contains\` ) ( \`${valExpr}\` ) ) )`;
-// a Sorter on one column path; descending passes the abap_bool `X`, ascending omits it
+// a Sorter on one column path; descending passes abap_true (the framework reads
+// this positional t_arg element as an abap_bool - X/space), ascending omits it
 const sortCall = (path, desc) =>
   'client->_event_client( val = client->cs_event-binding_call' +
-  ` t_arg = VALUE #( ( \`${ID_TABLE}\` ) ( \`items\` ) ( \`sort\` ) ( \`${path}\` )${desc ? ' ( `X` )' : ''} ) )`;
+  ` t_arg = VALUE #( ( \`${ID_TABLE}\` ) ( \`items\` ) ( \`sort\` ) ( \`${path}\` )${desc ? ' ( abap_true )' : ''} ) )`;
 
 // a sortable column: header label + ascending/descending sort icons (client-side)
 const sortableColumn = (label, path) => `                        )->open( \`Column\`

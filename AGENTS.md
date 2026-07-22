@@ -672,11 +672,27 @@ the `<!-- last-run -->` timestamp into `README.md`, and opens a pull request. Th
 
 ## 8. ABAP code conventions
 
-Follow the [SAP Clean ABAP style guide](https://github.com/SAP/styleguides/blob/main/clean-abap/CleanABAP.md)
-and the detailed conventions in the
+The two authoritative ABAP style references for this repo are:
+
+- **[SAP Clean ABAP](https://github.com/SAP/styleguides/tree/main/clean-abap)**
+  (`clean-abap/CleanABAP.md`) — SAP's official style guide.
+- **[DSAG ABAP-Leitfaden](https://github.com/1DSAG/ABAP-Leitfaden)** (1DSAG) —
+  the German-community ABAP best-practice guide.
+
+Plus the detailed conventions in the
 [abap2UI5/samples AGENTS.md](https://github.com/abap2UI5/samples/blob/main/AGENTS.md)
 (§7 code conventions, §9 app lifecycle, §10 view building, §11 app structure) —
-the ports share that style. Essentials:
+the ports share that style. When these disagree, prefer Clean ABAP, then the
+DSAG Leitfaden, then the samples style. Essentials:
+
+- **Booleans use `abap_true` / `abap_false`, never the character literals `'X'` /
+  `' '`** (Clean ABAP "Use abap_true and abap_false"); build them with
+  `xsdbool( )`, feed a bound view attribute through `z2ui5_cl_ai_xml=>as_bool( )`.
+  The **one deliberate exception is a positional `t_arg` element** (`t_arg TYPE
+  string_table`): those are wire-protocol string tokens, so the descending flag of
+  a `binding_call` sort etc. may be written as the plain string `` `X` `` — though
+  `( abap_true )` (implicitly `c → string` = `'X'`) is preferred where it reads as
+  the boolean it is (the framework defines that arg as "abap_bool as `X`/space").
 
 - **Always the simplest possible notation**: omit parameters that equal the
   default (`get_event_arg( )`, not `get_event_arg( 1 )`), no pass-through
