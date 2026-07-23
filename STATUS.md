@@ -5,6 +5,33 @@ findings are fixed or new ones land (same-change discipline as AGENTS.md §10).
 For the process itself see TRAINING.md; for what abap2UI5 can express see
 CAPABILITIES.md._
 
+## Batches b05–b07 — stress-test ports, maximally-diverse controls (2026-07-23) — 12 ports
+
+Three more diverse faithful batches to stress-test how far abab2UI5 reaches,
+each internally maximally-different. All machine-green (abaplint
+STANDARD/CLOUD/702, validate-meta, pattern-lint, structural-diff `--strict`,
+property-check, render-smoke):
+
+- **b05 (137–141):** `sap.ui.table.Table` multi-level column headers
+  (multiLabels/headerSpan) · `sap.ui.layout.DynamicSideContent` · `sap.ui.unified.Calendar`
+  · `sap.ui.layout.BlockLayout` (6 rows/7 cells, color shades A–F) ·
+  `sap.ui.core.InvisibleMessage`.
+- **b06 (142–145):** `sap.ui.layout.form.Form` (FormContainers + toolbars +
+  GridData) · `sap.f.DynamicPage` (title/header/content/footer + tnt:InfoLabel)
+  · `sap.f.GridList` GridBoxLayout · `sap.ui.layout.cssgrid` gridAutoFlow +
+  RadioButtonGroup.
+- **b07 (146–148):** `sap.ui.core` HyphenationAPI (core:HTML) ·
+  `sap.ui.core.BusyIndicator` (global) · `sap.f.GridList` **drag & drop**
+  (dnd:DragInfo + GridDropInfo).
+
+New paradigms exercised without framework changes: the sap.ui.table grid table
+with `multiLabels`/`headerSpan`, a full `sap.ui.layout.form.Form` tree,
+`DynamicSideContent`/`DynamicPage` responsive containers, and drag-and-drop
+config. One transpiler/checker footnote: the `sap.f.dnd` `GridDropInfo` keeps a
+hyphen-free `dndgrid` xmlns alias (the original's `dnd-grid` prefix trips the
+static regexes; the alias names the same URI). Coverage: **148** ports across
+10 libraries.
+
 ## Where the repo stands
 
 | Aspect | State |
