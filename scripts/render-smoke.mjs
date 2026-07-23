@@ -529,16 +529,30 @@ function parseTypes(content) {
 }
 
 function parseData(content) {
-  const vars = new Map(); // var -> { kind: 'scalar'|'table'|'struct', type }
-  for (const m of content.matchAll(/^\s*DATA\s+(\w+)\s+TYPE\s+(?:(STANDARD TABLE OF\s+(\w+))|REF TO\s+\w+|([\w ]+?))\s*(?:LENGTH\s+\d+)?\s*(?:DECIMALS\s+\d+)?\s*(?:WITH EMPTY KEY\s*)?\.\s*$/gm)) {
+  const vars = new Map(); // var -> { kind: 'scalar'|'table'|'struct', type, value? }
+  // the trailing (?:VALUE …)? captures an inline initial value on the same
+  // declaration (DATA n TYPE i VALUE 5. / … TYPE abap_bool VALUE abap_true.),
+  // so a VALUE-seeded field mocks with the right type instead of falling back
+  // to an empty string. The scalar type is a single token (\w+) so the VALUE
+  // clause cannot bleed into it (was `i VALUE 5` under the old `[\w ]+?`).
+  for (const m of content.matchAll(/^\s*DATA\s+(\w+)\s+TYPE\s+(?:(STANDARD TABLE OF\s+(\w+))|REF TO\s+\w+|(\w+))\s*(?:LENGTH\s+\d+)?\s*(?:DECIMALS\s+\d+)?\s*(?:WITH EMPTY KEY\s*)?(?:VALUE\s+(`(?:[^`]|``)*`|abap_true|abap_false|-?\d+(?:\.\d+)?))?\s*\.\s*$/gm)) {
     if (m[3]) vars.set(m[1], { kind: 'table', type: m[3] });
-    else if (m[4]) vars.set(m[1], { kind: 'scalar', type: m[4].trim() });
+    else if (m[4]) vars.set(m[1], { kind: 'scalar', type: m[4].trim(), value: m[5] });
   }
   return vars;
 }
 
 const scalarDefault = (type) =>
   type === 'abap_bool' ? false : NUMERIC.test(type) ? 0 : '';
+
+// coerce an ABAP scalar literal (backtick string / abap_true|false / number)
+// to its typed JS value — shared by VALUE clauses, model_init assignments and
+// row fields so the three paths agree.
+const coerceScalar = (raw, type) =>
+  raw === 'abap_true' ? true
+    : raw === 'abap_false' ? false
+      : raw.startsWith('`') ? (NUMERIC.test(type) ? Number(raw.slice(1, -1)) || 0 : raw.slice(1, -1).replace(/``/g, '`'))
+        : NUMERIC.test(type) ? Number(raw) : raw;
 
 // parse one VALUE #( ... ) region into JS rows, typed by the row's fields
 function parseRows(region, rowType, types) {
@@ -620,11 +634,11 @@ function buildModel(content, boundVars, types, vars, notes) {
     } else {
       const t = decl.type;
       if (scalarSeed.has(v)) {
-        const raw = scalarSeed.get(v);
-        model[up(v)] = raw === 'abap_true' ? true
-          : raw === 'abap_false' ? false
-            : raw.startsWith('`') ? (NUMERIC.test(t) ? Number(raw.slice(1, -1)) || 0 : raw.slice(1, -1).replace(/``/g, '`'))
-              : NUMERIC.test(t) ? Number(raw) : raw;
+        // explicit assignment in model_init wins over an inline VALUE
+        model[up(v)] = coerceScalar(scalarSeed.get(v), t);
+      } else if (decl.value != null) {
+        // inline DATA … VALUE … seeds the field with its declared literal
+        model[up(v)] = coerceScalar(decl.value, t);
       } else {
         const d = derivedSeed.find((s) => s.target === v);
         const rows = d && tableSeed.has(d.table)
