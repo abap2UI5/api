@@ -1637,6 +1637,15 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         notes = `IMPROVISED: the Select ``change`` handlers onSelectDesign/onSelectStyle (setDesign/setStyle) become two-way bound design/style; bActionContext (design != Info) becomes an expression binding on the` &&
                  ` Buttons' visible.`
         use_name = abap_true )
+      ( module = `sap.m`              control = `sap.m.OverflowToolbar`               name = `ToolbarResponsive`                   class = `z2ui5_cl_ai_app_163` path = `src/01/b17/z2ui5_cl_ai_app_163.clas.abap`
+        score = 3
+        score_tip = `Rating 3 of 5 - how much attention this port deserves (complexity + rework + review + test-priority: complex, 1 reworked). 1 = simple faithful 1:1, 5 = complex / reworked / worth a close look.`
+        since = `1.16`
+        notes = `IMPROVISED: Named-model wall-break: the original drives the footer toolbar button visibility from a separate 'range' media JSON model ({range>/isNoPhone}, isNotPhoneOrTablet, isTablet,` &&
+                 ` isPhoneOrTablet). abap2UI5 keeps the flags flat in the one default model; the frontend (view1_js) aliases that model under 'range', so the faithful {range>/...} paths resolve. Values use the desktop` &&
+                 ` media ranges (the original filled them from Device.media - a client-only decision). Button presses show client toasts (original onPress/onOpen).`
+        use_ec = abap_true
+        use_ec_arg = abap_true )
       ( module = `sap.m`              control = `sap.m.Page`                          name = `PageStandardClasses`                 class = `z2ui5_cl_ai_app_089` path = `src/01/b11/z2ui5_cl_ai_app_089.clas.abap`
         score = 2
         score_tip = `Rating 2 of 5 - how much attention this port deserves (complexity + rework + review + test-priority: complex, 1 noted). 1 = simple faithful 1:1, 5 = complex / reworked / worth a close look.`
@@ -2244,6 +2253,12 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         notes = `NOTE: sap.ui.layout.form.Form with two FormContainers, per-container toolbars, ResponsiveGridLayout, FormElements with GridData layoutData and a Select. The original bound an element context` &&
                  ` (/SupplierCollection/0 from the shared demo supplier.json); flattened here to top-level model fields the {…} bindings resolve against.`
         use_name = abap_true )
+      ( module = `sap.ui.layout`      control = `sap.ui.layout.HorizontalLayout`      name = `HorizontalLayout`                    class = `z2ui5_cl_ai_app_162` path = `src/02/b09/z2ui5_cl_ai_app_162.clas.abap`
+        score = 2
+        score_tip = `Rating 2 of 5 - how much attention this port deserves (complexity + rework + review + test-priority: 1 reworked). 1 = simple faithful 1:1, 5 = complex / reworked / worth a close look.`
+        notes = `IMPROVISED: Wall-break for NAMED MODELS: the original uses a separate 'img' JSON model for the image src ({img>/products/pic1}) alongside the default model for the widths. abap2UI5 keeps all data in` &&
+                 ` one default model; the frontend (view1_js) now aliases that model under every {name>} prefix the view uses, so {img>...} resolves to the same flat data. The image path is a single flat field (pic1)` &&
+                 ` instead of the original's /products/pic1 nesting (last-segment identical). Widths use the desktop values (the original's phone branch is a client-only Device decision).` )
       ( module = `sap.ui.layout`      control = `sap.ui.layout.Splitter`              name = `Splitter2`                           class = `z2ui5_cl_ai_app_125` path = `src/02/b02/z2ui5_cl_ai_app_125.clas.abap`
         score = 1
         score_tip = `Rating 1 of 5 - how much attention this port deserves (complexity + rework + review + test-priority). 1 = simple faithful 1:1, 5 = complex / reworked / worth a close look.` )
@@ -2285,7 +2300,13 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         score = 2
         score_tip = `Rating 2 of 5 - how much attention this port deserves (complexity + rework + review + test-priority: 1 reworked). 1 = simple faithful 1:1, 5 = complex / reworked / worth a close look.`
         notes = `IMPROVISED: Breadth-probe: a minimal sap.uxap.ObjectPageLayout (header title + section + two subsections). The original's blocks are custom JS view controls (sample:MultiViewBlock) — not expressible` &&
-                 ` in the declarative builder — so they are replaced with sap.m.Text content for the rendering probe.` ) ).
+                 ` in the declarative builder — so they are replaced with sap.m.Text content for the rendering probe.` )
+      ( module = `sap.uxap`           control = `sap.uxap.ObjectPageLayout`           name = `SingleView`                          class = `z2ui5_cl_ai_app_161` path = `src/03/b02/z2ui5_cl_ai_app_161.clas.abap`
+        score = 2
+        score_tip = `Rating 2 of 5 - how much attention this port deserves (complexity + rework + review + test-priority: 1 reworked). 1 = simple faithful 1:1, 5 = complex / reworked / worth a close look.`
+        notes = `IMPROVISED: Wall-break for sap.uxap: the original blocks aggregation holds a custom BlockBase control (blockcolor:BlockBlue from the sample's SharedBlocks JS). A BlockBase is only a lazy-loading` &&
+                 ` wrapper around a view; its content (a single coloured div) is inlined here as core:HTML, since ObjectPageSubSection.blocks accepts any sap.ui.core.Control. This removes the need for a custom JS` &&
+                 ` control - the whole uxap ObjectPage renders with the thin generic frontend. The blockcolor:BlockBlue control is therefore absent and a core:HTML is present in its place.` ) ).
 
   ENDMETHOD.
 
