@@ -664,7 +664,7 @@ function preparePort(meta) {
 // ---------------------------------------------------------------------------
 // 6. Local OpenUI5 server (from the @openui5/* npm source packages)
 // ---------------------------------------------------------------------------
-const LIB_ROOTS = ['sap.ui.core', 'sap.m', 'sap.ui.layout', 'sap.ui.unified', 'sap.f', 'themelib_sap_horizon']
+const LIB_ROOTS = ['sap.ui.core', 'sap.m', 'sap.ui.layout', 'sap.ui.unified', 'sap.f', 'sap.ui.table', 'sap.uxap', 'sap.tnt', 'sap.ui.codeeditor', 'sap.ui.integration', 'themelib_sap_horizon']
   .map((p) => path.join(ROOT, 'node_modules', '@openui5', p, 'src'))
   .filter((p) => fs.existsSync(p));
 
@@ -746,7 +746,7 @@ const HARNESS = `<!DOCTYPE html>
   })();
 </script>
 <script id="sap-ui-bootstrap" src="/resources/sap-ui-core.js"
-  data-sap-ui-libs="sap.m,sap.ui.layout,sap.f"
+  data-sap-ui-libs="sap.m,sap.ui.layout,sap.f,sap.ui.table,sap.uxap,sap.tnt"
   data-sap-ui-theme="sap_hcb"
   data-sap-ui-async="true"
   data-sap-ui-compatversion="edge"></script>

@@ -179,6 +179,14 @@ for (const metaFile of fs.readdirSync(META).sort()) {
   if (!fs.existsSync(abapPath)) continue;
   apps++;
 
+  // a port may opt out of structural comparison via its sidecar — for
+  // deliberate breadth/capability probes that render a control but are not a
+  // faithful 1:1 rebuild of the whole sample (mirrors the render_smoke skip).
+  if (meta.structural_diff?.skip) {
+    lines.push(`${meta.class} (${meta.sample}): structural_diff skip — ${meta.structural_diff.reason || 'declared probe'}`);
+    continue;
+  }
+
   const views = originalViews(meta.sample);
   if (!views.length) {
     lines.push(`${meta.class} (${meta.sample}): no original view.xml archived — SKIPPED`);
