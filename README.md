@@ -167,15 +167,16 @@ have an abap2UI5 port.
 
 <!-- coverage:start -->
 
-Overall **109 / 403** in-scope demo kit samples ported (27.0 %).
+Overall **109 / 444** in-scope demo kit samples ported (24.5 %).
 **In scope**: samples whose control exists since **UI5 1.71** and is **not deprecated** (legacy-free ready).
-Out of scope: 43 of 446 samples — 16 on deprecated controls, 21 on controls newer than 1.71, 6 without control metadata.
+Out of scope: 44 of 488 samples — 16 on deprecated controls, 21 on controls newer than 1.71, 7 without control metadata.
 Control metadata from OpenUI5 **1.151.0**.
 
 | Module | Samples | In scope | Ported | Coverage | |
 |--------|--------:|---------:|-------:|---------:|---|
 | `sap.m` | 446 | 403 | 109 | 27.0 % | ███░░░░░░░ |
-| **Total** | **446** | **403** | **109** | **27.0 %** | ███░░░░░░░ |
+| `sap.f` | 42 | 41 | 0 | 0.0 % | ░░░░░░░░░░ |
+| **Total** | **488** | **444** | **109** | **24.5 %** | ██░░░░░░░░ |
 
 <!-- coverage:end -->
 

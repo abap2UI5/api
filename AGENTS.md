@@ -88,7 +88,7 @@ by the UI5 **library** of the demo kit sample they rebuild:
 | `src/01` | `sap.m`    | `sap.m`    | exists |
 | `src/02` | `sap.ui`   | `sap.ui.*` (core, layout, unified, table, integration, model.type) | planned |
 | `src/03` | `sap.uxap` | `sap.uxap` | planned |
-| `src/04` | `sap.f`    | `sap.f`    | planned |
+| `src/04` | `sap.f`    | `sap.f`    | exists  |
 | `src/05` | `sap.tnt`  | `sap.tnt`  | planned |
 
 The split key is the **second-level namespace** of the sample's entity. New

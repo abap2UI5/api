@@ -2729,6 +2729,263 @@
      "deprecated": null
     }
    ]
+  },
+  {
+   "lib": "sap.f",
+   "samples": [
+    {
+     "name": "AvatarGroup",
+     "entity": "sap.f.AvatarGroup",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "Card",
+     "entity": "sap.f.Card",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "DynamicPageAnalyticalTable",
+     "entity": "sap.f.DynamicPage",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "DynamicPageFreeStyle",
+     "entity": "sap.f.DynamicPage",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "DynamicPageResponsiveAvatar",
+     "entity": "sap.f.DynamicPage",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "DynamicPageWithStickySubheader",
+     "entity": "sap.f.DynamicPage",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "DynamicPageWithWizard",
+     "entity": "sap.f.DynamicPage",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "FlexibleColumnLayoutColumnResize",
+     "entity": "sap.f.FlexibleColumnLayout",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "FlexibleColumnLayoutLandmarkInfo",
+     "entity": "sap.f.FlexibleColumnLayout",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "FlexibleColumnLayoutLandmarkInfoArrow",
+     "entity": "sap.f.FlexibleColumnLayout",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "FlexibleColumnLayoutSimple",
+     "entity": "sap.f.FlexibleColumnLayout",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "FlexibleColumnLayoutWithFullscreenPage",
+     "entity": "sap.f.FlexibleColumnLayout",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "FlexibleColumnLayoutWithOneColumnStart",
+     "entity": "sap.f.FlexibleColumnLayout",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "FlexibleColumnLayoutWithTwoColumnStart",
+     "entity": "sap.f.FlexibleColumnLayout",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "GridContainer",
+     "entity": "sap.f.GridContainer",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "GridContainerDragAndDrop",
+     "entity": "sap.f.GridContainer",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "GridContainerDragAndDropFromList",
+     "entity": "sap.f.GridContainer",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "GridContainersNavigation",
+     "entity": "sap.f.GridContainer",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "GridListBasic",
+     "entity": "sap.f.GridList",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "GridListBoxContainer",
+     "entity": "sap.f.GridList",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "GridListBoxContainerGrouping",
+     "entity": "sap.f.GridList",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "GridListBoxContainerReal",
+     "entity": "sap.f.GridList",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "GridListBreakPoints",
+     "entity": "sap.f.GridList",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "GridListDragAndDrop",
+     "entity": "sap.f.GridList",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "GridListKeyboardArrowsNavigation",
+     "entity": "sap.f.GridList",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "GridListModes",
+     "entity": "sap.f.GridList",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "GridListResponsiveColumnLayout",
+     "entity": "sap.f.GridList",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "MomentInPage",
+     "entity": null,
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "ProductSwitchItemWithImageSrc",
+     "entity": "sap.f.ProductSwitch",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "ProductSwitchNavigation",
+     "entity": "sap.f.ProductSwitch",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "SemanticPage",
+     "entity": "sap.f.semantic.SemanticPage",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "SemanticPageFreeStyle",
+     "entity": "sap.f.semantic.SemanticPage",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "ShellBar",
+     "entity": "sap.f.ShellBar",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "ShellBarProductSwitch",
+     "entity": "sap.f.ShellBar",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "ShellBarWithFlexibleColumnLayout",
+     "entity": "sap.f.FlexibleColumnLayout",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "ShellBarWithMenuButton",
+     "entity": "sap.f.ShellBar",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "ShellBarWithSearch",
+     "entity": "sap.f.ShellBar",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "ShellBarWithSplitApp",
+     "entity": "sap.f.ShellBar",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "SidePanel",
+     "entity": "sap.f.SidePanel",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "SidePanelOverflow",
+     "entity": "sap.f.SidePanel",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "SidePanelResizable",
+     "entity": "sap.f.SidePanel",
+     "since": null,
+     "deprecated": null
+    },
+    {
+     "name": "SidePanelSingle",
+     "entity": "sap.f.SidePanel",
+     "since": null,
+     "deprecated": null
+    }
+   ]
   }
  ]
 }
