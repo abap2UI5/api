@@ -18,6 +18,24 @@ CAPABILITIES.md._
 | Manually verified in a running system | **46 of 67 ports** — adds 060/061/066/067 (menu + MessagePopover, human live check 2026-07-22) to the 2026-07-20 checked set; the 21 remaining `generated` ports are b01–b04 apps that never carried an open question (machine-verified only) |
 | Archive | `ui5/sap.m/<SampleName>/` — full originals for the 44 ported samples (+2 cross-referenced: `FacetFilterSimple`, `Table`); mock snapshot in `ui5/mock/`. Unported samples are copied over batch by batch. |
 
+## Beyond sap.m: sap.f library started (2026-07-22) — src/04/b01
+
+First expansion past `sap.m`. **sap.f** (Fiori flagship) is now a second library
+in coverage/universe and the render-smoke harness (its `@openui5` package ships
+in `LIB_ROOTS`). Two ports, both machine-green: **110** ShellBar (static app
+shell header with a sap.m Menu + profile Avatar) and **111** GridList (grid
+layout list, 27 items, Slider→panel-width via a roundtrip-free expression
+binding). Infra: `FOCUS_LIBS += sap.f`; the 42 sap.f demokit samples merged into
+`ui5/universe.json` from the fork's docuindex (null since/deprecated — no built
+SDK api.json, so a full regen would wipe sap.m's scope metadata; the manual
+merge preserves it, sap.f starts with permissive scope). **structural-diff was
+hardcoded to `ui5/sap.m/`** and now resolves `ui5/<lib>/<Name>` from the sample
+library, so sap.f (and future libs) are structurally verified. Coverage:
+109/488 across 2 libraries. Deferred (own follow-up batch): the sap.f controls
+with popover fragments / named models (AvatarGroup — also hits a headless
+AvatarGroup render-restart loop —, DynamicPage, FlexibleColumnLayout, Card,
+GridContainer, ProductSwitch, SidePanel, SemanticPage).
+
 ## Batch b14 generated (2026-07-22) — planning calendars (2 ports)
 
 The two calendar NEW controls, both machine-green including render-smoke:

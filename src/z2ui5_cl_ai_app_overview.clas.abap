@@ -718,6 +718,12 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
   METHOD get_catalog.
 
     result = VALUE #(
+      ( module = `sap.f` control = `sap.f.GridList`                    name = `GridListBasic`                       class = `z2ui5_cl_ai_app_111` path = `src/04/b01/z2ui5_cl_ai_app_111.clas.abap`
+        score = 2
+        score_tip = `Rating 2 of 5 - how much attention this port deserves (complexity + rework + review + test-priority: complex, 1 noted). 1 = simple faithful 1:1, 5 = complex / reworked / worth a close look.`
+        notes = `NOTE: The Slider drives the panel width via a roundtrip-free expression binding ({= ${slider} + '%' }) over the two-way slider value, instead of the original onSliderMoved setWidth handler;` &&
+                 ` Slider.liveChange is therefore not wired (the width tracks the slider client-side). The full 27-row item set is inlined.`
+        use_name = abap_true )
       ( module = `sap.f` control = `sap.f.ShellBar`                    name = `ShellBar`                            class = `z2ui5_cl_ai_app_110` path = `src/04/b01/z2ui5_cl_ai_app_110.clas.abap`
         score = 2
         score_tip = `Rating 2 of 5 - how much attention this port deserves (complexity + rework + review + test-priority: 1 noted). 1 = simple faithful 1:1, 5 = complex / reworked / worth a close look.`
