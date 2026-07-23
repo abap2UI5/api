@@ -1572,6 +1572,21 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` 1:1 port - the app needs a UI5 release >= 1.121 (or a patched maintenance release) to render it.`
         use_fua = abap_true
         use_fua_arg = abap_true )
+      ( module = `sap.m` control = `sap.m.PlanningCalendar`            name = `PlanningCalendarSingle`              class = `z2ui5_cl_ai_app_108` path = `src/01/b14/z2ui5_cl_ai_app_108.clas.abap`
+        score = 3
+        score_tip = `Rating 3 of 5 - how much attention this port deserves (complexity + rework + review + test-priority: complex, 2 noted). 1 = simple faithful 1:1, 5 = complex / reworked / worth a close look.`
+        since = `1.34`
+        release = `1.74`
+        release_post171 = abap_true
+        is_post171 = abap_true
+        notes = `NOTE: The object-typed calendar date properties (PlanningCalendar.startDate, CalendarAppointment.startDate/endDate) are fed from plain ISO strings in the model and converted at the point of use with` &&
+                 ` Formatter.DateCreateObject from the curated module (core:require='{Formatter: z2ui5/model/formatter}'). The original's UI5Date.getInstance(year, month0, day, ...) values are normalized to ISO 1:1` &&
+                 ` (month is 0-based; day/month overflow rolled forward exactly as the JS Date constructor does). // NOTE: appointmentSelect / intervalSelect / the ToggleButton toggleDayNamesLine are wired to simple` &&
+                 ` toasts. The original opens a MessageBox with the selected appointment title + count, appends a new appointment on interval select, and toggles the day-names line — those interactive behaviors are` &&
+                 ` simplified here (the appointment/date event parameters are control references). // POST-1.71: Formatter.DateCreateObject is referenced via core:require, which needs UI5 >= 1.74.` &&
+                 ` sap.m.PlanningCalendar itself is since 1.34 (in scope).`
+        post171 = `Formatter.DateCreateObject is referenced via core:require, which needs UI5 >= 1.74. sap.m.PlanningCalendar itself is since 1.34 (in scope).`
+        use_name = abap_true )
       ( module = `sap.m` control = `sap.m.Popover`                     name = `PopoverControllingCloseBehavior`     class = `z2ui5_cl_ai_app_094` path = `src/01/b11/z2ui5_cl_ai_app_094.clas.abap`
         score = 4
         score_tip = `Rating 4 of 5 - how much attention this port deserves (complexity + rework + review + test-priority: complex, 1 reworked, live-test). 1 = simple faithful 1:1, 5 = complex / reworked / worth a close` &&
