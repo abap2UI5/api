@@ -17,9 +17,14 @@ _Last generated: <!-- last-run -->2026-07-20 06:21 UTC<!-- /last-run -->_
 > express — so they can be closed. Deprecated or newer controls are listed as
 > out of scope; other UI5 libraries follow later.
 >
-> See the result in **[api.md](api.md)**, or try it live: pull this repo into
-> your ABAP system and start **`z2ui5_cl_ai_app_overview`**, which lists every
-> generated sample and launches it right in your system.
+> See the result in **[api.md](api.md)**, or try it live — two ways:
+> - **In your browser (no backend):** open the GitHub Pages demo at
+>   **https://abap2ui5.github.io/ai-demokit/** — the framework and all ports
+>   run fully client-side (transpiled ABAP + sql.js WASM). Built from
+>   [`web/`](web) into [`docs/`](docs); see [`web/README.md`](web/README.md).
+> - **In your ABAP system:** pull this repo and start
+>   **`z2ui5_cl_ai_app_overview`**, which lists every generated sample and
+>   launches it right in your system.
 
 ## Pipeline
 
