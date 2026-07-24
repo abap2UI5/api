@@ -755,6 +755,26 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
         use_ec = abap_true
         use_ec_arg = abap_true
         use_name = abap_true )
+      ( module = `sap.f`              control = `sap.f.ProductSwitch`                 name = `ProductSwitchNavigation`             class = `z2ui5_cl_ai_app_165` path = `src/04/b07/z2ui5_cl_ai_app_165.clas.abap`
+        score = 3
+        score_tip = `Rating 3 of 5 - how much attention this port deserves (complexity + rework + review + test-priority: complex, 1 reworked). 1 = simple faithful 1:1, 5 = complex / reworked / worth a close look.`
+        notes = `IMPROVISED: The shipped view is only the trigger Button plus two explanatory Texts in a VerticalLayout - rebuilt 1:1. The ProductSwitch is built in the sample's JS controller (fnOpen) inside a` &&
+                 ` ResponsivePopover fragment (ResponsivePopover > ProductSwitch > ProductSwitchItem) and opened on press. abap2UI5 has no JS controller, so the button press raises a client MESSAGE_TOAST in place of` &&
+                 ` the controller-built ResponsivePopover; the ProductSwitch and ProductSwitchItem controls are therefore not rendered (a controller-only sample).`
+        use_ec = abap_true
+        use_ec_arg = abap_true )
+      ( module = `sap.f`              control = `sap.f.semantic.SemanticPage`         name = `SemanticPage`                        class = `z2ui5_cl_ai_app_166` path = `src/04/b07/z2ui5_cl_ai_app_166.clas.abap`
+        score = 5
+        score_tip = `Rating 5 of 5 - how much attention this port deserves (complexity + rework + review + test-priority: complex, 2 reworked). 1 = simple faithful 1:1, 5 = complex / reworked / worth a close look.`
+        notes = `IMPROVISED: The original keeps header/object data in nested paths on one JSON model (title, showFooter, titleSnappedContent/text, titleExpandedContent/text,` &&
+                 ` objectDescription/category|center|email|status). abap2UI5 keeps one default model and render-smoke does not mock nested structures, so those paths are folded to flat fields bound via _bind (last path` &&
+                 ` segment identical, which structural-diff matches). Both the snapped and expanded subheading Text controls bind the same flat 'text' field. The full 125-row ProductCollection mock is inlined. //` &&
+                 ` IMPROVISED: The semantic action press handlers (titleMainAction onEdit, footerMainAction onSave, footerCustomActions Cancel onCancel, messagesIndicator onMessagesButtonPress) are controller methods` &&
+                 ` in the original (opening popovers / navigating); here each press raises a client MESSAGE_TOAST. The DiscussInJam / SendEmail / SendMessage semantic actions keep their built-in behaviour, and the` &&
+                 ` DraftIndicator shows state Saved.`
+        use_ec = abap_true
+        use_ec_arg = abap_true
+        use_name = abap_true )
       ( module = `sap.f`              control = `sap.f.ShellBar`                      name = `ShellBar`                            class = `z2ui5_cl_ai_app_110` path = `src/04/b01/z2ui5_cl_ai_app_110.clas.abap`
         score = 2
         score_tip = `Rating 2 of 5 - how much attention this port deserves (complexity + rework + review + test-priority: 1 noted). 1 = simple faithful 1:1, 5 = complex / reworked / worth a close look.`
@@ -2137,6 +2157,24 @@ CLASS z2ui5_cl_ai_app_overview IMPLEMENTATION.
                  ` OverflowToolbarButtons are reproduced 1:1, including the original's Cyrillic-o typo in 'Prоduct Name'.`
         use_ec = abap_true
         use_ec_arg = abap_true )
+      ( module = `sap.tnt`            control = `sap.tnt.ToolPage`                    name = `ToolPage`                            class = `z2ui5_cl_ai_app_167` path = `src/05/b06/z2ui5_cl_ai_app_167.clas.abap`
+        score = 5
+        score_tip = `Rating 5 of 5 - how much attention this port deserves (complexity + rework + review + test-priority: complex, 1 reworked, live-test). 1 = simple faithful 1:1, 5 = complex / reworked / worth a close` &&
+                 ` look.`
+        release = `1.84`
+        release_post171 = abap_true
+        is_post171 = abap_true
+        notes = `IMPROVISED: NavigationListItem.selectable is the expression binding {= ${items}.length > 3} in the original; per the thin-frontend rule that presentation logic is computed in ABAP into a flat` &&
+                 ` 'selectable' field (children count > 3) and bound directly. The controller event handlers (onSideNavButtonPress toggling the side, onItemPress, onItemSelect navigating the NavContainer via to(),` &&
+                 ` handleUserNamePress opening a popover, fixed-item quickActionPress) are raised as client MESSAGE_TOAST here; the NavContainer shows its initialPage (page2) but page-to-page navigation is not wired` &&
+                 ` (would need a backend roundtrip). // POST-1.71: ariaHasPopup is bound on the header Button (Alan Smith) and the fixed NavigationListItem, exactly as the original sample - sap.m.Button.ariaHasPopup` &&
+                 ` exists since UI5 1.84 (> 1.71), kept for faithfulness. // NOTE: The full 14-item navigation tree (with its nested child lists, incl. Root Item 3's 38 children) and the 4-item fixed navigation are` &&
+                 ` inlined from data.json. The page2 ScrollContainer's multi-paragraph lorem-ipsum filler text is abbreviated to a short placeholder.`
+        post171 = `ariaHasPopup is bound on the header Button (Alan Smith) and the fixed NavigationListItem, exactly as the original sample - sap.m.Button.ariaHasPopup exists since UI5 1.84 (> 1.71), kept for` &&
+                 ` faithfulness.`
+        use_ec = abap_true
+        use_ec_arg = abap_true
+        use_name = abap_true )
       ( module = `sap.ui.codeeditor`  control = `sap.ui.codeeditor.CodeEditor`        name = `CodeEditor`                          class = `z2ui5_cl_ai_app_114` path = `src/02/b01/z2ui5_cl_ai_app_114.clas.abap`
         score = 1
         score_tip = `Rating 1 of 5 - how much attention this port deserves (complexity + rework + review + test-priority: 1 noted). 1 = simple faithful 1:1, 5 = complex / reworked / worth a close look.`

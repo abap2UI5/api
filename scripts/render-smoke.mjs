@@ -65,6 +65,12 @@ const BENIGN = [
   /theming\.Parameters/i,             // parameters need the compiled theme too
   /failed to load JavaScript resource/i,   // follow-up of the two above
   /Core\.applyTheme|sap\.ui\.getCore/i,
+  // nested bound aggregation whose template is itself a bound-aggregation
+  // template (e.g. sap.tnt NavigationListItem with a sub items binding): UI5
+  // logs a template-lifecycle caution about not destroying the shared template.
+  // It is a warning, not a load failure — an actual duplicate-ID collision
+  // would surface as its own (unfiltered) error, so this only hides the caution.
+  /clone operation.*template|templateShareable/i,
 ];
 
 // ---------------------------------------------------------------------------

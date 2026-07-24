@@ -172,7 +172,7 @@ have an abap2UI5 port.
 
 <!-- coverage:start -->
 
-Overall **164 / 641** in-scope demo kit samples ported (25.6 %).
+Overall **167 / 641** in-scope demo kit samples ported (26.1 %).
 **In scope**: samples whose control exists since **UI5 1.71** and is **not deprecated** (legacy-free ready).
 Out of scope: 66 of 707 samples — 16 on deprecated controls, 21 on controls newer than 1.71, 29 without control metadata.
 Control metadata from OpenUI5 **1.151.0**.
@@ -181,15 +181,15 @@ Control metadata from OpenUI5 **1.151.0**.
 |--------|--------:|---------:|-------:|---------:|---|
 | `sap.ui.codeeditor` | 2 | 2 | 2 | 100.0 % | ██████████ |
 | `sap.ui.integration` | 4 | 4 | 2 | 50.0 % | █████░░░░░ |
-| `sap.tnt` | 17 | 17 | 6 | 35.3 % | ████░░░░░░ |
+| `sap.tnt` | 17 | 17 | 7 | 41.2 % | ████░░░░░░ |
 | `sap.m` | 446 | 403 | 119 | 29.5 % | ███░░░░░░░ |
 | `sap.ui.core` | 48 | 36 | 10 | 27.8 % | ███░░░░░░░ |
-| `sap.f` | 42 | 41 | 8 | 19.5 % | ██░░░░░░░░ |
+| `sap.f` | 42 | 41 | 10 | 24.4 % | ██░░░░░░░░ |
 | `sap.ui.unified` | 21 | 21 | 4 | 19.0 % | ██░░░░░░░░ |
 | `sap.ui.table` | 18 | 17 | 3 | 17.6 % | ██░░░░░░░░ |
 | `sap.ui.layout` | 62 | 59 | 8 | 13.6 % | █░░░░░░░░░ |
 | `sap.uxap` | 47 | 41 | 2 | 4.9 % | ░░░░░░░░░░ |
-| **Total** | **707** | **641** | **164** | **25.6 %** | ███░░░░░░░ |
+| **Total** | **707** | **641** | **167** | **26.1 %** | ███░░░░░░░ |
 
 <!-- coverage:end -->
 
